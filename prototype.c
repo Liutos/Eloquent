@@ -48,7 +48,9 @@ enum TYPE {
   TEOF,
   VECTOR,
   UNDEF,
-  /* opcodes */
+};
+
+enum OPCODE_TYPE {
   ARGS,
   CALL,
   CONST,
@@ -97,10 +99,9 @@ struct lisp_object_t {
       int colnum;
     } input_file;
     struct {
-      char *name;
+      enum OPCODE_TYPE name;
       lt *oprands;
     } opcode;
-    /* DONE: The output file stream should also record its line and column number. */
     struct {
       FILE *file;
       int linum;
@@ -133,47 +134,7 @@ struct lisp_object_t {
       int length;
       lisp_object_t **value;
     } vector;
-    /* TODO: Defines all the opcodes as a single nested tagged-union. */
-    /* opcodes */
-    struct {
-      lisp_object_t *length;
-    } op_args;
-    struct {
-      lisp_object_t *arity;
-    } op_call;
-    struct {
-      lisp_object_t *value;
-    } op_const;
-    struct {
-      lisp_object_t *label;
-    } op_fjump;
-    struct {
-      lisp_object_t *func;
-    } op_fn;
-    struct {
-      lisp_object_t *symbol;
-    } op_gset;
-    struct {
-      lisp_object_t *symbol;
-    } op_gvar;
-    struct {
-      lisp_object_t *label;
-    } op_jump;
-    struct {
-      lisp_object_t *i;
-      lisp_object_t *j;
-      lisp_object_t *symbol;
-    } op_lset;
-    struct {
-      lisp_object_t *i;
-      lisp_object_t *j;
-      lisp_object_t *symbol;
-    } op_lvar;
-    struct {} op_pop;
-    struct {
-      lisp_object_t *nargs;
-    } op_prim;
-    struct {} op_return;
+    /* DONE: Defines all the opcodes as a single nested tagged-union. */
   } u;
 };
 
@@ -214,23 +175,29 @@ struct lisp_object_t {
 #define vector_last(x) ((x)->u.vector.last)
 #define vector_length(x) (x->u.vector.length)
 #define vector_value(x) (x->u.vector.value)
-/* TODO: Defines the following accessors macro by indexing. */
+/* DONE: Defines the following accessors macro by indexing. */
 /* Opcode Accessors */
-#define op_args_arity(x) ((x)->u.op_args.length)
-#define op_call_arity(x) ((x)->u.op_call.arity)
-#define op_const_value(x) ((x)->u.op_const.value)
-#define op_fjump_label(x) ((x)->u.op_fjump.label)
-#define op_fn_func(x) ((x)->u.op_fn.func)
-#define op_gset_var(x) ((x)->u.op_gset.symbol)
-#define op_gvar_var(x) ((x)->u.op_gvar.symbol)
-#define op_jump_label(x) ((x)->u.op_jump.label)
-#define op_lset_i(x) ((x)->u.op_lset.i)
-#define op_lset_j(x) ((x)->u.op_lset.j)
-#define op_lset_var(x) ((x)->u.op_lset.symbol)
-#define op_lvar_i(x) ((x)->u.op_lvar.i)
-#define op_lvar_j(x) ((x)->u.op_lvar.j)
-#define op_lvar_var(x) ((x)->u.op_lvar.symbol)
-#define op_prim_nargs(x) ((x)->u.op_prim.nargs)
+#define opcode_type(x) opcode_name(x)
+#define opargn(x, n) (vector_value(opcode_oprands(x))[n])
+#define oparg1(x) opargn(x, 0)
+#define oparg2(x) opargn(x, 1)
+#define oparg3(x) opargn(x, 2)
+
+#define op_args_arity(x) oparg1(x)
+#define op_call_arity(x) oparg1(x)
+#define op_const_value(x) oparg1(x)
+#define op_fjump_label(x) oparg1(x)
+#define op_fn_func(x) oparg1(x)
+#define op_gset_var(x) oparg1(x)
+#define op_gvar_var(x) oparg1(x)
+#define op_jump_label(x) oparg1(x)
+#define op_lset_i(x) oparg1(x)
+#define op_lset_j(x) oparg2(x)
+#define op_lset_var(x) oparg3(x)
+#define op_lvar_i(x) oparg1(x)
+#define op_lvar_j(x) oparg2(x)
+#define op_lvar_var(x) oparg3(x)
+#define op_prim_nargs(x) oparg1(x)
 
 #define S(name) (find_or_create_symbol(name))
 
@@ -397,91 +364,72 @@ lisp_object_t *make_vector(int length) {
 }
 
 /* Opcode constructors */
-lt *make_opcode(char *name, lt *oprands) {
+lt *make_opcode(enum OPCODE_TYPE name, lt *oprands) {
   lt *obj = make_object(OPCODE);
   opcode_name(obj) = name;
   opcode_oprands(obj) = oprands;
   return obj;
 }
 
+lt *mkopcode(enum OPCODE_TYPE name, int arity, ...) {
+  lt *oprands = make_vector(arity);
+  va_list ap;
+  va_start(ap, arity);
+  for (int i = 0; i < arity; i++)
+    vector_value(oprands)[i] = va_arg(ap, lt *);
+  return make_opcode(name, oprands);
+}
+
 lisp_object_t *make_op_args(lisp_object_t *length) {
-  lisp_object_t *op_args = make_object(ARGS);
-  op_args->u.op_args.length = length;
-  return op_args;
+  return mkopcode(ARGS, 1, length);
 }
 
 lisp_object_t *make_op_call(lisp_object_t *arity) {
-  lisp_object_t *op_call = make_object(CALL);
-  op_call_arity(op_call) = arity;
-  return op_call;
+  return mkopcode(CALL, 1, arity);
 }
 
 lisp_object_t *make_op_const(lisp_object_t *value) {
-  lisp_object_t *op_const = make_object(CONST);
-  op_const->u.op_const.value = value;
-  return op_const;
+  return mkopcode(CONST, 1, value);
 }
 
 lisp_object_t *make_op_fjump(lisp_object_t *label) {
-  lisp_object_t *op_fjump = make_object(FJUMP);
-  op_fjump->u.op_fjump.label = label;
-  return op_fjump;
+  return mkopcode(FJUMP, 1, label);
 }
 
 lisp_object_t *make_op_fn(lisp_object_t *func) {
-  lisp_object_t *op_fn = make_object(FN);
-  op_fn_func(op_fn) = func;
-  return op_fn;
+  return mkopcode(FN, 1, func);
 }
 
 lisp_object_t *make_op_gset(lisp_object_t *symbol) {
-  lisp_object_t *op_gset = make_object(GSET);
-  op_gset_var(op_gset) = symbol;
-  return op_gset;
+  return mkopcode(GSET, 1, symbol);
 }
 
 lisp_object_t *make_op_gvar(lisp_object_t *symbol) {
-  lisp_object_t *op_gvar = make_object(GVAR);
-  op_gvar_var(op_gvar) = symbol;
-  return op_gvar;
+  return mkopcode(GVAR, 1, symbol);
 }
 
 lisp_object_t *make_op_jump(lisp_object_t *label) {
-  lisp_object_t *op_jump = make_object(JUMP);
-  op_jump->u.op_jump.label = label;
-  return op_jump;
+  return mkopcode(JUMP, 1, label);
 }
 
 lisp_object_t *make_op_lset(lisp_object_t *i, lisp_object_t *j, lisp_object_t *symbol) {
-  lisp_object_t *op_lset = make_object(LSET);
-  op_lset_i(op_lset) = i;
-  op_lset_j(op_lset) = j;
-  op_lset_var(op_lset) = symbol;
-  return op_lset;
+  return mkopcode(LSET, 3, i, j, symbol);
 }
 
 lisp_object_t *make_op_lvar(lisp_object_t *i, lisp_object_t *j, lisp_object_t *symbol) {
-  lisp_object_t *op_lvar = make_object(LVAR);
-  op_lvar_i(op_lvar) = i;
-  op_lvar_j(op_lvar) = j;
-  op_lvar_var(op_lvar) = symbol;
-  return op_lvar;
+  return mkopcode(LVAR, 3, i, j, symbol);
 }
 
 lisp_object_t *make_op_pop(void) {
-  lisp_object_t *op_pop = make_object(POP);
-  return op_pop;
+  return mkopcode(POP, 0);
 }
 
 lisp_object_t *make_op_prim(lisp_object_t *nargs) {
-  lisp_object_t *op_prim = make_object(PRIM);
-  op_prim_nargs(op_prim) = nargs;
-  return op_prim;
+  return mkopcode(PRIM, 1, nargs);
 }
 
 lisp_object_t *make_op_return(void) {
-  lisp_object_t *op_return = make_object(RETURN);
-  return op_return;
+  return mkopcode(RETURN, 0);
 }
 
 /* Type predicate */
@@ -666,18 +614,15 @@ void writef(lisp_object_t *out_port, const char *format, ...) {
           write_raw_string(string_value(arg), out_port);
           break;
         case 'p':
-          /* DONE: Records the increment of line and column number. */
           nch = fprintf(output_file_file(out_port), "%p", arg);
           output_file_colnum(out_port) += nch;
           break;
         case 'f':
-          /* DONE: Records the increment of line and column number. */
           assert(isfloat(arg));
           nch = fprintf(output_file_file(out_port), "%f", float_value(arg));
           output_file_colnum(out_port) += nch;
           break;
         case 'd':
-          /* DONE: Records the increment of line and column number. */
           assert(isfixnum(arg));
           nch = fprintf(output_file_file(out_port), "%d", fixnum_value(arg));
           output_file_colnum(out_port) += nch;
@@ -699,6 +644,33 @@ void writef(lisp_object_t *out_port, const char *format, ...) {
     }
     format++;
     c = *format;
+  }
+}
+
+void write_opcode(lt *opcode, lt *dest) {
+  switch (opcode_type(opcode)) {
+    case ARGS: writef(dest, "#<ARGS %d>", op_args_arity(opcode)); break;
+    case CALL: writef(dest, "#<CALL %d>", op_call_arity(opcode)); break;
+    case CONST: writef(dest, "#<CONST %?>", op_const_value(opcode)); break;
+    case FJUMP: writef(dest, "#<FJUMP %?>", op_fjump_label(opcode)); break;
+    case FN: writef(dest, "#<FN %?>", op_fn_func(opcode)); break;
+    case GSET: writef(dest, "#<GSET %S>", op_gset_var(opcode)); break;
+    case GVAR: writef(dest, "#<GVAR %S>", op_gvar_var(opcode)); break;
+    case JUMP: writef(dest, "#<JUMP %?>", op_jump_label(opcode)); break;
+    case LSET:
+      writef(dest, "#<LSET %d %d %S>",
+             op_lset_i(opcode), op_lset_j(opcode), op_lset_var(opcode));
+      break;
+    case LVAR:
+      writef(dest, "#<LVAR %d %d %S>",
+             op_lvar_i(opcode), op_lvar_j(opcode), op_lvar_var(opcode));
+      break;
+    case POP: write_raw_string("#<POP>", dest); break;
+    case PRIM: writef(dest, "#<PRIM %d>", op_prim_nargs(opcode)); break;
+    case RETURN: write_raw_string("#<RETURN>", dest); break;
+    default :
+      printf("Unknown opcode\n");
+      exit(1);
   }
 }
 
@@ -794,23 +766,7 @@ void write_object(lisp_object_t *x, lisp_object_t *output_file) {
     }
       break;
       /* Opcodes */
-    case ARGS: writef(output_file, "#<ARGS %d>", op_args_arity(x)); break;
-    case CALL: writef(output_file, "#<CALL %d>", op_call_arity(x)); break;
-    case CONST: writef(output_file, "#<CONST %?>", op_const_value(x)); break;
-    case FJUMP: writef(output_file, "#<FJUMP %?>", op_fjump_label(x)); break;
-    case FN: writef(output_file, "#<FN %?>", op_fn_func(x)); break;
-    case GSET: writef(output_file, "#<GSET %S>", op_gset_var(x)); break;
-    case GVAR: writef(output_file, "#<GVAR %S>", op_gvar_var(x)); break;
-    case JUMP: writef(output_file, "#<JUMP %?>", op_jump_label(x)); break;
-    case LSET:
-      writef(output_file, "#<LSET %d %d %S>", op_lset_i(x), op_lset_j(x), op_lset_var(x));
-      break;
-    case LVAR:
-      writef(output_file, "#<LVAR %d %d %S>", op_lvar_i(x), op_lvar_j(x), op_lvar_var(x));
-      break;
-    case POP: write_raw_string("#<POP>", output_file); break;
-    case PRIM: writef(output_file, "#<PRIM %d>", op_prim_nargs(x)); break;
-    case RETURN: write_raw_string("#<RETURN>", output_file); break;
+    case OPCODE: write_opcode(x, output_file); break;
     default :
       fprintf(stdout, "invalid object with type %d", /* x->type */typeof(x));
       exit(1);
@@ -902,7 +858,6 @@ lt *lt_list_nreverse(lt *list) {
   lt *rhead = null_list;
   lt *rest = list;
   while (!isnull(rest)) {
-    /* assert(ispair(rest)); */
     if (!ispair(rest))
       return signal_exception("Argument is not a proper list.");
     lt *tmp = pair_tail(rest);
@@ -1493,7 +1448,7 @@ lisp_object_t *asm_first_pass(lisp_object_t *code) {
 }
 
 int is_addr_op(lisp_object_t *op) {
-  switch (op->type) {
+  switch (opcode_type(op)) {
     case JUMP: case FJUMP: return TRUE;
     default : return FALSE;
   }
@@ -1513,7 +1468,7 @@ lisp_object_t *get_offset(lisp_object_t *label, lisp_object_t *labels) {
 }
 
 lisp_object_t *change_addr(lisp_object_t *ins, lisp_object_t *table) {
-  switch (ins->type) {
+  switch (opcode_type(ins)) {
     case FJUMP: {
       lisp_object_t *label = op_fjump_label(ins);
       return make_op_fjump(get_offset(label, table));
@@ -1822,7 +1777,6 @@ lisp_object_t *raw_vector_ref(lisp_object_t *vector, int index) {
 pub lisp_object_t *run_by_llam(lisp_object_t *func) {
 
 #define vlast(v, n) lt_vector_last_nth(v, make_fixnum(n))
-#define opcode_type(x) (x->type)
 
   assert(isfunction(func));
   int pc = 0;
