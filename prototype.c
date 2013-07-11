@@ -25,6 +25,24 @@ lisp_object_t *read_object(lisp_object_t *input_file);
 void write_object(lisp_object_t *object, lisp_object_t *out_port);
 void writef(lt *, const char *, ...);
 
+/* tagging system
+ *   bits end in  00:  pointer
+ *                01:  fixnum
+ *              0110:  char
+ *              1110:  other immediate object (null_list, true, false)
+ */
+#define CHAR_BITS 4
+#define CHAR_MASK 15
+#define CHAR_TAG 6
+#define FIXNUM_BITS 2
+#define FIXNUM_MASK 3
+#define FIXNUM_TAG 1
+#define IMMEDIATE_BITS 4
+#define IMMEDIATE_MASK 15
+#define IMMEDIATE_TAG 14
+#define POINTER_MASK 3
+#define POINTER_TAG 0
+
 enum TYPE {
   BOOL,
   /* TODO: The support for Unicode. */
@@ -148,7 +166,8 @@ struct lisp_object_t {
 #define character_value(x) ((x)->u.character.value)
 #define exception_msg(x) ((x)->u.exception.message)
 #define exception_flag(x) ((x)->u.exception.signal_flag)
-#define fixnum_value(x) (x->u.fixnum.value)
+/* #define fixnum_value(x) (x->u.fixnum.value) */
+#define fixnum_value(x) (((int)(x)) >> FIXNUM_BITS)
 #define float_value(x) ((x)->u.float_num.value)
 #define function_args(x) ((x)->u.function.args)
 #define function_env(x) ((x)->u.function.env)
@@ -283,10 +302,13 @@ lt *make_exception(char *message, int signal_flag) {
   return ex;
 }
 
-lisp_object_t *make_fixnum(int value) {
-  lisp_object_t *fixnum = make_object(FIXNUM);
-  fixnum_value(fixnum) = value;
-  return fixnum;
+/* lisp_object_t *make_fixnum(int value) { */
+/*   lisp_object_t *fixnum = make_object(FIXNUM); */
+/*   fixnum_value(fixnum) = value; */
+/*   return fixnum; */
+/* } */
+lt *make_fixnum(int value) {
+  return (lt *)((value << FIXNUM_BITS) | FIXNUM_TAG);
 }
 
 lisp_object_t *make_float(float value) {
@@ -433,8 +455,12 @@ lisp_object_t *make_op_return(void) {
 }
 
 /* Type predicate */
+int is_pointer(lt *object) {
+  return ((int)object & POINTER_MASK) == POINTER_TAG;
+}
+
 int is_of_type(lisp_object_t *object, enum TYPE type) {
-  return object->type == type? TRUE: FALSE;
+  return is_pointer(object) && (object->type == type? TRUE: FALSE);
 }
 
 int isboolean(lisp_object_t *object) {
@@ -449,7 +475,7 @@ int isboolean(lisp_object_t *object) {
 mktype_pred(ischar, CHARACTER)
 mktype_pred(isclose, TCLOSE)
 mktype_pred(isexception, EXCEPTION)
-mktype_pred(isfixnum, FIXNUM)
+/* mktype_pred(isfixnum, FIXNUM) */
 mktype_pred(isfloat, FLOAT)
 mktype_pred(isfunction, COMPILED_FUNCTION)
 mktype_pred(isinput_file, INPUT_FILE)
@@ -460,6 +486,10 @@ mktype_pred(isstring, STRING)
 mktype_pred(issymbol, SYMBOL)
 mktype_pred(isvector, VECTOR)
 mktype_pred(isundef, UNDEF)
+
+int isfixnum(lt *object) {
+  return ((int)object & FIXNUM_MASK) == FIXNUM_TAG;
+}
 
 int isdot(lisp_object_t *object) {
   return object == dot_symbol;
@@ -477,6 +507,7 @@ int isnumber(lisp_object_t *object) {
   return isfixnum(object) || isfloat(object);
 }
 
+/* TODO: Moves the following section of code to above. */
 /* Utilities */
 lisp_object_t *booleanize(int value) {
   if (value == 0)
@@ -539,6 +570,9 @@ lisp_object_t *reader_error(char *format, ...) {
 }
 
 int typeof(lisp_object_t *x) {
+  if (isfixnum(x))
+    return FIXNUM;
+  assert(is_pointer(x));
   return x->type;
 }
 
@@ -679,7 +713,8 @@ void write_object(lisp_object_t *x, lisp_object_t *output_file) {
     fprintf(stdout, "Impossible!!! The code has errors!!!\n");
     exit(1);
   }
-  switch (x->type) {
+  /* switch (x->type) { */
+  switch(typeof(x)) {
     case BOOL:
       if (boolean_value(x) == TRUE)
         write_raw_string("#t", output_file);
@@ -768,7 +803,7 @@ void write_object(lisp_object_t *x, lisp_object_t *output_file) {
       /* Opcodes */
     case OPCODE: write_opcode(x, output_file); break;
     default :
-      fprintf(stdout, "invalid object with type %d", /* x->type */typeof(x));
+      fprintf(stdout, "invalid object with type %d", typeof(x));
       exit(1);
   }
 }
@@ -1910,7 +1945,7 @@ pub lisp_object_t *run_by_llam(lisp_object_t *func) {
       }
         break;
       default :
-        fprintf(stdout, "In run_by_llam --- Invalid opcode %d\n", ins->type);
+        fprintf(stdout, "In run_by_llam --- Invalid opcode %d\n", /* ins->type */typeof(ins));
         exit(1);
     }
     pc++;
