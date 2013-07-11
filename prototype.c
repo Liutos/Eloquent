@@ -163,7 +163,8 @@ struct lisp_object_t {
 
 /* Accessors */
 #define boolean_value(x)  ((x)->u.boolean.value)
-#define character_value(x) ((x)->u.character.value)
+/* #define character_value(x) ((x)->u.character.value) */
+#define character_value(x) (((int)x) >> CHAR_BITS)
 #define exception_msg(x) ((x)->u.exception.message)
 #define exception_flag(x) ((x)->u.exception.signal_flag)
 /* #define fixnum_value(x) (x->u.fixnum.value) */
@@ -275,9 +276,10 @@ lisp_object_t *make_boolean(int value) {
 }
 
 lisp_object_t *make_character(char value) {
-  lisp_object_t *character = make_object(CHARACTER);
-  character->u.character.value = value;
-  return character;
+  /* lisp_object_t *character = make_object(CHARACTER); */
+  /* character->u.character.value = value; */
+  /* return character; */
+  return (lt *)((((int)value) << CHAR_BITS) | CHAR_TAG);
 }
 
 lisp_object_t *make_close(void) {
@@ -472,7 +474,7 @@ int isboolean(lisp_object_t *object) {
     return is_of_type(object, type);            \
   }
 
-mktype_pred(ischar, CHARACTER)
+/* mktype_pred(ischar, CHARACTER) */
 mktype_pred(isclose, TCLOSE)
 mktype_pred(isexception, EXCEPTION)
 /* mktype_pred(isfixnum, FIXNUM) */
@@ -486,6 +488,10 @@ mktype_pred(isstring, STRING)
 mktype_pred(issymbol, SYMBOL)
 mktype_pred(isvector, VECTOR)
 mktype_pred(isundef, UNDEF)
+
+int ischar(lt *object) {
+  return ((int)object & CHAR_MASK) == CHAR_TAG;
+}
 
 int isfixnum(lt *object) {
   return ((int)object & FIXNUM_MASK) == FIXNUM_TAG;
@@ -572,6 +578,8 @@ lisp_object_t *reader_error(char *format, ...) {
 int typeof(lisp_object_t *x) {
   if (isfixnum(x))
     return FIXNUM;
+  if (ischar(x))
+    return CHARACTER;
   assert(is_pointer(x));
   return x->type;
 }
@@ -2047,9 +2055,11 @@ void init_global_variable(void) {
 int main(int argc, char *argv[])
 {
   char *inputs[] = {
-    "(set! abs (fn (x) (if (> 0 x) (- 0 x) x)))",
-    "(abs 1)",
-    "(abs -1)",
+    /* "(set! abs (fn (x) (if (> 0 x) (- 0 x) x)))", */
+    /* "(abs 1)", */
+    /* "(abs -1)", */
+    "#\\a",
+    "(code-char 97)",
   };
   init_global_variable();
   for (int i = 0; i < sizeof(inputs) / sizeof(char *); i++) {
