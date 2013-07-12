@@ -170,7 +170,7 @@ struct lisp_object_t {
 #define pub
 
 /* Accessors */
-#define boolean_value(x)  ((x)->u.boolean.value)
+/* #define boolean_value(x)  ((x)->u.boolean.value) */
 #define character_value(x) (((int)x) >> CHAR_BITS)
 #define exception_msg(x) ((x)->u.exception.message)
 #define exception_flag(x) ((x)->u.exception.signal_flag)
@@ -274,10 +274,18 @@ lisp_object_t *make_object(enum TYPE type) {
   return obj;
 }
 
-lisp_object_t *make_boolean(int value) {
-  lisp_object_t *boolean = make_object(BOOL);
-  boolean_value(boolean) = value;
-  return boolean;
+/* lisp_object_t *make_boolean(int value) { */
+/*   lisp_object_t *boolean = make_object(BOOL); */
+/*   boolean_value(boolean) = value; */
+/*   return boolean; */
+/* } */
+
+lt *make_false(void) {
+  return MAKE_IMMEDIATE(FALSE_ORIGIN);
+}
+
+lt *make_true(void) {
+  return MAKE_IMMEDIATE(TRUE_ORIGIN);
 }
 
 lisp_object_t *make_character(char value) {
@@ -466,10 +474,6 @@ int is_of_type(lisp_object_t *object, enum TYPE type) {
   return is_pointer(object) && (object->type == type? TRUE: FALSE);
 }
 
-int isboolean(lisp_object_t *object) {
-  return is_of_type(object, BOOL);
-}
-
 #define mktype_pred(func_name, type)            \
   int func_name(lisp_object_t *object) {        \
     return is_of_type(object, type);            \
@@ -508,12 +512,22 @@ int isnull(lt *object) {
   return is_immediate(object) && ((int)object >> IMMEDIATE_BITS) == NULL_ORIGIN;
 }
 
-int is_signaled(lisp_object_t *object) {
-  return isexception(object) && exception_flag(object) == TRUE;
+int isfalse(lisp_object_t *object) {
+  /* return isboolean(object) && boolean_value(object) == FALSE? TRUE: FALSE; */
+  return is_immediate(object) && ((int)object >> IMMEDIATE_BITS) == FALSE_ORIGIN;
 }
 
-int isfalse(lisp_object_t *object) {
-  return isboolean(object) && boolean_value(object) == FALSE? TRUE: FALSE;
+int is_true_object(lt *object) {
+  return is_immediate(object) && ((int)object >> IMMEDIATE_BITS) == TRUE_ORIGIN;
+}
+
+int isboolean(lisp_object_t *object) {
+  /* return is_of_type(object, BOOL); */
+  return isfalse(object) || is_true_object(object);
+}
+
+int is_signaled(lisp_object_t *object) {
+  return isexception(object) && exception_flag(object) == TRUE;
 }
 
 int isnumber(lisp_object_t *object) {
@@ -589,6 +603,8 @@ int typeof(lisp_object_t *x) {
     return CHARACTER;
   if (isnull(x))
     return EMPTY_LIST;
+  if (isboolean(x))
+    return BOOL;
   assert(is_pointer(x));
   return x->type;
 }
@@ -732,9 +748,11 @@ void write_object(lisp_object_t *x, lisp_object_t *output_file) {
   }
   switch(typeof(x)) {
     case BOOL:
-      if (boolean_value(x) == TRUE)
+      /* if (boolean_value(x) == TRUE) */
+      if (is_true_object(x))
         write_raw_string("#t", output_file);
-      if (boolean_value(x) == FALSE)
+      /* if (boolean_value(x) == FALSE) */
+      if (isfalse(x))
         write_raw_string("#f", output_file);
       break;
     case CHARACTER: {
@@ -1989,8 +2007,10 @@ void init_global_variable(void) {
   init_object_pool();
   /* Initialize global variables */
   debug_flag = FALSE;
-  false = make_boolean(FALSE);
-  true = make_boolean(TRUE);
+  /* false = make_boolean(FALSE); */
+  /* true = make_boolean(TRUE); */
+  false = make_false();
+  true = make_true();
   null_list = make_empty_list();
   null_env = null_list;
   standard_in = make_input_file(stdin);
@@ -2062,13 +2082,17 @@ void init_global_variable(void) {
 int main(int argc, char *argv[])
 {
   char *inputs[] = {
-    "(set! abs (fn (x) (if (> 0 x) (- 0 x) x)))",
-    "(abs 1)",
-    "(abs -1)",
-    "#\\a",
-    "(code-char 97)",
-    "()",
-    "(tail '(1))",
+    /* "(set! abs (fn (x) (if (> 0 x) (- 0 x) x)))", */
+    /* "(abs 1)", */
+    /* "(abs -1)", */
+    /* "#\\a", */
+    /* "(code-char 97)", */
+    /* "()", */
+    /* "(tail '(1))", */
+    "#t",
+    "#f",
+    "(> 1 2)",
+    "(= 1 1.0)",
   };
   init_global_variable();
   for (int i = 0; i < sizeof(inputs) / sizeof(char *); i++) {
