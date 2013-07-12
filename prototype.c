@@ -51,7 +51,7 @@ enum TYPE {
   EMPTY_LIST,
   EXCEPTION,
   /* TODO: Implements the arbitrary precision arithmetic numeric types. */
-  /* TODO: Implements a part of types as tagged-pointer. */
+  /* DONE: Implements a part of types as tagged-pointer. */
   FIXNUM,
   FLOAT,
   INPUT_FILE,
@@ -152,7 +152,6 @@ struct lisp_object_t {
       int length;
       lisp_object_t **value;
     } vector;
-    /* DONE: Defines all the opcodes as a single nested tagged-union. */
   } u;
 };
 
@@ -163,11 +162,9 @@ struct lisp_object_t {
 
 /* Accessors */
 #define boolean_value(x)  ((x)->u.boolean.value)
-/* #define character_value(x) ((x)->u.character.value) */
 #define character_value(x) (((int)x) >> CHAR_BITS)
 #define exception_msg(x) ((x)->u.exception.message)
 #define exception_flag(x) ((x)->u.exception.signal_flag)
-/* #define fixnum_value(x) (x->u.fixnum.value) */
 #define fixnum_value(x) (((int)(x)) >> FIXNUM_BITS)
 #define float_value(x) ((x)->u.float_num.value)
 #define function_args(x) ((x)->u.function.args)
@@ -195,7 +192,6 @@ struct lisp_object_t {
 #define vector_last(x) ((x)->u.vector.last)
 #define vector_length(x) (x->u.vector.length)
 #define vector_value(x) (x->u.vector.value)
-/* DONE: Defines the following accessors macro by indexing. */
 /* Opcode Accessors */
 #define opcode_type(x) opcode_name(x)
 #define opargn(x, n) (vector_value(opcode_oprands(x))[n])
@@ -276,9 +272,6 @@ lisp_object_t *make_boolean(int value) {
 }
 
 lisp_object_t *make_character(char value) {
-  /* lisp_object_t *character = make_object(CHARACTER); */
-  /* character->u.character.value = value; */
-  /* return character; */
   return (lt *)((((int)value) << CHAR_BITS) | CHAR_TAG);
 }
 
@@ -304,11 +297,6 @@ lt *make_exception(char *message, int signal_flag) {
   return ex;
 }
 
-/* lisp_object_t *make_fixnum(int value) { */
-/*   lisp_object_t *fixnum = make_object(FIXNUM); */
-/*   fixnum_value(fixnum) = value; */
-/*   return fixnum; */
-/* } */
 lt *make_fixnum(int value) {
   return (lt *)((value << FIXNUM_BITS) | FIXNUM_TAG);
 }
@@ -474,10 +462,8 @@ int isboolean(lisp_object_t *object) {
     return is_of_type(object, type);            \
   }
 
-/* mktype_pred(ischar, CHARACTER) */
 mktype_pred(isclose, TCLOSE)
 mktype_pred(isexception, EXCEPTION)
-/* mktype_pred(isfixnum, FIXNUM) */
 mktype_pred(isfloat, FLOAT)
 mktype_pred(isfunction, COMPILED_FUNCTION)
 mktype_pred(isinput_file, INPUT_FILE)
@@ -721,7 +707,6 @@ void write_object(lisp_object_t *x, lisp_object_t *output_file) {
     fprintf(stdout, "Impossible!!! The code has errors!!!\n");
     exit(1);
   }
-  /* switch (x->type) { */
   switch(typeof(x)) {
     case BOOL:
       if (boolean_value(x) == TRUE)
@@ -808,7 +793,6 @@ void write_object(lisp_object_t *x, lisp_object_t *output_file) {
       write_raw_string("]", output_file);
     }
       break;
-      /* Opcodes */
     case OPCODE: write_opcode(x, output_file); break;
     default :
       fprintf(stdout, "invalid object with type %d", typeof(x));
@@ -1953,7 +1937,7 @@ pub lisp_object_t *run_by_llam(lisp_object_t *func) {
       }
         break;
       default :
-        fprintf(stdout, "In run_by_llam --- Invalid opcode %d\n", /* ins->type */typeof(ins));
+        fprintf(stdout, "In run_by_llam --- Invalid opcode %d\n", typeof(ins));
         exit(1);
     }
     pc++;
