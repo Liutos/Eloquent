@@ -274,50 +274,25 @@ lisp_object_t *make_object(enum TYPE type) {
   return obj;
 }
 
-/* lisp_object_t *make_boolean(int value) { */
-/*   lisp_object_t *boolean = make_object(BOOL); */
-/*   boolean_value(boolean) = value; */
-/*   return boolean; */
-/* } */
+#define mksingle_type(func_name, origin)	\
+  lt *func_name(void) {				\
+    return MAKE_IMMEDIATE(origin);		\
+  }
 
-lt *make_false(void) {
-  return MAKE_IMMEDIATE(FALSE_ORIGIN);
-}
-
-lt *make_true(void) {
-  return MAKE_IMMEDIATE(TRUE_ORIGIN);
-}
+mksingle_type(make_false, FALSE_ORIGIN)
+mksingle_type(make_true, TRUE_ORIGIN)
+mksingle_type(make_empty_list, NULL_ORIGIN)
+mksingle_type(make_eof, EOF_ORIGIN)
+mksingle_type(make_undef, UNDEF_ORIGIN)
 
 lisp_object_t *make_character(char value) {
   return (lt *)((((int)value) << CHAR_BITS) | CHAR_TAG);
-}
-
-lt *make_empty_list(void) {
-  return MAKE_IMMEDIATE(NULL_ORIGIN);
-}
-
-lt *make_eof(void) {
-  return MAKE_IMMEDIATE(EOF_ORIGIN);
-}
-
-lt *make_undef(void) {
-  return MAKE_IMMEDIATE(UNDEF_ORIGIN);
 }
 
 lisp_object_t *make_close(void) {
   lisp_object_t *close = make_object(TCLOSE);
   return close;
 }
-
-#define mksingle_type(func_name, type)          \
-  lisp_object_t *func_name(void) {              \
-    lisp_object_t *obj = make_object(type);     \
-    return obj;                                 \
-  }
-
-/* mksingle_type(make_empty_list, EMPTY_LIST) */
-/* mksingle_type(make_eof, TEOF) */
-/* mksingle_type(make_undef, UNDEF) */
 
 lt *make_exception(char *message, int signal_flag) {
   lt *ex = make_object(EXCEPTION);
@@ -492,13 +467,11 @@ mktype_pred(isexception, EXCEPTION)
 mktype_pred(isfloat, FLOAT)
 mktype_pred(isfunction, COMPILED_FUNCTION)
 mktype_pred(isinput_file, INPUT_FILE)
-/* mktype_pred(isnull, EMPTY_LIST) */
 mktype_pred(ispair, PAIR)
 mktype_pred(isprimitive, PRIMITIVE_FUNCTION)
 mktype_pred(isstring, STRING)
 mktype_pred(issymbol, SYMBOL)
 mktype_pred(isvector, VECTOR)
-/* mktype_pred(isundef, UNDEF) */
 
 int ischar(lt *object) {
   return ((int)object & CHAR_MASK) == CHAR_TAG;
@@ -516,29 +489,22 @@ int is_immediate(lt *object) {
   return ((int)object & IMMEDIATE_MASK) == IMMEDIATE_TAG;
 }
 
-int iseof(lt *object) {
-  return is_immediate(object) && ((int)object >> IMMEDIATE_BITS) == EOF_ORIGIN;
+int is_tag_immediate(lt *object, int origin) {
+  return is_immediate(object) && ((int)object >> IMMEDIATE_BITS) == origin;
 }
 
-int isnull(lt *object) {
-  return is_immediate(object) && ((int)object >> IMMEDIATE_BITS) == NULL_ORIGIN;
-}
+#define mkim_pred(func_name, origin)		\
+  int func_name(lt *object) {			\
+    return is_tag_immediate(object, origin);	\
+  }
 
-int isfalse(lisp_object_t *object) {
-  /* return isboolean(object) && boolean_value(object) == FALSE? TRUE: FALSE; */
-  return is_immediate(object) && ((int)object >> IMMEDIATE_BITS) == FALSE_ORIGIN;
-}
-
-int is_true_object(lt *object) {
-  return is_immediate(object) && ((int)object >> IMMEDIATE_BITS) == TRUE_ORIGIN;
-}
-
-int isundef(lt *object) {
-  return is_immediate(object) && ((int)object >> IMMEDIATE_BITS) == UNDEF_ORIGIN;
-}
+mkim_pred(iseof, EOF_ORIGIN)
+mkim_pred(isnull, NULL_ORIGIN)
+mkim_pred(isfalse, FALSE_ORIGIN)
+mkim_pred(is_true_object, TRUE_ORIGIN)
+mkim_pred(isundef, UNDEF_ORIGIN)
 
 int isboolean(lisp_object_t *object) {
-  /* return is_of_type(object, BOOL); */
   return isfalse(object) || is_true_object(object);
 }
 
@@ -2104,18 +2070,17 @@ void init_global_variable(void) {
 int main(int argc, char *argv[])
 {
   char *inputs[] = {
-    /* "(set! abs (fn (x) (if (> 0 x) (- 0 x) x)))", */
-    /* "(abs 1)", */
-    /* "(abs -1)", */
-    /* "#\\a", */
-    /* "(code-char 97)", */
-    /* "()", */
-    /* "(tail '(1))", */
-    /* "#t", */
-    /* "#f", */
-    /* "(> 1 2)", */
-    /* "(= 1 1.0)", */
-    "(123",
+    "(set! abs (fn (x) (if (> 0 x) (- 0 x) x)))",
+    "(abs 1)",
+    "(abs -1)",
+    "#\\a",
+    "(code-char 97)",
+    "()",
+    "(tail '(1))",
+    "#t",
+    "#f",
+    "(> 1 2)",
+    "(= 1 1.0)",
   };
   init_global_variable();
   for (int i = 0; i < sizeof(inputs) / sizeof(char *); i++) {
