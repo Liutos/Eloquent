@@ -43,6 +43,15 @@ void writef(lt *, const char *, ...);
 #define POINTER_MASK 3
 #define POINTER_TAG 0
 
+#define EOF_ORIGIN 0
+#define FALSE_ORIGIN 1
+#define NULL_ORIGIN 2
+#define TRUE_ORIGIN 3
+#define UNDEF_ORIGIN 4
+
+#define MAKE_IMMEDIATE(origin) \
+  ((lt *)(((int)origin << IMMEDIATE_BITS) | IMMEDIATE_TAG))
+
 enum TYPE {
   BOOL,
   /* TODO: The support for Unicode. */
@@ -275,6 +284,10 @@ lisp_object_t *make_character(char value) {
   return (lt *)((((int)value) << CHAR_BITS) | CHAR_TAG);
 }
 
+lt *make_empty_list(void) {
+  return MAKE_IMMEDIATE(NULL_ORIGIN);
+}
+
 lisp_object_t *make_close(void) {
   lisp_object_t *close = make_object(TCLOSE);
   return close;
@@ -286,7 +299,7 @@ lisp_object_t *make_close(void) {
     return obj;                                 \
   }
 
-mksingle_type(make_empty_list, EMPTY_LIST)
+/* mksingle_type(make_empty_list, EMPTY_LIST) */
 mksingle_type(make_eof, TEOF)
 mksingle_type(make_undef, UNDEF)
 
@@ -467,7 +480,7 @@ mktype_pred(isexception, EXCEPTION)
 mktype_pred(isfloat, FLOAT)
 mktype_pred(isfunction, COMPILED_FUNCTION)
 mktype_pred(isinput_file, INPUT_FILE)
-mktype_pred(isnull, EMPTY_LIST)
+/* mktype_pred(isnull, EMPTY_LIST) */
 mktype_pred(ispair, PAIR)
 mktype_pred(isprimitive, PRIMITIVE_FUNCTION)
 mktype_pred(isstring, STRING)
@@ -485,6 +498,14 @@ int isfixnum(lt *object) {
 
 int isdot(lisp_object_t *object) {
   return object == dot_symbol;
+}
+
+int is_immediate(lt *object) {
+  return ((int)object & IMMEDIATE_MASK) == IMMEDIATE_TAG;
+}
+
+int isnull(lt *object) {
+  return is_immediate(object) && ((int)object >> IMMEDIATE_BITS) == NULL_ORIGIN;
 }
 
 int is_signaled(lisp_object_t *object) {
@@ -566,6 +587,8 @@ int typeof(lisp_object_t *x) {
     return FIXNUM;
   if (ischar(x))
     return CHARACTER;
+  if (isnull(x))
+    return EMPTY_LIST;
   assert(is_pointer(x));
   return x->type;
 }
@@ -2039,11 +2062,13 @@ void init_global_variable(void) {
 int main(int argc, char *argv[])
 {
   char *inputs[] = {
-    /* "(set! abs (fn (x) (if (> 0 x) (- 0 x) x)))", */
-    /* "(abs 1)", */
-    /* "(abs -1)", */
+    "(set! abs (fn (x) (if (> 0 x) (- 0 x) x)))",
+    "(abs 1)",
+    "(abs -1)",
     "#\\a",
     "(code-char 97)",
+    "()",
+    "(tail '(1))",
   };
   init_global_variable();
   for (int i = 0; i < sizeof(inputs) / sizeof(char *); i++) {
