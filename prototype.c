@@ -29,7 +29,7 @@ void writef(lt *, const char *, ...);
  *   bits end in  00:  pointer
  *                01:  fixnum
  *              0110:  char
- *              1110:  other immediate object (null_list, true, false)
+ *              1110:  other immediate object (null_list, true, false, eof, undef)
  */
 #define CHAR_BITS 4
 #define CHAR_MASK 15
@@ -296,6 +296,14 @@ lt *make_empty_list(void) {
   return MAKE_IMMEDIATE(NULL_ORIGIN);
 }
 
+lt *make_eof(void) {
+  return MAKE_IMMEDIATE(EOF_ORIGIN);
+}
+
+lt *make_undef(void) {
+  return MAKE_IMMEDIATE(UNDEF_ORIGIN);
+}
+
 lisp_object_t *make_close(void) {
   lisp_object_t *close = make_object(TCLOSE);
   return close;
@@ -308,8 +316,8 @@ lisp_object_t *make_close(void) {
   }
 
 /* mksingle_type(make_empty_list, EMPTY_LIST) */
-mksingle_type(make_eof, TEOF)
-mksingle_type(make_undef, UNDEF)
+/* mksingle_type(make_eof, TEOF) */
+/* mksingle_type(make_undef, UNDEF) */
 
 lt *make_exception(char *message, int signal_flag) {
   lt *ex = make_object(EXCEPTION);
@@ -490,7 +498,7 @@ mktype_pred(isprimitive, PRIMITIVE_FUNCTION)
 mktype_pred(isstring, STRING)
 mktype_pred(issymbol, SYMBOL)
 mktype_pred(isvector, VECTOR)
-mktype_pred(isundef, UNDEF)
+/* mktype_pred(isundef, UNDEF) */
 
 int ischar(lt *object) {
   return ((int)object & CHAR_MASK) == CHAR_TAG;
@@ -508,6 +516,10 @@ int is_immediate(lt *object) {
   return ((int)object & IMMEDIATE_MASK) == IMMEDIATE_TAG;
 }
 
+int iseof(lt *object) {
+  return is_immediate(object) && ((int)object >> IMMEDIATE_BITS) == EOF_ORIGIN;
+}
+
 int isnull(lt *object) {
   return is_immediate(object) && ((int)object >> IMMEDIATE_BITS) == NULL_ORIGIN;
 }
@@ -519,6 +531,10 @@ int isfalse(lisp_object_t *object) {
 
 int is_true_object(lt *object) {
   return is_immediate(object) && ((int)object >> IMMEDIATE_BITS) == TRUE_ORIGIN;
+}
+
+int isundef(lt *object) {
+  return is_immediate(object) && ((int)object >> IMMEDIATE_BITS) == UNDEF_ORIGIN;
 }
 
 int isboolean(lisp_object_t *object) {
@@ -605,6 +621,10 @@ int typeof(lisp_object_t *x) {
     return EMPTY_LIST;
   if (isboolean(x))
     return BOOL;
+  if (iseof(x))
+    return TEOF;
+  if (isundef(x))
+    return UNDEF;
   assert(is_pointer(x));
   return x->type;
 }
@@ -1369,6 +1389,8 @@ lisp_object_t *read_fixnum(lisp_object_t *input_file, int sign, char start) {
 
 lisp_object_t *read_pair(lisp_object_t *input_file) {
   lisp_object_t *obj = read_object(input_file);
+  if (iseof(obj))
+    return reader_error("Unexpected end-of-file.");
   if (is_signaled(obj))
     return obj;
   if (isclose(obj))
@@ -2089,10 +2111,11 @@ int main(int argc, char *argv[])
     /* "(code-char 97)", */
     /* "()", */
     /* "(tail '(1))", */
-    "#t",
-    "#f",
-    "(> 1 2)",
-    "(= 1 1.0)",
+    /* "#t", */
+    /* "#f", */
+    /* "(> 1 2)", */
+    /* "(= 1 1.0)", */
+    "(123",
   };
   init_global_variable();
   for (int i = 0; i < sizeof(inputs) / sizeof(char *); i++) {
