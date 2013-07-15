@@ -769,7 +769,9 @@ void write_object(lisp_object_t *x, lisp_object_t *output_file) {
       break;
     case EMPTY_LIST: write_raw_string("()", output_file); break;
     case EXCEPTION:
-      writef(output_file, "ERROR: %s", make_string(exception_msg(x)));
+      /* writef(output_file, "ERROR: %s", make_string(exception_msg(x))); */
+      write_raw_string("ERROR: ", output_file);
+      write_raw_string(exception_msg(x), output_file);
       break;
     case FIXNUM: writef(output_file, "%d", x); break;
     case FLOAT: writef(output_file, "%f", x); break;
@@ -789,8 +791,11 @@ void write_object(lisp_object_t *x, lisp_object_t *output_file) {
       write_raw_string(")", output_file);
       break;
     case PRIMITIVE_FUNCTION:
-      writef(output_file, "#<PRIMITIVE-FUNCTION %s %p>", 
-             make_string(primitive_Lisp_name(x)), x);
+      /* writef(output_file, "#<PRIMITIVE-FUNCTION %s %p>",  */
+      /*        make_string(primitive_Lisp_name(x)), x); */
+      write_raw_string("#<PRIMITIVE-FUNCTION ", output_file);
+      write_raw_string(primitive_Lisp_name(x), output_file);
+      writef(output_file, " %p>", x);
       break;
     case RETADDR:
       writef(output_file, "#<RETADDR %p pc: %d>", x, make_fixnum(retaddr_pc(x)));
@@ -2070,17 +2075,19 @@ void init_global_variable(void) {
 int main(int argc, char *argv[])
 {
   char *inputs[] = {
-    "(set! abs (fn (x) (if (> 0 x) (- 0 x) x)))",
-    "(abs 1)",
-    "(abs -1)",
-    "#\\a",
-    "(code-char 97)",
-    "()",
-    "(tail '(1))",
-    "#t",
-    "#f",
-    "(> 1 2)",
-    "(= 1 1.0)",
+    /* "(set! abs (fn (x) (if (> 0 x) (- 0 x) x)))", */
+    /* "(abs 1)", */
+    /* "(abs -1)", */
+    /* "#\\a", */
+    /* "(code-char 97)", */
+    /* "()", */
+    /* "(tail '(1))", */
+    /* "#t", */
+    /* "#f", */
+    /* "(> 1 2)", */
+    /* "(= 1 1.0)", */
+    "type-of",
+    "#r",
   };
   init_global_variable();
   for (int i = 0; i < sizeof(inputs) / sizeof(char *); i++) {
