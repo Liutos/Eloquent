@@ -100,18 +100,9 @@ struct lisp_object_t {
   enum TYPE type;
   union {
     struct {
-      int value;
-    } boolean;
-    struct {
-      char value;
-    } character;
-    struct {
       char *message;
       int signal_flag;
     } exception;
-    struct {
-      int value;
-    } fixnum;
     struct {
       float value;
     } float_num;
@@ -170,7 +161,6 @@ struct lisp_object_t {
 #define pub
 
 /* Accessors */
-/* #define boolean_value(x)  ((x)->u.boolean.value) */
 #define character_value(x) (((int)x) >> CHAR_BITS)
 #define exception_msg(x) ((x)->u.exception.message)
 #define exception_flag(x) ((x)->u.exception.signal_flag)
@@ -290,9 +280,7 @@ lisp_object_t *make_character(char value) {
 }
 
 lisp_object_t *make_close(void) {
-//  lisp_object_t *close = make_object(TCLOSE);
-//  return close;
-	return MAKE_IMMEDIATE(CLOSE_ORIGIN);
+  return MAKE_IMMEDIATE(CLOSE_ORIGIN);
 }
 
 lt *make_exception(char *message, int signal_flag) {
@@ -464,7 +452,6 @@ int is_of_type(lisp_object_t *object, enum TYPE type) {
     return is_of_type(object, type);            \
   }
 
-//mktype_pred(isclose, TCLOSE)
 mktype_pred(isexception, EXCEPTION)
 mktype_pred(isfloat, FLOAT)
 mktype_pred(isfunction, COMPILED_FUNCTION)
@@ -595,7 +582,7 @@ int typeof(lisp_object_t *x) {
   if (isundef(x))
     return UNDEF;
   if (isclose(x))
-	return TCLOSE;
+    return TCLOSE;
   assert(is_pointer(x));
   return x->type;
 }
@@ -739,10 +726,8 @@ void write_object(lisp_object_t *x, lisp_object_t *output_file) {
   }
   switch(typeof(x)) {
     case BOOL:
-      /* if (boolean_value(x) == TRUE) */
       if (is_true_object(x))
         write_raw_string("#t", output_file);
-      /* if (boolean_value(x) == FALSE) */
       if (isfalse(x))
         write_raw_string("#f", output_file);
       break;
@@ -774,7 +759,6 @@ void write_object(lisp_object_t *x, lisp_object_t *output_file) {
       break;
     case EMPTY_LIST: write_raw_string("()", output_file); break;
     case EXCEPTION:
-      /* writef(output_file, "ERROR: %s", make_string(exception_msg(x))); */
       write_raw_string("ERROR: ", output_file);
       write_raw_string(exception_msg(x), output_file);
       break;
@@ -796,8 +780,6 @@ void write_object(lisp_object_t *x, lisp_object_t *output_file) {
       write_raw_string(")", output_file);
       break;
     case PRIMITIVE_FUNCTION:
-      /* writef(output_file, "#<PRIMITIVE-FUNCTION %s %p>",  */
-      /*        make_string(primitive_Lisp_name(x)), x); */
       write_raw_string("#<PRIMITIVE-FUNCTION ", output_file);
       write_raw_string(primitive_Lisp_name(x), output_file);
       writef(output_file, " %p>", x);
@@ -2080,13 +2062,13 @@ int main(int argc, char *argv[])
 {
   char *inputs[] = {
     "(set! abs (fn (x) (if (> 0 x) (- 0 x) x)))",
-    "(abs 1)",
+    "(abs 1",
     "(abs -1)",
     "#\\a",
     "(code-char 97)",
     "()",
     "(tail '(1))",
-    "#t",
+    "#r",
     "#f",
     "(> 1 2)",
     "(= 1 1.0)",
