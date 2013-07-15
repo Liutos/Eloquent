@@ -4,3 +4,4 @@
 *.lisp
 prototype
 constructors.c
+.project
