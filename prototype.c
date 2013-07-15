@@ -61,7 +61,6 @@ enum TYPE {
   EMPTY_LIST,
   EXCEPTION,
   /* TODO: Implements the arbitrary precision arithmetic numeric types. */
-  /* DONE: Implements a part of types as tagged-pointer. */
   FIXNUM,
   FLOAT,
   INPUT_FILE,
@@ -395,6 +394,7 @@ lt *mkopcode(enum OPCODE_TYPE name, int arity, ...) {
   va_start(ap, arity);
   for (int i = 0; i < arity; i++)
     vector_value(oprands)[i] = va_arg(ap, lt *);
+  vector_last(oprands) = arity - 1;
   return make_opcode(name, oprands);
 }
 
@@ -1558,6 +1558,7 @@ lisp_object_t *asm_second_pass(lisp_object_t *code, lisp_object_t *length, lisp_
       if (is_addr_op(ins))
         ins = change_addr(ins, labels);
       vector_value(code_vector)[index] = ins;
+      vector_last(code_vector)++;
       index++;
     }
     code = pair_tail(code);
@@ -2004,9 +2005,7 @@ void init_object_pool(void) {
 void init_global_variable(void) {
   init_object_pool();
   /* Initialize global variables */
-  debug_flag = FALSE;
-  /* false = make_boolean(FALSE); */
-  /* true = make_boolean(TRUE); */
+  /* debug_flag = TRUE; */
   false = make_false();
   true = make_true();
   null_list = make_empty_list();
@@ -2091,8 +2090,6 @@ int main(int argc, char *argv[])
     "#f",
     "(> 1 2)",
     "(= 1 1.0)",
-//    "type-of",
-//    "#r",
   };
   init_global_variable();
   for (int i = 0; i < sizeof(inputs) / sizeof(char *); i++) {
