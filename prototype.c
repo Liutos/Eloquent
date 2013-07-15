@@ -29,7 +29,7 @@ void writef(lt *, const char *, ...);
  *   bits end in  00:  pointer
  *                01:  fixnum
  *              0110:  char
- *              1110:  other immediate object (null_list, true, false, eof, undef)
+ *              1110:  other immediate object (null_list, true, false, eof, undef, close)
  */
 #define CHAR_BITS 4
 #define CHAR_MASK 15
@@ -48,6 +48,7 @@ void writef(lt *, const char *, ...);
 #define NULL_ORIGIN 2
 #define TRUE_ORIGIN 3
 #define UNDEF_ORIGIN 4
+#define CLOSE_ORIGIN 5
 
 #define MAKE_IMMEDIATE(origin) \
   ((lt *)(((int)origin << IMMEDIATE_BITS) | IMMEDIATE_TAG))
@@ -290,8 +291,9 @@ lisp_object_t *make_character(char value) {
 }
 
 lisp_object_t *make_close(void) {
-  lisp_object_t *close = make_object(TCLOSE);
-  return close;
+//  lisp_object_t *close = make_object(TCLOSE);
+//  return close;
+	return MAKE_IMMEDIATE(CLOSE_ORIGIN);
 }
 
 lt *make_exception(char *message, int signal_flag) {
@@ -462,7 +464,7 @@ int is_of_type(lisp_object_t *object, enum TYPE type) {
     return is_of_type(object, type);            \
   }
 
-mktype_pred(isclose, TCLOSE)
+//mktype_pred(isclose, TCLOSE)
 mktype_pred(isexception, EXCEPTION)
 mktype_pred(isfloat, FLOAT)
 mktype_pred(isfunction, COMPILED_FUNCTION)
@@ -503,6 +505,7 @@ mkim_pred(isnull, NULL_ORIGIN)
 mkim_pred(isfalse, FALSE_ORIGIN)
 mkim_pred(is_true_object, TRUE_ORIGIN)
 mkim_pred(isundef, UNDEF_ORIGIN)
+mkim_pred(isclose, CLOSE_ORIGIN)
 
 int isboolean(lisp_object_t *object) {
   return isfalse(object) || is_true_object(object);
@@ -591,6 +594,8 @@ int typeof(lisp_object_t *x) {
     return TEOF;
   if (isundef(x))
     return UNDEF;
+  if (isclose(x))
+	return TCLOSE;
   assert(is_pointer(x));
   return x->type;
 }
@@ -2075,19 +2080,19 @@ void init_global_variable(void) {
 int main(int argc, char *argv[])
 {
   char *inputs[] = {
-    /* "(set! abs (fn (x) (if (> 0 x) (- 0 x) x)))", */
-    /* "(abs 1)", */
-    /* "(abs -1)", */
-    /* "#\\a", */
-    /* "(code-char 97)", */
-    /* "()", */
-    /* "(tail '(1))", */
-    /* "#t", */
-    /* "#f", */
-    /* "(> 1 2)", */
-    /* "(= 1 1.0)", */
-    "type-of",
-    "#r",
+    "(set! abs (fn (x) (if (> 0 x) (- 0 x) x)))",
+    "(abs 1)",
+    "(abs -1)",
+    "#\\a",
+    "(code-char 97)",
+    "()",
+    "(tail '(1))",
+    "#t",
+    "#f",
+    "(> 1 2)",
+    "(= 1 1.0)",
+//    "type-of",
+//    "#r",
   };
   init_global_variable();
   for (int i = 0; i < sizeof(inputs) / sizeof(char *); i++) {
