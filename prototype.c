@@ -53,15 +53,20 @@ void writef(lt *, const char *, ...);
 #define MAKE_IMMEDIATE(origin) \
   ((lt *)(((int)origin << IMMEDIATE_BITS) | IMMEDIATE_TAG))
 
+/* TODO: The support for Unicode. */
+/* TODO: Implements the arbitrary precision arithmetic numeric types. */
 enum TYPE {
+  /* tagged-pointer */
   BOOL,
-  /* TODO: The support for Unicode. */
   CHARACTER,
-  COMPILED_FUNCTION,
   EMPTY_LIST,
-  EXCEPTION,
-  /* TODO: Implements the arbitrary precision arithmetic numeric types. */
   FIXNUM,
+  TCLOSE,
+  TEOF,
+  UNDEF,
+  /* tagged-union */
+  FUNCTION,
+  EXCEPTION,
   FLOAT,
   INPUT_FILE,
   OPCODE,
@@ -71,10 +76,7 @@ enum TYPE {
   RETADDR,
   STRING,
   SYMBOL,
-  TCLOSE,
-  TEOF,
   VECTOR,
-  UNDEF,
 };
 
 enum OPCODE_TYPE {
@@ -236,7 +238,6 @@ lisp_object_t *standard_out;
 lisp_object_t *symbol_list;
 lisp_object_t *undef_object;
 lt *free_objects;
-lt *used_objects;
 
 /* TODO: Collects this part to file object.c */
 /* Constructors */
@@ -264,6 +265,8 @@ lisp_object_t *make_object(enum TYPE type) {
   return obj;
 }
 
+/* tagged-pointer types */
+/* immediate objects */
 #define mksingle_type(func_name, origin)	\
   lt *func_name(void) {				\
     return MAKE_IMMEDIATE(origin);		\
@@ -274,13 +277,14 @@ mksingle_type(make_true, TRUE_ORIGIN)
 mksingle_type(make_empty_list, NULL_ORIGIN)
 mksingle_type(make_eof, EOF_ORIGIN)
 mksingle_type(make_undef, UNDEF_ORIGIN)
+mksingle_type(make_close, CLOSE_ORIGIN)
 
 lisp_object_t *make_character(char value) {
   return (lt *)((((int)value) << CHAR_BITS) | CHAR_TAG);
 }
 
-lisp_object_t *make_close(void) {
-  return MAKE_IMMEDIATE(CLOSE_ORIGIN);
+lt *make_fixnum(int value) {
+  return (lt *)((value << FIXNUM_BITS) | FIXNUM_TAG);
 }
 
 lt *make_exception(char *message, int signal_flag) {
@@ -290,10 +294,6 @@ lt *make_exception(char *message, int signal_flag) {
   return ex;
 }
 
-lt *make_fixnum(int value) {
-  return (lt *)((value << FIXNUM_BITS) | FIXNUM_TAG);
-}
-
 lisp_object_t *make_float(float value) {
   lisp_object_t *flt_num = make_object(FLOAT);
   float_value(flt_num) = value;
@@ -301,7 +301,7 @@ lisp_object_t *make_float(float value) {
 }
 
 lisp_object_t *make_function(lisp_object_t *env, lisp_object_t *args, lisp_object_t *code) {
-  lisp_object_t *func = make_object(COMPILED_FUNCTION);
+  lisp_object_t *func = make_object(FUNCTION);
   function_env(func) = env;
   function_args(func) = args;
   function_code(func) = code;
@@ -454,7 +454,7 @@ int is_of_type(lisp_object_t *object, enum TYPE type) {
 
 mktype_pred(isexception, EXCEPTION)
 mktype_pred(isfloat, FLOAT)
-mktype_pred(isfunction, COMPILED_FUNCTION)
+mktype_pred(isfunction, FUNCTION)
 mktype_pred(isinput_file, INPUT_FILE)
 mktype_pred(ispair, PAIR)
 mktype_pred(isprimitive, PRIMITIVE_FUNCTION)
@@ -745,7 +745,7 @@ void write_object(lisp_object_t *x, lisp_object_t *output_file) {
       }
     }
       break;
-    case COMPILED_FUNCTION: {
+    case FUNCTION: {
       writef(output_file, "#<COMPILED-FUNCTION %p\n", x);
       lisp_object_t *code_vector = function_code(x);
       assert(isvector(code_vector));
@@ -1247,7 +1247,7 @@ lisp_object_t *lt_type_of(lisp_object_t *object) {
     mktype(CHARACTER);
     mktype(FIXNUM);
     mktype(FLOAT);
-    mktype(COMPILED_FUNCTION);
+    mktype(FUNCTION);
     mktype(PRIMITIVE_FUNCTION);
     default :
       fprintf(stdout, "Unknown type %d of object\n", typeof(object));
@@ -1981,7 +1981,6 @@ void init_object_pool(void) {
     object_pool[i].next = &object_pool[i + 1];
   object_pool[OBJECT_INIT_COUNT - 1].next = NULL;
   free_objects = &object_pool[0];
-  used_objects = NULL;
 }
 
 void init_global_variable(void) {
