@@ -84,6 +84,7 @@ enum TYPE {
 enum OPCODE_TYPE {
   ARGS,
   CALL,
+  CATCH,
   CONST,
   FN,
   GSET,
@@ -204,6 +205,8 @@ struct lisp_object_t {
 
 #define op_args_arity(x) oparg1(x)
 #define op_call_arity(x) oparg1(x)
+#define op_catch_type(x) oparg1(x)
+#define op_catch_handler(x) oparg2(x)
 #define op_const_value(x) oparg1(x)
 #define op_fjump_label(x) oparg1(x)
 #define op_fn_func(x) oparg1(x)
@@ -438,6 +441,10 @@ lisp_object_t *make_op_prim(lisp_object_t *nargs) {
 
 lisp_object_t *make_op_return(void) {
   return mkopcode(RETURN, 0);
+}
+
+lt *make_op_catch(lt *type_name, lt *handler) {
+  return mkopcode(CATCH, 2, type_name, handler);
 }
 
 /* Type predicate */
@@ -698,6 +705,10 @@ void write_opcode(lt *opcode, lt *dest) {
   switch (opcode_type(opcode)) {
     case ARGS: writef(dest, "#<ARGS %d>", op_args_arity(opcode)); break;
     case CALL: writef(dest, "#<CALL %d>", op_call_arity(opcode)); break;
+    case CATCH:
+      writef(dest, "#<CATCH type_name: %S, handler: %?>",
+             op_catch_type(opcode), op_catch_handler(opcode));
+      break;
     case CONST: writef(dest, "#<CONST %?>", op_const_value(opcode)); break;
     case FJUMP: writef(dest, "#<FJUMP %?>", op_fjump_label(opcode)); break;
     case FN: writef(dest, "#<FN %?>", op_fn_func(opcode)); break;
@@ -1569,6 +1580,12 @@ lisp_object_t *gen(enum TYPE opcode, ...) {
     }
       break;
     case CALL: ins = make_op_call(va_arg(ap, lisp_object_t *)); break;
+    case CATCH: {
+      lt *type_name = va_arg(ap, lt *);
+      lt *handler = va_arg(ap, lt *);
+      ins = make_op_catch(type_name, handler);
+    }
+      break;
     case FJUMP: {
       lisp_object_t *label = va_arg(ap, lisp_object_t *);
       ins = make_op_fjump(label);
@@ -1770,6 +1787,33 @@ lisp_object_t *gen_set(lisp_object_t *symbol, lisp_object_t *env) {
   }
 }
 
+lt *compile_handler(lt *handler, lt *env) {
+  assert(ispair(handler));
+  assert(ispair(pair_head(handler)));
+  lt *type_name = first(pair_head(handler));
+  assert(issymbol(type_name));
+  lt *var = second(pair_head(handler));
+  /* assert(issymbol(var)); */
+  assert(ispair(var) && issymbol(pair_head(var)));
+  lt *body = pair_tail(handler);
+  handler = compile_lambda(var, body, env);
+  return gen(CATCH, type_name, handler);
+}
+
+lt *compile_handlers(lt *handlers, lt *env) {
+  assert(isnull(handlers) || ispair(handlers));
+  if (isnull(handlers))
+    return null_list;
+  else
+    return lt_append2(compile_handler(pair_head(handlers), env),
+                      compile_handlers(pair_tail(handlers), env));
+}
+
+lt *compile_try_catch(lt *case_list, lt *form, lt *env) {
+  return seq(compile_handlers(case_list, env),
+             compile_object(form, env));
+}
+
 /* TODO: The support for built-in macros. */
 /* TODO: The support for tail call optimization. */
 pub lisp_object_t *compile_object(lisp_object_t *object, lisp_object_t *env) {
@@ -1794,6 +1838,11 @@ pub lisp_object_t *compile_object(lisp_object_t *object, lisp_object_t *env) {
   }
   if (is_tag_list(object, S("fn")))
     return gen(FN, compile_lambda(second(object), pair_tail(pair_tail(object)), env));
+  if (is_tag_list(object, S("try-with"))) {
+    lt *form = second(object);
+    lt *case_list = pair_tail(pair_tail(object));
+    return compile_try_catch(case_list, form, env);
+  }
   if (ispair(object)) {
     lisp_object_t *args = pair_tail(object);
     lisp_object_t *fn = pair_head(object);
@@ -2062,17 +2111,18 @@ void init_global_variable(void) {
 int main(int argc, char *argv[])
 {
   char *inputs[] = {
-    "(set! abs (fn (x) (if (> 0 x) (- 0 x) x)))",
-    "(abs 1",
-    "(abs -1)",
-    "#\\a",
-    "(code-char 97)",
-    "()",
-    "(tail '(1))",
-    "#r",
-    "#f",
-    "(> 1 2)",
-    "(= 1 1.0)",
+    /* "(set! abs (fn (x) (if (> 0 x) (- 0 x) x)))", */
+    /* "(abs 1", */
+    /* "(abs -1)", */
+    /* "#\\a", */
+    /* "(code-char 97)", */
+    /* "()", */
+    /* "(tail '(1))", */
+    /* "#r", */
+    /* "#f", */
+    /* "(> 1 2)", */
+    /* "(= 1 1.0)", */
+    "(try-with (/ 1 0) ((devideByZero (ex)) 0))",
   };
   init_global_variable();
   for (int i = 0; i < sizeof(inputs) / sizeof(char *); i++) {
@@ -2083,7 +2133,7 @@ int main(int argc, char *argv[])
     if (debug_flag)
       writef(standard_out, "In #main --- compile expr is\n%?\n", expr);
     writef(standard_out, ">> %s\n", make_string(inputs[i]));
-    expr = run_by_llam(expr);
+    /* expr = run_by_llam(expr); */
     if (is_signaled(expr))
       writef(standard_out, "%?\n", expr);
     else
