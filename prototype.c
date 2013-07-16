@@ -43,12 +43,14 @@ void writef(lt *, const char *, ...);
 #define POINTER_MASK 3
 #define POINTER_TAG 0
 
-#define EOF_ORIGIN 0
-#define FALSE_ORIGIN 1
-#define NULL_ORIGIN 2
-#define TRUE_ORIGIN 3
-#define UNDEF_ORIGIN 4
-#define CLOSE_ORIGIN 5
+enum ORIGINS {
+  EOF_ORIGIN,
+  FALSE_ORIGIN,
+  NULL_ORIGIN,
+  TRUE_ORIGIN,
+  UNDEF_ORIGIN,
+  CLOSE_ORIGIN,
+};
 
 #define MAKE_IMMEDIATE(origin) \
   ((lt *)(((int)origin << IMMEDIATE_BITS) | IMMEDIATE_TAG))
