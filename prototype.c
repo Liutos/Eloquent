@@ -20,28 +20,12 @@ typedef lisp_object_t *(*f1)(lisp_object_t *);
 typedef lisp_object_t *(*f2)(lisp_object_t *, lisp_object_t *);
 typedef lisp_object_t *(*f3)(lisp_object_t *, lisp_object_t *, lisp_object_t *);
 
-lisp_object_t *compile_object(lisp_object_t *object, lisp_object_t *env);
-lisp_object_t *read_object(lisp_object_t *input_file);
-void write_object(lisp_object_t *object, lisp_object_t *out_port);
-void writef(lt *, const char *, ...);
-
-/* tagging system
- *   bits end in  00:  pointer
- *                01:  fixnum
- *              0110:  char
- *              1110:  other immediate object (null_list, true, false, eof, undef, close)
- */
-#define CHAR_BITS 4
-#define CHAR_MASK 15
-#define CHAR_TAG 6
-#define FIXNUM_BITS 2
-#define FIXNUM_MASK 3
-#define FIXNUM_TAG 1
-#define IMMEDIATE_BITS 4
-#define IMMEDIATE_MASK 15
-#define IMMEDIATE_TAG 14
-#define POINTER_MASK 3
-#define POINTER_TAG 0
+/* StringBuilder */
+typedef struct string_builder_t {
+  char *string;
+  int length;
+  int index;
+} string_builder_t;
 
 enum ORIGINS {
   EOF_ORIGIN,
@@ -51,9 +35,6 @@ enum ORIGINS {
   UNDEF_ORIGIN,
   CLOSE_ORIGIN,
 };
-
-#define MAKE_IMMEDIATE(origin) \
-  ((lt *)(((int)origin << IMMEDIATE_BITS) | IMMEDIATE_TAG))
 
 /* TODO: The support for Unicode. */
 /* TODO: Implements the arbitrary precision arithmetic numeric types. */
@@ -160,6 +141,29 @@ struct lisp_object_t {
   } u;
 };
 
+lisp_object_t *compile_object(lisp_object_t *object, lisp_object_t *env);
+lisp_object_t *read_object(lisp_object_t *input_file);
+void write_object(lisp_object_t *object, lisp_object_t *out_port);
+void writef(lt *, const char *, ...);
+
+/* tagging system
+ *   bits end in  00:  pointer
+ *                01:  fixnum
+ *              0110:  char
+ *              1110:  other immediate object (null_list, true, false, eof, undef, close)
+ */
+#define CHAR_BITS 4
+#define CHAR_MASK 15
+#define CHAR_TAG 6
+#define FIXNUM_BITS 2
+#define FIXNUM_MASK 3
+#define FIXNUM_TAG 1
+#define IMMEDIATE_BITS 4
+#define IMMEDIATE_MASK 15
+#define IMMEDIATE_TAG 14
+#define POINTER_MASK 3
+#define POINTER_TAG 0
+
 #define FALSE 0
 #define TRUE 1
 #define OBJECT_INIT_COUNT 1000
@@ -230,6 +234,45 @@ struct lisp_object_t {
 
 #define seq(...) lt_append(__VA_ARGS__, NULL)
 
+#define MAKE_IMMEDIATE(origin) \
+  ((lt *)(((int)origin << IMMEDIATE_BITS) | IMMEDIATE_TAG))
+
+/* tagged-pointer types */
+/* immediate objects */
+#define mksingle_type(func_name, origin)    \
+  lt *func_name(void) {             \
+    return MAKE_IMMEDIATE(origin);      \
+  }
+
+#define mktype_pred(func_name, type)            \
+  int func_name(lisp_object_t *object) {        \
+    return is_of_type(object, type);            \
+  }
+
+#define mktype(type) case type: return S(#type)
+
+#define _arg(N) vlast(stack, primitive_arity(func) - N)
+#define _arg1 _arg(1)
+#define _arg2 _arg(2)
+#define _arg3 _arg(3)
+#define move_stack() vector_last(stack) -= primitive_arity(func)
+
+#define check_exception()                       \
+        do {                                    \
+          if (is_signaled(val)) {               \
+            write_object(val, standard_out);    \
+            lt_vector_push(stack, null_list);   \
+            goto halt;                          \
+          }                                     \
+        } while (0)
+
+#define ADD(arity, function_name, Lisp_name)                            \
+  do {                                                                  \
+    func =                                                              \
+        make_primitive(arity, (void *)function_name, Lisp_name);        \
+    symbol_value(S(Lisp_name)) = func;                                  \
+  } while (0)
+
 /* Global variables */
 int debug_flag;
 lisp_object_t *dot_symbol;
@@ -269,13 +312,6 @@ lisp_object_t *make_object(enum TYPE type) {
   obj->type = type;
   return obj;
 }
-
-/* tagged-pointer types */
-/* immediate objects */
-#define mksingle_type(func_name, origin)	\
-  lt *func_name(void) {				\
-    return MAKE_IMMEDIATE(origin);		\
-  }
 
 mksingle_type(make_false, FALSE_ORIGIN)
 mksingle_type(make_true, TRUE_ORIGIN)
@@ -456,11 +492,6 @@ int is_of_type(lisp_object_t *object, enum TYPE type) {
   return is_pointer(object) && (object->type == type? TRUE: FALSE);
 }
 
-#define mktype_pred(func_name, type)            \
-  int func_name(lisp_object_t *object) {        \
-    return is_of_type(object, type);            \
-  }
-
 mktype_pred(isexception, EXCEPTION)
 mktype_pred(isfloat, FLOAT)
 mktype_pred(isfunction, FUNCTION)
@@ -595,13 +626,6 @@ int typeof(lisp_object_t *x) {
   assert(is_pointer(x));
   return x->type;
 }
-
-/* StringBuilder */
-typedef struct string_builder_t {
-  char *string;
-  int length;
-  int index;
-} string_builder_t;
 
 string_builder_t *make_str_builder(void) {
   string_builder_t *sb = malloc(sizeof(*sb));
@@ -1253,8 +1277,6 @@ lt *lt_object_size(void) {
 }
 
 lisp_object_t *lt_type_of(lisp_object_t *object) {
-#define mktype(type) case type: return S(#type)
-
   switch (typeof(object)) {
     mktype(BOOL);
     mktype(CHARACTER);
@@ -1961,21 +1983,6 @@ pub lisp_object_t *run_by_llam(lisp_object_t *func) {
         lisp_object_t *val = NULL;
         assert(isprimitive(func));
 
-#define _arg(N) vlast(stack, primitive_arity(func) - N)
-#define _arg1 _arg(1)
-#define _arg2 _arg(2)
-#define _arg3 _arg(3)
-#define move_stack() vector_last(stack) -= primitive_arity(func)
-
-#define check_exception()                       \
-        do {                                    \
-          if (is_signaled(val)) {               \
-            write_object(val, standard_out);    \
-            lt_vector_push(stack, null_list);   \
-            goto halt;                          \
-          }                                     \
-        } while (0)
-
         switch (primitive_arity(func)) {
           case 0:
             val = ((f0)primitive_func(func))();
@@ -2053,13 +2060,6 @@ void init_global_variable(void) {
   symbol_value(S("*standard-input*")) = standard_in;
 
   lisp_object_t *func;
-
-#define ADD(arity, function_name, Lisp_name)                            \
-  do {                                                                  \
-    func =                                                              \
-        make_primitive(arity, (void *)function_name, Lisp_name);        \
-    symbol_value(S(Lisp_name)) = func;                                  \
-  } while (0)
 
   /* Arithmetic operations */
   ADD(2, lt_add, "+");
