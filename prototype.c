@@ -273,6 +273,13 @@ void writef(lt *, const char *, ...);
     symbol_value(S(Lisp_name)) = func;                                  \
   } while (0)
 
+#define vlast(v, n) lt_vector_last_nth(v, make_fixnum(n))
+
+#define mkim_pred(func_name, origin)		\
+  int func_name(lt *object) {			\
+    return is_tag_immediate(object, origin);	\
+  }
+
 /* Global variables */
 int debug_flag;
 lisp_object_t *dot_symbol;
@@ -287,9 +294,139 @@ lisp_object_t *symbol_list;
 lisp_object_t *undef_object;
 lt *free_objects;
 
+/* Type predicate */
+int is_pointer(lt *object) {
+  return ((int)object & POINTER_MASK) == POINTER_TAG;
+}
+
+int is_of_type(lisp_object_t *object, enum TYPE type) {
+  return is_pointer(object) && (object->type == type? TRUE: FALSE);
+}
+
+mktype_pred(isexception, EXCEPTION)
+mktype_pred(isfloat, FLOAT)
+mktype_pred(isfunction, FUNCTION)
+mktype_pred(isinput_file, INPUT_FILE)
+mktype_pred(ispair, PAIR)
+mktype_pred(isprimitive, PRIMITIVE_FUNCTION)
+mktype_pred(isstring, STRING)
+mktype_pred(issymbol, SYMBOL)
+mktype_pred(isvector, VECTOR)
+
+int ischar(lt *object) {
+  return ((int)object & CHAR_MASK) == CHAR_TAG;
+}
+
+int isfixnum(lt *object) {
+  return ((int)object & FIXNUM_MASK) == FIXNUM_TAG;
+}
+
+int isdot(lisp_object_t *object) {
+  return object == dot_symbol;
+}
+
+int is_immediate(lt *object) {
+  return ((int)object & IMMEDIATE_MASK) == IMMEDIATE_TAG;
+}
+
+int is_tag_immediate(lt *object, int origin) {
+  return is_immediate(object) && ((int)object >> IMMEDIATE_BITS) == origin;
+}
+
+mkim_pred(iseof, EOF_ORIGIN)
+mkim_pred(isnull, NULL_ORIGIN)
+mkim_pred(isfalse, FALSE_ORIGIN)
+mkim_pred(is_true_object, TRUE_ORIGIN)
+mkim_pred(isundef, UNDEF_ORIGIN)
+mkim_pred(isclose, CLOSE_ORIGIN)
+
+int isboolean(lisp_object_t *object) {
+  return isfalse(object) || is_true_object(object);
+}
+
+int is_signaled(lisp_object_t *object) {
+  return isexception(object) && exception_flag(object) == TRUE;
+}
+
+int isnumber(lisp_object_t *object) {
+  return isfixnum(object) || isfloat(object);
+}
+
+int type_of(lisp_object_t *x) {
+  if (isfixnum(x))
+    return FIXNUM;
+  if (ischar(x))
+    return CHARACTER;
+  if (isnull(x))
+    return EMPTY_LIST;
+  if (isboolean(x))
+    return BOOL;
+  if (iseof(x))
+    return TEOF;
+  if (isundef(x))
+    return UNDEF;
+  if (isclose(x))
+    return TCLOSE;
+  assert(is_pointer(x));
+  return x->type;
+}
+
 /* TODO: Collects this part to file object.c */
+void mark_lt_object(lt *object) {
+	if (!is_pointer(object) || object == NULL)
+		return;
+	if (object->gc_mark_flag == TRUE)
+		return;
+	object->gc_mark_flag = TRUE;
+	switch (type_of(object)) {
+	case FUNCTION:
+		mark_lt_object(function_args(object));
+		mark_lt_object(function_code(object));
+		mark_lt_object(function_env(object));
+		break;
+	case OPCODE:
+		mark_lt_object(opcode_oprands(object));
+		break;
+	case PAIR:
+		mark_lt_object(pair_head(object));
+		mark_lt_object(pair_tail(object));
+		break;
+	case SYMBOL:
+		mark_lt_object(symbol_value(object));
+		break;
+	case VECTOR:
+		for (int i = 0; i <= vector_last(object); i++)
+			mark_lt_object(vector_value(object)[i]);
+		break;
+	default :;
+	}
+}
+
+void mark_all(void) {
+	mark_lt_object(symbol_list);
+}
+
+void sweep_all(void) {
+	for (int i = 0; i < OBJECT_INIT_COUNT; i++) {
+		lt *obj = &object_pool[i];
+		if (obj->use_flag == TRUE && obj->gc_mark_flag == FALSE) {
+			obj->use_flag = FALSE;
+			obj->next = free_objects;
+			free_objects = obj;
+		} else
+			obj->gc_mark_flag = FALSE;
+	}
+}
+
+void trigger_gc(void) {
+	mark_all();
+	sweep_all();
+}
+
 /* Constructors */
 lt *allocate_object(void) {
+	if (free_objects == NULL)
+		trigger_gc();
   if (free_objects == NULL) {
     printf("Pool is full, program terminated.\n");
     exit(1);
@@ -483,69 +620,6 @@ lt *make_op_catch(lt *type_name, lt *handler) {
   return mkopcode(CATCH, 2, type_name, handler);
 }
 
-/* Type predicate */
-int is_pointer(lt *object) {
-  return ((int)object & POINTER_MASK) == POINTER_TAG;
-}
-
-int is_of_type(lisp_object_t *object, enum TYPE type) {
-  return is_pointer(object) && (object->type == type? TRUE: FALSE);
-}
-
-mktype_pred(isexception, EXCEPTION)
-mktype_pred(isfloat, FLOAT)
-mktype_pred(isfunction, FUNCTION)
-mktype_pred(isinput_file, INPUT_FILE)
-mktype_pred(ispair, PAIR)
-mktype_pred(isprimitive, PRIMITIVE_FUNCTION)
-mktype_pred(isstring, STRING)
-mktype_pred(issymbol, SYMBOL)
-mktype_pred(isvector, VECTOR)
-
-int ischar(lt *object) {
-  return ((int)object & CHAR_MASK) == CHAR_TAG;
-}
-
-int isfixnum(lt *object) {
-  return ((int)object & FIXNUM_MASK) == FIXNUM_TAG;
-}
-
-int isdot(lisp_object_t *object) {
-  return object == dot_symbol;
-}
-
-int is_immediate(lt *object) {
-  return ((int)object & IMMEDIATE_MASK) == IMMEDIATE_TAG;
-}
-
-int is_tag_immediate(lt *object, int origin) {
-  return is_immediate(object) && ((int)object >> IMMEDIATE_BITS) == origin;
-}
-
-#define mkim_pred(func_name, origin)		\
-  int func_name(lt *object) {			\
-    return is_tag_immediate(object, origin);	\
-  }
-
-mkim_pred(iseof, EOF_ORIGIN)
-mkim_pred(isnull, NULL_ORIGIN)
-mkim_pred(isfalse, FALSE_ORIGIN)
-mkim_pred(is_true_object, TRUE_ORIGIN)
-mkim_pred(isundef, UNDEF_ORIGIN)
-mkim_pred(isclose, CLOSE_ORIGIN)
-
-int isboolean(lisp_object_t *object) {
-  return isfalse(object) || is_true_object(object);
-}
-
-int is_signaled(lisp_object_t *object) {
-  return isexception(object) && exception_flag(object) == TRUE;
-}
-
-int isnumber(lisp_object_t *object) {
-  return isfixnum(object) || isfloat(object);
-}
-
 /* TODO: Moves the following section of code to above. */
 /* Utilities */
 lisp_object_t *booleanize(int value) {
@@ -606,25 +680,6 @@ lisp_object_t *reader_error(char *format, ...) {
   va_start(ap, format);
   vsprintf(msg, format, ap);
   return make_exception(strdup(msg), TRUE);
-}
-
-int type_of(lisp_object_t *x) {
-  if (isfixnum(x))
-    return FIXNUM;
-  if (ischar(x))
-    return CHARACTER;
-  if (isnull(x))
-    return EMPTY_LIST;
-  if (isboolean(x))
-    return BOOL;
-  if (iseof(x))
-    return TEOF;
-  if (isundef(x))
-    return UNDEF;
-  if (isclose(x))
-    return TCLOSE;
-  assert(is_pointer(x));
-  return x->type;
 }
 
 string_builder_t *make_str_builder(void) {
@@ -1450,9 +1505,13 @@ lisp_object_t *read_object(lisp_object_t *input_file) {
     case ';':
       while ((c = get_char(input_file)) != EOF && c != '\n');
       return read_object(input_file);
-    case EOF: return make_eof();
-    case '\n': input_file_linum(input_file)++;
-    case ' ': return read_object(input_file);
+    case EOF:
+    	return make_eof();
+    case '\n': case '\r': case '\t':
+    	input_file_linum(input_file)++;
+    	return read_object(input_file);
+    case ' ':
+    	return read_object(input_file);
     case '0': case '1': case '2': case '3': case '4':
     case '5': case '6': case '7': case '8': case '9':
       return read_fixnum(input_file, 1, c);
@@ -1464,18 +1523,26 @@ lisp_object_t *read_object(lisp_object_t *input_file) {
     case '#':
       c = get_char(input_file);
       switch (c) {
-        case '\\': return read_character(input_file);
+        case '\\':
+        	return read_character(input_file);
         case 't': 
           if (isdelimiter(peek_char(input_file)))
             return true;
+          else
+          	goto bool_error_label;
         case 'f': 
           if (isdelimiter(peek_char(input_file)))
             return false;
+          else
+          	goto bool_error_label;
         default : {
+        	bool_error_label:
           return reader_error("Unexpected character '%c' after '#', at line %d, column %d", c, input_file_linum(input_file), input_file_colnum(input_file));
         }
       }
-    case '"': return read_string(input_file);
+      break;
+    case '"':
+    	return read_string(input_file);
     case '(': {
       lisp_object_t *head = read_object(input_file);
       if (isclose(head))
@@ -1486,9 +1553,12 @@ lisp_object_t *read_object(lisp_object_t *input_file) {
       else
         return make_pair(head, tail);
     }
-    case ']': case ')': return make_close();
-    case '.': return dot_symbol;
-    case '[': return read_vector(input_file);
+    case ']': case ')':
+    	return make_close();
+    case '.':
+    	return dot_symbol;
+    case '[':
+    	return read_vector(input_file);
     case '\'':
       return make_pair(S("quote"), list1(read_object(input_file)));
     default :
@@ -1898,8 +1968,6 @@ lisp_object_t *raw_vector_ref(lisp_object_t *vector, int index) {
 /* TODO: Exception signaling and handling. */
 pub lisp_object_t *run_by_llam(lisp_object_t *func) {
 
-#define vlast(v, n) lt_vector_last_nth(v, make_fixnum(n))
-
   assert(isfunction(func));
   int pc = 0;
   lisp_object_t *stack = make_vector(10);
@@ -2111,18 +2179,18 @@ void init_global_variable(void) {
 int main(int argc, char *argv[])
 {
   char *inputs[] = {
-    /* "(set! abs (fn (x) (if (> 0 x) (- 0 x) x)))", */
-    /* "(abs 1", */
-    /* "(abs -1)", */
-    /* "#\\a", */
-    /* "(code-char 97)", */
-    /* "()", */
-    /* "(tail '(1))", */
-    /* "#r", */
-    /* "#f", */
-    /* "(> 1 2)", */
-    /* "(= 1 1.0)", */
-    "(try-with (/ 1 0) ((devideByZero (ex)) 0))",
+    "(set! abs (fn (x) (if (> 0 x) (- 0 x) x)))",
+    "(abs 1",
+    "(abs -1)",
+    "#\\a",
+    "(code-char 97)",
+    "()",
+    "(tail '(1))",
+//    "#r",
+//    "#f",
+//    "(> 1 2)",
+//    "(= 1 1.0)",
+//    "(try-with (/ 1 0) ((devideByZero (ex)) 0))",
   };
   init_global_variable();
   for (int i = 0; i < sizeof(inputs) / sizeof(char *); i++) {
