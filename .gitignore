@@ -5,3 +5,5 @@
 prototype
 constructors.c
 .project
+.cproject
+.settings

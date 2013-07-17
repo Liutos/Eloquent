@@ -608,7 +608,7 @@ lisp_object_t *reader_error(char *format, ...) {
   return make_exception(strdup(msg), TRUE);
 }
 
-int typeof(lisp_object_t *x) {
+int type_of(lisp_object_t *x) {
   if (isfixnum(x))
     return FIXNUM;
   if (ischar(x))
@@ -761,7 +761,7 @@ void write_object(lisp_object_t *x, lisp_object_t *output_file) {
     fprintf(stdout, "Impossible!!! The code has errors!!!\n");
     exit(1);
   }
-  switch(typeof(x)) {
+  switch(type_of(x)) {
     case BOOL:
       if (is_true_object(x))
         write_raw_string("#t", output_file);
@@ -851,7 +851,7 @@ void write_object(lisp_object_t *x, lisp_object_t *output_file) {
       break;
     case OPCODE: write_opcode(x, output_file); break;
     default :
-      fprintf(stdout, "invalid object with type %d", typeof(x));
+      fprintf(stdout, "invalid object with type %d", type_of(x));
       exit(1);
   }
 }
@@ -962,7 +962,7 @@ lt *lt_list_reverse(lt *list) {
 
 /* Arithmetic operations */
 int get_numeric_level(lt *n) {
-  switch (typeof(n)) {
+  switch (type_of(n)) {
     case FIXNUM: return 0;
     case FLOAT: return 1;
     default :
@@ -1277,7 +1277,7 @@ lt *lt_object_size(void) {
 }
 
 lisp_object_t *lt_type_of(lisp_object_t *object) {
-  switch (typeof(object)) {
+  switch (type_of(object)) {
     mktype(BOOL);
     mktype(CHARACTER);
     mktype(FIXNUM);
@@ -1285,7 +1285,7 @@ lisp_object_t *lt_type_of(lisp_object_t *object) {
     mktype(FUNCTION);
     mktype(PRIMITIVE_FUNCTION);
     default :
-      fprintf(stdout, "Unknown type %d of object\n", typeof(object));
+      fprintf(stdout, "Unknown type %d of object\n", type_of(object));
       exit(1);
   }
 }
@@ -2017,7 +2017,7 @@ pub lisp_object_t *run_by_llam(lisp_object_t *func) {
       }
         break;
       default :
-        fprintf(stdout, "In run_by_llam --- Invalid opcode %d\n", typeof(ins));
+        fprintf(stdout, "In run_by_llam --- Invalid opcode %d\n", type_of(ins));
         exit(1);
     }
     pc++;
