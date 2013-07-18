@@ -8,6 +8,7 @@
 * Put the left brace **{** at the same line as **if**, **while**, **switch**, **struct**, **enum**.
 * Avoid trailing whitespace.
 * Put the **break** out of the block in **case** clause.
+* Define functions as near the position to be used as possible, unless they're placed in different files.
 
 ## Naming
 
