@@ -13,6 +13,7 @@
 #include <string.h>
 
 /* TODO: Collects this part to file typedef.h */
+/* PART: typedef.h */
 typedef struct lisp_object_t lisp_object_t;
 typedef lisp_object_t lt;
 typedef lt *(*f0)(void);
@@ -251,21 +252,6 @@ void writef(lt *, const char *, ...);
 
 #define mktype(type) case type: return S(#type)
 
-#define _arg(N) vlast(stack, primitive_arity(func) - N)
-#define _arg1 _arg(1)
-#define _arg2 _arg(2)
-#define _arg3 _arg(3)
-#define move_stack() vector_last(stack) -= primitive_arity(func)
-
-#define check_exception()                       \
-        do {                                    \
-          if (is_signaled(val)) {               \
-            write_object(val, standard_out);    \
-            lt_vector_push(stack, null_list);   \
-            goto halt;                          \
-          }                                     \
-        } while (0)
-
 #define ADD(arity, function_name, Lisp_name)                            \
   do {                                                                  \
     func =                                                              \
@@ -273,15 +259,13 @@ void writef(lt *, const char *, ...);
     symbol_value(S(Lisp_name)) = func;                                  \
   } while (0)
 
-#define vlast(v, n) lt_vector_last_nth(v, make_fixnum(n))
-
 #define mkim_pred(func_name, origin)		\
   int func_name(lt *object) {			\
     return is_tag_immediate(object, origin);	\
   }
 
+/* PART: object.c */
 /* Global variables */
-int debug_flag;
 lisp_object_t *dot_symbol;
 lisp_object_t *false;
 lisp_object_t *true;
@@ -369,6 +353,18 @@ int type_of(lisp_object_t *x) {
     return TCLOSE;
   assert(is_pointer(x));
   return x->type;
+}
+
+/* Initialization */
+void init_object_pool(void) {
+  static int flag = 0;
+  if (flag == 1) return;
+  flag = 1;
+  object_pool = calloc(OBJECT_INIT_COUNT, sizeof(lt));
+  for (int i = 0; i < OBJECT_INIT_COUNT - 1; i++)
+    object_pool[i].next = &object_pool[i + 1];
+  object_pool[OBJECT_INIT_COUNT - 1].next = NULL;
+  free_objects = &object_pool[0];
 }
 
 /* TODO: Collects this part to file object.c */
@@ -704,6 +700,7 @@ char *sb2string(string_builder_t *sb) {
   return sb->string;
 }
 
+/* PART: prims.c */
 /* Writer */
 void write_raw_char(char c, lisp_object_t *out_port) {
   FILE *fp = output_file_file(out_port);
@@ -1573,31 +1570,73 @@ lisp_object_t *read_object_from_string(char *text) {
   return read_object(inf);
 }
 
+void init_global_variable(void) {
+  // init_object_pool();
+  /* Initialize global variables */
+  false = make_false();
+  true = make_true();
+  null_list = make_empty_list();
+  null_env = null_list;
+  standard_in = make_input_file(stdin);
+  standard_out = make_output_file(stdout);
+  symbol_list = null_list;
+  undef_object = make_undef();
+  /* Symbol initialization */
+  dot_symbol = S(".");
+
+  symbol_value(S("*standard-output*")) = standard_out;
+  symbol_value(S("*standard-input*")) = standard_in;
+
+  lisp_object_t *func;
+
+  /* Arithmetic operations */
+  ADD(2, lt_add, "+");
+  ADD(2, lt_div, "/");
+  ADD(2, lt_gt, ">");
+  ADD(2, lt_mod, "mod");
+  ADD(2, lt_mul, "*");
+  ADD(2, lt_numeric_eq, "=");
+  ADD(2, lt_sub, "-");
+  /* Character */
+  ADD(1, lt_char_code, "char-code");
+  ADD(1, lt_code_char, "code-char");
+  /* Input File */
+  ADD(1, lt_read_char, "read-char");
+  ADD(1, lt_read_line, "read-line");
+  /* List */
+  ADD(1, lt_head, "head");
+  ADD(1, lt_list_length, "list-length");
+  ADD(1, lt_list_nreverse, "list-reverse!");
+  ADD(1, lt_list_reverse, "list-reverse");
+  ADD(2, lt_nth, "nth");
+  ADD(2, lt_nthtail, "nth-tail");
+  ADD(2, lt_set_head, "set-head");
+  ADD(2, lt_set_tail, "set-tail");
+  ADD(1, lt_tail, "tail");
+  /* String */
+  ADD(2, lt_char_at, "char-at");
+  ADD(1, lt_string_length, "string-length");
+  ADD(3, lt_string_set, "string-set");
+  /* Symbol */
+  ADD(1, lt_intern, "string->symbol");
+  ADD(1, lt_symbol_name, "symbol-name");
+  ADD(1, lt_symbol_value, "symbol-value");
+  /* Vector */
+  ADD(1, lt_list_to_vector, "list->vector");
+  ADD(2, lt_vector_ref, "vector-ref");
+  ADD(3, lt_vector_set, "vector-set!");
+  /* General */
+  ADD(2, lt_eq, "eq");
+  ADD(2, lt_eql, "eql");
+  ADD(2, lt_equal, "equal");
+  ADD(0, lt_object_size, "object-size");
+  ADD(1, lt_type_of, "type-of");
+}
+
+/* PART: compiler.c */
 /* Compiler */
-int islength1(lisp_object_t *list) {
-  return isnull(pair_tail(list));
-}
-
-int is_tag_list(lisp_object_t *object, lisp_object_t *tag) {
-  return ispair(object) && (pair_head(object) == tag);
-}
-
 int is_label(lisp_object_t *object) {
   return issymbol(object);
-}
-
-lisp_object_t *asm_first_pass(lisp_object_t *code) {
-  int length = 0;
-  lisp_object_t *labels = null_list;
-  while (!isnull(code)) {
-    lisp_object_t *ins = pair_head(code);
-    if (is_label(ins))
-      labels = make_pair(make_pair(ins, make_fixnum(length)), labels);
-    else
-      length++;
-    code = pair_tail(code);
-  }
-  return make_pair(make_fixnum(length), labels);
 }
 
 int is_addr_op(lisp_object_t *op) {
@@ -1634,6 +1673,20 @@ lisp_object_t *change_addr(lisp_object_t *ins, lisp_object_t *table) {
       fprintf(stdout, "Invalid instruction to change address\n");
       exit(1);
   }
+}
+
+lisp_object_t *asm_first_pass(lisp_object_t *code) {
+  int length = 0;
+  lisp_object_t *labels = null_list;
+  while (!isnull(code)) {
+    lisp_object_t *ins = pair_head(code);
+    if (is_label(ins))
+      labels = make_pair(make_pair(ins, make_fixnum(length)), labels);
+    else
+      length++;
+    code = pair_tail(code);
+  }
+  return make_pair(make_fixnum(length), labels);
 }
 
 lisp_object_t *asm_second_pass(lisp_object_t *code, lisp_object_t *length, lisp_object_t *labels) {
@@ -1720,6 +1773,27 @@ lisp_object_t *gen(enum TYPE opcode, ...) {
   return make_pair(ins, make_empty_list());
 }
 
+int is_all_symbol(lisp_object_t *list) {
+  while (!isnull(list)) {
+    if (!issymbol(pair_head(list)))
+      return FALSE;
+    list = pair_tail(list);
+  }
+  return TRUE;
+}
+
+int islength1(lisp_object_t *list) {
+  return isnull(pair_tail(list));
+}
+
+lisp_object_t *compile_args(lisp_object_t *args, lisp_object_t *env) {
+  if (isnull(args))
+    return null_list;
+  else
+    return lt_append2(compile_object(pair_head(args), env),
+                      compile_args(pair_tail(args), env));
+}
+
 lisp_object_t *compile_begin(lisp_object_t *exps, lisp_object_t *env) {
   if (isnull(exps))
     return gen(CONST, null_list);
@@ -1733,34 +1807,6 @@ lisp_object_t *compile_begin(lisp_object_t *exps, lisp_object_t *env) {
   }
 }
 
-lisp_object_t *make_label(void) {
-  static int label_count = 1;
-  static char buffer[256];
-  int i = sprintf(buffer, "L%d", label_count);
-  label_count++;
-  return find_or_create_symbol(strndup(buffer, i));
-}
-
-lisp_object_t *compile_if(lisp_object_t *pred, lisp_object_t *then, lisp_object_t *else_part, lisp_object_t *env) {
-  lisp_object_t *l1 = make_label();
-  lisp_object_t *l2 = make_label();
-  pred = compile_object(pred, env);
-  then = compile_object(then, env);
-  else_part = compile_object(else_part, env);
-  lisp_object_t *fj = gen(FJUMP, l1);
-  lisp_object_t *j = gen(JUMP, l2);
-  return seq(pred, fj, then, j, list1(l1), else_part, list1(l2));
-}
-
-int is_all_symbol(lisp_object_t *list) {
-  while (!isnull(list)) {
-    if (!issymbol(pair_head(list)))
-      return FALSE;
-    list = pair_tail(list);
-  }
-  return TRUE;
-}
-
 lisp_object_t *compile_lambda(lisp_object_t *args, lisp_object_t *body, lisp_object_t *env) {
   assert(is_all_symbol(args));
   lisp_object_t *len = lt_list_length(args);
@@ -1769,114 +1815,6 @@ lisp_object_t *compile_lambda(lisp_object_t *args, lisp_object_t *body, lisp_obj
                             gen(RETURN));
   lisp_object_t *func = make_function(env, args, code);
   return assemble(func);
-}
-
-lisp_object_t *compile_args(lisp_object_t *args, lisp_object_t *env) {
-  if (isnull(args))
-    return null_list;
-  else
-    return lt_append2(compile_object(pair_head(args), env),
-                      compile_args(pair_tail(args), env));
-}
-
-lisp_object_t *is_var_in_frame(lisp_object_t *var, lisp_object_t *bindings) {
-  assert(isnull(bindings) || ispair(bindings) || isvector(bindings));
-  if (ispair(bindings)) {
-    int j = 0;
-    while (!isnull(bindings)) {
-      if (!isfalse(lt_eq(var, pair_head(bindings))))
-        return make_fixnum(j);
-      bindings = pair_tail(bindings);
-      j++;
-    }
-  }
-  if (isvector(bindings)) {
-    printf("Searching %s in vector...\n", symbol_name(var));
-    for (int j = 0; j < vector_length(bindings); j++) {
-      if (!isfalse(lt_eq(var, vector_value(bindings)[j])))
-        return make_fixnum(j);
-    }
-  }
-  return NULL;
-}
-
-lisp_object_t *find_in_frame(lisp_object_t *bindings, int j) {
-  assert(ispair(bindings) || isvector(bindings));
-  if (ispair(bindings)) {
-    bindings = lt_raw_nthtail(bindings, j);
-    return pair_head(bindings);
-  } else if (isvector(bindings)) {
-    return vector_value(bindings)[j];
-  }
-  fprintf(stdout, "Impossible!!! variable not found!\n");
-  exit(1);
-}
-
-void set_in_frame(lisp_object_t *bindings, int j, lisp_object_t *value) {
-  assert(ispair(bindings) || isvector(bindings));
-  if (ispair(bindings)) {
-    bindings = lt_raw_nthtail(bindings, j);
-    pair_head(bindings) = value;
-    return;
-  } else if (isvector(bindings)) {
-    vector_value(bindings)[j] = value;
-    return;
-  }
-  fprintf(stdout, "Impossible!!! variable not found!\n");
-  exit(1);
-}
-
-lisp_object_t *is_var_in_env(lisp_object_t *symbol, lisp_object_t *env) {
-  assert(issymbol(symbol));
-  int i = 0;
-  while (env != null_env) {
-    lisp_object_t *bindings = pair_head(env);
-    assert(isnull(bindings) ||ispair(bindings) || isvector(bindings));
-    lisp_object_t *j = is_var_in_frame(symbol, bindings);
-    if (j != NULL)
-      return make_pair(make_fixnum(i), j);
-    env = pair_tail(env);
-    i++;
-  }
-  return NULL;
-}
-
-lt *walk_in_env(lt *env, int n) {
-  while (n-- > 0)
-    env = pair_tail(env);
-  return env;
-}
-
-lisp_object_t *locate_var(lisp_object_t *env, int i, int j) {
-  env = walk_in_env(env, i);
-  return find_in_frame(pair_head(env), j);
-}
-
-void set_local_var(lisp_object_t *env, int i, int j, lisp_object_t *value) {
-  env = walk_in_env(env, i);
-  set_in_frame(pair_head(env), j, value);
-}
-
-lisp_object_t *gen_var(lisp_object_t *symbol, lisp_object_t *env) {
-  lisp_object_t *co = is_var_in_env(symbol, env);
-  if (co == NULL)
-    return gen(GVAR, symbol);
-  else {
-    lisp_object_t *i = pair_head(co);
-    lisp_object_t *j = pair_tail(co);
-    return gen(LVAR, i, j, symbol);
-  }
-}
-
-lisp_object_t *gen_set(lisp_object_t *symbol, lisp_object_t *env) {
-  lisp_object_t *co = is_var_in_env(symbol, env);
-  if (co == NULL)
-    return gen(GSET, symbol);
-  else {
-    lisp_object_t *i = pair_head(co);
-    lisp_object_t *j = pair_tail(co);
-    return gen(LSET, i, j, symbol);
-  }
 }
 
 lt *compile_handler(lt *handler, lt *env) {
@@ -1901,9 +1839,90 @@ lt *compile_handlers(lt *handlers, lt *env) {
                       compile_handlers(pair_tail(handlers), env));
 }
 
+lisp_object_t *make_label(void) {
+  static int label_count = 1;
+  static char buffer[256];
+  int i = sprintf(buffer, "L%d", label_count);
+  label_count++;
+  return find_or_create_symbol(strndup(buffer, i));
+}
+
+lisp_object_t *compile_if(lisp_object_t *pred, lisp_object_t *then, lisp_object_t *else_part, lisp_object_t *env) {
+  lisp_object_t *l1 = make_label();
+  lisp_object_t *l2 = make_label();
+  pred = compile_object(pred, env);
+  then = compile_object(then, env);
+  else_part = compile_object(else_part, env);
+  lisp_object_t *fj = gen(FJUMP, l1);
+  lisp_object_t *j = gen(JUMP, l2);
+  return seq(pred, fj, then, j, list1(l1), else_part, list1(l2));
+}
+
 lt *compile_try_catch(lt *case_list, lt *form, lt *env) {
   return seq(compile_handlers(case_list, env),
              compile_object(form, env));
+}
+
+lisp_object_t *is_var_in_frame(lisp_object_t *var, lisp_object_t *bindings) {
+  assert(isnull(bindings) || ispair(bindings) || isvector(bindings));
+  if (ispair(bindings)) {
+    int j = 0;
+    while (!isnull(bindings)) {
+      if (!isfalse(lt_eq(var, pair_head(bindings))))
+        return make_fixnum(j);
+      bindings = pair_tail(bindings);
+      j++;
+    }
+  }
+  if (isvector(bindings)) {
+    printf("Searching %s in vector...\n", symbol_name(var));
+    for (int j = 0; j < vector_length(bindings); j++) {
+      if (!isfalse(lt_eq(var, vector_value(bindings)[j])))
+        return make_fixnum(j);
+    }
+  }
+  return NULL;
+}
+
+lisp_object_t *is_var_in_env(lisp_object_t *symbol, lisp_object_t *env) {
+  assert(issymbol(symbol));
+  int i = 0;
+  while (env != null_env) {
+    lisp_object_t *bindings = pair_head(env);
+    assert(isnull(bindings) ||ispair(bindings) || isvector(bindings));
+    lisp_object_t *j = is_var_in_frame(symbol, bindings);
+    if (j != NULL)
+      return make_pair(make_fixnum(i), j);
+    env = pair_tail(env);
+    i++;
+  }
+  return NULL;
+}
+
+lisp_object_t *gen_set(lisp_object_t *symbol, lisp_object_t *env) {
+  lisp_object_t *co = is_var_in_env(symbol, env);
+  if (co == NULL)
+    return gen(GSET, symbol);
+  else {
+    lisp_object_t *i = pair_head(co);
+    lisp_object_t *j = pair_tail(co);
+    return gen(LSET, i, j, symbol);
+  }
+}
+
+lisp_object_t *gen_var(lisp_object_t *symbol, lisp_object_t *env) {
+  lisp_object_t *co = is_var_in_env(symbol, env);
+  if (co == NULL)
+    return gen(GVAR, symbol);
+  else {
+    lisp_object_t *i = pair_head(co);
+    lisp_object_t *j = pair_tail(co);
+    return gen(LVAR, i, j, symbol);
+  }
+}
+
+int is_tag_list(lisp_object_t *object, lisp_object_t *tag) {
+  return ispair(object) && (pair_head(object) == tag);
 }
 
 /* TODO: The support for built-in macros. */
@@ -1928,7 +1947,7 @@ pub lisp_object_t *compile_object(lisp_object_t *object, lisp_object_t *env) {
     lisp_object_t *else_part = fourth(object);
     return compile_if(pred, then, else_part, env);
   }
-  if (is_tag_list(object, S("fn")))
+  if (is_tag_list(object, S("lambda")))
     return gen(FN, compile_lambda(second(object), pair_tail(pair_tail(object)), env));
   if (is_tag_list(object, S("try-with"))) {
     lt *form = second(object);
@@ -1959,14 +1978,63 @@ lisp_object_t *compile_as_lambda(lisp_object_t *form) {
   return result;
 }
 
+/* PART: vm.c */
 /* Virtual Machine */
+lt *walk_in_env(lt *env, int n) {
+  while (n-- > 0)
+    env = pair_tail(env);
+  return env;
+}
+
+lisp_object_t *find_in_frame(lisp_object_t *bindings, int j) {
+  assert(ispair(bindings) || isvector(bindings));
+  if (ispair(bindings)) {
+    bindings = lt_raw_nthtail(bindings, j);
+    return pair_head(bindings);
+  } else if (isvector(bindings)) {
+    return vector_value(bindings)[j];
+  }
+  fprintf(stdout, "Impossible!!! variable not found!\n");
+  exit(1);
+}
+
+lisp_object_t *locate_var(lisp_object_t *env, int i, int j) {
+  env = walk_in_env(env, i);
+  return find_in_frame(pair_head(env), j);
+}
+
 lisp_object_t *raw_vector_ref(lisp_object_t *vector, int index) {
   assert(isvector(vector));
   return vector_value(vector)[index];
 }
 
+void set_in_frame(lisp_object_t *bindings, int j, lisp_object_t *value) {
+  assert(ispair(bindings) || isvector(bindings));
+  if (ispair(bindings)) {
+    bindings = lt_raw_nthtail(bindings, j);
+    pair_head(bindings) = value;
+    return;
+  } else if (isvector(bindings)) {
+    vector_value(bindings)[j] = value;
+    return;
+  }
+  fprintf(stdout, "Impossible!!! variable not found!\n");
+  exit(1);
+}
+
+void set_local_var(lisp_object_t *env, int i, int j, lisp_object_t *value) {
+  env = walk_in_env(env, i);
+  set_in_frame(pair_head(env), j, value);
+}
+
 /* TODO: Exception signaling and handling. */
 pub lisp_object_t *run_by_llam(lisp_object_t *func) {
+#define _arg(N) vlast(stack, primitive_arity(func) - N)
+#define _arg1 _arg(1)
+#define _arg2 _arg(2)
+#define _arg3 _arg(3)
+#define move_stack() vector_last(stack) -= primitive_arity(func)
+#define vlast(v, n) lt_vector_last_nth(v, make_fixnum(n))
 
   assert(isfunction(func));
   int pc = 0;
@@ -1976,8 +2044,6 @@ pub lisp_object_t *run_by_llam(lisp_object_t *func) {
   lisp_object_t *return_stack = null_list;
   while (pc < vector_length(code)) {
     lisp_object_t *ins = raw_vector_ref(code, pc);
-    if (debug_flag)
-      writef(standard_out, "In #run_by_llam --- executing instruction %?\n", ins);
     switch (opcode_type(ins)) {
       case ARGS: {
         lisp_object_t *args = make_vector(fixnum_value(op_args_arity(ins)));
@@ -1999,8 +2065,6 @@ pub lisp_object_t *run_by_llam(lisp_object_t *func) {
       }
         break;
       case CONST:
-        if (debug_flag)
-          writef(standard_out, "In #run_by_llam --- pushing %? to stack\n", op_const_value(ins));
         lt_vector_push(stack, op_const_value(ins));
         break;
       case FJUMP:
@@ -2008,8 +2072,6 @@ pub lisp_object_t *run_by_llam(lisp_object_t *func) {
           pc = fixnum_value(op_fjump_label(ins)) - 1;
         break;
       case FN: {
-        if (debug_flag)
-          writef(standard_out, "In #run_by_llam --- making function with environment %p\n%?\n", env, env);
         lisp_object_t *func = op_fn_func(ins);
         func = make_function(env, null_list, function_code(func));
         lt_vector_push(stack, func);
@@ -2045,12 +2107,13 @@ pub lisp_object_t *run_by_llam(lisp_object_t *func) {
         lt_vector_push(stack, value);
       }
         break;
-      case POP: lt_vector_pop(stack); break;
+      case POP:
+        lt_vector_pop(stack);
+        break;
       case PRIM: {
         lisp_object_t *func = lt_vector_pop(stack);
         lisp_object_t *val = NULL;
         assert(isprimitive(func));
-
         switch (primitive_arity(func)) {
           case 0:
             val = ((f0)primitive_func(func))();
@@ -2089,97 +2152,18 @@ pub lisp_object_t *run_by_llam(lisp_object_t *func) {
         exit(1);
     }
     pc++;
-    if (debug_flag)
-      writef(standard_out, "In #run_by_llam --- after executing, the stack is\n%?\n", stack);
   }
 halt:
   assert(isfalse(lt_is_vector_empty(stack)));
   return vlast(stack, 0);
 }
 
-/* Initialization */
-void init_object_pool(void) {
-  static int flag = 0;
-  if (flag == 1) return;
-  flag = 1;
-  object_pool = calloc(OBJECT_INIT_COUNT, sizeof(lt));
-  for (int i = 0; i < OBJECT_INIT_COUNT - 1; i++)
-    object_pool[i].next = &object_pool[i + 1];
-  object_pool[OBJECT_INIT_COUNT - 1].next = NULL;
-  free_objects = &object_pool[0];
-}
-
-void init_global_variable(void) {
-  init_object_pool();
-  /* Initialize global variables */
-  /* debug_flag = TRUE; */
-  false = make_false();
-  true = make_true();
-  null_list = make_empty_list();
-  null_env = null_list;
-  standard_in = make_input_file(stdin);
-  standard_out = make_output_file(stdout);
-  symbol_list = null_list;
-  undef_object = make_undef();
-  /* Symbol initialization */
-  dot_symbol = S(".");
-
-  symbol_value(S("*standard-output*")) = standard_out;
-  symbol_value(S("*standard-input*")) = standard_in;
-
-  lisp_object_t *func;
-
-  /* Arithmetic operations */
-  ADD(2, lt_add, "+");
-  ADD(2, lt_div, "/");
-  ADD(2, lt_gt, ">");
-  ADD(2, lt_mod, "mod");
-  ADD(2, lt_mul, "*");
-  ADD(2, lt_numeric_eq, "=");
-  ADD(2, lt_sub, "-");
-  /* Character */
-  ADD(1, lt_char_code, "char-code");
-  ADD(1, lt_code_char, "code-char");
-  /* Input File */
-  ADD(1, lt_read_char, "read-char");
-  ADD(1, lt_read_line, "read-line");
-  /* List */
-  ADD(1, lt_head, "head");
-  ADD(1, lt_list_length, "list-length");
-  ADD(1, lt_list_nreverse, "list-reverse!");
-  ADD(1, lt_list_reverse, "list-reverse");
-  ADD(2, lt_nth, "nth");
-  ADD(2, lt_nthtail, "nth-tail");
-  ADD(2, lt_set_head, "set-head");
-  ADD(2, lt_set_tail, "set-tail");
-  ADD(1, lt_tail, "tail");
-  /* String */
-  ADD(2, lt_char_at, "char-at");
-  ADD(1, lt_string_length, "string-length");
-  ADD(3, lt_string_set, "string-set");
-  /* Symbol */
-  ADD(1, lt_intern, "string->symbol");
-  ADD(1, lt_symbol_name, "symbol-name");
-  ADD(1, lt_symbol_value, "symbol-value");
-  /* Vector */
-  ADD(1, lt_list_to_vector, "list->vector");
-  ADD(2, lt_vector_ref, "vector-ref");
-  ADD(3, lt_vector_set, "vector-set!");
-  /* General */
-  ADD(2, lt_eq, "eq");
-  ADD(2, lt_eql, "eql");
-  ADD(2, lt_equal, "equal");
-  ADD(0, lt_object_size, "object-size");
-  ADD(1, lt_type_of, "type-of");
-  if (debug_flag)
-    writef(standard_out, "Initialization finished.\n");
-}
-
+/* PART: vm_test.c */
 /* Driver */
 int main(int argc, char *argv[])
 {
   char *inputs[] = {
-    "(set! abs (fn (x) (if (> 0 x) (- 0 x) x)))",
+    "(set! abs (lambda (x) (if (> 0 x) (- 0 x) x)))",
     "(abs 1",
     "(abs -1)",
     "#\\a",
@@ -2192,16 +2176,13 @@ int main(int argc, char *argv[])
 //    "(= 1 1.0)",
 //    "(try-with (/ 1 0) ((devideByZero (ex)) 0))",
   };
+  init_object_pool();
   init_global_variable();
   for (int i = 0; i < sizeof(inputs) / sizeof(char *); i++) {
     lisp_object_t *expr = read_object_from_string(inputs[i]);
-    if (debug_flag)
-      writef(standard_out, "In #main --- expr is %?\n", expr);
     expr = compile_as_lambda(expr);
-    if (debug_flag)
-      writef(standard_out, "In #main --- compile expr is\n%?\n", expr);
     writef(standard_out, ">> %s\n", make_string(inputs[i]));
-    /* expr = run_by_llam(expr); */
+    expr = run_by_llam(expr);
     if (is_signaled(expr))
       writef(standard_out, "%?\n", expr);
     else
