@@ -9,10 +9,10 @@ object.o: object.c object.h type.h
 prims.o: prims.c object.h type.h
 	$(CC) $(CFLAGS) -c $< -o $@
 
-compiler.o: compiler.c object.h type.h
+compiler.o: compiler.c object.h type.h prims.h
 	$(CC) $(CFLAGS) -c $< -o $@
 
-vm.o: vm.c object.h type.h
+vm.o: vm.c object.h type.h prims.h
 	$(CC) $(CFLAGS) -c $< -o $@
 
 vm_test.o: vm_test.c object.h type.h compiler.h vm.h
