@@ -18,11 +18,6 @@
 #include "object.h"
 #include "prims.h"
 
-//lisp_object_t *compile_object(lisp_object_t *object, lisp_object_t *env);
-//lisp_object_t *read_object(lisp_object_t *input_file);
-//void write_object(lisp_object_t *object, lisp_object_t *out_port);
-//void writef(lt *, const char *, ...);
-
 /* PART: vm_test.c */
 /* Driver */
 int main(int argc, char *argv[])

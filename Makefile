@@ -19,7 +19,7 @@ vm_test.o: vm_test.c object.h type.h compiler.h vm.h
 	$(CC) $(CFLAGS) -c $< -o $@
 
 test_vm: vm_test.o object.o prims.o compiler.o vm.o
-	$(CC) $(CFLAGS) $^ -o $@
+	$(CC) $(CFLAGS) $^ -o bin/$@
 
 .PHONY: clean
 
