@@ -2,7 +2,7 @@
 *.out
 *.fasl
 *.lisp
-prototype
+test_vm
 constructors.c
 .project
 .cproject
