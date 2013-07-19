@@ -45,6 +45,7 @@ mktype_pred(isexception, EXCEPTION)
 mktype_pred(isfloat, FLOAT)
 mktype_pred(isfunction, FUNCTION)
 mktype_pred(isinput_file, INPUT_FILE)
+mktype_pred(ismacro, MACRO)
 mktype_pred(ispair, PAIR)
 mktype_pred(isprimitive, PRIMITIVE_FUNCTION)
 mktype_pred(isstring, STRING)
@@ -255,6 +256,13 @@ lisp_object_t *make_input_file(FILE *file) {
   input_file_linum(inf) = 1;
   input_file_colnum(inf) = 0;
   return inf;
+}
+
+lt *make_macro(lt *procedure, lt *environment) {
+  lt *obj = make_object(MACRO);
+  macro_procedure(obj) = procedure;
+  macro_environment(obj) = environment;
+  return obj;
 }
 
 lisp_object_t *make_output_file(FILE *file) {

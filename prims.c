@@ -233,6 +233,9 @@ void write_object(lisp_object_t *x, lisp_object_t *output_file) {
     case FIXNUM: writef(output_file, "%d", x); break;
     case FLOAT: writef(output_file, "%f", x); break;
     case INPUT_FILE: writef(output_file, "#<INPUT-FILE %p>"); break;
+    case MACRO:
+      writef(output_file, "#<MACRO %p %p>", macro_procedure(x), macro_environment(x));
+      break;
     case OUTPUT_FILE: writef(output_file, "#<OUTPUT-FILE %p>", x); break;
     case PAIR:
       write_raw_string("(", output_file);

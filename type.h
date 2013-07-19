@@ -49,6 +49,7 @@ enum TYPE {
   EXCEPTION,
   FLOAT,
   INPUT_FILE,
+  MACRO,
   OPCODE,
   OUTPUT_FILE,
   PAIR,
@@ -99,6 +100,10 @@ struct lisp_object_t {
       int linum;
       int colnum;
     } input_file;
+    struct {
+      lt *procedure;
+      lt *environment;
+    } macro;
     struct {
       enum OPCODE_TYPE name;
       lt *oprands;
@@ -155,6 +160,8 @@ struct lisp_object_t {
 #define input_file_colnum(x) ((x)->u.input_file.colnum)
 #define input_file_file(x) ((x)->u.input_file.file)
 #define input_file_linum(x) ((x)->u.input_file.linum)
+#define macro_procedure(x) ((x)->u.macro.procedure)
+#define macro_environment(x) ((x)->u.macro.environment)
 #define opcode_name(x) ((x)->u.opcode.name)
 #define opcode_oprands(x) ((x)->u.opcode.oprands)
 #define output_file_colnum(x) ((x)->u.output_file.colnum)
