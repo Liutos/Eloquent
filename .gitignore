@@ -2,8 +2,7 @@
 *.out
 *.fasl
 *.lisp
-test_vm
-constructors.c
 .project
 .cproject
 .settings
+bin/
