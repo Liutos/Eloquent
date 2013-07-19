@@ -62,7 +62,7 @@ extern lt *make_input_file(FILE *);
 extern lt *make_output_file(FILE *);
 extern lt *make_pair(lt *, lt *);
 extern lt *make_primitive(int, void *, char *);
-extern lt *make_retaddr(lt *code, lt *env, int pc);
+extern lt *make_retaddr(lt *code, lt *env, int pc, int throw_flag);
 extern lt *make_string(char *);
 extern lt *make_symbol(char *);
 extern lt *make_vector(int);
@@ -79,7 +79,7 @@ extern lt *make_op_lvar(lt *i, lt *j, lt *symbol);
 extern lt *make_op_pop(void);
 extern lt *make_op_prim(lt *);
 extern lt *make_op_return(void);
-extern lt *make_op_catch(lt *, lt *);
+extern lt *make_op_catch();
 extern lt *find_or_create_symbol(char *);
 extern void init_global_variable(void);
 

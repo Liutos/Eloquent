@@ -15,16 +15,12 @@
 
 #define OBJECT_INIT_COUNT 1000
 
-/* tagged-pointer types */
-/* immediate objects */
-/* PART: object.c */
-/* Global variables */
 lisp_object_t *dot_symbol;
 lisp_object_t *false;
 lisp_object_t *true;
 lisp_object_t *null_env;
 lisp_object_t *null_list;
-lt *object_pool;                        /* An array contains lt. */
+lt *object_pool;
 lisp_object_t *standard_in;
 lisp_object_t *standard_out;
 lisp_object_t *symbol_list;
@@ -284,11 +280,12 @@ lisp_object_t *make_primitive(int arity, void *C_function, char *Lisp_name) {
   return p;
 }
 
-lisp_object_t *make_retaddr(lisp_object_t *code, lisp_object_t *env, int pc) {
-  lisp_object_t *retaddr = make_object(RETADDR);
+lt *make_retaddr(lt *code, lt *env, int pc, int throw_flag) {
+  lt *retaddr = make_object(RETADDR);
   retaddr_code(retaddr) = code;
   retaddr_env(retaddr) = env;
   retaddr_pc(retaddr) = pc;
+  retaddr_throw_flag(retaddr) = throw_flag;
   return retaddr;
 }
 
@@ -383,8 +380,8 @@ lisp_object_t *make_op_return(void) {
   return mkopcode(RETURN, 0);
 }
 
-lt *make_op_catch(lt *type_name, lt *handler) {
-  return mkopcode(CATCH, 2, type_name, handler);
+lt *make_op_catch(void) {
+  return mkopcode(CATCH, 0);
 }
 
 /* TODO: Use a hash table for storing symbols. */

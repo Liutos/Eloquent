@@ -1,7 +1,7 @@
 /*
  * prototype.c
  *
- *
+ * A Simple Byte Code Compiler for Lisp
  *
  * Copyright (C) 2013-06-07 liutos <mat.liutos@gmail.com>
  */
@@ -18,8 +18,6 @@
 #include "object.h"
 #include "prims.h"
 
-/* PART: vm_test.c */
-/* Driver */
 int main(int argc, char *argv[])
 {
   char *inputs[] = {
@@ -30,13 +28,7 @@ int main(int argc, char *argv[])
     "(code-char 97)",
     "()",
     "(tail '(1))",
-//    "#r",
-//    "#f",
-//    "(> 1 2)",
-//    "(= 1 1.0)",
-//    "(try-with (/ 1 0) ((devideByZero (ex)) 0))",
   };
-//  init_object_pool();
   init_global_variable();
   init_prims();
   for (int i = 0; i < sizeof(inputs) / sizeof(char *); i++) {

@@ -10,8 +10,6 @@
 
 #include <stdio.h>
 
-/* DONE: Collects this part to file typedef.h */
-/* PART: typedef.h */
 typedef struct lisp_object_t lisp_object_t;
 typedef lisp_object_t lt;
 typedef lt *(*f0)(void);
@@ -123,6 +121,7 @@ struct lisp_object_t {
       lisp_object_t *code;
       lisp_object_t *env;
       int pc;
+      int throw_flag;
     } retaddr;
     struct {
       char *value;
@@ -169,6 +168,7 @@ struct lisp_object_t {
 #define retaddr_code(x) ((x)->u.retaddr.code)
 #define retaddr_env(x) ((x)->u.retaddr.env)
 #define retaddr_pc(x) ((x)->u.retaddr.pc)
+#define retaddr_throw_flag(x) ((x)->u.retaddr.throw_flag)
 #define string_value(x) ((x)->u.string.value)
 #define symbol_name(x) ((x)->u.symbol.name)
 #define symbol_value(x) ((x)->u.symbol.global_value)
@@ -184,8 +184,6 @@ struct lisp_object_t {
 
 #define op_args_arity(x) oparg1(x)
 #define op_call_arity(x) oparg1(x)
-#define op_catch_type(x) oparg1(x)
-#define op_catch_handler(x) oparg2(x)
 #define op_const_value(x) oparg1(x)
 #define op_fjump_label(x) oparg1(x)
 #define op_fn_func(x) oparg1(x)

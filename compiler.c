@@ -16,8 +16,6 @@
 
 lt *compile_object(lt *, lt *);
 
-/* PART: compiler.c */
-/* Compiler */
 int is_label(lisp_object_t *object) {
   return issymbol(object);
 }
@@ -108,11 +106,8 @@ lisp_object_t *gen(enum TYPE opcode, ...) {
     }
       break;
     case CALL: ins = make_op_call(va_arg(ap, lisp_object_t *)); break;
-    case CATCH: {
-      lt *type_name = va_arg(ap, lt *);
-      lt *handler = va_arg(ap, lt *);
-      ins = make_op_catch(type_name, handler);
-    }
+    case CATCH:
+      ins = make_op_catch();
       break;
     case FJUMP: {
       lisp_object_t *label = va_arg(ap, lisp_object_t *);
@@ -205,28 +200,6 @@ lisp_object_t *compile_lambda(lisp_object_t *args, lisp_object_t *body, lisp_obj
   return assemble(func);
 }
 
-lt *compile_handler(lt *handler, lt *env) {
-  assert(ispair(handler));
-  assert(ispair(pair_head(handler)));
-  lt *type_name = first(pair_head(handler));
-  assert(issymbol(type_name));
-  lt *var = second(pair_head(handler));
-  /* assert(issymbol(var)); */
-  assert(ispair(var) && issymbol(pair_head(var)));
-  lt *body = pair_tail(handler);
-  handler = compile_lambda(var, body, env);
-  return gen(CATCH, type_name, handler);
-}
-
-lt *compile_handlers(lt *handlers, lt *env) {
-  assert(isnull(handlers) || ispair(handlers));
-  if (isnull(handlers))
-    return null_list;
-  else
-    return lt_append2(compile_handler(pair_head(handlers), env),
-                      compile_handlers(pair_tail(handlers), env));
-}
-
 lisp_object_t *make_label(void) {
   static int label_count = 1;
   static char buffer[256];
@@ -244,11 +217,6 @@ lisp_object_t *compile_if(lisp_object_t *pred, lisp_object_t *then, lisp_object_
   lisp_object_t *fj = gen(FJUMP, l1);
   lisp_object_t *j = gen(JUMP, l2);
   return seq(pred, fj, then, j, list1(l1), else_part, list1(l2));
-}
-
-lt *compile_try_catch(lt *case_list, lt *form, lt *env) {
-  return seq(compile_handlers(case_list, env),
-             compile_object(form, env));
 }
 
 lisp_object_t *is_var_in_frame(lisp_object_t *var, lisp_object_t *bindings) {
@@ -337,11 +305,8 @@ pub lisp_object_t *compile_object(lisp_object_t *object, lisp_object_t *env) {
   }
   if (is_tag_list(object, S("lambda")))
     return gen(FN, compile_lambda(second(object), pair_tail(pair_tail(object)), env));
-  if (is_tag_list(object, S("try-with"))) {
-    lt *form = second(object);
-    lt *case_list = pair_tail(pair_tail(object));
-    return compile_try_catch(case_list, form, env);
-  }
+  if (is_tag_list(object, S("catch")))
+    return gen(CATCH);
   if (ispair(object)) {
     lisp_object_t *args = pair_tail(object);
     lisp_object_t *fn = pair_head(object);

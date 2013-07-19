@@ -11,8 +11,6 @@
 #include "object.h"
 #include "prims.h"
 
-/* PART: vm.c */
-/* Virtual Machine */
 lt *walk_in_env(lt *env, int n) {
   while (n-- > 0)
     env = pair_tail(env);
@@ -71,6 +69,7 @@ pub lisp_object_t *run_by_llam(lisp_object_t *func) {
 
   assert(isfunction(func));
   int pc = 0;
+  int throw_exception = TRUE;
   lisp_object_t *stack = make_vector(10);
   lisp_object_t *code = function_code(func);
   lisp_object_t *env = null_env;
@@ -90,12 +89,16 @@ pub lisp_object_t *run_by_llam(lisp_object_t *func) {
       case CALL: {
         lisp_object_t *func = lt_vector_pop(stack);
         assert(isfunction(func));
-        lisp_object_t *retaddr = make_retaddr(code, env, pc);
+        lisp_object_t *retaddr = make_retaddr(code, env, pc, throw_exception);
         return_stack = make_pair(retaddr, return_stack);
         code = function_code(func);
         env = function_env(func);
         pc = -1;
+        throw_exception = TRUE;
       }
+        break;
+      case CATCH:
+        throw_exception = FALSE;
         break;
       case CONST:
         lt_vector_push(stack, op_const_value(ins));
@@ -166,11 +169,19 @@ pub lisp_object_t *run_by_llam(lisp_object_t *func) {
         }
         move_stack();
         lt_vector_push(stack, val);
-        if (is_signaled(vlast(stack, 0)))
-          goto halt;
+//        When the primitive function's execution is finished, they will put the return
+//        value at the top of stack. If this return value is a signaled exception, and the
+//        local variable `throw_exception' is false, it means the last primitive function
+//        was called within a `try-with' block. Therefore, the exception object, as a
+//        return value, should be left at the top of stack, as the return value, and it
+//        will be used by the expandsion code of `try-with' block, in other word, CATCH
+//        by the language.
+        if (is_signaled(vlast(stack, 0)) && throw_exception)
+          goto return_label;
       }
         break;
       case RETURN: {
+        return_label:
         if (isnull(return_stack))
           break;
         lisp_object_t *retaddr = pair_head(return_stack);
@@ -178,6 +189,7 @@ pub lisp_object_t *run_by_llam(lisp_object_t *func) {
         code = retaddr_code(retaddr);
         env = retaddr_env(retaddr);
         pc = retaddr_pc(retaddr);
+        throw_exception = retaddr_throw_flag(retaddr);
       }
         break;
       default :
@@ -186,7 +198,6 @@ pub lisp_object_t *run_by_llam(lisp_object_t *func) {
     }
     pc++;
   }
-halt:
   assert(isfalse(lt_is_vector_empty(stack)));
   return vlast(stack, 0);
 }

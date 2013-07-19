@@ -17,9 +17,6 @@
 lt *read_object(lt *);
 void write_object(lt *, lt *);
 
-/* PART: prims.c */
-/* DONE: Moves the following section of code to above. */
-/* Utilities */
 lisp_object_t *booleanize(int value) {
   if (value == 0)
     return false;
@@ -168,8 +165,7 @@ void write_opcode(lt *opcode, lt *dest) {
     case ARGS: writef(dest, "#<ARGS %d>", op_args_arity(opcode)); break;
     case CALL: writef(dest, "#<CALL %d>", op_call_arity(opcode)); break;
     case CATCH:
-      writef(dest, "#<CATCH type_name: %S, handler: %?>",
-             op_catch_type(opcode), op_catch_handler(opcode));
+      write_raw_string("#<CATCH>", dest);
       break;
     case CONST: writef(dest, "#<CONST %?>", op_const_value(opcode)); break;
     case FJUMP: writef(dest, "#<FJUMP %?>", op_fjump_label(opcode)); break;
@@ -195,10 +191,7 @@ void write_opcode(lt *opcode, lt *dest) {
 }
 
 void write_object(lisp_object_t *x, lisp_object_t *output_file) {
-  if (x == NULL) {
-    fprintf(stdout, "Impossible!!! The code has errors!!!\n");
-    exit(1);
-  }
+  assert(x != NULL);
   switch(type_of(x)) {
     case BOOL:
       if (is_true_object(x))
