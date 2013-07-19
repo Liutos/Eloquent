@@ -10,7 +10,7 @@
 
 #include <stdio.h>
 
-/* TODO: Collects this part to file typedef.h */
+/* DONE: Collects this part to file typedef.h */
 /* PART: typedef.h */
 typedef struct lisp_object_t lisp_object_t;
 typedef lisp_object_t lt;

@@ -82,8 +82,6 @@ extern lt *make_op_return(void);
 extern lt *make_op_catch(lt *, lt *);
 extern lt *find_or_create_symbol(char *);
 extern void init_global_variable(void);
-extern lt *read_object_from_string(char *);
-extern void writef(lt *, const char *, ...);
 
 /* tagging system
  *   bits end in  00:  pointer

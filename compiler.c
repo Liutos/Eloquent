@@ -4,8 +4,17 @@
  *  Created on: 2013年7月18日
  *      Author: liutos
  */
+#include <assert.h>
+#include <stdarg.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+
 #include "type.h"
 #include "object.h"
+#include "prims.h"
+
+lt *compile_object(lt *, lt *);
 
 /* PART: compiler.c */
 /* Compiler */
@@ -164,8 +173,6 @@ int islength1(lisp_object_t *list) {
 #define second(x) lt_raw_nth((x), 1)
 #define third(x) lt_raw_nth((x), 2)
 #define fourth(x) lt_raw_nth((x), 3)
-
-#define seq(...) lt_append(__VA_ARGS__, NULL)
 
 lisp_object_t *compile_args(lisp_object_t *args, lisp_object_t *env) {
   if (isnull(args))

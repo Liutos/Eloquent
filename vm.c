@@ -4,8 +4,12 @@
  *  Created on: 2013年7月18日
  *      Author: liutos
  */
+#include <assert.h>
+#include <stdlib.h>
+
 #include "type.h"
 #include "object.h"
+#include "prims.h"
 
 /* PART: vm.c */
 /* Virtual Machine */
