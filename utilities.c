@@ -12,23 +12,23 @@
 #include "object.h"
 #include "type.h"
 
-lisp_object_t *booleanize(int value) {
+lt *booleanize(int value) {
   if (value == 0)
     return the_false;
   else
     return the_true;
 }
 
-int is_symbol_bound(lisp_object_t *symbol) {
+int is_symbol_bound(lt *symbol) {
   return isundef(symbol_value(symbol))? FALSE: TRUE;
 }
 
-lisp_object_t *list1(lisp_object_t *o) {
-  return make_pair(o, make_empty_list());
+lt *list1(lt *element) {
+  return make_pair(element, make_empty_list());
 }
 
-lt *signal_exception(char *msg) {
-  return make_exception(msg, TRUE);
+lt *signal_exception(char *message) {
+  return make_exception(message, TRUE);
 }
 
 lt *signal_typerr(char *type_name) {
@@ -78,4 +78,3 @@ char *sb2string(string_builder_t *sb) {
   sb->string[sb->index] = '\0';
   return sb->string;
 }
-

@@ -10,11 +10,14 @@
 #include <stdlib.h>
 #include <string.h>
 
-#include "type.h"
 #include "object.h"
 #include "prims.h"
+#include "type.h"
+#include "utilities.h"
 
 lt *compile_object(lt *, lt *);
+lt *compile_as_lambda(lt *);
+lt *run_by_llam(lt *);
 
 int is_label(lisp_object_t *object) {
   return issymbol(object);
@@ -58,7 +61,7 @@ lisp_object_t *change_addr(lisp_object_t *ins, lisp_object_t *table) {
 
 lisp_object_t *asm_first_pass(lisp_object_t *code) {
   int length = 0;
-  lisp_object_t *labels = null_list;
+  lisp_object_t *labels = the_empty_list;
   while (!isnull(code)) {
     lisp_object_t *ins = pair_head(code);
     if (is_label(ins))
@@ -109,6 +112,11 @@ lisp_object_t *gen(enum TYPE opcode, ...) {
     case CATCH:
       ins = make_op_catch();
       break;
+    case CONST: {
+      lisp_object_t *value = va_arg(ap, lisp_object_t *);
+      ins = make_op_const(value);
+    }
+      break;
     case FJUMP: {
       lisp_object_t *label = va_arg(ap, lisp_object_t *);
       ins = make_op_fjump(label);
@@ -136,11 +144,9 @@ lisp_object_t *gen(enum TYPE opcode, ...) {
       ins = make_op_lvar(i, j, symbol);
     }
       break;
-    case CONST: {
-      lisp_object_t *value = va_arg(ap, lisp_object_t *);
-      ins = make_op_const(value);
-    }
-      break;
+    case MACRO_FN:
+    	ins = make_op_macro(va_arg(ap, lt *));
+    	break;
     case POP: ins = make_op_pop(); break;
     case PRIM: ins = make_op_prim(va_arg(ap, lisp_object_t *)); break;
     case RETURN: ins = make_op_return(); break;
@@ -171,7 +177,7 @@ int islength1(lisp_object_t *list) {
 
 lisp_object_t *compile_args(lisp_object_t *args, lisp_object_t *env) {
   if (isnull(args))
-    return null_list;
+    return the_empty_list;
   else
     return lt_append2(compile_object(pair_head(args), env),
                       compile_args(pair_tail(args), env));
@@ -185,19 +191,34 @@ int is_macro_form(lt *form) {
 }
 
 lt *expand_macro(lt *form) {
+	printf("In `expand_macro'\n");
   if (is_macro_form(form)) {
     lt *op = symbol_value(pair_head(form));
+    writef(standard_out, "op is %?\n", op);
     lt *proc = macro_procedure(op);
-    assert(isprimitive(proc));
-    lt *result;
-    switch (primitive_arity(proc)) {
-    case 0:
-      result = ((f0)primitive_func(proc))();
-      break;
-    default :
-      printf("Macro with arity %d is unsupported yet.\n", primitive_arity(proc));
-      exit(1);
-    }
+    writef(standard_out, "proc is %?\n", proc);
+    assert(isprimitive(proc) || isfunction(proc));
+		lt *result;
+    if (isprimitive(proc)) {
+			switch (primitive_arity(proc)) {
+			case 0:
+				result = ((f0) primitive_func(proc))();
+				break;
+			default:
+				printf("Macro with arity %d is unsupported yet.\n",
+						primitive_arity(proc));
+				exit(1);
+			}
+    } else {
+    	printf("Expands user-defined macro...\n");
+    	writef(standard_out, "form is %?\n", form);
+			lt *args = pair_tail(form);
+			printf("type_of(proc) is %d\n", type_of(proc));
+			writef(standard_out, "The complete expression is %?\n", make_pair(proc, args));
+			result = compile_as_lambda(make_pair(proc, args));
+			result = run_by_llam(result);
+			writef(standard_out, "The expandsion is %?\n", result);
+		}
     return expand_macro(result);
   } else
     return form;
@@ -205,7 +226,7 @@ lt *expand_macro(lt *form) {
 
 lisp_object_t *compile_begin(lisp_object_t *exps, lisp_object_t *env) {
   if (isnull(exps))
-    return gen(CONST, null_list);
+    return gen(CONST, the_empty_list);
   else if (islength1(exps))
     return compile_object(first(exps), env);
   else {
@@ -333,6 +354,10 @@ pub lisp_object_t *compile_object(lisp_object_t *object, lisp_object_t *env) {
   }
   if (is_tag_list(object, S("lambda")))
     return gen(FN, compile_lambda(second(object), pair_tail(pair_tail(object)), env));
+  if (is_tag_list(object, S("macro"))) {
+  	lt *proc = compile_lambda(second(object), pair_tail(pair_tail(object)), env);
+  	return gen(MACRO_FN, proc);
+  }
   if (is_tag_list(object, S("catch")))
     return gen(CATCH);
   if (ispair(object)) {

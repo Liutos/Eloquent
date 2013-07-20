@@ -52,17 +52,18 @@ extern F2(lt_eq);
 extern F2(lt_eql);
 extern F2(lt_equal);
 extern F0(lt_object_size);
-extern F1(lt_type_oF);
+extern F1(lt_type_of);
 extern lt *read_object_from_string(char *);
 extern void writef(lt *, const char *, ...);
 extern void write_expr(char *, lt *);
 extern void init_prims(void);
 extern lt *lt_append2(lt *, lt *);
 extern lt *lt_raw_nth(lt *, int);
-extern lt *list1(lt *);
 extern lt *lt_append(lt *, ...);
-extern int is_symbol_bound(lt *);
 extern lt *lt_raw_nthtail(lt *, int);
+extern void write_raw_string(char *, lt *);
+extern void write_raw_char(char, lt *);
+extern void write_object(lt *, lt *);
 
 #define seq(...) lt_append(__VA_ARGS__, NULL)
 
