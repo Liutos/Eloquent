@@ -13,16 +13,16 @@
 #include "type.h"
 
 /* OBJECT_H_ */
-lisp_object_t *dot_symbol;
-lisp_object_t *false;
-lisp_object_t *true;
+lisp_object_t *the_dot_symbol;
+lisp_object_t *the_false;
+lisp_object_t *the_true;
 lisp_object_t *null_env;
-lisp_object_t *null_list;
+lisp_object_t *the_empty_list;
 lt *object_pool;                        /* An array contains lt. */
 lisp_object_t *standard_in;
 lisp_object_t *standard_out;
 lisp_object_t *symbol_list;
-lisp_object_t *undef_object;
+lisp_object_t *the_undef;
 
 extern int is_pointer(lt *);
 extern int isexception(lt *);
@@ -60,6 +60,7 @@ extern lt *make_exception(char *, int);
 extern lt *make_float(float);
 extern lt *make_function(lt *env, lt *args, lt *code);
 extern lt *make_input_file(FILE *);
+extern lt *make_macro(lt *, lt *);
 extern lt *make_output_file(FILE *);
 extern lt *make_pair(lt *, lt *);
 extern lt *make_primitive(int, void *, char *);
@@ -77,6 +78,7 @@ extern lt *make_op_gvar(lt *);
 extern lt *make_op_jump(lt *);
 extern lt *make_op_lset(lt *i, lt *j, lt *symbol);
 extern lt *make_op_lvar(lt *i, lt *j, lt *symbol);
+extern lt *make_op_macro(lt *);
 extern lt *make_op_pop(void);
 extern lt *make_op_prim(lt *);
 extern lt *make_op_return(void);

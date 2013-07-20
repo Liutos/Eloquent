@@ -21,20 +21,27 @@
 int main(int argc, char *argv[])
 {
   char *inputs[] = {
-    "(set! abs (lambda (x) (if (> 0 x) (- 0 x) x)))",
-    "(abs 1",
-    "(abs -1)",
-    "#\\a",
-    "(code-char 97)",
-    "()",
-    "(tail '(1))",
+  		"123",
+  		"-123",
+  		"1.23",
+  		"#\\a",
+  		"\"Hello, world!\"",
+			"(+ 1 2)",
+			"'abc",
+			"(quote abc)",
+			"[1 2 3 4]",
+			"(begin (+ 1 2) 1)",
+			"(lambda (x) (+ x 1))",
+			"(if #t 1 2)",
+			"(set! abc 'abc)",
   };
   init_global_variable();
   init_prims();
   for (int i = 0; i < sizeof(inputs) / sizeof(char *); i++) {
+    writef(standard_out, ">> %s\n", make_string(inputs[i]));
     lisp_object_t *expr = read_object_from_string(inputs[i]);
     expr = compile_as_lambda(expr);
-    writef(standard_out, ">> %s\n", make_string(inputs[i]));
+//    writef(standard_out, "-> %?\n", expr);
     expr = run_by_llam(expr);
     if (is_signaled(expr))
       writef(standard_out, "%?\n", expr);

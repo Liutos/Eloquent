@@ -13,21 +13,29 @@
 #include "object.h"
 #include "type.h"
 
-#define OBJECT_INIT_COUNT 1000
-
-lisp_object_t *dot_symbol;
-lisp_object_t *false;
-lisp_object_t *true;
-lisp_object_t *null_env;
-lisp_object_t *null_list;
-lt *object_pool;
-lisp_object_t *standard_in;
-lisp_object_t *standard_out;
-lisp_object_t *symbol_list;
-lisp_object_t *undef_object;
 lt *free_objects;
+lt *null_env;
+lt *object_pool;
+lt *standard_in;
+lt *standard_out;
+lt *symbol_list;
+lt *the_dot_symbol;
+lt *the_empty_list;
+lt *the_false;
+lt *the_true;
+lt *the_undef;
+
+#define OBJECT_INIT_COUNT 2000
 
 /* Type predicate */
+int ischar(lt *object) {
+  return ((int)object & CHAR_MASK) == CHAR_TAG;
+}
+
+int isfixnum(lt *object) {
+  return ((int)object & FIXNUM_MASK) == FIXNUM_TAG;
+}
+
 int is_pointer(lt *object) {
   return ((int)object & POINTER_MASK) == POINTER_TAG;
 }
@@ -52,18 +60,6 @@ mktype_pred(isstring, STRING)
 mktype_pred(issymbol, SYMBOL)
 mktype_pred(isvector, VECTOR)
 
-int ischar(lt *object) {
-  return ((int)object & CHAR_MASK) == CHAR_TAG;
-}
-
-int isfixnum(lt *object) {
-  return ((int)object & FIXNUM_MASK) == FIXNUM_TAG;
-}
-
-int isdot(lisp_object_t *object) {
-  return object == dot_symbol;
-}
-
 int is_immediate(lt *object) {
   return ((int)object & IMMEDIATE_MASK) == IMMEDIATE_TAG;
 }
@@ -72,9 +68,9 @@ int is_tag_immediate(lt *object, int origin) {
   return is_immediate(object) && ((int)object >> IMMEDIATE_BITS) == origin;
 }
 
-#define mkim_pred(func_name, origin)		\
-  int func_name(lt *object) {			\
-    return is_tag_immediate(object, origin);	\
+#define mkim_pred(func_name, origin)		      \
+  int func_name(lt *object) {			            \
+	  return is_tag_immediate(object, origin);	\
   }
 
 mkim_pred(iseof, EOF_ORIGIN)
@@ -92,30 +88,33 @@ int is_signaled(lisp_object_t *object) {
   return isexception(object) && exception_flag(object) == TRUE;
 }
 
+int isdot(lisp_object_t *object) {
+  return object == the_dot_symbol;
+}
+
 int isnumber(lisp_object_t *object) {
   return isfixnum(object) || isfloat(object);
 }
 
 int type_of(lisp_object_t *x) {
-  if (isfixnum(x))
-    return FIXNUM;
+  if (isboolean(x))
+    return BOOL;
   if (ischar(x))
     return CHARACTER;
   if (isnull(x))
     return EMPTY_LIST;
-  if (isboolean(x))
-    return BOOL;
+  if (isfixnum(x))
+    return FIXNUM;
+  if (isclose(x))
+    return TCLOSE;
   if (iseof(x))
     return TEOF;
   if (isundef(x))
-    return UNDEF;
-  if (isclose(x))
-    return TCLOSE;
+    return TUNDEF;
   assert(is_pointer(x));
   return x->type;
 }
 
-/* Initialization */
 void init_object_pool(void) {
   static int flag = 0;
   if (flag == 1) return;
@@ -127,7 +126,6 @@ void init_object_pool(void) {
   free_objects = &object_pool[0];
 }
 
-/* DONE: Collects this part to file object.c */
 void mark_lt_object(lt *object) {
 	if (!is_pointer(object) || object == NULL)
 		return;
@@ -179,10 +177,8 @@ void trigger_gc(void) {
 	sweep_all();
 }
 
-/* Constructors */
+/* Constructor functions */
 lt *allocate_object(void) {
-	if (free_objects == NULL)
-		trigger_gc();
   if (free_objects == NULL) {
     printf("Pool is full, program terminated.\n");
     exit(1);
@@ -242,8 +238,8 @@ lisp_object_t *make_float(float value) {
   return flt_num;
 }
 
-lisp_object_t *make_function(lisp_object_t *env, lisp_object_t *args, lisp_object_t *code) {
-  lisp_object_t *func = make_object(FUNCTION);
+lt *make_function(lt *env, lt *args, lt *code) {
+  lt *func = make_object(FUNCTION);
   function_env(func) = env;
   function_args(func) = args;
   function_code(func) = code;
@@ -306,7 +302,7 @@ lisp_object_t *make_string(char *value) {
 lisp_object_t *make_symbol(char *name) {
   lisp_object_t *symbol = make_object(SYMBOL);
   symbol->u.symbol.name = name;
-  symbol_value(symbol) = undef_object;
+  symbol_value(symbol) = the_undef;
   return symbol;
 }
 
@@ -318,7 +314,7 @@ lisp_object_t *make_vector(int length) {
   return vector;
 }
 
-/* Opcode constructors */
+/* Opcode constructor functions */
 lt *make_opcode(enum OPCODE_TYPE name, lt *oprands) {
   lt *obj = make_object(OPCODE);
   opcode_name(obj) = name;
@@ -368,12 +364,16 @@ lisp_object_t *make_op_jump(lisp_object_t *label) {
   return mkopcode(JUMP, 1, label);
 }
 
-lisp_object_t *make_op_lset(lisp_object_t *i, lisp_object_t *j, lisp_object_t *symbol) {
+lt *make_op_lset(lt *i, lt *j, lt *symbol) {
   return mkopcode(LSET, 3, i, j, symbol);
 }
 
-lisp_object_t *make_op_lvar(lisp_object_t *i, lisp_object_t *j, lisp_object_t *symbol) {
+lt *make_op_lvar(lt *i, lt *j, lt *symbol) {
   return mkopcode(LVAR, 3, i, j, symbol);
+}
+
+lt *make_op_macro(lt *func) {
+	return mkopcode(MACRO_FN, 1, func);
 }
 
 lisp_object_t *make_op_pop(void) {
@@ -410,17 +410,18 @@ lisp_object_t *find_or_create_symbol(char *name) {
 void init_global_variable(void) {
   init_object_pool();
   /* Initialize global variables */
-  false = make_false();
-  true = make_true();
-  null_list = make_empty_list();
-  null_env = null_list;
+  the_false = make_false();
+  the_true = make_true();
+  the_empty_list = make_empty_list();
+  null_env = the_empty_list;
   standard_in = make_input_file(stdin);
   standard_out = make_output_file(stdout);
-  symbol_list = null_list;
-  undef_object = make_undef();
-  /* Symbol initialization */
-  dot_symbol = S(".");
+  symbol_list = the_empty_list;
+  the_undef = make_undef();
 
   symbol_value(S("*standard-output*")) = standard_out;
   symbol_value(S("*standard-input*")) = standard_in;
+
+  /* Symbol initialization */
+  the_dot_symbol = S(".");
 }

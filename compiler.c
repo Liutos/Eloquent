@@ -19,21 +19,23 @@ lt *compile_object(lt *, lt *);
 lt *compile_as_lambda(lt *);
 lt *run_by_llam(lt *);
 
-int is_label(lisp_object_t *object) {
+int is_label(lt *object) {
   return issymbol(object);
 }
 
-int is_addr_op(lisp_object_t *op) {
+int is_addr_op(lt *op) {
   switch (opcode_type(op)) {
-    case JUMP: case FJUMP: return TRUE;
-    default : return FALSE;
+    case JUMP: case FJUMP:
+    	return TRUE;
+    default :
+    	return FALSE;
   }
 }
 
-lisp_object_t *get_offset(lisp_object_t *label, lisp_object_t *labels) {
-  lisp_object_t *last_labels = labels;
+lt *get_offset(lt *label, lt *labels) {
+  lt *last_labels = labels;
   while (!isnull(labels)) {
-    lisp_object_t *lo = pair_head(labels);
+    lt *lo = pair_head(labels);
     if (!isfalse(lt_eq(label, pair_head(lo))))
       return pair_tail(lo);
     labels = pair_tail(labels);
@@ -43,14 +45,14 @@ lisp_object_t *get_offset(lisp_object_t *label, lisp_object_t *labels) {
   exit(1);
 }
 
-lisp_object_t *change_addr(lisp_object_t *ins, lisp_object_t *table) {
+lt *change_addr(lt *ins, lt *table) {
   switch (opcode_type(ins)) {
     case FJUMP: {
-      lisp_object_t *label = op_fjump_label(ins);
+      lt *label = op_fjump_label(ins);
       return make_op_fjump(get_offset(label, table));
     }
     case JUMP: {
-      lisp_object_t *label = op_jump_label(ins);
+      lt *label = op_jump_label(ins);
       return make_op_jump(get_offset(label, table));
     }
     default :
@@ -59,11 +61,11 @@ lisp_object_t *change_addr(lisp_object_t *ins, lisp_object_t *table) {
   }
 }
 
-lisp_object_t *asm_first_pass(lisp_object_t *code) {
+lt *asm_first_pass(lt *code) {
   int length = 0;
-  lisp_object_t *labels = the_empty_list;
+  lt *labels = the_empty_list;
   while (!isnull(code)) {
-    lisp_object_t *ins = pair_head(code);
+    lt *ins = pair_head(code);
     if (is_label(ins))
       labels = make_pair(make_pair(ins, make_fixnum(length)), labels);
     else
@@ -73,7 +75,7 @@ lisp_object_t *asm_first_pass(lisp_object_t *code) {
   return make_pair(make_fixnum(length), labels);
 }
 
-lisp_object_t *asm_second_pass(lisp_object_t *code, lisp_object_t *length, lisp_object_t *labels) {
+lt *asm_second_pass(lt *code, lt *length, lt *labels) {
   int index = 0;
   lisp_object_t *code_vector = make_vector(fixnum_value(length));
   while (!isnull(code)) {

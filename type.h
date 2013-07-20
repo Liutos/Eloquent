@@ -13,24 +13,18 @@
 typedef struct lisp_object_t lisp_object_t;
 typedef lisp_object_t lt;
 typedef lt *(*f0)(void);
-typedef lisp_object_t *(*f1)(lisp_object_t *);
-typedef lisp_object_t *(*f2)(lisp_object_t *, lisp_object_t *);
-typedef lisp_object_t *(*f3)(lisp_object_t *, lisp_object_t *, lisp_object_t *);
+typedef lt *(*f1)(lt *);
+typedef lt *(*f2)(lt *, lt *);
+typedef lt *(*f3)(lt *, lt *, lt *);
+typedef struct string_builder_t string_builder_t;
 
-/* StringBuilder */
-typedef struct string_builder_t {
-  char *string;
-  int length;
-  int index;
-} string_builder_t;
-
-enum ORIGINS {
+enum {
+  CLOSE_ORIGIN,
   EOF_ORIGIN,
   FALSE_ORIGIN,
   NULL_ORIGIN,
   TRUE_ORIGIN,
   UNDEF_ORIGIN,
-  CLOSE_ORIGIN,
 };
 
 /* TODO: The support for Unicode. */
@@ -43,10 +37,10 @@ enum TYPE {
   FIXNUM,
   TCLOSE,
   TEOF,
-  UNDEF,
+  TUNDEF,
   /* tagged-union */
-  FUNCTION,
   EXCEPTION,
+  FUNCTION,
   FLOAT,
   INPUT_FILE,
   MACRO,
@@ -72,6 +66,7 @@ enum OPCODE_TYPE {
   JUMP,
   LSET,
   LVAR,
+  MACRO_FN,
   POP,
   PRIM,
   RETURN,
@@ -80,79 +75,81 @@ enum OPCODE_TYPE {
 struct lisp_object_t {
   int gc_mark_flag;
   int use_flag;
-  lt *next;
   enum TYPE type;
   union {
     struct {
-      char *message;
       int signal_flag;
+      char *message;
     } exception;
     struct {
       float value;
     } float_num;
     struct {
-      lisp_object_t *code;
-      lisp_object_t *env;
-      lisp_object_t *args;
+      lt *code;
+      lt *env;
+      lt *args;
     } function;
     struct {
+      int colnum, linum;
       FILE *file;
-      int linum;
-      int colnum;
     } input_file;
     struct {
-      lt *procedure;
       lt *environment;
+      lt *procedure;
     } macro;
     struct {
       enum OPCODE_TYPE name;
       lt *oprands;
     } opcode;
     struct {
+      int colnum, linum;
       FILE *file;
-      int linum;
-      int colnum;
     } output_file;
     struct {
-      lisp_object_t *head;
-      lisp_object_t *tail;
+      lt *head;
+      lt *tail;
     } pair;
     struct {
       int arity;
-      void *C_function;
       char *Lisp_name;
+      void *C_function;
     } primitive;
     struct {
-      lisp_object_t *code;
-      lisp_object_t *env;
-      int pc;
-      int throw_flag;
+      int pc, throw_flag;
+      lt *code;
+      lt *env;
     } retaddr;
     struct {
-      char *value;
       int length;
+      char *value;
     } string;
     struct {
       char *name;
-      lisp_object_t *global_value;
+      lt *global_value;
     } symbol;
     struct {
-      int last;
-      int length;
-      lisp_object_t **value;
+      int last, length;
+      lt **value;
     } vector;
   } u;
+  lt *next;
+};
+
+struct string_builder_t {
+  int index, length;
+  char *string;
 };
 
 #define FALSE 0
 #define TRUE 1
 #define pub
 
-/* Accessors */
 #define character_value(x) (((int)x) >> CHAR_BITS)
+#define fixnum_value(x) (((int)(x)) >> FIXNUM_BITS)
+
+/* Accessor macros */
 #define exception_msg(x) ((x)->u.exception.message)
 #define exception_flag(x) ((x)->u.exception.signal_flag)
-#define fixnum_value(x) (((int)(x)) >> FIXNUM_BITS)
 #define float_value(x) ((x)->u.float_num.value)
 #define function_args(x) ((x)->u.function.args)
 #define function_env(x) ((x)->u.function.env)
@@ -182,13 +179,13 @@ struct lisp_object_t {
 #define vector_last(x) ((x)->u.vector.last)
 #define vector_length(x) (x->u.vector.length)
 #define vector_value(x) (x->u.vector.value)
-/* Opcode Accessors */
+
+/* Opcode accessor macros */
 #define opcode_type(x) opcode_name(x)
 #define opargn(x, n) (vector_value(opcode_oprands(x))[n])
 #define oparg1(x) opargn(x, 0)
 #define oparg2(x) opargn(x, 1)
 #define oparg3(x) opargn(x, 2)
-
 #define op_args_arity(x) oparg1(x)
 #define op_call_arity(x) oparg1(x)
 #define op_const_value(x) oparg1(x)
@@ -203,6 +200,7 @@ struct lisp_object_t {
 #define op_lvar_i(x) oparg1(x)
 #define op_lvar_j(x) oparg2(x)
 #define op_lvar_var(x) oparg3(x)
+#define op_macro_func(x) oparg1(x)
 #define op_prim_nargs(x) oparg1(x)
 
 #endif /* TYPE_H_ */

@@ -11,108 +11,42 @@
 #include <stdlib.h>
 #include <string.h>
 
-#include "type.h"
 #include "object.h"
+#include "prims.h"
+#include "type.h"
+#include "utilities.h"
 
-lt *read_object(lt *);
 void write_object(lt *, lt *);
-
-lisp_object_t *booleanize(int value) {
-  if (value == 0)
-    return false;
-  else
-    return true;
-}
-
-int is_symbol_bound(lisp_object_t *symbol) {
-  return isundef(symbol_value(symbol))? FALSE: TRUE;
-}
-
-lisp_object_t *list1(lisp_object_t *o) {
-  return make_pair(o, make_empty_list());
-}
-
-lt *signal_exception(char *msg) {
-  return make_exception(msg, TRUE);
-}
-
-lt *signal_typerr(char *type_name) {
-  char msg[256];
-  sprintf(msg, "Argument is not of type %s", type_name);
-  return signal_exception(strdup(msg));
-}
-
-int pair_length(lisp_object_t *pair) {
-  if (isnull(pair))
-    return 0;
-  int length = 0;
-  while (!isnull(pair)) {
-    assert(ispair(pair));
-    length++;
-    pair = pair_tail(pair);
-  }
-  return length;
-}
-
-lisp_object_t *reader_error(char *format, ...) {
-  static char msg[1000];
-  va_list ap;
-  va_start(ap, format);
-  vsprintf(msg, format, ap);
-  return make_exception(strdup(msg), TRUE);
-}
-
-string_builder_t *make_str_builder(void) {
-  string_builder_t *sb = malloc(sizeof(*sb));
-  sb->length = 20;
-  sb->string = malloc(sb->length * sizeof(char));
-  sb->index = 0;
-  return sb;
-}
-
-void sb_add_char(string_builder_t *sb, char c) {
-  if (sb->index >= sb->length) {
-    sb->length += 20;
-    sb->string = realloc(sb->string, sb->length * sizeof(char));
-  }
-  sb->string[sb->index] = c;
-  sb->index++;
-}
-
-char *sb2string(string_builder_t *sb) {
-  sb->string[sb->index] = '\0';
-  return sb->string;
-}
+lt *read_object(lt *);
 
 /* Writer */
-void write_raw_char(char c, lisp_object_t *out_port) {
-  FILE *fp = output_file_file(out_port);
+void write_raw_char(char c, lt *dest_port) {
+  FILE *fp = output_file_file(dest_port);
   fputc(c, fp);
   if (c == '\n') {
-    output_file_linum(out_port)++;
-    output_file_colnum(out_port) = 0;
+    output_file_linum(dest_port)++;
+    output_file_colnum(dest_port) = 0;
   } else
-    output_file_colnum(out_port)++;
+    output_file_colnum(dest_port)++;
 }
 
-void write_raw_string(char *string, lisp_object_t *output_file) {
+void write_raw_string(char *string, lt *dest_port) {
   while (*string != '\0') {
-    write_raw_char(*string, output_file);
+    write_raw_char(*string, dest_port);
     string++;
   }
 }
 
-void writef(lisp_object_t *out_port, const char *format, ...) {
+void writef(lt *dest, const char *format, ...) {
+	int nch = 0;
   va_list ap;
-  char c;
   lisp_object_t *arg;
-  int nch;
 
   va_start(ap, format);
-  c = *format;
+  char c = *format;
   while (c != '\0') {
     if (c != '%')
-      write_raw_char(c, out_port);
+      write_raw_char(c, dest);
     else {
       format++;
       c = *format;
@@ -120,35 +54,35 @@ void writef(lisp_object_t *out_port, const char *format, ...) {
       switch (c) {
         case 'c':
           assert(ischar(arg));
-          write_raw_char(character_value(arg), out_port);
+          write_raw_char(character_value(arg), dest);
           break;
         case 's':
           assert(isstring(arg));
-          write_raw_string(string_value(arg), out_port);
+          write_raw_string(string_value(arg), dest);
           break;
         case 'p':
-          nch = fprintf(output_file_file(out_port), "%p", arg);
-          output_file_colnum(out_port) += nch;
+          nch = fprintf(output_file_file(dest), "%p", arg);
+          output_file_colnum(dest) += nch;
           break;
         case 'f':
           assert(isfloat(arg));
-          nch = fprintf(output_file_file(out_port), "%f", float_value(arg));
-          output_file_colnum(out_port) += nch;
+          nch = fprintf(output_file_file(dest), "%f", float_value(arg));
+          output_file_colnum(dest) += nch;
           break;
         case 'd':
           assert(isfixnum(arg));
-          nch = fprintf(output_file_file(out_port), "%d", fixnum_value(arg));
-          output_file_colnum(out_port) += nch;
+          nch = fprintf(output_file_file(dest), "%d", fixnum_value(arg));
+          output_file_colnum(dest) += nch;
           break;
         case '?':
-          write_object(arg, out_port);
+          write_object(arg, dest);
           break;
         case 'S':
           assert(issymbol(arg));
-          write_object(arg, out_port);
+          write_object(arg, dest);
           break;
         case '%':
-          write_raw_char('%', out_port);
+          write_raw_char('%', dest);
           break;
         default :
           fprintf(stdout, "Invalid character %c after %%", c);
@@ -162,17 +96,33 @@ void writef(lisp_object_t *out_port, const char *format, ...) {
 
 void write_opcode(lt *opcode, lt *dest) {
   switch (opcode_type(opcode)) {
-    case ARGS: writef(dest, "#<ARGS %d>", op_args_arity(opcode)); break;
-    case CALL: writef(dest, "#<CALL %d>", op_call_arity(opcode)); break;
+    case ARGS: 
+    	writef(dest, "#<ARGS %d>", op_args_arity(opcode)); 
+    	break;
+    case CALL: 
+    	writef(dest, "#<CALL %d>", op_call_arity(opcode)); 
+    	break;
     case CATCH:
       write_raw_string("#<CATCH>", dest);
       break;
-    case CONST: writef(dest, "#<CONST %?>", op_const_value(opcode)); break;
-    case FJUMP: writef(dest, "#<FJUMP %?>", op_fjump_label(opcode)); break;
-    case FN: writef(dest, "#<FN %?>", op_fn_func(opcode)); break;
-    case GSET: writef(dest, "#<GSET %S>", op_gset_var(opcode)); break;
-    case GVAR: writef(dest, "#<GVAR %S>", op_gvar_var(opcode)); break;
-    case JUMP: writef(dest, "#<JUMP %?>", op_jump_label(opcode)); break;
+    case CONST: 
+    	writef(dest, "#<CONST %?>", op_const_value(opcode)); 
+    	break;
+    case FJUMP: 
+    	writef(dest, "#<FJUMP %?>", op_fjump_label(opcode)); 
+    	break;
+    case FN: 
+    	writef(dest, "#<FN %?>", op_fn_func(opcode)); 
+    	break;
+    case GSET: 
+    	writef(dest, "#<GSET %S>", op_gset_var(opcode)); 
+    	break;
+    case GVAR: 
+    	writef(dest, "#<GVAR %S>", op_gvar_var(opcode)); 
+    	break;
+    case JUMP: 
+    	writef(dest, "#<JUMP %?>", op_jump_label(opcode)); 
+    	break;
     case LSET:
       writef(dest, "#<LSET %d %d %S>",
              op_lset_i(opcode), op_lset_j(opcode), op_lset_var(opcode));
@@ -181,22 +131,31 @@ void write_opcode(lt *opcode, lt *dest) {
       writef(dest, "#<LVAR %d %d %S>",
              op_lvar_i(opcode), op_lvar_j(opcode), op_lvar_var(opcode));
       break;
-    case POP: write_raw_string("#<POP>", dest); break;
-    case PRIM: writef(dest, "#<PRIM %d>", op_prim_nargs(opcode)); break;
-    case RETURN: write_raw_string("#<RETURN>", dest); break;
+    case MACRO_FN:
+    	writef(dest, "#<MACRO_FN %?>", op_macro_func(opcode));
+    	break;
+    case POP: 
+    	write_raw_string("#<POP>", dest); 
+    	break;
+    case PRIM: 
+    	writef(dest, "#<PRIM %d>", op_prim_nargs(opcode)); 
+    	break;
+    case RETURN: 
+    	write_raw_string("#<RETURN>", dest); 
+    	break;
     default :
       printf("Unknown opcode\n");
       exit(1);
   }
 }
 
-void write_object(lisp_object_t *x, lisp_object_t *output_file) {
+void write_object(lt *x, lt *output_file) {
   assert(x != NULL);
   switch(type_of(x)) {
     case BOOL:
       if (is_true_object(x))
         write_raw_string("#t", output_file);
-      if (isfalse(x))
+      else
         write_raw_string("#f", output_file);
       break;
     case CHARACTER: {
@@ -225,18 +184,28 @@ void write_object(lisp_object_t *x, lisp_object_t *output_file) {
       write_raw_string(">", output_file);
     }
       break;
-    case EMPTY_LIST: write_raw_string("()", output_file); break;
+    case EMPTY_LIST:
+    	write_raw_string("()", output_file);
+    	break;
     case EXCEPTION:
       write_raw_string("ERROR: ", output_file);
       write_raw_string(exception_msg(x), output_file);
       break;
-    case FIXNUM: writef(output_file, "%d", x); break;
-    case FLOAT: writef(output_file, "%f", x); break;
-    case INPUT_FILE: writef(output_file, "#<INPUT-FILE %p>"); break;
+    case FIXNUM:
+    	writef(output_file, "%d", x);
+    	break;
+    case FLOAT:
+    	writef(output_file, "%f", x);
+    	break;
+    case INPUT_FILE:
+    	writef(output_file, "#<INPUT-FILE %p>");
+    	break;
     case MACRO:
-      writef(output_file, "#<MACRO %p %p>", macro_procedure(x), macro_environment(x));
+    	writef(output_file, "#<MACRO %p>", x);
       break;
-    case OUTPUT_FILE: writef(output_file, "#<OUTPUT-FILE %p>", x); break;
+    case OUTPUT_FILE:
+    	writef(output_file, "#<OUTPUT-FILE %p>", x);
+    	break;
     case PAIR:
       write_raw_string("(", output_file);
       write_object(pair_head(x), output_file);
@@ -270,8 +239,12 @@ void write_object(lisp_object_t *x, lisp_object_t *output_file) {
       write_raw_string("\"", output_file);
     }
       break;
-    case SYMBOL: write_raw_string(symbol_name(x), output_file); break;
-    case TEOF: write_raw_string("#<EOF>", output_file); break;
+    case SYMBOL:
+    	write_raw_string(symbol_name(x), output_file);
+    	break;
+    case TEOF:
+    	write_raw_string("#<EOF>", output_file);
+    	break;
     case VECTOR: {
       lisp_object_t **vector = vector_value(x);
       write_raw_string("[", output_file);
@@ -290,13 +263,12 @@ void write_object(lisp_object_t *x, lisp_object_t *output_file) {
   }
 }
 
-void write_expr(char *expr, lisp_object_t *result) {
+void write_expr(char *expr, lt *result) {
   writef(standard_out, "%s => %?\n", make_string(expr), result);
 }
 
-/* Primitives */
-/* Auxiliary Functions */
-int get_char(lisp_object_t *input_file) {
+/* Auxiliary functions */
+int get_char(lt *input_file) {
   FILE *in = input_file_file(input_file);
   input_file_colnum(input_file)++;
   return getc(in);
@@ -315,7 +287,7 @@ lt *lt_raw_nth(lt *list, int n) {
   return pair_head(list);
 }
 
-lisp_object_t *lt_raw_nthtail(lisp_object_t *list, int n) {
+lt *lt_raw_nthtail(lt *list, int n) {
   assert(ispair(list));
   int n2 = n;
   while (n2 > 0) {
@@ -329,13 +301,14 @@ lisp_object_t *lt_raw_nthtail(lisp_object_t *list, int n) {
   return list;
 }
 
-lisp_object_t *lt_append2(lisp_object_t *l1, lisp_object_t *l2) {
+lt *lt_append2(lt *l1, lt *l2) {
   if (isnull(l1))
     return l2;
   else
     return make_pair(pair_head(l1), lt_append2(pair_tail(l1), l2));
 }
 
+/* Primitives */
 /* Input Port */
 lt *lt_read_char(lt *in_port) {
   assert(isinput_file(in_port));
@@ -354,7 +327,7 @@ lt *lt_read_line(lt *in_port) {
 }
 
 /* List */
-lisp_object_t *lt_list_length(lisp_object_t *list) {
+lt *lt_list_length(lt *list) {
   if (isnull(list))
     return make_fixnum(0);
   int length = 0;
@@ -369,10 +342,10 @@ lisp_object_t *lt_list_length(lisp_object_t *list) {
 
 lt *lt_list_nreverse(lt *list) {
   if (isnull(list))
-    return null_list;
+    return the_empty_list;
   if (isnull(pair_tail(list)))
     return list;
-  lt *rhead = null_list;
+  lt *rhead = the_empty_list;
   lt *rest = list;
   while (!isnull(rest)) {
     if (!ispair(rest))
@@ -387,7 +360,7 @@ lt *lt_list_nreverse(lt *list) {
 
 lt *lt_list_reverse(lt *list) {
   if (isnull(list))
-    return null_list;
+    return the_empty_list;
   if (isnull(pair_tail(list)))
     return list;
   else
@@ -395,22 +368,8 @@ lt *lt_list_reverse(lt *list) {
 }
 
 /* Arithmetic operations */
-int get_numeric_level(lt *n) {
-  switch (type_of(n)) {
-    case FIXNUM: return 0;
-    case FLOAT: return 1;
-    default :
-      fprintf(stdout, "In get_numeric_level --- It's impossible!\n");
-      exit(1);
-  }
-}
-
-int is_lower_than(lt *n1, lt *n2) {
-  return get_numeric_level(n1) < get_numeric_level(n2);
-}
-
 /* TODO: Find a more elegant way of defining arithmetic operations. */
-lisp_object_t *lt_add(lisp_object_t *n, lisp_object_t *m) {
+lt *lt_add(lt *n, lt *m) {
   assert(isnumber(n) && isnumber(m));
   if (isfixnum(n) && isfixnum(m))
     return make_fixnum(fixnum_value(n) + fixnum_value(m));
@@ -510,7 +469,7 @@ lisp_object_t *lt_string_length(lisp_object_t *string) {
   return make_fixnum(strlen(string_value(string)));
 }
 
-lisp_object_t *lt_string_set(lisp_object_t *string, lisp_object_t *index, lisp_object_t *new_char) {
+lt *lt_string_set(lt *string, lt *index, lt *new_char) {
   assert(isstring(string));
   assert(isfixnum(index));
   assert(ischar(new_char));
@@ -559,14 +518,14 @@ lisp_object_t *lt_list_to_vector(lisp_object_t *list) {
 
 lt *lt_vector_equal(lt *v1, lt *v2) {
   lt *lt_equal(lt *, lt *);
-  if (v1 == v2) return true;
+  if (v1 == v2) return the_true;
   if (vector_length(v1) != vector_length(v2))
-    return false;
+    return the_false;
   for (int i = 0; i < vector_length(v1); i++) {
     if (isfalse(lt_equal(vector_value(v1)[i], vector_value(v2)[i])))
-      return false;
+      return the_false;
   }
-  return true;
+  return the_true;
 }
 
 lisp_object_t *lt_vector_last_nth(lisp_object_t *vector, lisp_object_t *n) {
@@ -605,7 +564,7 @@ lisp_object_t *lt_vector_ref(lisp_object_t *vector, lisp_object_t *index) {
   return vector_value(vector)[fixnum_value(index)];
 }
 
-lisp_object_t *lt_vector_set(lisp_object_t *vector, lisp_object_t *index, lisp_object_t *new_value) {
+lt *lt_vector_set(lt *vector, lt *index, lt *new_value) {
   if (!isvector(vector))
     return signal_typerr("VECTOR");
   if (!isfixnum(index))
@@ -636,17 +595,17 @@ lisp_object_t *lt_head(lisp_object_t *pair) {
 lt *lt_list_equal(lt *l1, lt *l2) {
   lt *lt_equal(lt *, lt *);
   if (l1 == l2)
-    return true;
+    return the_true;
   while (!isnull(l1) && !isnull(l2)) {
     if (isfalse(lt_equal(pair_head(l1), pair_head(l2))))
-      return false;
+      return the_false;
     l1 = pair_tail(l1);
     l2 = pair_tail(l2);
   }
   if (!isnull(l1) || !isnull(l2))
-    return false;
+    return the_false;
   else
-    return true;
+    return the_true;
 }
 
 lisp_object_t *lt_nth(lisp_object_t *list, lisp_object_t *n) {
@@ -688,22 +647,22 @@ lisp_object_t *lt_eq(lisp_object_t *x, lisp_object_t *y) {
 
 lt *lt_eql(lt *x, lt *y) {
   if (x == y)
-    return true;
+    return the_true;
   if (isnumber(x) && isnumber(y))
     return lt_numeric_eq(x, y);
   if (ischar(x) && ischar(y))
     return booleanize(character_value(x) == character_value(y));
-  return false;
+  return the_false;
 }
 
 lt *lt_equal(lt *x, lt *y) {
   if (!isfalse(lt_eql(x, y)))
-    return true;
+    return the_true;
   if (ispair(x) && ispair(y))
     return lt_list_equal(x, y);
   if (isvector(x) && isvector(y))
     return lt_vector_equal(x, y);
-  return false;
+  return the_false;
 }
 
 lt *lt_object_size(void) {
@@ -720,6 +679,7 @@ lisp_object_t *lt_type_of(lisp_object_t *object) {
     mktype(FLOAT);
     mktype(FUNCTION);
     mktype(PRIMITIVE_FUNCTION);
+    mktype(VECTOR);
     default :
       fprintf(stdout, "Unknown type %d of object\n", type_of(object));
       exit(1);
@@ -756,7 +716,7 @@ lt *expect_string(char *target, lisp_object_t *input_file) {
     }
     target++;
   }
-  return null_list;
+  return the_empty_list;
 }
 
 lisp_object_t *read_character(lisp_object_t *input_file) {
@@ -823,7 +783,7 @@ lisp_object_t *read_pair(lisp_object_t *input_file) {
   if (is_signaled(obj))
     return obj;
   if (isclose(obj))
-    return null_list;
+    return the_empty_list;
   if (isdot(obj)) {
     lisp_object_t *o1 = read_object(input_file);
     if (is_signaled(o1))
@@ -908,12 +868,12 @@ lisp_object_t *read_object(lisp_object_t *input_file) {
         	return read_character(input_file);
         case 't':
           if (isdelimiter(peek_char(input_file)))
-            return true;
+            return the_true;
           else
           	goto bool_error_label;
         case 'f':
           if (isdelimiter(peek_char(input_file)))
-            return false;
+            return the_false;
           else
           	goto bool_error_label;
         default : {
@@ -927,7 +887,7 @@ lisp_object_t *read_object(lisp_object_t *input_file) {
     case '(': {
       lisp_object_t *head = read_object(input_file);
       if (isclose(head))
-        return null_list;
+        return the_empty_list;
       lisp_object_t *tail = read_pair(input_file);
       if (is_signaled(tail))
         return tail;
@@ -937,7 +897,7 @@ lisp_object_t *read_object(lisp_object_t *input_file) {
     case ']': case ')':
     	return make_close();
     case '.':
-    	return dot_symbol;
+    	return the_dot_symbol;
     case '[':
     	return read_vector(input_file);
     case '\'':

@@ -7,9 +7,9 @@
 #include <assert.h>
 #include <stdlib.h>
 
-#include "type.h"
 #include "object.h"
 #include "prims.h"
+#include "type.h"
 
 lt *walk_in_env(lt *env, int n) {
   while (n-- > 0)
@@ -73,7 +73,7 @@ pub lisp_object_t *run_by_llam(lisp_object_t *func) {
   lisp_object_t *stack = make_vector(10);
   lisp_object_t *code = function_code(func);
   lisp_object_t *env = null_env;
-  lisp_object_t *return_stack = null_list;
+  lisp_object_t *return_stack = the_empty_list;
   while (pc < vector_length(code)) {
     lisp_object_t *ins = raw_vector_ref(code, pc);
     switch (opcode_type(ins)) {
@@ -109,7 +109,7 @@ pub lisp_object_t *run_by_llam(lisp_object_t *func) {
         break;
       case FN: {
         lisp_object_t *func = op_fn_func(ins);
-        func = make_function(env, null_list, function_code(func));
+        func = make_function(env, the_empty_list, function_code(func));
         lt_vector_push(stack, func);
       }
         break;
@@ -121,7 +121,7 @@ pub lisp_object_t *run_by_llam(lisp_object_t *func) {
         break;
       case GVAR: {
         lisp_object_t *sym = op_gvar_var(ins);
-        if (symbol_value(sym) == undef_object) {
+        if (symbol_value(sym) == the_undef) {
           fprintf(stdout, "Undefined global variable: %s\n", symbol_name(sym));
           exit(1);
         }
@@ -143,6 +143,12 @@ pub lisp_object_t *run_by_llam(lisp_object_t *func) {
         lt_vector_push(stack, value);
       }
         break;
+      case MACRO_FN: {
+        lisp_object_t *func = op_macro_func(ins);
+        func = make_function(env, the_empty_list, function_code(ins));
+        lt_vector_push(stack, make_macro(func, env));
+      }
+      	break;
       case POP:
         lt_vector_pop(stack);
         break;
