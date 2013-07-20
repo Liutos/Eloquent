@@ -43,7 +43,8 @@
 
 * Include header files
 * Type declarations use `typedef`
-* Type definitions
+* enum type definitions
+* struct type definitions
 * Global variable declarations
 * Function prototype declarations
 * Constant macro definitions
