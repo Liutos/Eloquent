@@ -15,6 +15,7 @@
 #include "type.h"
 #include "utilities.h"
 
+lt *assemble(lt *);
 lt *compile_object(lt *, lt *);
 lt *compile_as_lambda(lt *);
 lt *run_by_llam(lt *);
@@ -77,8 +78,11 @@ lt *asm_second_pass(lt *code, lt *length, lt *labels) {
   while (!isnull(code)) {
     lisp_object_t *ins = pair_head(code);
     if (!is_label(ins)) {
+      assert(isopcode(ins));
       if (is_addr_op(ins))
         ins = change_addr(ins, labels);
+      if (opcode_name(ins) == FN)
+        function_code(op_fn_func(ins)) = assemble(function_code(op_fn_func(ins)));
       vector_value(code_vector)[index] = ins;
       vector_last(code_vector)++;
       index++;
@@ -88,12 +92,13 @@ lt *asm_second_pass(lt *code, lt *length, lt *labels) {
   return code_vector;
 }
 
-lisp_object_t *assemble(lisp_object_t *func) {
-  lisp_object_t *ll = asm_first_pass(function_code(func));
+lisp_object_t *assemble(lisp_object_t *code) {
+  assert(ispair(code));
+  lisp_object_t *ll = asm_first_pass(code);
   lisp_object_t *length = pair_head(ll);
   lisp_object_t *labels = pair_tail(ll);
-  function_code(func) = asm_second_pass(function_code(func), length, labels);
-  return func;
+  code = asm_second_pass(code, length, labels);
+  return code;
 }
 
 lisp_object_t *gen(enum TYPE opcode, ...) {
@@ -248,7 +253,7 @@ lt *compile_lambda(lt *args, lt *body, lt *env) {
                             compile_begin(body, make_pair(args, env)),
                             gen(RETURN));
   lisp_object_t *func = make_function(env, args, code);
-  return assemble(func);
+  return func;
 }
 
 lisp_object_t *make_label(void) {
@@ -382,10 +387,9 @@ pub lisp_object_t *compile_object(lisp_object_t *object, lisp_object_t *env) {
       return seq(compile_args(args, env),
                  compile_object(fn, env),
                  gen(CALL, lt_list_length(args)));
-  } else {
-    fprintf(stdout, "Invalid expression to be compiled\n");
-    exit(1);
   }
+  writef(standard_out, "Impossible --- Unable to compile %?\n", object);
+  exit(1);
 }
 
 lisp_object_t *compile_as_lambda(lisp_object_t *form) {

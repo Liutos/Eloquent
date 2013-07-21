@@ -59,7 +59,7 @@ void set_local_var(lisp_object_t *env, int i, int j, lisp_object_t *value) {
 }
 
 /* TODO: Exception signaling and handling. */
-pub lisp_object_t *run_by_llam(lisp_object_t *func) {
+pub lisp_object_t *run_by_llam(lisp_object_t *code_vector) {
 #define _arg(N) vlast(stack, primitive_arity(func) - N)
 #define _arg1 _arg(1)
 #define _arg2 _arg(2)
@@ -67,11 +67,11 @@ pub lisp_object_t *run_by_llam(lisp_object_t *func) {
 #define move_stack() vector_last(stack) -= primitive_arity(func)
 #define vlast(v, n) lt_vector_last_nth(v, make_fixnum(n))
 
-  assert(isfunction(func));
+  assert(isvector(code_vector));
   int pc = 0;
   int throw_exception = TRUE;
   lisp_object_t *stack = make_vector(10);
-  lisp_object_t *code = function_code(func);
+  lt *code = code_vector;
   lisp_object_t *env = null_env;
   lisp_object_t *return_stack = the_empty_list;
   while (pc < vector_length(code)) {
@@ -152,6 +152,7 @@ pub lisp_object_t *run_by_llam(lisp_object_t *func) {
         lt_vector_push(stack, value);
       }
         break;
+//        FIXME: Fix the wrong implementation of user-defined macro.
       case MACROFN: {
         lisp_object_t *func = op_macro_func(ins);
         func = make_function(env, the_empty_list, function_code(func));

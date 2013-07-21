@@ -20,18 +20,19 @@
 
 int main(int argc, char *argv[])
 {
+  lt *assemble(lt *);
   char *inputs[] = {
-  		"((lambda (x y) (+ x y)) 1 2.3)",
-  		"((if #t (symbol-value '+) (symbol-value '-)) 1 2)",
-  		"((symbol-value '-) 1 2)",
+      "((lambda (x y) (if #t x y)) 1 2)",
+      "((lambda (x) ((lambda (y) (+ x y)) 2)) 1)",
   };
   init_global_variable();
   init_prims();
   for (int i = 0; i < sizeof(inputs) / sizeof(char *); i++) {
     writef(standard_out, ">> %s\n", make_string(inputs[i]));
     lisp_object_t *expr = read_object_from_string(inputs[i]);
-    expr = compile_as_lambda(expr);
-//    writef(standard_out, "-> %?\n", expr);
+//    expr = compile_as_lambda(expr);
+    expr = compile_object(expr, null_env);
+    expr = assemble(expr);
     expr = run_by_llam(expr);
     if (is_signaled(expr))
       writef(standard_out, "%?\n", expr);

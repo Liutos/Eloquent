@@ -30,6 +30,7 @@ extern int isfloat(lt *);
 extern int isfunction(lt *);
 extern int isinput_file(lt *);
 extern int ismacro(lt *);
+extern int isopcode(lt *);
 extern int ispair(lt *);
 extern int isprimitive(lt *);
 extern int isstring(lt *);
