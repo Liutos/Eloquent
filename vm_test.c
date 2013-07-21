@@ -21,7 +21,9 @@
 int main(int argc, char *argv[])
 {
   char *inputs[] = {
-  		"(macro (x) (+ x 1))",
+  		"((lambda (x y) (+ x y)) 1 2.3)",
+  		"((if #t (symbol-value '+) (symbol-value '-)) 1 2)",
+  		"((symbol-value '-) 1 2)",
   };
   init_global_variable();
   init_prims();
@@ -29,7 +31,7 @@ int main(int argc, char *argv[])
     writef(standard_out, ">> %s\n", make_string(inputs[i]));
     lisp_object_t *expr = read_object_from_string(inputs[i]);
     expr = compile_as_lambda(expr);
-    writef(standard_out, "-> %?\n", expr);
+//    writef(standard_out, "-> %?\n", expr);
     expr = run_by_llam(expr);
     if (is_signaled(expr))
       writef(standard_out, "%?\n", expr);

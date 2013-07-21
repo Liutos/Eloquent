@@ -22,9 +22,9 @@ lt *run_by_llam(lt *);
 int is_addr_op(lt *op) {
   switch (opcode_type(op)) {
     case JUMP: case FJUMP:
-    	return TRUE;
+      return TRUE;
     default :
-    	return FALSE;
+      return FALSE;
   }
 }
 
@@ -106,7 +106,9 @@ lisp_object_t *gen(enum TYPE opcode, ...) {
       ins = make_op_args(length);
     }
       break;
-    case CALL: ins = make_op_call(va_arg(ap, lisp_object_t *)); break;
+    case CALL:
+      ins = make_op_call(va_arg(ap, lisp_object_t *));
+      break;
     case CATCH:
       ins = make_op_catch();
       break;
@@ -120,9 +122,15 @@ lisp_object_t *gen(enum TYPE opcode, ...) {
       ins = make_op_fjump(label);
     }
       break;
-    case FN: ins = make_op_fn(va_arg(ap, lisp_object_t *)); break;
-    case GSET: ins = make_op_gset(va_arg(ap, lisp_object_t *)); break;
-    case GVAR: ins = make_op_gvar(va_arg(ap, lisp_object_t *)); break;
+    case FN:
+      ins = make_op_fn(va_arg(ap, lisp_object_t *));
+      break;
+    case GSET:
+      ins = make_op_gset(va_arg(ap, lisp_object_t *));
+      break;
+    case GVAR:
+      ins = make_op_gvar(va_arg(ap, lisp_object_t *));
+      break;
     case JUMP: {
       lisp_object_t *label = va_arg(ap, lisp_object_t *);
       ins = make_op_jump(label);
@@ -143,12 +151,18 @@ lisp_object_t *gen(enum TYPE opcode, ...) {
     }
       break;
     case MACROFN:
-    	ins = make_op_macro(va_arg(ap, lt *));
-    	break;
-    case POP: ins = make_op_pop(); break;
-    case PRIM: ins = make_op_prim(va_arg(ap, lisp_object_t *)); break;
-    case RETURN: ins = make_op_return(); break;
-    default :
+      ins = make_op_macro(va_arg(ap, lt *));
+      break;
+    case POP:
+      ins = make_op_pop();
+      break;
+    case PRIM:
+      ins = make_op_prim(va_arg(ap, lisp_object_t *));
+      break;
+    case RETURN:
+      ins = make_op_return();
+      break;
+    default:
       fprintf(stdout, "Invalid opcode %d\n", opcode);
       exit(1);
   }
@@ -189,34 +203,26 @@ int is_macro_form(lt *form) {
 }
 
 lt *expand_macro(lt *form) {
-	printf("In `expand_macro'\n");
   if (is_macro_form(form)) {
     lt *op = symbol_value(pair_head(form));
-    writef(standard_out, "op is %?\n", op);
     lt *proc = macro_procedure(op);
-    writef(standard_out, "proc is %?\n", proc);
     assert(isprimitive(proc) || isfunction(proc));
-		lt *result;
+    lt *result;
     if (isprimitive(proc)) {
-			switch (primitive_arity(proc)) {
-			case 0:
-				result = ((f0) primitive_func(proc))();
-				break;
-			default:
-				printf("Macro with arity %d is unsupported yet.\n",
-						primitive_arity(proc));
-				exit(1);
-			}
+      switch (primitive_arity(proc)) {
+        case 0:
+          result = ((f0) primitive_func(proc))();
+          break;
+        default:
+          printf("Macro with arity %d is unsupported yet.\n",
+                 primitive_arity(proc));
+          exit(1);
+      }
     } else {
-    	printf("Expands user-defined macro...\n");
-    	writef(standard_out, "form is %?\n", form);
-			lt *args = pair_tail(form);
-			printf("type_of(proc) is %d\n", type_of(proc));
-			writef(standard_out, "The complete expression is %?\n", make_pair(proc, args));
-			result = compile_as_lambda(make_pair(proc, args));
-			result = run_by_llam(result);
-			writef(standard_out, "The expandsion is %?\n", result);
-		}
+      lt *args = pair_tail(form);
+      result = compile_as_lambda(make_pair(proc, args));
+      result = run_by_llam(result);
+    }
     return expand_macro(result);
   } else
     return form;
@@ -235,7 +241,7 @@ lisp_object_t *compile_begin(lisp_object_t *exps, lisp_object_t *env) {
   }
 }
 
-lisp_object_t *compile_lambda(lisp_object_t *args, lisp_object_t *body, lisp_object_t *env) {
+lt *compile_lambda(lt *args, lt *body, lt *env) {
   assert(is_all_symbol(args));
   lisp_object_t *len = lt_list_length(args);
   lisp_object_t *code = seq(gen(ARGS, len),
@@ -253,7 +259,7 @@ lisp_object_t *make_label(void) {
   return find_or_create_symbol(strndup(buffer, i));
 }
 
-lisp_object_t *compile_if(lisp_object_t *pred, lisp_object_t *then, lisp_object_t *else_part, lisp_object_t *env) {
+lt *compile_if(lt *pred, lt *then, lt *else_part, lt *env) {
   lisp_object_t *l1 = make_label();
   lisp_object_t *l2 = make_label();
   pred = compile_object(pred, env);
@@ -290,7 +296,7 @@ lisp_object_t *is_var_in_env(lisp_object_t *symbol, lisp_object_t *env) {
   int i = 0;
   while (env != null_env) {
     lisp_object_t *bindings = pair_head(env);
-    assert(isnull(bindings) ||ispair(bindings) || isvector(bindings));
+    assert(isnull(bindings) || ispair(bindings) || isvector(bindings));
     lisp_object_t *j = is_var_in_frame(symbol, bindings);
     if (j != NULL)
       return make_pair(make_fixnum(i), j);
@@ -326,6 +332,12 @@ int is_tag_list(lisp_object_t *object, lisp_object_t *tag) {
   return ispair(object) && (pair_head(object) == tag);
 }
 
+int is_primitive_fun(lt *variable) {
+  return issymbol(variable) &&
+      is_symbol_bound(variable) &&
+      isprimitive(symbol_value(variable));
+}
+
 /* TODO: The support for built-in macros. */
 /* TODO: The support for tail call optimization. */
 pub lisp_object_t *compile_object(lisp_object_t *object, lisp_object_t *env) {
@@ -353,17 +365,16 @@ pub lisp_object_t *compile_object(lisp_object_t *object, lisp_object_t *env) {
   if (is_tag_list(object, S("lambda")))
     return gen(FN, compile_lambda(second(object), pair_tail(pair_tail(object)), env));
   if (is_tag_list(object, S("macro"))) {
-  	lt *proc = compile_lambda(second(object), pair_tail(pair_tail(object)), env);
-  	return gen(MACROFN, proc);
+    lt *proc = compile_lambda(second(object), pair_tail(pair_tail(object)), env);
+    return gen(MACROFN, proc);
   }
   if (is_tag_list(object, S("catch")))
     return gen(CATCH);
   if (ispair(object)) {
     lisp_object_t *args = pair_tail(object);
     lisp_object_t *fn = pair_head(object);
-    assert(issymbol(fn));
-    /* Generating different instruction when calling primitive and compiled function */
-    if (is_symbol_bound(fn) && isprimitive(symbol_value(fn)))
+    /* Generating different instruction when calling primitive and anything else */
+    if (is_primitive_fun(fn))
       return seq(compile_args(args, env),
                  compile_object(fn, env),
                  gen(PRIM, lt_list_length(args)));

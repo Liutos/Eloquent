@@ -88,6 +88,15 @@ pub lisp_object_t *run_by_llam(lisp_object_t *func) {
         break;
       case CALL: {
         lisp_object_t *func = lt_vector_pop(stack);
+        if (isprimitive(func)) {
+//        	This is possible because the first element of a application list
+//        	might be a compound expression, and this compound one will return
+//        	a primitive function object at run-time, but the compiler is unable
+//        	to generate a PRIM instruction at compile-time --- This is only
+//        	happen when the first element is a symbol named a primitive function.
+        	lt_vector_push(stack, func);
+        	goto call_primitive;
+        }
         assert(isfunction(func));
         lisp_object_t *retaddr = make_retaddr(code, env, pc, throw_exception);
         return_stack = make_pair(retaddr, return_stack);
@@ -152,6 +161,7 @@ pub lisp_object_t *run_by_llam(lisp_object_t *func) {
       case POP:
         lt_vector_pop(stack);
         break;
+			call_primitive:
       case PRIM: {
         lisp_object_t *func = lt_vector_pop(stack);
         lisp_object_t *val = NULL;
