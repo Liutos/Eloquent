@@ -142,7 +142,7 @@ lisp_object_t *gen(enum TYPE opcode, ...) {
       ins = make_op_lvar(i, j, symbol);
     }
       break;
-    case MACRO_FN:
+    case MACROFN:
     	ins = make_op_macro(va_arg(ap, lt *));
     	break;
     case POP: ins = make_op_pop(); break;
@@ -354,7 +354,7 @@ pub lisp_object_t *compile_object(lisp_object_t *object, lisp_object_t *env) {
     return gen(FN, compile_lambda(second(object), pair_tail(pair_tail(object)), env));
   if (is_tag_list(object, S("macro"))) {
   	lt *proc = compile_lambda(second(object), pair_tail(pair_tail(object)), env);
-  	return gen(MACRO_FN, proc);
+  	return gen(MACROFN, proc);
   }
   if (is_tag_list(object, S("catch")))
     return gen(CATCH);

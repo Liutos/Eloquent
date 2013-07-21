@@ -131,7 +131,7 @@ void write_opcode(lt *opcode, lt *dest) {
       writef(dest, "#<LVAR %d %d %S>",
              op_lvar_i(opcode), op_lvar_j(opcode), op_lvar_var(opcode));
       break;
-    case MACRO_FN:
+    case MACROFN:
     	writef(dest, "#<MACRO_FN %?>", op_macro_func(opcode));
     	break;
     case POP: 
@@ -230,7 +230,7 @@ void write_object(lt *x, lt *output_file) {
     	writef(output_file, "#<INPUT-FILE %p>");
     	break;
     case MACRO:
-    	writef(output_file, "#<MACRO %p>", x);
+    	writef(output_file, "#<MACRO %?>", macro_procedure(x));
       break;
     case OUTPUT_FILE:
     	writef(output_file, "#<OUTPUT-FILE %p>", x);

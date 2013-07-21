@@ -143,9 +143,9 @@ pub lisp_object_t *run_by_llam(lisp_object_t *func) {
         lt_vector_push(stack, value);
       }
         break;
-      case MACRO_FN: {
+      case MACROFN: {
         lisp_object_t *func = op_macro_func(ins);
-        func = make_function(env, the_empty_list, function_code(ins));
+        func = make_function(env, the_empty_list, function_code(func));
         lt_vector_push(stack, make_macro(func, env));
       }
       	break;

@@ -66,7 +66,7 @@ enum OPCODE_TYPE {
   JUMP,
   LSET,
   LVAR,
-  MACRO_FN,
+  MACROFN,
   POP,
   PRIM,
   RETURN,

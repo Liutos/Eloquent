@@ -24,6 +24,7 @@ int main(int argc, char *argv[])
   char *inputs[] = {
   		"(lambda (x) (+ x 1))",
   		"(lambda (n) (lambda (x) (+ x n)))",
+  		"(macro (x) (+ x 1))",
   };
   init_global_variable();
   init_prims();

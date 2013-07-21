@@ -374,7 +374,7 @@ lt *make_op_lvar(lt *i, lt *j, lt *symbol) {
 }
 
 lt *make_op_macro(lt *func) {
-	return mkopcode(MACRO_FN, "MACRO_FN", 1, func);
+	return mkopcode(MACROFN, "MACROFN", 1, func);
 }
 
 lisp_object_t *make_op_pop(void) {
