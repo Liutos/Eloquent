@@ -20,5 +20,6 @@ extern lt *reader_error(char *, ...);
 extern string_builder_t *make_str_builder(void);
 extern void sb_add_char(string_builder_t *, char);
 extern char *sb2string(string_builder_t *);
+extern int is_label(lt *);
 
 #endif /* UTILITIES_H_ */

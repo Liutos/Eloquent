@@ -99,6 +99,7 @@ struct lisp_object_t {
     } macro;
     struct {
       enum OPCODE_TYPE name;
+      char *op;
       lt *oprands;
     } opcode;
     struct {
@@ -160,6 +161,7 @@ struct string_builder_t {
 #define macro_procedure(x) ((x)->u.macro.procedure)
 #define macro_environment(x) ((x)->u.macro.environment)
 #define opcode_name(x) ((x)->u.opcode.name)
+#define opcode_op(x) ((x)->u.opcode.op)
 #define opcode_oprands(x) ((x)->u.opcode.oprands)
 #define output_file_colnum(x) ((x)->u.output_file.colnum)
 #define output_file_file(x) ((x)->u.output_file.file)

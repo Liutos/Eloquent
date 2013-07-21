@@ -22,19 +22,8 @@
 int main(int argc, char *argv[])
 {
   char *inputs[] = {
-  		"123",
-  		"-123",
-  		"1.23",
-  		"#\\a",
-  		"\"Hello, world!\"",
-  		"(+ 1 2)",
-  		"'abc",
-  		"(quote abc)",
-  		"[1 2 3 4]",
-  		"(begin (+ 1 2) 1)",
   		"(lambda (x) (+ x 1))",
-  		"(if #t 1 2)",
-  		"(set! abc 'abc)",
+  		"(lambda (n) (lambda (x) (+ x n)))",
   };
   init_global_variable();
   init_prims();
@@ -43,7 +32,6 @@ int main(int argc, char *argv[])
     write_raw_string(inputs[i], standard_out);
     write_raw_char('\n', standard_out);
     lisp_object_t *expr = read_object_from_string(inputs[i]);
-//    expr = compile_as_lambda(expr);
     expr = compile_object(expr, null_env);
     if (is_signaled(expr))
       writef(standard_out, "%?\n", expr);

@@ -149,6 +149,42 @@ void write_opcode(lt *opcode, lt *dest) {
   }
 }
 
+void write_n_spaces(int n, lt *dest) {
+	for (int i = 0; i < n; i++)
+		write_raw_char(' ', dest);
+}
+
+void write_compiled_function(lt *function, int indent, lt *dest) {
+	writef(dest, "#<COMPILED-FUNCTION %p\n", function);
+	for (int i = 0; i < vector_length(function_code(function)); i++) {
+		lt *ins = vector_value(function_code(function))[i];
+		write_n_spaces(indent, dest);
+		if (is_label(ins)) {
+			writef(dest, "%S:", ins);
+			int rest_width = 8 - (strlen(symbol_name(ins)) + 2);
+			write_n_spaces(rest_width, dest);
+			continue;
+		} else
+			write_raw_string("    ", dest);
+		write_raw_string(opcode_op(ins), dest);
+		int rest_width = 8 - strlen(opcode_op(ins));
+		write_n_spaces(rest_width, dest);
+		if (opcode_name(ins) == FN) {
+			write_compiled_function(op_fn_func(ins), output_file_colnum(dest), dest);
+		} else {
+			for (int j = 0; j < vector_length(opcode_oprands(ins)); j++) {
+				write_object(vector_value(opcode_oprands(ins))[j], dest);
+				if (j != vector_length(opcode_oprands(ins)) - 1)
+					write_raw_char(' ', dest);
+			}
+		}
+		write_raw_char('\n', dest);
+	}
+	for (int j = 0; j < indent; j++)
+		write_raw_char(' ', dest);
+	write_raw_char('>', dest);
+}
+
 void write_object(lt *x, lt *output_file) {
   assert(x != NULL);
   switch(type_of(x)) {
@@ -173,15 +209,8 @@ void write_object(lt *x, lt *output_file) {
     }
       break;
     case FUNCTION: {
-      writef(output_file, "#<COMPILED-FUNCTION %p\n", x);
-      lisp_object_t *code_vector = function_code(x);
-      assert(isvector(code_vector));
-      for (int i = 0; i < vector_length(code_vector); i++) {
-        writef(output_file, "\t%?", vector_value(code_vector)[i]);
-        if (i < vector_length(code_vector) - 1)
-          write_raw_char('\n', output_file);
-      }
-      write_raw_string(">", output_file);
+    	int indent = output_file_colnum(output_file);
+    	write_compiled_function(x, indent, output_file);
     }
       break;
     case EMPTY_LIST:

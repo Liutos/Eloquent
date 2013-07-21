@@ -315,81 +315,82 @@ lisp_object_t *make_vector(int length) {
 }
 
 /* Opcode constructor functions */
-lt *make_opcode(enum OPCODE_TYPE name, lt *oprands) {
+lt *make_opcode(enum OPCODE_TYPE name, char *op, lt *oprands) {
   lt *obj = make_object(OPCODE);
   opcode_name(obj) = name;
+  opcode_op(obj) = op;
   opcode_oprands(obj) = oprands;
   return obj;
 }
 
-lt *mkopcode(enum OPCODE_TYPE name, int arity, ...) {
+lt *mkopcode(enum OPCODE_TYPE name, char *op, int arity, ...) {
   lt *oprands = make_vector(arity);
   va_list ap;
   va_start(ap, arity);
   for (int i = 0; i < arity; i++)
     vector_value(oprands)[i] = va_arg(ap, lt *);
   vector_last(oprands) = arity - 1;
-  return make_opcode(name, oprands);
+  return make_opcode(name, op, oprands);
 }
 
 lisp_object_t *make_op_args(lisp_object_t *length) {
-  return mkopcode(ARGS, 1, length);
+  return mkopcode(ARGS, "ARGS", 1, length);
 }
 
 lisp_object_t *make_op_call(lisp_object_t *arity) {
-  return mkopcode(CALL, 1, arity);
+  return mkopcode(CALL, "CALL", 1, arity);
 }
 
 lisp_object_t *make_op_const(lisp_object_t *value) {
-  return mkopcode(CONST, 1, value);
+  return mkopcode(CONST, "CONST", 1, value);
 }
 
 lisp_object_t *make_op_fjump(lisp_object_t *label) {
-  return mkopcode(FJUMP, 1, label);
+  return mkopcode(FJUMP, "FJUMP", 1, label);
 }
 
 lisp_object_t *make_op_fn(lisp_object_t *func) {
-  return mkopcode(FN, 1, func);
+  return mkopcode(FN, "FN", 1, func);
 }
 
 lisp_object_t *make_op_gset(lisp_object_t *symbol) {
-  return mkopcode(GSET, 1, symbol);
+  return mkopcode(GSET, "GSET", 1, symbol);
 }
 
 lisp_object_t *make_op_gvar(lisp_object_t *symbol) {
-  return mkopcode(GVAR, 1, symbol);
+  return mkopcode(GVAR, "GVAR", 1, symbol);
 }
 
 lisp_object_t *make_op_jump(lisp_object_t *label) {
-  return mkopcode(JUMP, 1, label);
+  return mkopcode(JUMP, "JUMP", 1, label);
 }
 
 lt *make_op_lset(lt *i, lt *j, lt *symbol) {
-  return mkopcode(LSET, 3, i, j, symbol);
+  return mkopcode(LSET, "LSET", 3, i, j, symbol);
 }
 
 lt *make_op_lvar(lt *i, lt *j, lt *symbol) {
-  return mkopcode(LVAR, 3, i, j, symbol);
+  return mkopcode(LVAR, "LVAR", 3, i, j, symbol);
 }
 
 lt *make_op_macro(lt *func) {
-	return mkopcode(MACRO_FN, 1, func);
+	return mkopcode(MACRO_FN, "MACRO_FN", 1, func);
 }
 
 lisp_object_t *make_op_pop(void) {
-  return mkopcode(POP, 0);
+  return mkopcode(POP, "POP", 0);
 }
 
 lisp_object_t *make_op_prim(lisp_object_t *nargs) {
-  return mkopcode(PRIM, 1, nargs);
+  return mkopcode(PRIM, "PRIM", 1, nargs);
 }
 
 lisp_object_t *make_op_return(void) {
-  return mkopcode(RETURN, 0);
+  return mkopcode(RETURN, "RETURN", 0);
 }
 
 lt *make_op_catch(void) {
-  return mkopcode(CATCH, 0);
+  return mkopcode(CATCH, "CATCH", 0);
 }
 
 /* TODO: Use a hash table for storing symbols. */

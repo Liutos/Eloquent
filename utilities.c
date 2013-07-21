@@ -78,3 +78,7 @@ char *sb2string(string_builder_t *sb) {
   sb->string[sb->index] = '\0';
   return sb->string;
 }
+
+int is_label(lt *object) {
+  return issymbol(object);
+}

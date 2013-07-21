@@ -19,10 +19,6 @@ lt *compile_object(lt *, lt *);
 lt *compile_as_lambda(lt *);
 lt *run_by_llam(lt *);
 
-int is_label(lt *object) {
-  return issymbol(object);
-}
-
 int is_addr_op(lt *op) {
   switch (opcode_type(op)) {
     case JUMP: case FJUMP:
