@@ -156,7 +156,10 @@ void write_n_spaces(int n, lt *dest) {
 
 void write_compiled_function(lt *function, int indent, lt *dest) {
 	writef(dest, "#<COMPILED-FUNCTION %p\n", function);
-	assert(isvector(function_code(function)));
+	if (!isvector(function_code(function))) {
+	  writef(standard_out, "type_of(function_code(function)) is %S\n", lt_type_of(function_code(function)));
+	  assert(isvector(function_code(function)));
+	}
 	for (int i = 0; i < vector_length(function_code(function)); i++) {
 		lt *ins = vector_value(function_code(function))[i];
 		write_n_spaces(indent, dest);
@@ -344,7 +347,7 @@ lt *lt_simple_apply(lt *function, lt *args) {
   lt *compile_to_bytecode(lt *);
   lt *run_by_llam(lt *);
   assert(isprimitive(function) || isfunction(function));
-  assert(ispair(args));
+  assert(ispair(args) || isnull(args));
   lt *expr = make_pair(function, args);
   return run_by_llam(compile_to_bytecode(expr));
 }
@@ -729,6 +732,8 @@ lisp_object_t *lt_type_of(lisp_object_t *object) {
     mktype(FUNCTION);
     mktype(PRIMITIVE_FUNCTION);
     mktype(VECTOR);
+    mktype(MACRO);
+    mktype(PAIR);
     default :
       fprintf(stdout, "Unknown type %d of object\n", type_of(object));
       exit(1);
