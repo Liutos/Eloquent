@@ -53,6 +53,9 @@ extern F2(lt_eql);
 extern F2(lt_equal);
 extern F0(lt_object_size);
 extern F1(lt_type_of);
+extern F1(lt_function_arity);
+extern F2(lt_simple_apply);
+
 extern lt *read_object_from_string(char *);
 extern void writef(lt *, const char *, ...);
 extern void write_expr(char *, lt *);

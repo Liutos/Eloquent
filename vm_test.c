@@ -21,8 +21,8 @@
 int main(int argc, char *argv[])
 {
   char *inputs[] = {
-      "((lambda (x y) (if #t x y)) 1 2)",
-      "((lambda (x) ((lambda (y) (+ x y)) 2)) 1)",
+//      "(function-arity (symbol-value '+))",
+      "(simple-apply (symbol-value '+) '(1 2))",
   };
   init_global_variable();
   init_prims();

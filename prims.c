@@ -339,6 +339,25 @@ lt *lt_append2(lt *l1, lt *l2) {
 }
 
 /* Primitives */
+/* Function */
+lt *lt_simple_apply(lt *function, lt *args) {
+  lt *compile_to_bytecode(lt *);
+  lt *run_by_llam(lt *);
+  assert(isprimitive(function) || isfunction(function));
+  assert(ispair(args));
+  lt *expr = make_pair(function, args);
+  return run_by_llam(compile_to_bytecode(expr));
+}
+
+lt *lt_function_arity(lt *function) {
+  lt *lt_list_length(lt *);
+  assert(isprimitive(function) || isfunction(function));
+  if (isprimitive(function))
+    return make_fixnum(primitive_arity(function));
+  else
+    return lt_list_length(function_args(function));
+}
+
 /* Input Port */
 lt *lt_read_char(lt *in_port) {
   assert(isinput_file(in_port));
@@ -964,6 +983,9 @@ void init_prims(void) {
   /* Character */
   ADD(1, lt_char_code, "char-code");
   ADD(1, lt_code_char, "code-char");
+  /* Function */
+  ADD(2, lt_simple_apply, "simple-apply");
+  ADD(1, lt_function_arity, "function-arity");
   /* Input File */
   ADD(1, lt_read_char, "read-char");
   ADD(1, lt_read_line, "read-line");
