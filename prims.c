@@ -156,6 +156,7 @@ void write_n_spaces(int n, lt *dest) {
 
 void write_compiled_function(lt *function, int indent, lt *dest) {
 	writef(dest, "#<COMPILED-FUNCTION %p\n", function);
+	assert(isvector(function_code(function)));
 	for (int i = 0; i < vector_length(function_code(function)); i++) {
 		lt *ins = vector_value(function_code(function))[i];
 		write_n_spaces(indent, dest);
