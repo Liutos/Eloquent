@@ -22,7 +22,9 @@
 int main(int argc, char *argv[])
 {
   char *inputs[] = {
-      "(lambda () (if #t 1 2))",
+      "(set! a 1)",
+      "(set! a-plus-one (macro () '(+ a 1)))",
+      "(a-plus-one)",
   };
   init_global_variable();
   init_prims();

@@ -21,8 +21,9 @@
 int main(int argc, char *argv[])
 {
   char *inputs[] = {
-//      "(function-arity (symbol-value '+))",
-      "(simple-apply (symbol-value '+) '(1 2))",
+      "(set! a 1)",
+      "(set! a-plus-one (macro () '(+ a 1)))",
+      "(a-plus-one)",
   };
   init_global_variable();
   init_prims();

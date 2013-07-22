@@ -88,6 +88,8 @@ pub lisp_object_t *run_by_llam(lisp_object_t *code_vector) {
         break;
       case CALL: {
         lisp_object_t *func = lt_vector_pop(stack);
+        if (ismacro(func))
+          func = macro_procedure(func);
         if (isprimitive(func)) {
 //        	This is possible because the first element of a application list
 //        	might be a compound expression, and this compound one will return
@@ -97,7 +99,10 @@ pub lisp_object_t *run_by_llam(lisp_object_t *code_vector) {
         	lt_vector_push(stack, func);
         	goto call_primitive;
         }
-        assert(isfunction(func));
+        if (!isfunction(func)) {
+          writef(standard_out, "lt_type_of(func) is %?\n", lt_type_of(func));
+          assert(isfunction(func));
+        }
         lisp_object_t *retaddr = make_retaddr(code, env, pc, throw_exception);
         return_stack = make_pair(retaddr, return_stack);
         code = function_code(func);
@@ -152,7 +157,7 @@ pub lisp_object_t *run_by_llam(lisp_object_t *code_vector) {
         lt_vector_push(stack, value);
       }
         break;
-//        FIXME: Fix the wrong implementation of user-defined macro.
+//        DONE: Fix the wrong implementation of user-defined macro.
       case MACROFN: {
         lisp_object_t *func = op_macro_func(ins);
         func = make_function(env, the_empty_list, function_code(func));
