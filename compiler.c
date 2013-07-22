@@ -18,7 +18,6 @@
 lt *assemble(lt *);
 lt *compile_object(lt *, lt *);
 lt *compile_as_lambda(lt *);
-lt *run_by_llam(lt *);
 
 int is_addr_op(lt *op) {
   switch (opcode_type(op)) {
@@ -83,6 +82,11 @@ lt *asm_second_pass(lt *code, lt *length, lt *labels) {
         ins = change_addr(ins, labels);
       if (opcode_name(ins) == FN)
         function_code(op_fn_func(ins)) = assemble(function_code(op_fn_func(ins)));
+      if (opcode_name(ins) == MACROFN) {
+        lt *func = op_macro_func(ins);
+        assert(isfunction(func));
+        function_code(func) = assemble(function_code(func));
+      }
       vector_value(code_vector)[index] = ins;
       vector_last(code_vector)++;
       index++;
@@ -225,8 +229,6 @@ lt *expand_macro(lt *form) {
       }
     } else {
       lt *args = pair_tail(form);
-//      result = compile_as_lambda(make_pair(proc, args));
-//      result = run_by_llam(result);
       result = lt_simple_apply(proc, args);
     }
     return expand_macro(result);
