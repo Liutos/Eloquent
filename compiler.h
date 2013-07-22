@@ -12,6 +12,6 @@
 
 extern lt *compile_as_lambda(lt *);
 extern lt *compile_object(lt *, lt *);
-extern lt *assemble(lt *);
+extern lt *compile_to_bytecode(lt *);
 
 #endif /* COMPILER_H_ */

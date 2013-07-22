@@ -396,3 +396,7 @@ lisp_object_t *compile_as_lambda(lisp_object_t *form) {
   lisp_object_t *result = compile_lambda(make_empty_list(), list1(form), null_env);
   return result;
 }
+
+lt *compile_to_bytecode(lt *form) {
+  return assemble(compile_object(form, null_env));
+}

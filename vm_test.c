@@ -29,9 +29,7 @@ int main(int argc, char *argv[])
   for (int i = 0; i < sizeof(inputs) / sizeof(char *); i++) {
     writef(standard_out, ">> %s\n", make_string(inputs[i]));
     lisp_object_t *expr = read_object_from_string(inputs[i]);
-//    expr = compile_as_lambda(expr);
-    expr = compile_object(expr, null_env);
-    expr = assemble(expr);
+    expr = compile_to_bytecode(expr);
     expr = run_by_llam(expr);
     if (is_signaled(expr))
       writef(standard_out, "%?\n", expr);
