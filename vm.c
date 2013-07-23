@@ -68,6 +68,7 @@ pub lisp_object_t *run_by_llam(lisp_object_t *code_vector) {
 #define vlast(v, n) lt_vector_last_nth(v, make_fixnum(n))
 
   assert(isvector(code_vector));
+  int nargs = 0;
   int pc = 0;
   int throw_exception = TRUE;
   lisp_object_t *stack = make_vector(10);
@@ -87,9 +88,24 @@ pub lisp_object_t *run_by_llam(lisp_object_t *code_vector) {
       }
         break;
       case ARGSD: {
-        printf("Unimplemented yet.\n");
-        exit(1);
+//        Assume the arity of subprogram is N, then the last nargs - N elements
+//        belongs to the last parameter of this subprogram. Therefore, collects
+//        this nargs - N elements into a list as one argument, and collects
+//        all the remaining arguments into one array.
+        lt *rest = make_empty_list();
+        for (int i = 0; i < nargs - fixnum_value(op_argsd_arity(ins)); i++) {
+          lt *arg = lt_vector_pop(stack);
+          rest = make_pair(arg, rest);
+        }
+        lt_vector_push(stack, rest);
+        lt *args = make_vector(fixnum_value(op_args_arity(ins)) + 1);
+        for (int i = fixnum_value(op_argsd_arity(ins)); i >= 0; i--) {
+          lt *arg = lt_vector_pop(stack);
+          vector_value(args)[i] = arg;
+        }
+        env = make_pair(args, env);
       }
+        break;
       case CALL: {
         lisp_object_t *func = lt_vector_pop(stack);
         if (ismacro(func))
@@ -113,6 +129,7 @@ pub lisp_object_t *run_by_llam(lisp_object_t *code_vector) {
         env = function_env(func);
         pc = -1;
         throw_exception = TRUE;
+        nargs = fixnum_value(op_call_arity(ins));
       }
         break;
       case CATCH:

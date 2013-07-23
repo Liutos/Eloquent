@@ -254,12 +254,12 @@ lisp_object_t *compile_begin(lisp_object_t *exps, lisp_object_t *env) {
 
 lt *gen_args(lt *args, int nrequired) {
   if (isnull(args))
-    return gen(ARGS, nrequired);
-  else if (issymbol(args))
-    return gen(ARGSD, nrequired);
-  else if (ispair(args) && issymbol(pair_head(args)))
+    return gen(ARGS, make_fixnum(nrequired));
+  else if (issymbol(args)) {
+    return gen(ARGSD, make_fixnum(nrequired));
+  } else if (ispair(args) && issymbol(pair_head(args))) {
     return gen_args(pair_tail(args), nrequired + 1);
-  else {
+  } else {
     printf("Illegal argument list");
     exit(1);
   }
@@ -277,8 +277,9 @@ lt *make_proper_args(lt *args) {
 lt *compile_lambda(lt *args, lt *body, lt *env) {
 //  assert(is_all_symbol(args));
 //  lisp_object_t *len = lt_list_length(args);
+  lt *arg_ins = gen_args(args, 0);
   lisp_object_t *code =
-      seq(gen_args(args, 0),
+      seq(arg_ins,
           compile_begin(body, make_pair(make_proper_args(args), env)),
           gen(RETURN));
   lisp_object_t *func = make_function(env, args, code);

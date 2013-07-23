@@ -21,9 +21,7 @@
 int main(int argc, char *argv[])
 {
   char *inputs[] = {
-      "(set! a 1)",
-      "(set! a-plus-one (macro () '(+ a 1)))",
-      "(a-plus-one)",
+      "((lambda (x . y) (cons 4 y)) 1 2 3)",
   };
   init_global_variable();
   init_prims();
