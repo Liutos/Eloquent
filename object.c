@@ -334,6 +334,10 @@ lt *mkopcode(enum OPCODE_TYPE name, char *op, int arity, ...) {
   return make_opcode(name, op, oprands);
 }
 
+lt *make_op_argsd(lt *length) {
+  return mkopcode(ARGSD, "ARGSD", 1, length);
+}
+
 lisp_object_t *make_op_args(lisp_object_t *length) {
   return mkopcode(ARGS, "ARGS", 1, length);
 }

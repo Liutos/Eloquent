@@ -110,6 +110,9 @@ lisp_object_t *gen(enum TYPE opcode, ...) {
   va_start(ap, opcode);
   lisp_object_t *ins;
   switch (opcode) {
+    case ARGSD:
+      ins = make_op_argsd(va_arg(ap, lt *));
+      break;
     case ARGS: {
       lisp_object_t *length = va_arg(ap, lisp_object_t *);
       ins = make_op_args(length);
@@ -249,12 +252,35 @@ lisp_object_t *compile_begin(lisp_object_t *exps, lisp_object_t *env) {
   }
 }
 
+lt *gen_args(lt *args, int nrequired) {
+  if (isnull(args))
+    return gen(ARGS, nrequired);
+  else if (issymbol(args))
+    return gen(ARGSD, nrequired);
+  else if (ispair(args) && issymbol(pair_head(args)))
+    return gen_args(pair_tail(args), nrequired + 1);
+  else {
+    printf("Illegal argument list");
+    exit(1);
+  }
+}
+
+lt *make_proper_args(lt *args) {
+  if (isnull(args))
+    return make_empty_list();
+  else if (!ispair(args))
+    return list1(args);
+  else
+    return make_pair(pair_head(args), make_proper_args(pair_tail(args)));
+}
+
 lt *compile_lambda(lt *args, lt *body, lt *env) {
-  assert(is_all_symbol(args));
-  lisp_object_t *len = lt_list_length(args);
-  lisp_object_t *code = seq(gen(ARGS, len),
-                            compile_begin(body, make_pair(args, env)),
-                            gen(RETURN));
+//  assert(is_all_symbol(args));
+//  lisp_object_t *len = lt_list_length(args);
+  lisp_object_t *code =
+      seq(gen_args(args, 0),
+          compile_begin(body, make_pair(make_proper_args(args), env)),
+          gen(RETURN));
   lisp_object_t *func = make_function(env, args, code);
   return func;
 }

@@ -99,6 +99,9 @@ void write_opcode(lt *opcode, lt *dest) {
     case ARGS: 
     	writef(dest, "#<ARGS %d>", op_args_arity(opcode)); 
     	break;
+    case ARGSD:
+      writef(dest, "#<ARGSD %d>", op_argsd_arity(opcode));
+      break;
     case CALL: 
     	writef(dest, "#<CALL %d>", op_call_arity(opcode)); 
     	break;
@@ -995,6 +998,7 @@ void init_prims(void) {
   ADD(1, lt_read_char, "read-char");
   ADD(1, lt_read_line, "read-line");
   /* List */
+  ADD(2, make_pair, "cons");
   ADD(1, lt_head, "head");
   ADD(1, lt_list_length, "list-length");
   ADD(1, lt_list_nreverse, "list-reverse!");

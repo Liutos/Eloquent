@@ -86,6 +86,10 @@ pub lisp_object_t *run_by_llam(lisp_object_t *code_vector) {
         env = make_pair(args, env);
       }
         break;
+      case ARGSD: {
+        printf("Unimplemented yet.\n");
+        exit(1);
+      }
       case CALL: {
         lisp_object_t *func = lt_vector_pop(stack);
         if (ismacro(func))

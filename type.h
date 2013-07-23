@@ -56,6 +56,7 @@ enum TYPE {
 
 enum OPCODE_TYPE {
   ARGS,
+  ARGSD,
   CALL,
   CATCH,
   CONST,
@@ -188,6 +189,7 @@ struct string_builder_t {
 #define oparg1(x) opargn(x, 0)
 #define oparg2(x) opargn(x, 1)
 #define oparg3(x) opargn(x, 2)
+#define op_argsd_arity(x) oparg1(x)
 #define op_args_arity(x) oparg1(x)
 #define op_call_arity(x) oparg1(x)
 #define op_const_value(x) oparg1(x)
