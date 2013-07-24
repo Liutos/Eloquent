@@ -630,6 +630,16 @@ lt *lt_vector_set(lt *vector, lt *index, lt *new_value) {
   return vector;
 }
 
+lt *lt_vector_to_list(lt *vector) {
+  lt *lt_list_nreverse(lt *);
+  int length = vector_length(vector);
+  lt *list = make_empty_list();
+  for (int i = 0; i < length; i++) {
+    list = make_pair(vector_value(vector)[i], list);
+  }
+  return lt_list_nreverse(list);
+}
+
 /* List */
 lisp_object_t *lt_append(lisp_object_t *list0, ...) {
   va_list ap;
@@ -745,6 +755,14 @@ lisp_object_t *lt_type_of(lisp_object_t *object) {
       fprintf(stdout, "Unknown type %d of object\n", type_of(object));
       exit(1);
   }
+}
+
+lt *lt_is_constant(lt *object) {
+  if (is_tag_list(object, S("quote")))
+    return make_true();
+  if (!ispair(object) && !issymbol(object))
+    return make_true();
+  return make_false();
 }
 
 /* Reader */
@@ -1040,7 +1058,9 @@ void init_prims(void) {
   ADD(1, lt_list_to_vector, "list->vector");
   ADD(2, lt_vector_ref, "vector-ref");
   ADD(3, lt_vector_set, "vector-set!");
+  ADD(1, lt_vector_to_list, "vector->list");
   /* General */
+  ADD(1, lt_is_constant, "is-constant?");
   ADD(2, lt_eq, "eq");
   ADD(2, lt_eql, "eql");
   ADD(2, lt_equal, "equal");

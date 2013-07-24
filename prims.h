@@ -48,11 +48,13 @@ extern F1(lt_vector_pop);
 extern F2(lt_vector_push);
 extern F2(lt_vector_reF);
 extern F3(lt_vector_set);
+extern F1(lt_vector_to_list);
 extern F2(lt_eq);
 extern F2(lt_eql);
 extern F2(lt_equal);
 extern F0(lt_object_size);
 extern F1(lt_type_of);
+extern F1(lt_is_constant);
 extern F1(lt_function_arity);
 extern F2(lt_simple_apply);
 
