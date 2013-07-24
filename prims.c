@@ -963,6 +963,16 @@ lisp_object_t *read_object(lisp_object_t *input_file) {
     	return read_vector(input_file);
     case '\'':
       return make_pair(S("quote"), list1(read_object(input_file)));
+    case '`':
+      return make_pair(S("quasiquote"), list1(read_object(input_file)));
+    case ',': {
+      c = get_char(input_file);
+      if (c == '@')
+        return make_pair(S("unquote-splicing"), list1(read_object(input_file)));
+      unget_char(c, input_file);
+      return make_pair(S("unquote"), list1(read_object(input_file)));
+    }
+      break;
     default :
     read_symbol_label:
       return read_symbol(c, input_file);
@@ -973,6 +983,10 @@ lisp_object_t *read_object_from_string(char *text) {
   FILE *in = fmemopen(text, strlen(text), "r");
   lisp_object_t *inf = make_input_file(in);
   return read_object(inf);
+}
+
+lt *lt_read_from_string(lt *string) {
+  return read_object_from_string(string_value(string));
 }
 
 void init_prims(void) {
@@ -1001,6 +1015,7 @@ void init_prims(void) {
   /* Input File */
   ADD(1, lt_read_char, "read-char");
   ADD(1, lt_read_line, "read-line");
+  ADD(1, lt_read_from_string, "read-from-string");
   /* List */
   ADD(2, lt_is_tag_list, "is-tag-list?");
   ADD(2, make_pair, "cons");

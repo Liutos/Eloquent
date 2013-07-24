@@ -21,10 +21,9 @@
 int main(int argc, char *argv[])
 {
   char *inputs[] = {
-      "(is-tag-list? '(1 2 3) 1)",
-      "(is-tag-list? '(a b c) 'a)",
-      "(is-tag-list? '(\"abc\") \"abc\")",
-      "(is-tag-list? '(1.1 2.2) 1.1)",
+      "(read-from-string \"`abc\")",
+      "(read-from-string \"`(a ,b)\")",
+      "(read-from-string \"`(a ,@c)\")",
   };
   init_global_variable();
   init_prims();
