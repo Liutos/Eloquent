@@ -21,10 +21,11 @@
 int main(int argc, char *argv[])
 {
   char *inputs[] = {
-      "(is-constant? 1)",
-      "(is-constant? 'a)",
-      "(is-constant? ''a)",
-      "(vector->list [1 2 3])",
+      "'123",
+      "'abc",
+      "(read-from-string \"`abc\")",
+      "(read-from-string \"`,a\")",
+      "(read-from-string \"`,@c\")",
   };
   init_global_variable();
   init_prims();

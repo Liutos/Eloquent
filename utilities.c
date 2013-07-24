@@ -27,6 +27,14 @@ lt *list1(lt *element) {
   return make_pair(element, make_empty_list());
 }
 
+lt *list2(lt *e1, lt *e2) {
+  return make_pair(e1, list1(e2));
+}
+
+lt *list3(lt *e1, lt *e2, lt *e3) {
+  return make_pair(e1, list2(e2, e3));
+}
+
 lt *signal_exception(char *message) {
   return make_exception(message, TRUE);
 }

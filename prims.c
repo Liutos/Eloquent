@@ -980,15 +980,15 @@ lisp_object_t *read_object(lisp_object_t *input_file) {
     case '[':
     	return read_vector(input_file);
     case '\'':
-      return make_pair(S("quote"), list1(read_object(input_file)));
+      return list2(S("quote"), read_object(input_file));
     case '`':
-      return make_pair(S("quasiquote"), list1(read_object(input_file)));
+      return list2(S("quasiquote"), read_object(input_file));
     case ',': {
       c = get_char(input_file);
       if (c == '@')
-        return make_pair(S("unquote-splicing"), list1(read_object(input_file)));
+        return list2(S("unquote-splicing"), read_object(input_file));
       unget_char(c, input_file);
-      return make_pair(S("unquote"), list1(read_object(input_file)));
+      return list2(S("unquote"), read_object(input_file));
     }
       break;
     default :
