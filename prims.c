@@ -647,6 +647,10 @@ lisp_object_t *lt_head(lisp_object_t *pair) {
   return pair_head(pair);
 }
 
+lt *lt_is_tag_list(lt *list, lt *tag) {
+  return booleanize(is_tag_list(list, tag));
+}
+
 lt *lt_list_equal(lt *l1, lt *l2) {
   lt *lt_equal(lt *, lt *);
   if (l1 == l2)
@@ -998,6 +1002,7 @@ void init_prims(void) {
   ADD(1, lt_read_char, "read-char");
   ADD(1, lt_read_line, "read-line");
   /* List */
+  ADD(2, lt_is_tag_list, "is-tag-list?");
   ADD(2, make_pair, "cons");
   ADD(1, lt_head, "head");
   ADD(1, lt_list_length, "list-length");

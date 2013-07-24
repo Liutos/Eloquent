@@ -82,3 +82,7 @@ char *sb2string(string_builder_t *sb) {
 int is_label(lt *object) {
   return issymbol(object);
 }
+
+int is_tag_list(lisp_object_t *object, lisp_object_t *tag) {
+  return ispair(object) && (pair_head(object) == tag);
+}

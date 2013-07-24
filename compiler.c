@@ -363,10 +363,6 @@ lisp_object_t *gen_var(lisp_object_t *symbol, lisp_object_t *env) {
   }
 }
 
-int is_tag_list(lisp_object_t *object, lisp_object_t *tag) {
-  return ispair(object) && (pair_head(object) == tag);
-}
-
 int is_primitive_fun(lt *variable) {
   return issymbol(variable) &&
       is_symbol_bound(variable) &&

@@ -21,5 +21,6 @@ extern string_builder_t *make_str_builder(void);
 extern void sb_add_char(string_builder_t *, char);
 extern char *sb2string(string_builder_t *);
 extern int is_label(lt *);
+extern int is_tag_list(lt *list, lt *tag);
 
 #endif /* UTILITIES_H_ */
