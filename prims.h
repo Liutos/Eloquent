@@ -74,4 +74,9 @@ extern void write_object(lt *, lt *);
 
 #define seq(...) lt_append(__VA_ARGS__, NULL)
 
+#define first(x) lt_raw_nth((x), 0)
+#define second(x) lt_raw_nth((x), 1)
+#define third(x) lt_raw_nth((x), 2)
+#define fourth(x) lt_raw_nth((x), 3)
+
 #endif /* PRIMS_H_ */

@@ -1120,20 +1120,20 @@ lt *quasiq(lt *x) {
   if (is_tag_list(x, S("unquote"))) {
     assert(!isnull(pair_tail(x)));
     assert(isnull(pair_tail(pair_tail(x))));
-    return lt_raw_nth(x, 1);
+    return second(x);
   }
   if (is_tag_list(x, S("quasiquote"))) {
     assert(!isnull(pair_tail(x)));
     assert(isnull(pair_tail(pair_tail(x))));
-    quasiq(quasiq(lt_raw_nth(x, 1)));
+    quasiq(quasiq(second(x)));
   }
   if (is_tag_list(pair_head(x), S("unquote-splicing"))) {
     if (isnull(pair_tail(x)))
-      return lt_raw_nth(pair_head(x), 1);
+      return second(pair_head(x));
     else
       return
           list3(S("append"),
-                lt_raw_nth(pair_head(x), 1),
+                second(pair_head(x)),
                 quasiq(pair_tail(x)));
   }
   if (ispair(x))

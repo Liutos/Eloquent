@@ -194,11 +194,6 @@ int islength1(lisp_object_t *list) {
   return isnull(pair_tail(list));
 }
 
-#define first(x) lt_raw_nth((x), 0)
-#define second(x) lt_raw_nth((x), 1)
-#define third(x) lt_raw_nth((x), 2)
-#define fourth(x) lt_raw_nth((x), 3)
-
 lisp_object_t *compile_args(lisp_object_t *args, lisp_object_t *env) {
   if (isnull(args))
     return the_empty_list;

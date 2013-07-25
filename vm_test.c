@@ -24,6 +24,9 @@ int main(int argc, char *argv[])
       "(read-from-string \"`(a ,b ,@c d)\")",
       "(expand-macro '`(a ,b ,@c d))",
 //      "`(a ,b ,@c d)",
+      "(read-from-string \"`,'*standard-out*\")",
+      "(expand-macro '`,'*standard-out*)",
+      "`,'*standard-out*",
   };
   init_global_variable();
   init_prims();
