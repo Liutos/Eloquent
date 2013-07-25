@@ -24,5 +24,6 @@ extern void sb_add_char(string_builder_t *, char);
 extern char *sb2string(string_builder_t *);
 extern int is_label(lt *);
 extern int is_tag_list(lt *list, lt *tag);
+extern int is_macro_form(lt *);
 
 #endif /* UTILITIES_H_ */

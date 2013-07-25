@@ -765,6 +765,31 @@ lt *lt_is_constant(lt *object) {
   return make_false();
 }
 
+lt *lt_expand_macro(lt *form) {
+  if (is_macro_form(form)) {
+      lt *op = symbol_value(pair_head(form));
+      lt *proc = macro_procedure(op);
+      assert(isprimitive(proc) || isfunction(proc));
+      lt *result;
+      if (isprimitive(proc)) {
+        switch (primitive_arity(proc)) {
+          case 0:
+            result = ((f0) primitive_func(proc))();
+            break;
+          default:
+            printf("Macro with arity %d is unsupported yet.\n",
+                   primitive_arity(proc));
+            exit(1);
+        }
+      } else {
+        lt *args = pair_tail(form);
+        result = lt_simple_apply(proc, args);
+      }
+      return lt_expand_macro(result);
+    } else
+      return form;
+}
+
 /* Reader */
 int peek_char(lisp_object_t *input_file) {
   FILE *in = input_file_file(input_file);
@@ -1064,6 +1089,7 @@ void init_prims(void) {
   ADD(2, lt_eq, "eq");
   ADD(2, lt_eql, "eql");
   ADD(2, lt_equal, "equal");
+  ADD(1, lt_expand_macro, "expand-macro");
   ADD(0, lt_object_size, "object-size");
   ADD(1, lt_type_of, "type-of");
 }

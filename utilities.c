@@ -94,3 +94,10 @@ int is_label(lt *object) {
 int is_tag_list(lisp_object_t *object, lisp_object_t *tag) {
   return ispair(object) && (pair_head(object) == tag);
 }
+
+int is_macro_form(lt *form) {
+  if (!ispair(form))
+    return FALSE;
+  lt *symbol = pair_head(form);
+  return is_symbol_bound(symbol) && ismacro(symbol_value(symbol));
+}

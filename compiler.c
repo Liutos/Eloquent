@@ -206,38 +206,31 @@ lisp_object_t *compile_args(lisp_object_t *args, lisp_object_t *env) {
     return lt_append2(compile_object(pair_head(args), env),
                       compile_args(pair_tail(args), env));
 }
-
-int is_macro_form(lt *form) {
-  if (!ispair(form))
-    return FALSE;
-  lt *symbol = pair_head(form);
-  return is_symbol_bound(symbol) && ismacro(symbol_value(symbol));
-}
-
-lt *expand_macro(lt *form) {
-  if (is_macro_form(form)) {
-    lt *op = symbol_value(pair_head(form));
-    lt *proc = macro_procedure(op);
-    assert(isprimitive(proc) || isfunction(proc));
-    lt *result;
-    if (isprimitive(proc)) {
-      switch (primitive_arity(proc)) {
-        case 0:
-          result = ((f0) primitive_func(proc))();
-          break;
-        default:
-          printf("Macro with arity %d is unsupported yet.\n",
-                 primitive_arity(proc));
-          exit(1);
-      }
-    } else {
-      lt *args = pair_tail(form);
-      result = lt_simple_apply(proc, args);
-    }
-    return expand_macro(result);
-  } else
-    return form;
-}
+//
+//lt *expand_macro(lt *form) {
+//  if (is_macro_form(form)) {
+//    lt *op = symbol_value(pair_head(form));
+//    lt *proc = macro_procedure(op);
+//    assert(isprimitive(proc) || isfunction(proc));
+//    lt *result;
+//    if (isprimitive(proc)) {
+//      switch (primitive_arity(proc)) {
+//        case 0:
+//          result = ((f0) primitive_func(proc))();
+//          break;
+//        default:
+//          printf("Macro with arity %d is unsupported yet.\n",
+//                 primitive_arity(proc));
+//          exit(1);
+//      }
+//    } else {
+//      lt *args = pair_tail(form);
+//      result = lt_simple_apply(proc, args);
+//    }
+//    return expand_macro(result);
+//  } else
+//    return form;
+//}
 
 lisp_object_t *compile_begin(lisp_object_t *exps, lisp_object_t *env) {
   if (isnull(exps))
@@ -377,7 +370,7 @@ pub lisp_object_t *compile_object(lisp_object_t *object, lisp_object_t *env) {
   if (!ispair(object))
     return gen(CONST, object);
   if (is_macro_form(object))
-    return compile_object(expand_macro(object), env);
+    return compile_object(lt_expand_macro(object), env);
   if (is_tag_list(object, S("quote")))
     return gen(CONST, second(object));
   if (is_tag_list(object, S("begin")))
