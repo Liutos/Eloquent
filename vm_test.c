@@ -21,7 +21,7 @@
 int main(int argc, char *argv[])
 {
   char *inputs[] = {
-      "(list 1 2 3)",
+      "(append '(1) '(2 3) '(4))",
   };
   init_global_variable();
   init_prims();

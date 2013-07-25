@@ -66,13 +66,13 @@ extern void write_expr(char *, lt *);
 extern void init_prims(void);
 extern lt *lt_append2(lt *, lt *);
 extern lt *lt_raw_nth(lt *, int);
-extern lt *lt_append(lt *, ...);
+extern lt *lt_append_n(lt *, ...);
 extern lt *lt_raw_nthtail(lt *, int);
 extern void write_raw_string(char *, lt *);
 extern void write_raw_char(char, lt *);
 extern void write_object(lt *, lt *);
 
-#define seq(...) lt_append(__VA_ARGS__, NULL)
+#define seq(...) lt_append_n(__VA_ARGS__, NULL)
 
 #define first(x) lt_raw_nth((x), 0)
 #define second(x) lt_raw_nth((x), 1)

@@ -337,13 +337,6 @@ lt *lt_raw_nthtail(lt *list, int n) {
   return list;
 }
 
-lt *lt_append2(lt *l1, lt *l2) {
-  if (isnull(l1))
-    return l2;
-  else
-    return make_pair(pair_head(l1), lt_append2(pair_tail(l1), l2));
-}
-
 /* Primitives */
 /* Function */
 lt *lt_simple_apply(lt *function, lt *args) {
@@ -641,15 +634,10 @@ lt *lt_vector_to_list(lt *vector) {
 }
 
 /* List */
-lisp_object_t *lt_append(lisp_object_t *list0, ...) {
-  va_list ap;
-  va_start(ap, list0);
-  lisp_object_t *next = va_arg(ap, lisp_object_t *);
-  while (next != NULL) {
-    list0 = lt_append2(list0, next);
-    next = va_arg(ap, lisp_object_t *);
-  }
-  return list0;
+lt *lt_append(lt *lists) {
+  if (isnull(lists))
+    return make_empty_list();
+  return lt_append2(pair_head(lists), lt_append(pair_tail(lists)));
 }
 
 lisp_object_t *lt_head(lisp_object_t *pair) {
@@ -1076,6 +1064,7 @@ void init_prims(void) {
   ADD(1, FALSE, lt_read_line, "read-line");
   ADD(1, FALSE, lt_read_from_string, "read-from-string");
   /* List */
+  ADD(1, TRUE, lt_append, "append");
   ADD(2, FALSE, lt_is_tag_list, "is-tag-list?");
   ADD(2, FALSE, make_pair, "cons");
   ADD(1, FALSE, lt_head, "head");
