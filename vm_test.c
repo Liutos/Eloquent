@@ -21,11 +21,9 @@
 int main(int argc, char *argv[])
 {
   char *inputs[] = {
-      "(set! x 1)",
-      "(set! list '(2 3 4))",
-      "(expand-macro '(push x list))",
-      "(push x list)",
-      "list",
+      "(read-from-string \"`(a ,b ,@c d)\")",
+      "(expand-macro '`(a ,b ,@c d))",
+//      "`(a ,b ,@c d)",
   };
   init_global_variable();
   init_prims();

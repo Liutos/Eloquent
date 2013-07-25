@@ -777,6 +777,11 @@ lt *lt_expand_macro(lt *form) {
           case 0:
             result = ((f0)primitive_func(proc))();
             break;
+          case 1: {
+            lt *arg1 = lt_raw_nth(args, 0);
+            result = ((f1)primitive_func(proc))(arg1);
+          }
+            break;
           case 2: {
             lt *arg1 = lt_raw_nth(args, 0);
             lt *arg2 = lt_raw_nth(args, 1);
@@ -1112,7 +1117,28 @@ lt *quasiq(lt *x) {
     else
       return list2(S("quote"), x);
   }
-  printf("Unknown case of quasiquote\n");
+  if (is_tag_list(x, S("unquote"))) {
+    assert(!isnull(pair_tail(x)));
+    assert(isnull(pair_tail(pair_tail(x))));
+    return lt_raw_nth(x, 1);
+  }
+  if (is_tag_list(x, S("quasiquote"))) {
+    assert(!isnull(pair_tail(x)));
+    assert(isnull(pair_tail(pair_tail(x))));
+    quasiq(quasiq(lt_raw_nth(x, 1)));
+  }
+  if (is_tag_list(pair_head(x), S("unquote-splicing"))) {
+    if (isnull(pair_tail(x)))
+      return lt_raw_nth(pair_head(x), 1);
+    else
+      return
+          list3(S("append"),
+                lt_raw_nth(pair_head(x), 1),
+                quasiq(pair_tail(x)));
+  }
+  if (ispair(x))
+    return list3(S("cons"), quasiq(pair_head(x)), quasiq(pair_tail(x)));
+  writef(standard_out, "Unknown case of quasiquote %?\n", x);
   exit(1);
 }
 
@@ -1125,4 +1151,5 @@ void init_macros(void) {
   } while(0)
 
   DM(2, lt_push_macro, "push");
+  DM(1, quasiq, "quasiquote");
 }
