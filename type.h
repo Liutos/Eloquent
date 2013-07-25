@@ -113,6 +113,7 @@ struct lisp_object_t {
     } pair;
     struct {
       int arity;
+      int restp;
       char *Lisp_name;
       void *C_function;
     } primitive;
@@ -172,6 +173,7 @@ struct string_builder_t {
 #define primitive_Lisp_name(x) ((x)->u.primitive.Lisp_name)
 #define primitive_arity(x) ((x)->u.primitive.arity)
 #define primitive_func(x) ((x)->u.primitive.C_function)
+#define primitive_restp(x) ((x)->u.primitive.restp)
 #define retaddr_code(x) ((x)->u.retaddr.code)
 #define retaddr_env(x) ((x)->u.retaddr.env)
 #define retaddr_pc(x) ((x)->u.retaddr.pc)

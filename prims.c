@@ -657,6 +657,10 @@ lisp_object_t *lt_head(lisp_object_t *pair) {
   return pair_head(pair);
 }
 
+lt *lt_list(lt *list) {
+  return list;
+}
+
 lt *lt_is_tag_list(lt *list, lt *tag) {
   return booleanize(is_tag_list(list, tag));
 }
@@ -1045,65 +1049,66 @@ lt *lt_read_from_string(lt *string) {
 }
 
 void init_prims(void) {
-#define ADD(arity, function_name, Lisp_name)                            \
+#define ADD(arity, restp, function_name, Lisp_name)                            \
   do {                                                                  \
     func =                                                              \
-        make_primitive(arity, (void *)function_name, Lisp_name);        \
+        make_primitive(arity, (void *)function_name, Lisp_name, restp);        \
     symbol_value(S(Lisp_name)) = func;                                  \
   } while (0)
 
   lisp_object_t *func;
   /* Arithmetic operations */
-  ADD(2, lt_add, "+");
-  ADD(2, lt_div, "/");
-  ADD(2, lt_gt, ">");
-  ADD(2, lt_mod, "mod");
-  ADD(2, lt_mul, "*");
-  ADD(2, lt_numeric_eq, "=");
-  ADD(2, lt_sub, "-");
+  ADD(2, FALSE, lt_add, "+");
+  ADD(2, FALSE, lt_div, "/");
+  ADD(2, FALSE, lt_gt, ">");
+  ADD(2, FALSE, lt_mod, "mod");
+  ADD(2, FALSE, lt_mul, "*");
+  ADD(2, FALSE, lt_numeric_eq, "=");
+  ADD(2, FALSE, lt_sub, "-");
   /* Character */
-  ADD(1, lt_char_code, "char-code");
-  ADD(1, lt_code_char, "code-char");
+  ADD(1, FALSE, lt_char_code, "char-code");
+  ADD(1, FALSE, lt_code_char, "code-char");
   /* Function */
-  ADD(2, lt_simple_apply, "simple-apply");
-  ADD(1, lt_function_arity, "function-arity");
+  ADD(2, FALSE, lt_simple_apply, "simple-apply");
+  ADD(1, FALSE, lt_function_arity, "function-arity");
   /* Input File */
-  ADD(1, lt_read_char, "read-char");
-  ADD(1, lt_read_line, "read-line");
-  ADD(1, lt_read_from_string, "read-from-string");
+  ADD(1, FALSE, lt_read_char, "read-char");
+  ADD(1, FALSE, lt_read_line, "read-line");
+  ADD(1, FALSE, lt_read_from_string, "read-from-string");
   /* List */
-  ADD(2, lt_is_tag_list, "is-tag-list?");
-  ADD(2, make_pair, "cons");
-  ADD(1, lt_head, "head");
-  ADD(1, lt_list_length, "list-length");
-  ADD(1, lt_list_nreverse, "list-reverse!");
-  ADD(1, lt_list_reverse, "list-reverse");
-  ADD(2, lt_nth, "nth");
-  ADD(2, lt_nthtail, "nth-tail");
-  ADD(2, lt_set_head, "set-head");
-  ADD(2, lt_set_tail, "set-tail");
-  ADD(1, lt_tail, "tail");
+  ADD(2, FALSE, lt_is_tag_list, "is-tag-list?");
+  ADD(2, FALSE, make_pair, "cons");
+  ADD(1, FALSE, lt_head, "head");
+  ADD(1, TRUE, lt_list, "list");
+  ADD(1, FALSE, lt_list_length, "list-length");
+  ADD(1, FALSE, lt_list_nreverse, "list-reverse!");
+  ADD(1, FALSE, lt_list_reverse, "list-reverse");
+  ADD(2, FALSE, lt_nth, "nth");
+  ADD(2, FALSE, lt_nthtail, "nth-tail");
+  ADD(2, FALSE, lt_set_head, "set-head");
+  ADD(2, FALSE, lt_set_tail, "set-tail");
+  ADD(1, FALSE, lt_tail, "tail");
   /* String */
-  ADD(2, lt_char_at, "char-at");
-  ADD(1, lt_string_length, "string-length");
-  ADD(3, lt_string_set, "string-set");
+  ADD(2, FALSE, lt_char_at, "char-at");
+  ADD(1, FALSE, lt_string_length, "string-length");
+  ADD(3, FALSE, lt_string_set, "string-set");
   /* Symbol */
-  ADD(1, lt_intern, "string->symbol");
-  ADD(1, lt_symbol_name, "symbol-name");
-  ADD(1, lt_symbol_value, "symbol-value");
+  ADD(1, FALSE, lt_intern, "string->symbol");
+  ADD(1, FALSE, lt_symbol_name, "symbol-name");
+  ADD(1, FALSE, lt_symbol_value, "symbol-value");
   /* Vector */
-  ADD(1, lt_list_to_vector, "list->vector");
-  ADD(2, lt_vector_ref, "vector-ref");
-  ADD(3, lt_vector_set, "vector-set!");
-  ADD(1, lt_vector_to_list, "vector->list");
+  ADD(1, FALSE, lt_list_to_vector, "list->vector");
+  ADD(2, FALSE, lt_vector_ref, "vector-ref");
+  ADD(3, FALSE, lt_vector_set, "vector-set!");
+  ADD(1, FALSE, lt_vector_to_list, "vector->list");
   /* General */
-  ADD(1, lt_is_constant, "is-constant?");
-  ADD(2, lt_eq, "eq");
-  ADD(2, lt_eql, "eql");
-  ADD(2, lt_equal, "equal");
-  ADD(1, lt_expand_macro, "expand-macro");
-  ADD(0, lt_object_size, "object-size");
-  ADD(1, lt_type_of, "type-of");
+  ADD(1, FALSE, lt_is_constant, "is-constant?");
+  ADD(2, FALSE, lt_eq, "eq");
+  ADD(2, FALSE, lt_eql, "eql");
+  ADD(2, FALSE, lt_equal, "equal");
+  ADD(1, FALSE, lt_expand_macro, "expand-macro");
+  ADD(0, FALSE, lt_object_size, "object-size");
+  ADD(1, FALSE, lt_type_of, "type-of");
 }
 
 lt *lt_push_macro(lt *x, lt *list) {
@@ -1144,12 +1149,12 @@ lt *quasiq(lt *x) {
 
 void init_macros(void) {
   lt *func;
-#define DM(arity, func_name, Lisp_name) \
+#define DM(arity, restp, func_name, Lisp_name) \
   do { \
-    func = make_macro(make_primitive(arity, func_name, Lisp_name), null_env); \
+    func = make_macro(make_primitive(arity, func_name, Lisp_name, restp), null_env); \
     symbol_value(S(Lisp_name)) = func; \
   } while(0)
 
-  DM(2, lt_push_macro, "push");
-  DM(1, quasiq, "quasiquote");
+  DM(2, FALSE, lt_push_macro, "push");
+  DM(1, FALSE, quasiq, "quasiquote");
 }

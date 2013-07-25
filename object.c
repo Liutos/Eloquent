@@ -277,10 +277,11 @@ lisp_object_t *make_pair(lisp_object_t *head, lisp_object_t *tail) {
   return pair;
 }
 
-lisp_object_t *make_primitive(int arity, void *C_function, char *Lisp_name) {
+lisp_object_t *make_primitive(int arity, void *C_function, char *Lisp_name, int restp) {
   lisp_object_t *p = make_object(PRIMITIVE_FUNCTION);
   primitive_arity(p) = arity;
   primitive_func(p) = C_function;
+  primitive_restp(p) = restp;
   primitive_Lisp_name(p) = Lisp_name;
   return p;
 }

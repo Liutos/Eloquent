@@ -190,9 +190,21 @@ pub lisp_object_t *run_by_llam(lisp_object_t *code_vector) {
         break;
 			call_primitive:
       case PRIM: {
+        nargs = fixnum_value(op_prim_nargs(ins));
         lisp_object_t *func = lt_vector_pop(stack);
         lisp_object_t *val = NULL;
         assert(isprimitive(func));
+//        Preprocess the arguments on the stack if the primitive function takes
+//        a rest flag.
+        if (primitive_restp(func) == TRUE) {
+          assert(nargs >= primitive_arity(func));
+          lt *rest = make_empty_list();
+          for (int i = nargs - primitive_arity(func) + 1; i > 0; i--) {
+            lt *arg = lt_vector_pop(stack);
+            rest = make_pair(arg, rest);
+          }
+          lt_vector_push(stack, rest);
+        }
         switch (primitive_arity(func)) {
           case 0:
             val = ((f0)primitive_func(func))();

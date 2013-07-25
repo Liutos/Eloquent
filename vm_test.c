@@ -21,12 +21,7 @@
 int main(int argc, char *argv[])
 {
   char *inputs[] = {
-      "(read-from-string \"`(a ,b ,@c d)\")",
-      "(expand-macro '`(a ,b ,@c d))",
-//      "`(a ,b ,@c d)",
-      "(read-from-string \"`,'*standard-out*\")",
-      "(expand-macro '`,'*standard-out*)",
-      "`,'*standard-out*",
+      "(list 1 2 3)",
   };
   init_global_variable();
   init_prims();
