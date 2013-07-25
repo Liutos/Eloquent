@@ -58,6 +58,7 @@ extern F1(lt_is_constant);
 extern F1(lt_expand_macro);
 extern F1(lt_function_arity);
 extern F2(lt_simple_apply);
+extern void init_macros(void);
 
 extern lt *read_object_from_string(char *);
 extern void writef(lt *, const char *, ...);

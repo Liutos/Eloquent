@@ -26,6 +26,7 @@ int main(int argc, char *argv[])
   };
   init_global_variable();
   init_prims();
+  init_macros();
   for (int i = 0; i < sizeof(inputs) / sizeof(char *); i++) {
     write_raw_string(">> ", standard_out);
     write_raw_string(inputs[i], standard_out);

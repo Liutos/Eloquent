@@ -772,9 +772,16 @@ lt *lt_expand_macro(lt *form) {
       assert(isprimitive(proc) || isfunction(proc));
       lt *result;
       if (isprimitive(proc)) {
+        lt *args = pair_tail(form);
         switch (primitive_arity(proc)) {
           case 0:
-            result = ((f0) primitive_func(proc))();
+            result = ((f0)primitive_func(proc))();
+            break;
+          case 2: {
+            lt *arg1 = lt_raw_nth(args, 0);
+            lt *arg2 = lt_raw_nth(args, 1);
+            result = ((f2)primitive_func(proc))(arg1, arg2);
+          }
             break;
           default:
             printf("Macro with arity %d is unsupported yet.\n",
@@ -1092,4 +1099,30 @@ void init_prims(void) {
   ADD(1, lt_expand_macro, "expand-macro");
   ADD(0, lt_object_size, "object-size");
   ADD(1, lt_type_of, "type-of");
+}
+
+lt *lt_push_macro(lt *x, lt *list) {
+  return list3(S("set!"), list, list3(S("cons"), x, list));
+}
+
+lt *quasiq(lt *x) {
+  if (!ispair(x)) {
+    if (!isfalse(lt_is_constant(x)))
+      return x;
+    else
+      return list2(S("quote"), x);
+  }
+  printf("Unknown case of quasiquote\n");
+  exit(1);
+}
+
+void init_macros(void) {
+  lt *func;
+#define DM(arity, func_name, Lisp_name) \
+  do { \
+    func = make_macro(make_primitive(arity, func_name, Lisp_name), null_env); \
+    symbol_value(S(Lisp_name)) = func; \
+  } while(0)
+
+  DM(2, lt_push_macro, "push");
 }

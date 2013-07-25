@@ -21,14 +21,15 @@
 int main(int argc, char *argv[])
 {
   char *inputs[] = {
-      "'123",
-      "'abc",
-      "(read-from-string \"`abc\")",
-      "(read-from-string \"`,a\")",
-      "(read-from-string \"`,@c\")",
+      "(set! x 1)",
+      "(set! list '(2 3 4))",
+      "(expand-macro '(push x list))",
+      "(push x list)",
+      "list",
   };
   init_global_variable();
   init_prims();
+  init_macros();
   for (int i = 0; i < sizeof(inputs) / sizeof(char *); i++) {
     writef(standard_out, ">> %s\n", make_string(inputs[i]));
     lisp_object_t *expr = read_object_from_string(inputs[i]);
