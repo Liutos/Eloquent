@@ -295,6 +295,14 @@ lt *make_retaddr(lt *code, lt *env, int pc, int throw_flag) {
   return retaddr;
 }
 
+string_builder_t *make_str_builder(void) {
+  string_builder_t *sb = malloc(sizeof(*sb));
+  sb->length = 20;
+  sb->string = malloc(sb->length * sizeof(char));
+  sb->index = 0;
+  return sb;
+}
+
 lisp_object_t *make_string(char *value) {
   lisp_object_t *string = make_object(STRING);
   string->u.string.value = value;

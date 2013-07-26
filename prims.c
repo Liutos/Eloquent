@@ -30,6 +30,11 @@ void write_raw_char(char c, lt *dest_port) {
     output_file_colnum(dest_port)++;
 }
 
+void write_n_spaces(int n, lt *dest) {
+  for (int i = 0; i < n; i++)
+    write_raw_char(' ', dest);
+}
+
 void write_raw_string(char *string, lt *dest_port) {
   while (*string != '\0') {
     write_raw_char(*string, dest_port);
@@ -150,11 +155,6 @@ void write_opcode(lt *opcode, lt *dest) {
       printf("Unknown opcode\n");
       exit(1);
   }
-}
-
-void write_n_spaces(int n, lt *dest) {
-	for (int i = 0; i < n; i++)
-		write_raw_char(' ', dest);
 }
 
 void write_compiled_function(lt *function, int indent, lt *dest) {
@@ -297,10 +297,6 @@ void write_object(lt *x, lt *output_file) {
       fprintf(stdout, "invalid object with type %d", type_of(x));
       exit(1);
   }
-}
-
-void write_expr(char *expr, lt *result) {
-  writef(standard_out, "%s => %?\n", make_string(expr), result);
 }
 
 /* Auxiliary functions */

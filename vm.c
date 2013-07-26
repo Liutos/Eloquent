@@ -10,6 +10,7 @@
 #include "object.h"
 #include "prims.h"
 #include "type.h"
+#include "utilities.h"
 
 lt *walk_in_env(lt *env, int n) {
   while (n-- > 0)

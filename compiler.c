@@ -17,7 +17,6 @@
 
 lt *assemble(lt *);
 lt *compile_object(lt *, lt *);
-lt *compile_as_lambda(lt *);
 
 int is_addr_op(lt *op) {
   switch (opcode_type(op)) {
@@ -37,7 +36,8 @@ lt *get_offset(lt *label, lt *labels) {
     labels = pair_tail(labels);
   }
   fprintf(stdout, "Impossible!!! %s not found!\n", symbol_name(label));
-  write_expr("labels", last_labels);
+//  write_expr("labels", last_labels);
+  writef(standard_out, "labels => %?\n", last_labels);
   exit(1);
 }
 
@@ -404,11 +404,6 @@ pub lisp_object_t *compile_object(lisp_object_t *object, lisp_object_t *env) {
   }
   writef(standard_out, "Impossible --- Unable to compile %?\n", object);
   exit(1);
-}
-
-lisp_object_t *compile_as_lambda(lisp_object_t *form) {
-  lisp_object_t *result = compile_lambda(make_empty_list(), list1(form), null_env);
-  return result;
 }
 
 lt *compile_to_bytecode(lt *form) {

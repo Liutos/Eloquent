@@ -1,6 +1,8 @@
 /*
  * utilities.c
  *
+ * Defines the utility functions only depends on the operations provided by object.c and type.h
+ *
  *  Created on: 2013年7月20日
  *      Author: liutos
  */
@@ -19,8 +21,23 @@ lt *booleanize(int value) {
     return the_true;
 }
 
+int is_label(lt *object) {
+  return issymbol(object);
+}
+
 int is_symbol_bound(lt *symbol) {
   return isundef(symbol_value(symbol))? FALSE: TRUE;
+}
+
+int is_macro_form(lt *form) {
+  if (!ispair(form))
+    return FALSE;
+  lt *symbol = pair_head(form);
+  return is_symbol_bound(symbol) && ismacro(symbol_value(symbol));
+}
+
+int is_tag_list(lisp_object_t *object, lisp_object_t *tag) {
+  return ispair(object) && (pair_head(object) == tag);
 }
 
 lt *list1(lt *element) {
@@ -35,14 +52,22 @@ lt *list3(lt *e1, lt *e2, lt *e3) {
   return make_pair(e1, list2(e2, e3));
 }
 
-lt *signal_exception(char *message) {
-  return make_exception(message, TRUE);
+lt *lt_append2(lt *l1, lt *l2) {
+  if (isnull(l1))
+    return l2;
+  else
+    return make_pair(pair_head(l1), lt_append2(pair_tail(l1), l2));
 }
 
-lt *signal_typerr(char *type_name) {
-  char msg[256];
-  sprintf(msg, "Argument is not of type %s", type_name);
-  return signal_exception(strdup(msg));
+lisp_object_t *lt_append_n(lisp_object_t *list0, ...) {
+  va_list ap;
+  va_start(ap, list0);
+  lisp_object_t *next = va_arg(ap, lisp_object_t *);
+  while (next != NULL) {
+    list0 = lt_append2(list0, next);
+    next = va_arg(ap, lisp_object_t *);
+  }
+  return list0;
 }
 
 int pair_length(lisp_object_t *pair) {
@@ -65,12 +90,9 @@ lisp_object_t *reader_error(char *format, ...) {
   return make_exception(strdup(msg), TRUE);
 }
 
-string_builder_t *make_str_builder(void) {
-  string_builder_t *sb = malloc(sizeof(*sb));
-  sb->length = 20;
-  sb->string = malloc(sb->length * sizeof(char));
-  sb->index = 0;
-  return sb;
+char *sb2string(string_builder_t *sb) {
+  sb->string[sb->index] = '\0';
+  return sb->string;
 }
 
 void sb_add_char(string_builder_t *sb, char c) {
@@ -82,40 +104,12 @@ void sb_add_char(string_builder_t *sb, char c) {
   sb->index++;
 }
 
-char *sb2string(string_builder_t *sb) {
-  sb->string[sb->index] = '\0';
-  return sb->string;
+lt *signal_exception(char *message) {
+  return make_exception(message, TRUE);
 }
 
-int is_label(lt *object) {
-  return issymbol(object);
-}
-
-int is_tag_list(lisp_object_t *object, lisp_object_t *tag) {
-  return ispair(object) && (pair_head(object) == tag);
-}
-
-int is_macro_form(lt *form) {
-  if (!ispair(form))
-    return FALSE;
-  lt *symbol = pair_head(form);
-  return is_symbol_bound(symbol) && ismacro(symbol_value(symbol));
-}
-
-lt *lt_append2(lt *l1, lt *l2) {
-  if (isnull(l1))
-    return l2;
-  else
-    return make_pair(pair_head(l1), lt_append2(pair_tail(l1), l2));
-}
-
-lisp_object_t *lt_append_n(lisp_object_t *list0, ...) {
-  va_list ap;
-  va_start(ap, list0);
-  lisp_object_t *next = va_arg(ap, lisp_object_t *);
-  while (next != NULL) {
-    list0 = lt_append2(list0, next);
-    next = va_arg(ap, lisp_object_t *);
-  }
-  return list0;
+lt *signal_typerr(char *type_name) {
+  char msg[256];
+  sprintf(msg, "Argument is not of type %s", type_name);
+  return signal_exception(strdup(msg));
 }

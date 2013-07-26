@@ -15,6 +15,11 @@
 #define F2(x) lt *x(lt *, lt *);
 #define F3(x) lt *x(lt *, lt *, lt *);
 
+extern void write_object(lt *, lt *);
+extern void write_raw_char(char, lt *);
+extern void write_raw_string(char *, lt *);
+extern void writef(lt *, const char *, ...);
+
 extern F2(lt_add);
 extern F2(lt_div);
 extern F2(lt_gt);
@@ -58,19 +63,12 @@ extern F1(lt_is_constant);
 extern F1(lt_expand_macro);
 extern F1(lt_function_arity);
 extern F2(lt_simple_apply);
-extern void init_macros(void);
 
 extern lt *read_object_from_string(char *);
-extern void writef(lt *, const char *, ...);
-extern void write_expr(char *, lt *);
+extern lt *read_object(lt *);
+
+extern void init_macros(void);
 extern void init_prims(void);
-extern lt *lt_append2(lt *, lt *);
-extern lt *lt_raw_nth(lt *, int);
-extern lt *lt_append_n(lt *, ...);
-extern lt *lt_raw_nthtail(lt *, int);
-extern void write_raw_string(char *, lt *);
-extern void write_raw_char(char, lt *);
-extern void write_object(lt *, lt *);
 
 #define seq(...) lt_append_n(__VA_ARGS__, NULL)
 
