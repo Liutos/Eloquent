@@ -54,6 +54,7 @@ mktype_pred(isfloat, FLOAT)
 mktype_pred(isfunction, FUNCTION)
 mktype_pred(isinput_file, INPUT_FILE)
 mktype_pred(ismacro, MACRO)
+mktype_pred(isoutput_file, OUTPUT_FILE)
 mktype_pred(isopcode, OPCODE)
 mktype_pred(ispair, PAIR)
 mktype_pred(isprimitive, PRIMITIVE_FUNCTION)
@@ -252,6 +253,7 @@ lisp_object_t *make_input_file(FILE *file) {
   input_file_file(inf) = file;
   input_file_linum(inf) = 1;
   input_file_colnum(inf) = 0;
+  input_file_openp(inf) = TRUE;
   return inf;
 }
 
@@ -267,6 +269,7 @@ lisp_object_t *make_output_file(FILE *file) {
   output_file_file(outf) = file;
   output_file_linum(outf) = 1;
   output_file_colnum(outf) = 0;
+  output_file_openp(outf) = TRUE;
   return outf;
 }
 

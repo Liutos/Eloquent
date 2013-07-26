@@ -389,6 +389,27 @@ lt *lt_function_arity(lt *function) {
 }
 
 /* Input Port */
+lt *lt_close_in(lt *file) {
+  assert(isinput_file(file));
+  fclose(input_file_file(file));
+  input_file_openp(file) = TRUE;
+  return make_true();
+}
+
+lt *lt_is_file_open(lt *file) {
+  assert(isinput_file(file) || isoutput_file(file));
+  if (isinput_file(file))
+    return booleanize(input_file_openp(file));
+  else
+    return booleanize(output_file_openp(file));
+}
+
+lt *lt_open_in(lt *path) {
+  assert(isstring(path));
+  FILE *fp = fopen(string_value(path), "r");
+  return make_input_file(fp);
+}
+
 lt *lt_read_char(lt *in_port) {
   assert(isinput_file(in_port));
   return make_character(get_char(in_port));
@@ -537,6 +558,19 @@ lisp_object_t *lt_code_char(lisp_object_t *code) {
 }
 
 /* Output File */
+lt *lt_close_out(lt *file) {
+  assert(isoutput_file(file));
+  fclose(output_file_file(file));
+  output_file_openp(file) = FALSE;
+  return make_true();
+}
+
+lt *lt_open_out(lt *path) {
+  assert(isstring(path));
+  FILE *fp = fopen(string_value(path), "w");
+  return make_output_file(fp);
+}
+
 lt *lt_write_char(lt *c, lt *dest) {
   write_raw_char(character_value(c), dest);
   return c;
@@ -1056,7 +1090,9 @@ lisp_object_t *read_object(lisp_object_t *input_file) {
 lisp_object_t *read_object_from_string(char *text) {
   FILE *in = fmemopen(text, strlen(text), "r");
   lisp_object_t *inf = make_input_file(in);
-  return read_object(inf);
+  lt *obj = read_object(inf);
+  fclose(in);
+  return obj;
 }
 
 lt *lt_read_from_string(lt *string) {
@@ -1087,6 +1123,9 @@ void init_prims(void) {
   ADD(2, FALSE, lt_simple_apply, "simple-apply");
   ADD(1, FALSE, lt_function_arity, "function-arity");
   /* Input File */
+  ADD(1, FALSE, lt_close_in, "close-in");
+  ADD(1, FALSE, lt_is_file_open, "file-open?");
+  ADD(1, FALSE, lt_open_in, "open-in");
   ADD(1, FALSE, lt_read_char, "read-char");
   ADD(1, FALSE, lt_read_line, "read-line");
   ADD(1, FALSE, lt_read_from_string, "read-from-string");
@@ -1105,6 +1144,8 @@ void init_prims(void) {
   ADD(2, FALSE, lt_set_tail, "set-tail");
   ADD(1, FALSE, lt_tail, "tail");
   /* Output File */
+  ADD(1, FALSE, lt_open_in, "open-in");
+  ADD(1, FALSE, lt_open_out, "open-out");
   ADD(2, FALSE, lt_write_char, "write-char");
   ADD(2, FALSE, lt_write_line, "write-line");
   ADD(2, FALSE, lt_write_string, "write-string");

@@ -91,7 +91,7 @@ struct lisp_object_t {
       lt *args;
     } function;
     struct {
-      int colnum, linum;
+      int colnum, linum, openp;
       FILE *file;
     } input_file;
     struct {
@@ -104,7 +104,7 @@ struct lisp_object_t {
       lt *oprands;
     } opcode;
     struct {
-      int colnum, linum;
+      int colnum, linum, openp;
       FILE *file;
     } output_file;
     struct {
@@ -160,6 +160,7 @@ struct string_builder_t {
 #define input_file_colnum(x) ((x)->u.input_file.colnum)
 #define input_file_file(x) ((x)->u.input_file.file)
 #define input_file_linum(x) ((x)->u.input_file.linum)
+#define input_file_openp(x) ((x)->u.input_file.openp)
 #define macro_procedure(x) ((x)->u.macro.procedure)
 #define macro_environment(x) ((x)->u.macro.environment)
 #define opcode_name(x) ((x)->u.opcode.name)
@@ -168,6 +169,7 @@ struct string_builder_t {
 #define output_file_colnum(x) ((x)->u.output_file.colnum)
 #define output_file_file(x) ((x)->u.output_file.file)
 #define output_file_linum(x) ((x)->u.output_file.linum)
+#define output_file_openp(x) ((x)->u.output_file.openp)
 #define pair_head(x) (x->u.pair.head)
 #define pair_tail(x) (x->u.pair.tail)
 #define primitive_Lisp_name(x) ((x)->u.primitive.Lisp_name)
