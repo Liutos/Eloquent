@@ -5,24 +5,19 @@
  *
  * Copyright (C) 2013-06-07 liutos <mat.liutos@gmail.com>
  */
-#include <assert.h>
-#include <ctype.h>
-#include <stdarg.h>
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-
-#include "type.h"
 #include "compiler.h"
-#include "vm.h"
+#include "macros.h"
 #include "object.h"
 #include "prims.h"
+#include "type.h"
+#include "vm.h"
 
 int main(int argc, char *argv[])
 {
   char *inputs[] = {
-      "(bound? '*standard-output*)",
-      "(fbound? 'list)",
+      "(write-char #\\a *standard-output*)",
+      "(write-line \"Goodbye, 233-lisp!\" *standard-output*)",
+      "(write-string \"Hello, 233-lisp!\" *standard-output*)",
   };
   init_global_variable();
   init_prims();

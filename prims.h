@@ -67,7 +67,6 @@ extern F2(lt_simple_apply);
 extern lt *read_object_from_string(char *);
 extern lt *read_object(lt *);
 
-extern void init_macros(void);
 extern void init_prims(void);
 
 #define seq(...) lt_append_n(__VA_ARGS__, NULL)

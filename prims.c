@@ -12,7 +12,6 @@
 #include <string.h>
 
 #include "object.h"
-#include "prims.h"
 #include "type.h"
 #include "utilities.h"
 
@@ -158,6 +157,7 @@ void write_opcode(lt *opcode, lt *dest) {
 }
 
 void write_compiled_function(lt *function, int indent, lt *dest) {
+  lt *lt_type_of(lt *);
 	writef(dest, "#<COMPILED-FUNCTION %p\n", function);
 	if (!isvector(function_code(function))) {
 	  writef(standard_out, "type_of(function_code(function)) is %S\n", lt_type_of(function_code(function)));
@@ -534,6 +534,23 @@ lisp_object_t *lt_char_code(lisp_object_t *c) {
 lisp_object_t *lt_code_char(lisp_object_t *code) {
   assert(isfixnum(code));
   return make_character(fixnum_value(code));
+}
+
+/* Output File */
+lt *lt_write_char(lt *c, lt *dest) {
+  write_raw_char(character_value(c), dest);
+  return c;
+}
+
+lt *lt_write_string(lt *str, lt *dest) {
+  write_raw_string(string_value(str), dest);
+  return str;
+}
+
+lt *lt_write_line(lt *str, lt *dest) {
+  lt_write_string(str, dest);
+  write_raw_char('\n', dest);
+  return str;
 }
 
 /* String */
@@ -1087,6 +1104,10 @@ void init_prims(void) {
   ADD(2, FALSE, lt_set_head, "set-head");
   ADD(2, FALSE, lt_set_tail, "set-tail");
   ADD(1, FALSE, lt_tail, "tail");
+  /* Output File */
+  ADD(2, FALSE, lt_write_char, "write-char");
+  ADD(2, FALSE, lt_write_line, "write-line");
+  ADD(2, FALSE, lt_write_string, "write-string");
   /* String */
   ADD(2, FALSE, lt_char_at, "char-at");
   ADD(1, FALSE, lt_string_length, "string-length");
@@ -1110,52 +1131,4 @@ void init_prims(void) {
   ADD(1, FALSE, lt_expand_macro, "expand-macro");
   ADD(0, FALSE, lt_object_size, "object-size");
   ADD(1, FALSE, lt_type_of, "type-of");
-}
-
-lt *lt_push_macro(lt *x, lt *list) {
-  return list3(S("set!"), list, list3(S("cons"), x, list));
-}
-
-lt *quasiq(lt *x) {
-  if (!ispair(x)) {
-    if (!isfalse(lt_is_constant(x)))
-      return x;
-    else
-      return list2(S("quote"), x);
-  }
-  if (is_tag_list(x, S("unquote"))) {
-    assert(!isnull(pair_tail(x)));
-    assert(isnull(pair_tail(pair_tail(x))));
-    return second(x);
-  }
-  if (is_tag_list(x, S("quasiquote"))) {
-    assert(!isnull(pair_tail(x)));
-    assert(isnull(pair_tail(pair_tail(x))));
-    quasiq(quasiq(second(x)));
-  }
-  if (is_tag_list(pair_head(x), S("unquote-splicing"))) {
-    if (isnull(pair_tail(x)))
-      return second(pair_head(x));
-    else
-      return
-          list3(S("append"),
-                second(pair_head(x)),
-                quasiq(pair_tail(x)));
-  }
-  if (ispair(x))
-    return list3(S("cons"), quasiq(pair_head(x)), quasiq(pair_tail(x)));
-  writef(standard_out, "Unknown case of quasiquote %?\n", x);
-  exit(1);
-}
-
-void init_macros(void) {
-  lt *func;
-#define DM(arity, restp, func_name, Lisp_name) \
-  do { \
-    func = make_macro(make_primitive(arity, func_name, Lisp_name, restp), null_env); \
-    symbol_value(S(Lisp_name)) = func; \
-  } while(0)
-
-  DM(2, FALSE, lt_push_macro, "push");
-  DM(1, FALSE, quasiq, "quasiquote");
 }
