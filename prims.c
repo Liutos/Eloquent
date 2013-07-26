@@ -299,7 +299,6 @@ void write_object(lt *x, lt *output_file) {
   }
 }
 
-/* Auxiliary functions */
 int get_char(lt *input_file) {
   FILE *in = input_file_file(input_file);
   input_file_colnum(input_file)++;
@@ -333,7 +332,6 @@ lt *lt_raw_nthtail(lt *list, int n) {
   return list;
 }
 
-/* Primitives */
 /* Function */
 lt *lt_simple_apply(lt *function, lt *args) {
   lt *compile_to_bytecode(lt *);
@@ -342,6 +340,43 @@ lt *lt_simple_apply(lt *function, lt *args) {
   assert(ispair(args) || isnull(args));
   lt *expr = make_pair(function, args);
   return run_by_llam(compile_to_bytecode(expr));
+}
+
+lt *lt_expand_macro(lt *form) {
+  if (is_macro_form(form)) {
+      lt *op = symbol_value(pair_head(form));
+      lt *proc = macro_procedure(op);
+      assert(isprimitive(proc) || isfunction(proc));
+      lt *result;
+      if (isprimitive(proc)) {
+        lt *args = pair_tail(form);
+        switch (primitive_arity(proc)) {
+          case 0:
+            result = ((f0)primitive_func(proc))();
+            break;
+          case 1: {
+            lt *arg1 = lt_raw_nth(args, 0);
+            result = ((f1)primitive_func(proc))(arg1);
+          }
+            break;
+          case 2: {
+            lt *arg1 = lt_raw_nth(args, 0);
+            lt *arg2 = lt_raw_nth(args, 1);
+            result = ((f2)primitive_func(proc))(arg1, arg2);
+          }
+            break;
+          default:
+            printf("Macro with arity %d is unsupported yet.\n",
+                   primitive_arity(proc));
+            exit(1);
+        }
+      } else {
+        lt *args = pair_tail(form);
+        result = lt_simple_apply(proc, args);
+      }
+      return lt_expand_macro(result);
+    } else
+      return form;
 }
 
 lt *lt_function_arity(lt *function) {
@@ -411,7 +446,7 @@ lt *lt_list_reverse(lt *list) {
     return lt_append2(lt_list_reverse(pair_tail(list)), list1(pair_head(list)));
 }
 
-/* Arithmetic operations */
+/* Arithmetic Operations */
 /* TODO: Find a more elegant way of defining arithmetic operations. */
 lt *lt_add(lt *n, lt *m) {
   assert(isnumber(n) && isnumber(m));
@@ -525,6 +560,22 @@ lt *lt_string_set(lt *string, lt *index, lt *new_char) {
 lisp_object_t *lt_intern(lisp_object_t *name) {
   assert(isstring(name));
   return find_or_create_symbol(string_value(name));
+}
+
+lt *lt_is_bound(lt *symbol) {
+  assert(issymbol(symbol));
+  return booleanize(!isundef(symbol_value(symbol)));
+}
+
+lt *lt_is_fbound(lt *symbol) {
+  assert(issymbol(symbol));
+  if (isundef(symbol_value(symbol)))
+    return make_false();
+  lt *value = symbol_value(symbol);
+  if (isprimitive(value) || isfunction(value))
+    return make_true();
+  else
+    return make_false();
 }
 
 lisp_object_t *lt_symbol_name(lisp_object_t *symbol) {
@@ -641,12 +692,12 @@ lisp_object_t *lt_head(lisp_object_t *pair) {
   return pair_head(pair);
 }
 
-lt *lt_list(lt *list) {
-  return list;
-}
-
 lt *lt_is_tag_list(lt *list, lt *tag) {
   return booleanize(is_tag_list(list, tag));
+}
+
+lt *lt_list(lt *list) {
+  return list;
 }
 
 lt *lt_list_equal(lt *l1, lt *l2) {
@@ -722,6 +773,14 @@ lt *lt_equal(lt *x, lt *y) {
   return the_false;
 }
 
+lt *lt_is_constant(lt *object) {
+  if (is_tag_list(object, S("quote")))
+    return make_true();
+  if (!ispair(object) && !issymbol(object))
+    return make_true();
+  return make_false();
+}
+
 lt *lt_object_size(void) {
   return make_fixnum(sizeof(lt));
 }
@@ -743,51 +802,6 @@ lisp_object_t *lt_type_of(lisp_object_t *object) {
       fprintf(stdout, "Unknown type %d of object\n", type_of(object));
       exit(1);
   }
-}
-
-lt *lt_is_constant(lt *object) {
-  if (is_tag_list(object, S("quote")))
-    return make_true();
-  if (!ispair(object) && !issymbol(object))
-    return make_true();
-  return make_false();
-}
-
-lt *lt_expand_macro(lt *form) {
-  if (is_macro_form(form)) {
-      lt *op = symbol_value(pair_head(form));
-      lt *proc = macro_procedure(op);
-      assert(isprimitive(proc) || isfunction(proc));
-      lt *result;
-      if (isprimitive(proc)) {
-        lt *args = pair_tail(form);
-        switch (primitive_arity(proc)) {
-          case 0:
-            result = ((f0)primitive_func(proc))();
-            break;
-          case 1: {
-            lt *arg1 = lt_raw_nth(args, 0);
-            result = ((f1)primitive_func(proc))(arg1);
-          }
-            break;
-          case 2: {
-            lt *arg1 = lt_raw_nth(args, 0);
-            lt *arg2 = lt_raw_nth(args, 1);
-            result = ((f2)primitive_func(proc))(arg1, arg2);
-          }
-            break;
-          default:
-            printf("Macro with arity %d is unsupported yet.\n",
-                   primitive_arity(proc));
-            exit(1);
-        }
-      } else {
-        lt *args = pair_tail(form);
-        result = lt_simple_apply(proc, args);
-      }
-      return lt_expand_macro(result);
-    } else
-      return form;
 }
 
 /* Reader */
@@ -1079,6 +1093,8 @@ void init_prims(void) {
   ADD(3, FALSE, lt_string_set, "string-set");
   /* Symbol */
   ADD(1, FALSE, lt_intern, "string->symbol");
+  ADD(1, FALSE, lt_is_bound, "bound?");
+  ADD(1, FALSE, lt_is_fbound, "fbound?");
   ADD(1, FALSE, lt_symbol_name, "symbol-name");
   ADD(1, FALSE, lt_symbol_value, "symbol-value");
   /* Vector */

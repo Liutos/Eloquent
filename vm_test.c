@@ -21,9 +21,8 @@
 int main(int argc, char *argv[])
 {
   char *inputs[] = {
-      "(set! b 1)",
-      "(set! c '(2 3 4))",
-      "`(a ,b ,@c d)",
+      "(bound? '*standard-output*)",
+      "(fbound? 'list)",
   };
   init_global_variable();
   init_prims();
