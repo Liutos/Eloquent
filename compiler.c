@@ -206,31 +206,6 @@ lisp_object_t *compile_args(lisp_object_t *args, lisp_object_t *env) {
     return append2(compile_object(pair_head(args), env),
                       compile_args(pair_tail(args), env));
 }
-//
-//lt *expand_macro(lt *form) {
-//  if (is_macro_form(form)) {
-//    lt *op = symbol_value(pair_head(form));
-//    lt *proc = macro_procedure(op);
-//    assert(isprimitive(proc) || isfunction(proc));
-//    lt *result;
-//    if (isprimitive(proc)) {
-//      switch (primitive_arity(proc)) {
-//        case 0:
-//          result = ((f0) primitive_func(proc))();
-//          break;
-//        default:
-//          printf("Macro with arity %d is unsupported yet.\n",
-//                 primitive_arity(proc));
-//          exit(1);
-//      }
-//    } else {
-//      lt *args = pair_tail(form);
-//      result = lt_simple_apply(proc, args);
-//    }
-//    return expand_macro(result);
-//  } else
-//    return form;
-//}
 
 lisp_object_t *compile_begin(lisp_object_t *exps, lisp_object_t *env) {
   if (isnull(exps))
@@ -362,6 +337,18 @@ int is_primitive_fun(lt *variable) {
       isprimitive(symbol_value(variable));
 }
 
+void add_local_var(lt *var, lt *env) {
+  if (env == null_env)
+    return;
+  assert(ispair(pair_head(env)) || isnull(pair_head(env)));
+  if (ispair(pair_head(env))) {
+    lt *c = list1(var);
+    pair_head(env) = seq(pair_head(env), c);
+  } else {
+    pair_head(env) = list1(var);
+  }
+}
+
 /* TODO: The support for built-in macros. */
 /* TODO: The support for tail call optimization. */
 pub lisp_object_t *compile_object(lisp_object_t *object, lisp_object_t *env) {
@@ -394,6 +381,10 @@ pub lisp_object_t *compile_object(lisp_object_t *object, lisp_object_t *env) {
   }
   if (is_tag_list(object, S("catch")))
     return gen(CATCH);
+  if (is_tag_list(object, S("declare"))) {
+    add_local_var(second(object), env);
+    return gen(DECL, second(object));
+  }
   if (ispair(object)) {
     lisp_object_t *args = pair_tail(object);
     lisp_object_t *fn = pair_head(object);

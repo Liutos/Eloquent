@@ -25,6 +25,8 @@ lisp_object_t *standard_out;
 lisp_object_t *symbol_list;
 lisp_object_t *the_undef;
 
+extern void *checked_malloc(size_t);
+
 extern int is_pointer(lt *);
 extern int isexception(lt *);
 extern int isfloat(lt *);

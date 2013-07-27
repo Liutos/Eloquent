@@ -751,6 +751,21 @@ lisp_object_t *lt_vector_push(lisp_object_t *vector, lisp_object_t *object) {
   return vector;
 }
 
+lt *lt_vector_push_extend(lt *vector, lt *x) {
+  if (isfalse(lt_is_vector_full(vector)))
+    return lt_vector_push(vector, x);
+  else {
+    int length = vector_length(vector) + 1;
+    lt **value = checked_malloc(length * sizeof(lt *));
+    for (int i = 0; i < length - 1; i++)
+      value[i] = vector_value(vector)[i];
+    vector_value(vector) = value;
+    vector_length(vector)++;
+    lt_vector_push(vector, x);
+    return make_fixnum(vector_last(vector));
+  }
+}
+
 lisp_object_t *lt_vector_ref(lisp_object_t *vector, lisp_object_t *index) {
   assert(isvector(vector));
   assert(isfixnum(index));
@@ -1218,6 +1233,9 @@ void init_prims(void) {
   ADD(1, FALSE, lt_symbol_value, "symbol-value");
   /* Vector */
   ADD(1, FALSE, lt_list_to_vector, "list->vector");
+  ADD(1, FALSE, lt_vector_pop, "vector-pop");
+  ADD(2, FALSE, lt_vector_push, "vector-push");
+  ADD(2, FALSE, lt_vector_push_extend, "vector-push-extend");
   ADD(2, FALSE, lt_vector_ref, "vector-ref");
   ADD(3, FALSE, lt_vector_set, "vector-set!");
   ADD(1, FALSE, lt_vector_to_list, "vector->list");

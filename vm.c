@@ -12,6 +12,16 @@
 #include "type.h"
 #include "utilities.h"
 
+void add_local_variable(lt *var, lt *env) {
+  if (env == null_env)
+    return;
+  if (!isvector(pair_head(env))) {
+    writef(standard_out, "type-of(pair_head(env)) is %S\n", lt_type_of(pair_head(env)));
+    assert(isvector(pair_head(env)));
+  }
+  lt_vector_push_extend(pair_head(env), make_undef());
+}
+
 lt *walk_in_env(lt *env, int n) {
   while (n-- > 0)
     env = pair_tail(env);
@@ -138,6 +148,10 @@ pub lisp_object_t *run_by_llam(lisp_object_t *code_vector) {
         break;
       case CONST:
         lt_vector_push(stack, op_const_value(ins));
+        break;
+      case DECL:
+        add_local_variable(op_decl_var(ins), env);
+        lt_vector_push(stack, make_empty_list());
         break;
       case FJUMP:
         if (isfalse(lt_vector_pop(stack)))

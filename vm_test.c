@@ -15,9 +15,7 @@
 int main(int argc, char *argv[])
 {
   char *inputs[] = {
-      "(read-from-string \"``a\")",
-      "(expand-macro '``a)",
-      "``a",
+      "((lambda () (declare x) (set! x 1) x))",
   };
   init_global_variable();
   init_prims();

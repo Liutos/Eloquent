@@ -48,6 +48,7 @@ extern F1(lt_symbol_name);
 extern F1(lt_symbol_value);
 extern F1(lt_is_vector_empty);
 extern F1(lt_list_to_vector);
+extern F2(lt_vector_push_extend);
 extern F2(lt_vector_last_nth);
 extern F1(lt_vector_pop);
 extern F2(lt_vector_push);
