@@ -16,7 +16,9 @@
 #include "utilities.h"
 
 void write_object(lt *, lt *);
+lt *compile_to_bytecode(lt *);
 lt *read_object(lt *);
+lt *run_by_llam(lt *);
 
 /* Writer */
 void write_raw_char(char c, lt *dest_port) {
@@ -333,9 +335,11 @@ lt *lt_raw_nthtail(lt *list, int n) {
 }
 
 /* Function */
+lt *lt_eval(lt *form) {
+  return run_by_llam(compile_to_bytecode(form));
+}
+
 lt *lt_simple_apply(lt *function, lt *args) {
-  lt *compile_to_bytecode(lt *);
-  lt *run_by_llam(lt *);
   assert(isprimitive(function) || isfunction(function));
   assert(ispair(args) || isnull(args));
   lt *expr = make_pair(function, args);
@@ -406,6 +410,18 @@ lt *lt_function_arity(lt *function) {
     return make_fixnum(primitive_arity(function));
   else
     return lt_list_length(function_args(function));
+}
+
+lt *lt_load(lt *path) {
+  lt *lt_open_in(lt *);
+  assert(isstring(path));
+  lt *file = lt_open_in(path);
+  lt *expr = read_object(file);
+  while (!iseof(expr)) {
+    lt_eval(expr);
+    expr = read_object(file);
+  }
+  return make_true();
 }
 
 /* Input Port */
@@ -1140,8 +1156,11 @@ void init_prims(void) {
   ADD(1, FALSE, lt_char_code, "char-code");
   ADD(1, FALSE, lt_code_char, "code-char");
   /* Function */
-  ADD(2, FALSE, lt_simple_apply, "simple-apply");
+  ADD(1, FALSE, lt_eval, "eval");
+  ADD(1, FALSE, lt_expand_macro, "expand-macro");
   ADD(1, FALSE, lt_function_arity, "function-arity");
+  ADD(1, FALSE, lt_load, "load");
+  ADD(2, FALSE, lt_simple_apply, "simple-apply");
   /* Input File */
   ADD(1, FALSE, lt_close_in, "close-in");
   ADD(1, FALSE, lt_is_file_open, "file-open?");
@@ -1189,7 +1208,6 @@ void init_prims(void) {
   ADD(2, FALSE, lt_eq, "eq");
   ADD(2, FALSE, lt_eql, "eql");
   ADD(2, FALSE, lt_equal, "equal");
-  ADD(1, FALSE, lt_expand_macro, "expand-macro");
   ADD(0, FALSE, lt_object_size, "object-size");
   ADD(1, FALSE, lt_type_of, "type-of");
 }
