@@ -69,7 +69,7 @@ extern lt *read_object(lt *);
 
 extern void init_prims(void);
 
-#define seq(...) lt_append_n(__VA_ARGS__, NULL)
+#define seq(...) append_n(__VA_ARGS__, NULL)
 
 #define first(x) lt_raw_nth((x), 0)
 #define second(x) lt_raw_nth((x), 1)

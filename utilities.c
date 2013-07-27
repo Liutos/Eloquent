@@ -54,19 +54,19 @@ lt *list3(lt *e1, lt *e2, lt *e3) {
   return make_pair(e1, list2(e2, e3));
 }
 
-lt *lt_append2(lt *l1, lt *l2) {
+lt *append2(lt *l1, lt *l2) {
   if (isnull(l1))
     return l2;
   else
-    return make_pair(pair_head(l1), lt_append2(pair_tail(l1), l2));
+    return make_pair(pair_head(l1), append2(pair_tail(l1), l2));
 }
 
-lisp_object_t *lt_append_n(lisp_object_t *list0, ...) {
+lisp_object_t *append_n(lisp_object_t *list0, ...) {
   va_list ap;
   va_start(ap, list0);
   lisp_object_t *next = va_arg(ap, lisp_object_t *);
   while (next != NULL) {
-    list0 = lt_append2(list0, next);
+    list0 = append2(list0, next);
     next = va_arg(ap, lisp_object_t *);
   }
   return list0;

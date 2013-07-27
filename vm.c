@@ -198,7 +198,7 @@ pub lisp_object_t *run_by_llam(lisp_object_t *code_vector) {
 //        Preprocess the arguments on the stack if the primitive function takes
 //        a rest flag.
         if (primitive_restp(func) == TRUE) {
-          assert(nargs >= primitive_arity(func));
+          assert(nargs >= primitive_arity(func) - 1);
           lt *rest = make_empty_list();
           for (int i = nargs - primitive_arity(func) + 1; i > 0; i--) {
             lt *arg = lt_vector_pop(stack);

@@ -198,7 +198,7 @@ lisp_object_t *compile_args(lisp_object_t *args, lisp_object_t *env) {
   if (isnull(args))
     return the_empty_list;
   else
-    return lt_append2(compile_object(pair_head(args), env),
+    return append2(compile_object(pair_head(args), env),
                       compile_args(pair_tail(args), env));
 }
 //

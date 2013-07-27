@@ -365,6 +365,7 @@ lt *lt_expand_macro(lt *form) {
       lt *proc = macro_procedure(op);
       assert(isprimitive(proc) || isfunction(proc));
       lt *result;
+//      TODO: Combine the two cases of function type
       if (isprimitive(proc)) {
         lt *args = pair_tail(form);
         if (primitive_restp(proc))
@@ -483,7 +484,7 @@ lt *lt_list_reverse(lt *list) {
   if (isnull(pair_tail(list)))
     return list;
   else
-    return lt_append2(lt_list_reverse(pair_tail(list)), list1(pair_head(list)));
+    return append2(lt_list_reverse(pair_tail(list)), list1(pair_head(list)));
 }
 
 /* Arithmetic Operations */
@@ -754,7 +755,7 @@ lt *lt_vector_to_list(lt *vector) {
 lt *lt_append(lt *lists) {
   if (isnull(lists))
     return make_empty_list();
-  return lt_append2(pair_head(lists), lt_append(pair_tail(lists)));
+  return append2(pair_head(lists), lt_append(pair_tail(lists)));
 }
 
 lisp_object_t *lt_head(lisp_object_t *pair) {
