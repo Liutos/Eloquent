@@ -114,6 +114,9 @@ void write_opcode(lt *opcode, lt *dest) {
     case CATCH:
       write_raw_string("#<CATCH>", dest);
       break;
+    case DECL:
+      writef(dest, "#<DECL %S>", op_decl_var(opcode));
+      break;
     case CONST: 
     	writef(dest, "#<CONST %?>", op_const_value(opcode)); 
     	break;

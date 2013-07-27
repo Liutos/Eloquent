@@ -60,6 +60,7 @@ enum OPCODE_TYPE {
   CALL,
   CATCH,
   CONST,
+  DECL,
   FN,
   GSET,
   GVAR,
@@ -197,6 +198,7 @@ struct string_builder_t {
 #define op_args_arity(x) oparg1(x)
 #define op_call_arity(x) oparg1(x)
 #define op_const_value(x) oparg1(x)
+#define op_decl_var(x) oparg1(x)
 #define op_fjump_label(x) oparg1(x)
 #define op_fn_func(x) oparg1(x)
 #define op_gset_var(x) oparg1(x)

@@ -363,6 +363,10 @@ lisp_object_t *make_op_const(lisp_object_t *value) {
   return mkopcode(CONST, "CONST", 1, value);
 }
 
+lt *make_op_decl(lt *symbol) {
+  return mkopcode(DECL, "DECL", 1, symbol);
+}
+
 lisp_object_t *make_op_fjump(lisp_object_t *label) {
   return mkopcode(FJUMP, "FJUMP", 1, label);
 }

@@ -129,6 +129,11 @@ lisp_object_t *gen(enum TYPE opcode, ...) {
       ins = make_op_const(value);
     }
       break;
+    case DECL: {
+      lt *symbol = va_arg(ap, lt *);
+      ins = make_op_decl(symbol);
+    }
+      break;
     case FJUMP: {
       lisp_object_t *label = va_arg(ap, lisp_object_t *);
       ins = make_op_fjump(label);
