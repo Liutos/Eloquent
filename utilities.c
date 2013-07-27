@@ -32,6 +32,8 @@ int is_symbol_bound(lt *symbol) {
 int is_macro_form(lt *form) {
   if (!ispair(form))
     return FALSE;
+  if (!issymbol(pair_head(form)))
+    return FALSE;
   lt *symbol = pair_head(form);
   return is_symbol_bound(symbol) && ismacro(symbol_value(symbol));
 }

@@ -15,9 +15,14 @@
 int main(int argc, char *argv[])
 {
   char *inputs[] = {
-      "(write-char #\\a *standard-output*)",
-      "(write-line \"Goodbye, 233-lisp!\" *standard-output*)",
-      "(write-string \"Hello, 233-lisp!\" *standard-output*)",
+      "(expand-macro '(cond))",
+      "(cond)",
+      "(expand-macro '(cond (1 (+ 1 2))))",
+      "(cond (1 (+ 1 2)))",
+      "(expand-macro '(cond (#f (/ 1 0)) (else (+ 1 2.3))))",
+      "(cond (#f (/ 1 0)) (else (+ 1 2.3)))",
+      "(expand-macro '(cond (#f (/ 1 0)) ((tail '(1)) (/ 2 2)) (else (+ 2.3 1))))",
+      "(cond (#f (/ 1 0)) ((tail '(1)) (/ 2 2)) (else (+ 2.3 1)))",
   };
   init_global_variable();
   init_prims();

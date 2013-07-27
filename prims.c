@@ -339,7 +339,24 @@ lt *lt_simple_apply(lt *function, lt *args) {
   assert(isprimitive(function) || isfunction(function));
   assert(ispair(args) || isnull(args));
   lt *expr = make_pair(function, args);
+  writef(standard_out, "In lt_simple_apply --- expr is %?\n", expr);
   return run_by_llam(compile_to_bytecode(expr));
+}
+
+lt *compress_args(lt *args, int nrequired) {
+  lt *lt_list_nreverse(lt *);
+  lt *new_args = make_empty_list();
+  for (int i = 0; i < nrequired; i++) {
+    new_args = make_pair(pair_head(args), new_args);
+    args = pair_tail(args);
+  }
+  lt *rest = make_empty_list();
+  while (ispair(args)) {
+    rest = make_pair(pair_head(args), rest);
+    args = pair_tail(args);
+  }
+  new_args = make_pair(lt_list_nreverse(rest), new_args);
+  return lt_list_nreverse(new_args);
 }
 
 lt *lt_expand_macro(lt *form) {
@@ -350,6 +367,8 @@ lt *lt_expand_macro(lt *form) {
       lt *result;
       if (isprimitive(proc)) {
         lt *args = pair_tail(form);
+        if (primitive_restp(proc))
+          args = compress_args(args, primitive_arity(proc) - 1);
         switch (primitive_arity(proc)) {
           case 0:
             result = ((f0)primitive_func(proc))();
