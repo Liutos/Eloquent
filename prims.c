@@ -365,41 +365,41 @@ lt *compress_args(lt *args, int nrequired) {
 
 lt *lt_expand_macro(lt *form) {
   if (is_macro_form(form)) {
-      lt *op = symbol_value(pair_head(form));
-      lt *proc = macro_procedure(op);
-      assert(isprimitive(proc) || isfunction(proc));
-      lt *result;
+    lt *op = symbol_value(pair_head(form));
+    lt *proc = macro_procedure(op);
+    assert(isprimitive(proc) || isfunction(proc));
+    lt *result;
 //      TODO: Combine the two cases of function type
-      if (isprimitive(proc)) {
-        lt *args = pair_tail(form);
-        if (primitive_restp(proc))
-          args = compress_args(args, primitive_arity(proc) - 1);
-        switch (primitive_arity(proc)) {
-          case 0:
-            result = ((f0)primitive_func(proc))();
-            break;
-          case 1: {
-            lt *arg1 = lt_raw_nth(args, 0);
-            result = ((f1)primitive_func(proc))(arg1);
-          }
-            break;
-          case 2: {
-            lt *arg1 = lt_raw_nth(args, 0);
-            lt *arg2 = lt_raw_nth(args, 1);
-            result = ((f2)primitive_func(proc))(arg1, arg2);
-          }
-            break;
-          default:
-            printf("Macro with arity %d is unsupported yet.\n",
-                   primitive_arity(proc));
-            exit(1);
+    if (isprimitive(proc)) {
+      lt *args = pair_tail(form);
+      if (primitive_restp(proc))
+        args = compress_args(args, primitive_arity(proc) - 1);
+      switch (primitive_arity(proc)) {
+        case 0:
+          result = ((f0) primitive_func(proc))();
+          break;
+        case 1: {
+          lt *arg1 = lt_raw_nth(args, 0);
+          result = ((f1) primitive_func(proc))(arg1);
         }
-      } else {
-        lt *args = pair_tail(form);
-        result = lt_simple_apply(proc, args);
+          break;
+        case 2: {
+          lt *arg1 = lt_raw_nth(args, 0);
+          lt *arg2 = lt_raw_nth(args, 1);
+          result = ((f2) primitive_func(proc))(arg1, arg2);
+        }
+          break;
+        default:
+          printf("Macro with arity %d is unsupported yet.\n",
+          primitive_arity(proc));
+          exit(1);
       }
-      return lt_expand_macro(result);
-    } else
+    } else {
+      lt *args = pair_tail(form);
+      result = lt_simple_apply(proc, args);
+    }
+    return lt_expand_macro(result);
+  } else
       return form;
 }
 
@@ -413,6 +413,7 @@ lt *lt_function_arity(lt *function) {
 }
 
 lt *lt_load(lt *path) {
+  lt *lt_close_in(lt *);
   lt *lt_open_in(lt *);
   assert(isstring(path));
   lt *file = lt_open_in(path);
@@ -421,6 +422,7 @@ lt *lt_load(lt *path) {
     lt_eval(expr);
     expr = read_object(file);
   }
+  lt_close_in(file);
   return make_true();
 }
 

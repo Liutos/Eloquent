@@ -75,7 +75,7 @@ lt *quasiq(lt *x) {
   if (is_tag_list(x, S("quasiquote"))) {
     assert(!isnull(pair_tail(x)));
     assert(isnull(pair_tail(pair_tail(x))));
-    quasiq(quasiq(second(x)));
+    return quasiq(quasiq(second(x)));
   }
   if (is_tag_list(pair_head(x), S("unquote-splicing"))) {
     if (isnull(pair_tail(x)))

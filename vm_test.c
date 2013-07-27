@@ -15,13 +15,9 @@
 int main(int argc, char *argv[])
 {
   char *inputs[] = {
-      "(list)",
-      "(list 1)",
-      "(list 1 2)",
-      "(list 1 2 3)",
-      "(append)",
-      "(append '(1))",
-      "(append '(1) '(2))",
+      "(read-from-string \"``a\")",
+      "(expand-macro '``a)",
+      "``a",
   };
   init_global_variable();
   init_prims();
