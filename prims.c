@@ -286,6 +286,9 @@ void write_object(lt *x, lt *output_file) {
     case TEOF:
     	write_raw_string("#<EOF>", output_file);
     	break;
+    case TUNDEF:
+      write_raw_string("#<UNDEF>", output_file);
+      break;
     case VECTOR: {
       lisp_object_t **vector = vector_value(x);
       write_raw_string("[", output_file);

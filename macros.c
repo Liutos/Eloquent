@@ -56,6 +56,23 @@ lt *lt_cond_macro(lt *clauses) {
   }
 }
 
+lt *lt_let_macro(lt *bindings, lt *body) {
+  lt *decls = make_empty_list();
+  lt *sets = make_empty_list();
+  while (ispair(bindings)) {
+    lt *bd = pair_head(bindings);
+    lt *com;
+    com = list2(S("declare"), pair_head(bd));
+    decls = make_pair(com, decls);
+    com = list3(S("set!"), pair_head(bd), second(bd));
+    sets = make_pair(com, sets);
+    bindings = pair_tail(bindings);
+  }
+  decls = lt_list_nreverse(decls);
+  sets = lt_list_nreverse(sets);
+  return make_pair(S("begin"), seq(decls, sets, body));
+}
+
 lt *lt_push_macro(lt *x, lt *list) {
   return list3(S("set!"), list, list3(S("cons"), x, list));
 }
@@ -100,7 +117,8 @@ void init_macros(void) {
     symbol_value(S(Lisp_name)) = func; \
   } while(0)
 
+  DM(1, TRUE, lt_cond_macro, "cond");
+  DM(2, TRUE, lt_let_macro, "let");
   DM(2, FALSE, lt_push_macro, "push");
   DM(1, FALSE, quasiq, "quasiquote");
-  DM(1, TRUE, lt_cond_macro, "cond");
 }

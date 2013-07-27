@@ -15,10 +15,7 @@
 void add_local_variable(lt *var, lt *env) {
   if (env == null_env)
     return;
-  if (!isvector(pair_head(env))) {
-    writef(standard_out, "type-of(pair_head(env)) is %S\n", lt_type_of(pair_head(env)));
-    assert(isvector(pair_head(env)));
-  }
+  assert(isvector(pair_head(env)));
   lt_vector_push_extend(pair_head(env), make_undef());
 }
 
@@ -93,7 +90,7 @@ pub lisp_object_t *run_by_llam(lisp_object_t *code_vector) {
         lisp_object_t *args = make_vector(fixnum_value(op_args_arity(ins)));
         for (int i = fixnum_value(op_args_arity(ins)) - 1; i >= 0; i--) {
           lisp_object_t *arg = lt_vector_pop(stack);
-          vector_value(args)[i] = arg;
+          lt_vector_push(args, arg);
         }
         env = make_pair(args, env);
       }

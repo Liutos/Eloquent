@@ -14,7 +14,7 @@
 int main(int argc, char *argv[])
 {
   char *inputs[] = {
-      "((lambda () (declare x) (set! x 1) x))",
+      "((lambda (x) (let ((a 1))) (* a x)) 3)",
   };
   init_global_variable();
   init_prims();
