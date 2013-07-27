@@ -16,6 +16,7 @@
 lisp_object_t *the_dot_symbol;
 lisp_object_t *the_false;
 lisp_object_t *the_true;
+lt *gensym_counter;
 lisp_object_t *null_env;
 lisp_object_t *the_empty_list;
 lt *object_pool;                        /* An array contains lt. */

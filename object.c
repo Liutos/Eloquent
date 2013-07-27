@@ -14,6 +14,7 @@
 #include "type.h"
 
 lt *free_objects;
+lt *gensym_counter;
 lt *null_env;
 lt *object_pool;
 lt *standard_in;
@@ -431,12 +432,14 @@ void init_global_variable(void) {
   the_false = make_false();
   the_true = make_true();
   the_empty_list = make_empty_list();
+  gensym_counter = make_fixnum(0);
   null_env = the_empty_list;
   standard_in = make_input_file(stdin);
   standard_out = make_output_file(stdout);
   symbol_list = the_empty_list;
   the_undef = make_undef();
 
+  symbol_value(S("*gensym-counter*")) = gensym_counter;
   symbol_value(S("*standard-output*")) = standard_out;
   symbol_value(S("*standard-input*")) = standard_in;
 

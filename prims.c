@@ -651,6 +651,13 @@ lisp_object_t *lt_intern(lisp_object_t *name) {
   return find_or_create_symbol(string_value(name));
 }
 
+lt *lt_gensym(void) {
+  static char sym[256];
+  int n = sprintf(sym, "G%d", fixnum_value(gensym_counter));
+  gensym_counter = make_fixnum(fixnum_value(gensym_counter) + 1);
+  return S(strndup(sym, n));
+}
+
 lt *lt_is_bound(lt *symbol) {
   assert(issymbol(symbol));
   return booleanize(!isundef(symbol_value(symbol)));
@@ -883,10 +890,15 @@ lisp_object_t *lt_type_of(lisp_object_t *object) {
     mktype(FIXNUM);
     mktype(FLOAT);
     mktype(FUNCTION);
-    mktype(PRIMITIVE_FUNCTION);
-    mktype(VECTOR);
+    mktype(INPUT_FILE);
     mktype(MACRO);
+    mktype(OPCODE);
+    mktype(OUTPUT_FILE);
     mktype(PAIR);
+    mktype(PRIMITIVE_FUNCTION);
+    mktype(STRING);
+    mktype(SYMBOL);
+    mktype(VECTOR);
     default :
       fprintf(stdout, "Unknown type %d of object\n", type_of(object));
       exit(1);
@@ -1195,6 +1207,7 @@ void init_prims(void) {
   ADD(1, FALSE, lt_string_length, "string-length");
   ADD(3, FALSE, lt_string_set, "string-set");
   /* Symbol */
+  ADD(0, FALSE, lt_gensym, "gensym");
   ADD(1, FALSE, lt_intern, "string->symbol");
   ADD(1, FALSE, lt_is_bound, "bound?");
   ADD(1, FALSE, lt_is_fbound, "fbound?");
