@@ -14,7 +14,7 @@
 int main(int argc, char *argv[])
 {
   char *inputs[] = {
-      "((lambda (x) (let ((a 1))) (* a x)) 3)",
+      "(expand-macro '(var a 1))",
   };
   init_global_variable();
   init_prims();

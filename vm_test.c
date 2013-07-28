@@ -1,7 +1,7 @@
 /*
- * prototype.c
+ * vm_test.c
  *
- * A Simple Byte Code Compiler for Lisp
+ * The Test Driver for the Virtual Machine
  *
  * Copyright (C) 2013-06-07 liutos <mat.liutos@gmail.com>
  */
@@ -15,8 +15,12 @@
 int main(int argc, char *argv[])
 {
   char *inputs[] = {
+      "(expand-macro '(var a 1))",
+      "((lambda (x) (var a 1) (+ a x)) 2)",
+      "(set! mk-adder (lambda (x) (lambda (n) (var m n) (+ m x))))",
+      "(set! add1 (mk-adder 1))",
+      "(add1 2)",
       "(let ((a 1)) (+ a 1))",
-      "((lambda (x) (let ((a 1) (b 2)) (* x (+ a b)))) 3)",
   };
   init_global_variable();
   init_prims();

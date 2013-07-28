@@ -57,20 +57,24 @@ lt *lt_cond_macro(lt *clauses) {
 }
 
 lt *lt_let_macro(lt *bindings, lt *body) {
-  lt *decls = make_empty_list();
-  lt *sets = make_empty_list();
+  lt *pars= make_empty_list();
+  lt *args= make_empty_list();
   while (ispair(bindings)) {
     lt *bd = pair_head(bindings);
-    lt *com;
-    com = list2(S("declare"), pair_head(bd));
-    decls = make_pair(com, decls);
-    com = list3(S("set!"), pair_head(bd), second(bd));
-    sets = make_pair(com, sets);
+    pars = make_pair(pair_head(bd), pars);
+    args = make_pair(second(bd), args);
     bindings = pair_tail(bindings);
   }
-  decls = lt_list_nreverse(decls);
-  sets = lt_list_nreverse(sets);
-  return make_pair(S("begin"), seq(decls, sets, body));
+  pars = lt_list_nreverse(pars);
+  args = lt_list_nreverse(args);
+  lt *lambda = make_pair(S("lambda"), make_pair(pars, body));
+  return make_pair(lambda, args);
+}
+
+lt *lt_var_macro(lt *var, lt *val) {
+  lt *decl = list2(S("declare"), var);
+  lt *setf = list3(S("set!"), var, val);
+  return list3(S("begin"), decl, setf);
 }
 
 lt *lt_push_macro(lt *x, lt *list) {
@@ -119,6 +123,7 @@ void init_macros(void) {
 
   DM(1, TRUE, lt_cond_macro, "cond");
   DM(2, TRUE, lt_let_macro, "let");
+  DM(2, FALSE, lt_var_macro, "var");
   DM(2, FALSE, lt_push_macro, "push");
   DM(1, FALSE, quasiq, "quasiquote");
 }
