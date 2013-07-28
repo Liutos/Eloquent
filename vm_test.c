@@ -15,16 +15,12 @@
 int main(int argc, char *argv[])
 {
   char *inputs[] = {
-      "(expand-macro '(var a 1))",
-      "((lambda (x) (var a 1) (+ a x)) 2)",
-      "(set! mk-adder (lambda (x) (lambda (n) (var m n) (+ m x))))",
-      "(set! add1 (mk-adder 1))",
-      "(add1 2)",
-      "(let ((a 1)) (+ a 1))",
+      "((lambda (x y) (- x y)) 1 2)",
   };
   init_global_variable();
   init_prims();
   init_macros();
+  lt_load(make_string("/home/liutos/src/c/Eloquent/eloquent/init.scm"));
   for (int i = 0; i < sizeof(inputs) / sizeof(char *); i++) {
     writef(standard_out, ">> %s\n", make_string(inputs[i]));
     lisp_object_t *expr = read_object_from_string(inputs[i]);

@@ -90,7 +90,8 @@ pub lisp_object_t *run_by_llam(lisp_object_t *code_vector) {
         lisp_object_t *args = make_vector(fixnum_value(op_args_arity(ins)));
         for (int i = fixnum_value(op_args_arity(ins)) - 1; i >= 0; i--) {
           lisp_object_t *arg = lt_vector_pop(stack);
-          lt_vector_push(args, arg);
+          vector_value(args)[i] = arg;
+          vector_last(args)++;
         }
         env = make_pair(args, env);
       }

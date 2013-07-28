@@ -64,6 +64,7 @@ extern F1(lt_is_constant);
 extern F1(lt_expand_macro);
 extern F1(lt_function_arity);
 extern F2(lt_simple_apply);
+extern F1(lt_load);
 
 extern lt *read_object_from_string(char *);
 extern lt *read_object(lt *);

@@ -14,11 +14,12 @@
 int main(int argc, char *argv[])
 {
   char *inputs[] = {
-      "(expand-macro '(var a 1))",
+      "(if (> x y) #f (if (= x y) #f #t))",
   };
   init_global_variable();
   init_prims();
   init_macros();
+  lt_load(make_string("/home/liutos/src/c/Eloquent/eloquent/init.scm"));
   for (int i = 0; i < sizeof(inputs) / sizeof(char *); i++) {
     write_raw_string(">> ", standard_out);
     write_raw_string(inputs[i], standard_out);
