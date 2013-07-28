@@ -349,7 +349,6 @@ lt *lt_simple_apply(lt *function, lt *args) {
   assert(isprimitive(function) || isfunction(function));
   assert(ispair(args) || isnull(args));
   lt *expr = make_pair(function, args);
-  writef(standard_out, "In lt_simple_apply --- expr is %?\n", expr);
   return run_by_llam(compile_to_bytecode(expr));
 }
 
@@ -367,6 +366,15 @@ lt *compress_args(lt *args, int nrequired) {
   }
   new_args = make_pair(lt_list_nreverse(rest), new_args);
   return lt_list_nreverse(new_args);
+}
+
+lt *quote_each_args(lt *args) {
+  if (isnull(args))
+    return make_empty_list();
+  else
+    return
+        make_pair(list2(S("quote"), pair_head(args)),
+            quote_each_args(pair_tail(args)));
 }
 
 lt *lt_expand_macro(lt *form) {
@@ -402,7 +410,7 @@ lt *lt_expand_macro(lt *form) {
       }
     } else {
       lt *args = pair_tail(form);
-      result = lt_simple_apply(proc, args);
+      result = lt_simple_apply(proc, quote_each_args(args));
     }
     return lt_expand_macro(result);
   } else
