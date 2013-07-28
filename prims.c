@@ -1017,9 +1017,11 @@ lisp_object_t *read_fixnum(lisp_object_t *input_file, int sign, char start) {
   for (; isdigit(c); c = get_char(input_file)) {
     sum = sum * 10 + c - '0';
   }
-  if (c == '.')
-    return read_float(input_file, sum);
-  else
+  if (c == '.') {
+    lt *flonum = read_float(input_file, sum);
+    float_value(flonum) = sign * float_value(flonum);
+    return flonum;
+  } else
     unget_char(c, input_file);
   return make_fixnum(sign * sum);
 }
