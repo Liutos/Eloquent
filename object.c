@@ -26,6 +26,11 @@ lt *the_false;
 lt *the_true;
 lt *the_undef;
 
+lt *the_add;
+lt *the_sub;
+lt *the_mul;
+lt *the_div;
+
 #define OBJECT_INIT_COUNT 2000
 
 /* Type predicate */
@@ -442,6 +447,11 @@ void init_global_variable(void) {
   standard_out = make_output_file(stdout);
   symbol_list = the_empty_list;
   the_undef = make_undef();
+
+  the_add = S("+");
+  the_sub = S("-");
+  the_mul = S("*");
+  the_div = S("/");
 
   symbol_value(S("*gensym-counter*")) = gensym_counter;
   symbol_value(S("*standard-output*")) = standard_out;

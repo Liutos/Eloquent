@@ -25,6 +25,11 @@ lisp_object_t *standard_out;
 lisp_object_t *symbol_list;
 lisp_object_t *the_undef;
 
+lt *the_add;
+lt *the_sub;
+lt *the_mul;
+lt *the_div;
+
 extern void *checked_malloc(size_t);
 
 extern int is_pointer(lt *);

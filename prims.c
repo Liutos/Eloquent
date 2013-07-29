@@ -1180,6 +1180,160 @@ lt *lt_read_from_string(lt *string) {
   return read_object_from_string(string_value(string));
 }
 
+lt *read_one_token(lt *in) {
+  int c = get_char(in);
+  switch (c) {
+    case ';':
+      while ((c = get_char(in)) != EOF && c != '\n');
+      return read_one_token(in);
+    case EOF:
+      return make_eof();
+    case '\n': case '\r': case '\t':
+      input_file_linum(in)++;
+      return read_one_token(in);
+    case ' ':
+      return read_one_token(in);
+    case '0': case '1': case '2': case '3': case '4':
+    case '5': case '6': case '7': case '8': case '9':
+      return read_fixnum(in, 1, c);
+    case '-':
+      if (isdigit(peek_char(in)))
+        return read_fixnum(in, -1, '0');
+      else
+        goto read_symbol_label;
+    case '#':
+      c = get_char(in);
+      switch (c) {
+        case '\\':
+          return read_character(in);
+        case 't':
+          if (isdelimiter(peek_char(in)))
+            return the_true;
+          else
+            goto bool_error_label;
+        case 'f':
+          if (isdelimiter(peek_char(in)))
+            return the_false;
+          else
+            goto bool_error_label;
+        default : {
+          bool_error_label:
+          return reader_error("Unexpected character '%c' after '#', at line %d, column %d",
+              c, input_file_linum(in), input_file_colnum(in));
+        }
+      }
+      break;
+    case '"':
+      return read_string(in);
+    case '(': return S("(");
+    case ')': return S(")");
+    case '[': return S("[");
+    case ']': return S("]");
+    case ',': return S(",");
+//    case '(': {
+//      lisp_object_t *head = read_object(in);
+//      if (isclose(head))
+//        return the_empty_list;
+//      lisp_object_t *tail = read_pair(in);
+//      if (is_signaled(tail))
+//        return tail;
+//      else
+//        return make_pair(head, tail);
+//    }
+//    case ']': case ')':
+//      return make_close();
+//    case '.':
+//      return the_dot_symbol;
+//    case '[':
+//      return read_vector(in);
+//    case '\'':
+//      return list2(S("quote"), read_object(in));
+//    case '`':
+//      return list2(S("quasiquote"), read_object(in));
+//    case ',': {
+//      c = get_char(in);
+//      if (c == '@')
+//        return list2(S("unquote-splicing"), read_object(in));
+//      unget_char(c, in);
+//      return list2(S("unquote"), read_object(in));
+//    }
+//      break;
+    default :
+    read_symbol_label:
+      return read_symbol(c, in);
+  }
+}
+
+lt *read_tokens(lt *in) {
+  lt *tokens = make_empty_list();
+  lt *tk= read_one_token(in);
+  while (!iseof(tk)) {
+    tokens = make_pair(tk, tokens);
+    tk = read_one_token(in);
+  }
+  return lt_list_nreverse(tokens);
+}
+
+lt *lt_read_tokens_from_string(lt *str) {
+  assert(isstring(str));
+  FILE *fp = fmemopen(string_value(str), strlen(string_value(str)), "r");
+  lt *in = make_input_file(fp);
+  return read_tokens(in);
+}
+
+int is_operator(lt *token) {
+  return token == the_add ||
+      token == the_sub ||
+      token == the_mul ||
+      token == the_div;
+}
+
+int is_left_assoc(lt *op) {
+  return op == the_add ||
+      op == the_sub ||
+      op == the_mul ||
+      op == the_div;
+}
+
+int op_pcd(lt *op) {
+  if (op == the_add || op == the_sub)
+    return 0;
+  else
+    return 1;
+}
+
+lt *postify_tokens(lt *tokens) {
+  assert(ispair(tokens));
+  lt *out = make_vector(10);
+  lt *stk = make_empty_list();
+  while (!isnull(tokens)) {
+    lt *token = pair_head(tokens);
+    if (!isfalse(lt_is_constant(token)))
+      lt_vector_push_extend(out, token);
+    else if (is_operator(token)) {
+      while (!isnull(stk)) {
+        lt *o2 = pair_head(stk);
+        if ((is_left_assoc(token) && op_pcd(token) <= op_pcd(o2)) ||
+            (!is_left_assoc(token) && op_pcd(token) < op_pcd(o2))) {
+          stk = pair_tail(stk);
+          lt_vector_push_extend(out, o2);
+        }
+      }
+      stk = make_pair(token, stk);
+    } else {
+      writef(standard_out, "Token %? is not supported yet\n", token);
+      exit(1);
+    }
+    tokens = pair_tail(tokens);
+  }
+  while (!isnull(stk)) {
+    lt *op = pair_head(stk);
+    lt_vector_push_extend(out, op);
+    stk = pair_tail(stk);
+  }
+  return out;
+}
+
 void init_prims(void) {
 #define ADD(arity, restp, function_name, Lisp_name)                            \
   do {                                                                  \
@@ -1212,7 +1366,6 @@ void init_prims(void) {
   ADD(1, FALSE, lt_open_in, "open-in");
   ADD(1, FALSE, lt_read_char, "read-char");
   ADD(1, FALSE, lt_read_line, "read-line");
-  ADD(1, FALSE, lt_read_from_string, "read-from-string");
   /* List */
   ADD(1, TRUE, lt_append, "append");
   ADD(2, FALSE, lt_is_tag_list, "is-tag-list?");
@@ -1224,6 +1377,7 @@ void init_prims(void) {
   ADD(1, FALSE, lt_list_reverse, "list-reverse");
   ADD(2, FALSE, lt_nth, "nth");
   ADD(2, FALSE, lt_nthtail, "nth-tail");
+  ADD(1, FALSE, postify_tokens, "postify-tokens");
   ADD(2, FALSE, lt_set_head, "set-head");
   ADD(2, FALSE, lt_set_tail, "set-tail");
   ADD(1, FALSE, lt_tail, "tail");
@@ -1235,6 +1389,8 @@ void init_prims(void) {
   ADD(2, FALSE, lt_write_string, "write-string");
   /* String */
   ADD(2, FALSE, lt_char_at, "char-at");
+  ADD(1, FALSE, lt_read_from_string, "read-from-string");
+  ADD(1, FALSE, lt_read_tokens_from_string, "read-tokens-from-string");
   ADD(1, FALSE, lt_string_length, "string-length");
   ADD(3, FALSE, lt_string_set, "string-set");
   /* Symbol */
