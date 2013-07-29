@@ -1260,3 +1260,8 @@ void init_prims(void) {
   ADD(0, FALSE, lt_object_size, "object-size");
   ADD(1, FALSE, lt_type_of, "type-of");
 }
+
+void load_init_file(void) {
+  lt *path = make_string("init.scm");
+  lt_load(path);
+}

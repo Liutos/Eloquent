@@ -15,7 +15,7 @@ int main(int argc, char *argv[]) {
   init_global_variable();
   init_prims();
   init_macros();
-  lt_load(make_string("/home/liutos/src/c/Eloquent/eloquent/init.scm"));
+  load_init_file();
   while (1) {
     write_raw_string(">> ", standard_out);
     lt *expr = read_object(standard_in);

@@ -70,6 +70,7 @@ extern lt *read_object_from_string(char *);
 extern lt *read_object(lt *);
 
 extern void init_prims(void);
+extern void load_init_file(void);
 
 #define seq(...) append_n(__VA_ARGS__, NULL)
 
