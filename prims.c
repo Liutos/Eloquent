@@ -1304,19 +1304,19 @@ int op_pcd(lt *op) {
 
 lt *postify_tokens(lt *tokens) {
   assert(ispair(tokens));
-  lt *out = make_vector(10);
+  lt *out = make_empty_list();
   lt *stk = make_empty_list();
   while (!isnull(tokens)) {
     lt *token = pair_head(tokens);
     if (!isfalse(lt_is_constant(token)))
-      lt_vector_push_extend(out, token);
+      out = make_pair(token, out);
     else if (is_operator(token)) {
       while (!isnull(stk)) {
         lt *o2 = pair_head(stk);
         if ((is_left_assoc(token) && op_pcd(token) <= op_pcd(o2)) ||
             (!is_left_assoc(token) && op_pcd(token) < op_pcd(o2))) {
           stk = pair_tail(stk);
-          lt_vector_push_extend(out, o2);
+          out = make_pair(o2, out);
         }
       }
       stk = make_pair(token, stk);
@@ -1328,10 +1328,31 @@ lt *postify_tokens(lt *tokens) {
   }
   while (!isnull(stk)) {
     lt *op = pair_head(stk);
-    lt_vector_push_extend(out, op);
+    out = make_pair(op, out);
     stk = pair_tail(stk);
   }
-  return out;
+  return lt_list_nreverse(out);
+}
+
+lt *prefixy_tokens(lt *tokens) {
+  lt *args = make_empty_list();
+  while (!isnull(tokens)) {
+    lt *tk = pair_head(tokens);
+    if (!isfalse(lt_is_constant(tk)))
+      args = make_pair(tk, args);
+    else {
+      assert(!isnull(args));
+      lt *a2 = pair_head(args);
+      args = pair_tail(args);
+      assert(!isnull(args));
+      lt *a1 = pair_head(args);
+      args = pair_tail(args);
+      args = make_pair(list3(tk, a1, a2), args);
+    }
+    tokens = pair_tail(tokens);
+  }
+  assert(!isnull(args));
+  return pair_head(args);
 }
 
 void init_prims(void) {
@@ -1378,6 +1399,7 @@ void init_prims(void) {
   ADD(2, FALSE, lt_nth, "nth");
   ADD(2, FALSE, lt_nthtail, "nth-tail");
   ADD(1, FALSE, postify_tokens, "postify-tokens");
+  ADD(1, FALSE, prefixy_tokens, "prefixy-tokens");
   ADD(2, FALSE, lt_set_head, "set-head");
   ADD(2, FALSE, lt_set_tail, "set-tail");
   ADD(1, FALSE, lt_tail, "tail");

@@ -15,10 +15,9 @@
 int main(int argc, char *argv[])
 {
   char *inputs[] = {
-      "(read-tokens-from-string \"1 2.3 #t #\\\\a\")",
-      "(read-tokens-from-string \"lambda (x) x + 1\")",
-      "(read-tokens-from-string \"if x < 0 0 - x else x\")",
-      "(read-tokens-from-string \"func([1, 2.3, 4.56, (x + y)])\")",
+      "(set! tks (read-tokens-from-string \"lambda (x) x + 1\"))",
+      "(set! pts (postify-tokens tks))",
+      "(prefixy-tokens pts)",
   };
   init_global_variable();
   init_prims();
