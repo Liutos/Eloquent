@@ -15,6 +15,8 @@ typedef struct token_vector_t token_vector_t;
 enum TOKEN_TYPE {
   NUMBER,
   OPERATOR,
+  LPAREN,
+  RPAREN,
 };
 
 enum {
@@ -40,10 +42,10 @@ void write_tokens(token_vector_t *);
 void convert_write(char *);
 
 int main(int argc, char *argv[]) {
-  convert_write("1 + 1");
-  convert_write("2 * 3");
-  convert_write("9 - 5 + 2");
-  convert_write("1 + 2 * 3");
+  convert_write("1 + (1)");
+  convert_write("(2 * 3)");
+  convert_write("9 - (5 + 2)");
+  convert_write("(1 + 2) * 3");
   return 0;
 }
 
@@ -58,6 +60,18 @@ token_t *make_operator(char op) {
   token_t *tk = malloc(sizeof(struct token_t));
   tk->type = OPERATOR;
   tk->u.operator = op;
+  return tk;
+}
+
+token_t *make_lparen(void) {
+  token_t *tk = malloc(sizeof(struct token_t));
+  tk->type = LPAREN;
+  return tk;
+}
+
+token_t *make_rparen(void) {
+  token_t *tk = malloc(sizeof(struct token_t));
+  tk->type = RPAREN;
   return tk;
 }
 
@@ -88,6 +102,10 @@ token_t *pop(token_vector_t *vector) {
 token_t *top(token_vector_t *vector) {
   assert(vector->index > 0);
   return vector->data[vector->index - 1];
+}
+
+int isparen(token_t *tk) {
+  return tk->type == LPAREN || tk->type == RPAREN;
 }
 
 int op_precedence(token_t *op) {
@@ -133,7 +151,18 @@ token_vector_t *infix2postfix(char *str) {
       i++;
       continue;
     }
-    if (isdigit(c)) {
+    if (c == '(') {
+      push(make_lparen(), stack);
+      i++;
+    } else if (c == ')') {
+      while (!is_vector_empty(stack)) {
+	token_t *tk = pop(stack);
+	if (tk->type == LPAREN)
+	  break;
+	push(tk, queue);
+      }
+      i++;
+    } else if (isdigit(c)) {
       int n = 0;
       do {
         n = n * 10 + c - '0';
@@ -146,16 +175,18 @@ token_vector_t *infix2postfix(char *str) {
       token_t *o1 = make_operator(c);
       if (!is_vector_empty(stack)) {
         token_t *o2 = top(stack);
-        int p1 = op_precedence(o1);
-        int p2 = op_precedence(o2);
-        while ((is_left_assoc(o1) && p1 <= p2) ||
-            (is_right_assoc(o1) && p1 < p2)) {
-          pop(stack);
-          push(o2, queue);
-          if (is_vector_empty(stack))
-            break;
-          o2 = top(stack);
-        }
+	if (!isparen(o2)) {
+	  int p1 = op_precedence(o1);
+	  int p2 = op_precedence(o2);
+	  while ((is_left_assoc(o1) && p1 <= p2) ||
+		 (is_right_assoc(o1) && p1 < p2)) {
+	    pop(stack);
+	    push(o2, queue);
+	    if (is_vector_empty(stack))
+	      break;
+	    o2 = top(stack);
+	  }
+	}
       }
       push(o1, stack);
     } else {
@@ -178,6 +209,12 @@ void write_tokens(token_vector_t *vector) {
       case OPERATOR:
         printf("%c", tk->u.operator);
         break;
+      case LPAREN:
+	printf("(");
+	break;
+      case RPAREN:
+	printf(")");
+	break;
     }
   }
 }
