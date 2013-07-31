@@ -40,10 +40,10 @@ void write_tokens(token_vector_t *);
 void convert_write(char *);
 
 int main(int argc, char *argv[]) {
-  convert_write("1+1");
-  convert_write("2*3");
-  convert_write("9-5+2");
-  convert_write("1+2*3");
+  convert_write("1 + 1");
+  convert_write("2 * 3");
+  convert_write("9 - 5 + 2");
+  convert_write("1 + 2 * 3");
   return 0;
 }
 
@@ -129,6 +129,10 @@ token_vector_t *infix2postfix(char *str) {
   token_vector_t *queue = make_token_vector(20);
   for (int i = 0; str[i] != '\0';) {
     char c = str[i];
+    if (c == ' ' || c == '\t' || c == '\n') {
+      i++;
+      continue;
+    }
     if (isdigit(c)) {
       int n = 0;
       do {
