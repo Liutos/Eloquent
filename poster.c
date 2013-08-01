@@ -15,6 +15,7 @@
 
 typedef struct token_t token_t;
 typedef struct token_vector_t token_vector_t;
+typedef struct lexer_t lexer_t;
 
 enum TOKEN_TYPE {
   NUMBER,
@@ -22,6 +23,7 @@ enum TOKEN_TYPE {
   LPAREN,
   RPAREN,
   ID,
+  EOF_TOKEN,
 };
 
 enum {
@@ -38,6 +40,12 @@ struct token_t {
   } u;
 };
 
+struct lexer_t {
+  char *source;
+  int pos;
+  char c;
+};
+
 struct token_vector_t {
   int length, index;
   token_t **data;
@@ -46,6 +54,7 @@ struct token_vector_t {
 token_vector_t *infix2postfix(char *);
 void write_tokens(token_vector_t *);
 void convert_write(char *);
+token_vector_t *get_tokens(char *);
 
 int main(int argc, char *argv[]) {
   convert_write("1 + (1)");
@@ -90,12 +99,26 @@ token_t *make_id(char *id) {
   return tk;
 }
 
+token_t *make_eof_token(void) {
+  token_t *tk = malloc(sizeof(*tk));
+  tk->type = EOF_TOKEN;
+  return tk;
+}
+
 token_vector_t *make_token_vector(int length) {
   token_vector_t *tv = malloc(sizeof(*tv));
   tv->length = length;
   tv->index = 0;
   tv->data = calloc(length, sizeof(token_t *));
   return tv;
+}
+
+lexer_t *make_lexer(char *source) {
+  lexer_t *lexer = malloc(sizeof(*lexer));
+  lexer->source = source;
+  lexer->pos = 0;
+  lexer->c = source[0];
+  return lexer;
 }
 
 int is_vector_empty(token_vector_t *vector) {
@@ -161,71 +184,6 @@ int is_right_assoc(token_t *op) {
   return op_associate(op) == RIGHT;
 }
 
-token_vector_t *infix2postfix(char *str) {
-  token_vector_t *stack = make_token_vector(20);
-  token_vector_t *queue = make_token_vector(20);
-  for (int i = 0; str[i] != '\0';) {
-    char c = str[i];
-    if (c == ' ' || c == '\t' || c == '\n') {
-      i++;
-      continue;
-    }
-    if (c == '(') {
-      push(make_lparen(), stack);
-      i++;
-    } else if (c == ')') {
-      while (!is_vector_empty(stack)) {
-        token_t *tk = pop(stack);
-        if (tk->type == LPAREN)
-          break;
-        push(tk, queue);
-      }
-      i++;
-    } else if (isdigit(c)) {
-      int n = 0;
-      do {
-        n = n * 10 + c - '0';
-        i++;
-        c = str[i];
-      } while (isdigit(c));
-      push(make_number(n), queue);
-    } else if (isalpha(c)) {
-      string_builder_t *sb = make_str_builder();
-      while (isalpha(c)) {
-        sb_add_char(sb, c);
-        i++;
-        c = str[i];
-      }
-      push(make_id(sb2string(sb)), queue);
-    } else if (isoperator(c)) {
-      i++;
-      token_t *o1 = make_operator(c);
-      if (!is_vector_empty(stack)) {
-        token_t *o2 = top(stack);
-        if (!isparen(o2)) {
-          int p1 = op_precedence(o1);
-          int p2 = op_precedence(o2);
-          while ((is_left_assoc(o1) && p1 <= p2)
-              || (is_right_assoc(o1) && p1 < p2)) {
-            pop(stack);
-            push(o2, queue);
-            if (is_vector_empty(stack))
-              break;
-            o2 = top(stack);
-          }
-        }
-      }
-      push(o1, stack);
-    } else {
-      fprintf(stderr, "Invalid character %c\n", c);
-      exit(1);
-    }
-  }
-  while (!is_vector_empty(stack))
-    push(pop(stack), queue);
-  return queue;
-}
-
 void write_tokens(token_vector_t *vector) {
   for (int i = 0; i < vector->index; i++) {
     token_t *tk = vector->data[i];
@@ -245,6 +203,9 @@ void write_tokens(token_vector_t *vector) {
       case ID:
         printf("%s", tk->u.id);
         break;
+      case EOF_TOKEN:
+        fprintf(stderr, "Hey! It's a BUG!!!\n");
+        exit(1);
     }
   }
 }
@@ -253,4 +214,182 @@ void convert_write(char *str) {
   printf("%s => ", str);
   write_tokens(infix2postfix(str));
   printf("\n");
+}
+
+void move(lexer_t *lexer) {
+  lexer->pos++;
+  lexer->c = lexer->source[lexer->pos];
+}
+
+token_t *get_num_token(lexer_t *lexer) {
+  int n = 0;
+  while (isdigit(lexer->c)) {
+    n = n * 10 + lexer->c - '0';
+    move(lexer);
+  }
+  return make_number(n);
+}
+
+token_t *get_id_token(lexer_t *lexer) {
+  string_builder_t *sb = make_str_builder();
+  while (isalpha(lexer->c) || isdigit(lexer->c)) {
+    sb_add_char(sb, lexer->c);
+    move(lexer);
+  }
+  return make_id(sb2string(sb));
+}
+
+token_t *scan(lexer_t *lexer) {
+  char c = lexer->c;
+  switch (c) {
+    case '\0':
+      return make_eof_token();
+    case ' ': case '\t': case '\n':
+      move(lexer);
+      return scan(lexer);
+    case '0': case '1': case '2': case '3': case '4':
+    case '5': case '6': case '7': case '8': case '9':
+      return get_num_token(lexer);
+    case '+': case '-': case '*': case '/': case '=':
+    case '^': case '!':
+      move(lexer);
+      return make_operator(c);
+    case '(':
+      move(lexer);
+      return make_lparen();
+    case ')':
+      move(lexer);
+      return make_rparen();
+    default :
+      return get_id_token(lexer);
+  }
+}
+//
+//token_vector_t *infix2postfix(char *str) {
+//  token_vector_t *stack = make_token_vector(20);
+//  token_vector_t *queue = make_token_vector(20);
+//  for (int i = 0; str[i] != '\0';) {
+//    char c = str[i];
+//    if (c == ' ' || c == '\t' || c == '\n') {
+//      i++;
+//      continue;
+//    }
+//    if (c == '(') {
+//      push(make_lparen(), stack);
+//      i++;
+//    } else if (c == ')') {
+//      while (!is_vector_empty(stack)) {
+//        token_t *tk = pop(stack);
+//        if (tk->type == LPAREN)
+//          break;
+//        push(tk, queue);
+//      }
+//      i++;
+//    } else if (isdigit(c)) {
+//      int n = 0;
+//      do {
+//        n = n * 10 + c - '0';
+//        i++;
+//        c = str[i];
+//      } while (isdigit(c));
+//      push(make_number(n), queue);
+//    } else if (isalpha(c)) {
+//      string_builder_t *sb = make_str_builder();
+//      while (isalpha(c)) {
+//        sb_add_char(sb, c);
+//        i++;
+//        c = str[i];
+//      }
+//      push(make_id(sb2string(sb)), queue);
+//    } else if (isoperator(c)) {
+//      i++;
+//      token_t *o1 = make_operator(c);
+//      if (!is_vector_empty(stack)) {
+//        token_t *o2 = top(stack);
+//        if (!isparen(o2)) {
+//          int p1 = op_precedence(o1);
+//          int p2 = op_precedence(o2);
+//          while ((is_left_assoc(o1) && p1 <= p2)
+//              || (is_right_assoc(o1) && p1 < p2)) {
+//            pop(stack);
+//            push(o2, queue);
+//            if (is_vector_empty(stack))
+//              break;
+//            o2 = top(stack);
+//          }
+//        }
+//      }
+//      push(o1, stack);
+//    } else {
+//      fprintf(stderr, "Invalid character %c\n", c);
+//      exit(1);
+//    }
+//  }
+//  while (!is_vector_empty(stack))
+//    push(pop(stack), queue);
+//  return queue;
+//}
+
+int is_to_pop(token_t *op, token_vector_t *stack) {
+  token_t *tk = top(stack);
+  return (is_left_assoc(op) && op_precedence(op) <= op_precedence(tk)) ||
+      (is_right_assoc(op) && op_precedence(op) < op_precedence(tk));
+}
+
+token_vector_t *infix2postfix(char *str) {
+  lexer_t *lexer = make_lexer(str);
+  token_t *la = scan(lexer);
+  token_vector_t *stack = make_token_vector(100);
+  token_vector_t *queue = make_token_vector(100);
+  while (la->type != EOF_TOKEN) {
+    switch (la->type) {
+      case NUMBER:
+        push(la, queue);
+        break;
+      case OPERATOR: {
+        if (!is_vector_empty(stack) && !isparen(top(stack))) {
+          while (is_to_pop(la, stack)) {
+            token_t *tk = pop(stack);
+            push(tk, queue);
+            if (is_vector_empty(stack))
+              break;
+          }
+        }
+        push(la, stack);
+      }
+        break;
+      case LPAREN:
+        push(la, stack);
+        break;
+      case RPAREN: {
+        token_t *tmp = pop(stack);
+        while (tmp->type != LPAREN) {
+          push(tmp, queue);
+          tmp = pop(stack);
+        }
+      }
+        break;
+      case ID:
+        push(la, queue);
+        break;
+      default :
+        fprintf(stderr, "Unknown token type %d\n", la->type);
+        exit(1);
+    }
+    la = scan(lexer);
+  }
+  while (!is_vector_empty(stack))
+    push(pop(stack), queue);
+  return queue;
+}
+
+token_vector_t *get_tokens(char *str) {
+  token_vector_t *v = make_token_vector(10);
+  lexer_t *lexer = make_lexer(str);
+  token_t *tk = scan(lexer);
+  while (tk->type != EOF_TOKEN) {
+    push(tk, v);
+    tk = scan(lexer);
+  }
+  return v;
 }
