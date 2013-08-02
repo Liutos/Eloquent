@@ -20,7 +20,7 @@ typedef struct ast_node_t ast_node_t;
 typedef struct parser_t parser_t;
 
 enum TOKEN_TYPE {
-  NUMBER,
+  NUMBER=256,
   OPERATOR,
   LPAREN,
   RPAREN,
@@ -82,23 +82,13 @@ struct ast_node_t {
 
 struct parser_t {
   lexer_t *lexer;
-  token_t *token;
+  token_t *look;
 };
 
 token_vector_t *infix2postfix(char *);
 void write_tokens(token_vector_t *);
 void convert_write(char *);
 token_vector_t *get_tokens(char *);
-
-int main(int argc, char *argv[]) {
-  convert_write("1 + (1)");
-  convert_write("(2 * 3)");
-  convert_write("9 - (5 + 2)");
-  convert_write("(1 + 2) * 3");
-  convert_write("(1 + 2) ^ 3!");
-  convert_write("var = 1 + 2");
-  return 0;
-}
 
 token_t *make_number(int number) {
   token_t *tk = malloc(sizeof(struct token_t));
@@ -147,10 +137,15 @@ token_vector_t *make_token_vector(int length) {
   return tv;
 }
 
+void parser_move(parser_t *parser) {
+  token_t *scan(lexer_t *);
+  parser->look = scan(parser->lexer);
+}
+
 parser_t *make_parser(lexer_t *lexer) {
   parser_t *parser = malloc(sizeof(*parser));
   parser->lexer = lexer;
-  parser->token = NULL;
+  parser_move(parser);
   return parser;
 }
 
@@ -165,18 +160,54 @@ ast_node_t *make_num_node(int value) {
   node->u.num_value = value;
   return node;
 }
+//
+//ast_node_t *make_bin_op(enum NODE_TYPE type, ast_node_t *left, ast_node_t *right) {
+//  ast_node_t *node = make_node(type);
+//  switch (type) {
+//    case '+': case '-': case '*': case '/':
+//      node->u.add.left = left;
+//      node->u.add.right = right;
+//      return node;
+//    default :
+//      fprintf(stderr, "Unsupported node type %d\n", type);
+//      exit(1);
+//  }
+//}
 
-ast_node_t *make_bin_op(enum NODE_TYPE type, ast_node_t *left, ast_node_t *right) {
-  ast_node_t *node = make_node(type);
-  switch (type) {
-    case ADD_OP: case SUB_OP: case MUL_OP: case DIV_OP:
-      node->u.add.left = left;
-      node->u.add.right = right;
-      return node;
-    default :
-      fprintf(stderr, "Unsupported node type %d\n", type);
-      exit(1);
-  }
+ast_node_t *make_add_node(ast_node_t *left, ast_node_t *right) {
+//  return make_bin_op('+', left, right);
+  ast_node_t *node = malloc(sizeof(*node));
+  node->type = '+';
+  node->u.add.left = left;
+  node->u.add.right = right;
+  return node;
+}
+
+ast_node_t *make_div_node(ast_node_t *left, ast_node_t *right) {
+//  return make_bin_op('/', left, right);
+  ast_node_t *node = malloc(sizeof(*node));
+  node->type = '/';
+  node->u.div.left = left;
+  node->u.div.right = right;
+  return node;
+}
+
+ast_node_t *make_sub_node(ast_node_t *left, ast_node_t *right) {
+//  return make_bin_op('-', left, right);
+  ast_node_t *node = malloc(sizeof(*node));
+  node->type = '-';
+  node->u.sub.left = left;
+  node->u.sub.right = right;
+  return node;
+}
+
+ast_node_t *make_mul_node(ast_node_t *left, ast_node_t *right) {
+//  return make_bin_op('*', left, right);
+  ast_node_t *node = malloc(sizeof(*node));
+  node->type = '*';
+  node->u.mul.left = left;
+  node->u.mul.right = right;
+  return node;
 }
 
 lexer_t *make_lexer(char *source) {
@@ -255,10 +286,14 @@ void write_node(ast_node_t *node) {
     case NUM:
       printf("%d", node->u.num_value);
       break;
-    case ADD_OP: case SUB_OP: case MUL_OP: case DIV_OP:
+    case '+': case '-': case '*': case '/':
       write_node(node->u.add.left);
-      printf("%d", node->type);
       write_node(node->u.add.right);
+      printf("%c", node->type);
+      break;
+    default :
+      printf("It's a bug for printing node of type %d\n", node->type);
+      exit(1);
   }
 }
 
@@ -472,59 +507,71 @@ token_vector_t *get_tokens(char *str) {
   return v;
 }
 
-token_t *next_token(parser_t *parser) {
-  parser->token = scan(parser->lexer);
-  return parser->token;
-}
-
-ast_node_t *parse_token(parser_t *parser) {
-  token_t *token = next_token(parser);
+ast_node_t *parse_factor(parser_t *parser) {
+  token_t *token = parser->look;
+  ast_node_t *x = NULL;
   switch (token->type) {
     case NUMBER:
-      return make_num_node(token->u.number);
+      x = make_num_node(token->u.number);
+      parser_move(parser);
+      return x;
     default :
       fprintf(stderr, "Syntax error\n");
       exit(1);
   }
 }
 
-ast_node_t *parse_factor(parser_t *parser) {
-  ast_node_t *node = parse_token(parser);
-  token_t *token = next_token(parser);
-  while (token->type == OPERATOR && (token->u.operator == '*' || token->u.operator == '/')) {
-    switch (token->u.operator) {
-      case '*':
-        node = make_bin_op(MUL_OP, node, parse_token(parser));
-        break;
-      case '/':
-        node = make_bin_op(DIV_OP, node, parse_token(parser));
-        break;
-    }
-    token = next_token(parser);
-  }
-  return node;
-}
-
 ast_node_t *parse_term(parser_t *parser) {
   ast_node_t *node = parse_factor(parser);
-  printf("In parse_term --- node is ");
-  write_node(node);
-  token_t *token = next_token(parser);
-  while (token->type == OPERATOR && (token->u.operator == '+' || token->u.operator == '-')) {
+  token_t *token = parser->look;
+  while (token->type == OPERATOR && (token->u.operator == '*' || token->u.operator == '/')) {
+    parser_move(parser);
     switch (token->u.operator) {
-      case '+':
-        node = make_bin_op(ADD_OP, node, parse_factor(parser));
+      case '*':
+        node = make_mul_node(node, parse_factor(parser));
         break;
-      case '-':
-        node = make_bin_op(SUB_OP, node, parse_factor(parser));
+      case '/':
+        node = make_div_node(node, parse_factor(parser));
         break;
     }
-    token = next_token(parser);
+    token = parser->look;
   }
   return node;
 }
 
 ast_node_t *parse_expr(parser_t *parser) {
-  printf("Using parse_expr\n");
-  return parse_term(parser);
+  ast_node_t *node = parse_term(parser);
+  token_t *token = parser->look;
+  while (token->type == OPERATOR && (token->u.operator == '+' || token->u.operator == '-')) {
+    parser_move(parser);
+    switch (token->u.operator) {
+      case '+':
+        node = make_add_node(node, parse_term(parser));
+        break;
+      case '-':
+        node = make_sub_node(node, parse_term(parser));
+        break;
+    }
+    token = parser->look;
+  }
+  return node;
+}
+
+ast_node_t *parse_prog(parser_t *parser) {
+  return parse_expr(parser);
+}
+
+int main(int argc, char *argv[]) {
+  lexer_t *lexer = make_lexer("11*2+3/1");
+  parser_t *parser = make_parser(lexer);
+  ast_node_t *node = parse_prog(parser);
+  write_node(node);
+  printf("\n");
+//  convert_write("1 + (1)");
+//  convert_write("(2 * 3)");
+//  convert_write("9 - (5 + 2)");
+//  convert_write("(1 + 2) * 3");
+//  convert_write("(1 + 2) ^ 3!");
+//  convert_write("var = 1 + 2");
+  return 0;
 }
