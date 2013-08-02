@@ -39,6 +39,7 @@ enum NODE_TYPE {
   MUL_OP,
   DIV_OP,
   NUM,
+  ID_NODE,
 };
 
 struct token_t {
@@ -77,6 +78,7 @@ struct ast_node_t {
       ast_node_t *left, *right;
     } div;
     int num_value;
+    char *id;
   } u;
 };
 
@@ -160,22 +162,8 @@ ast_node_t *make_num_node(int value) {
   node->u.num_value = value;
   return node;
 }
-//
-//ast_node_t *make_bin_op(enum NODE_TYPE type, ast_node_t *left, ast_node_t *right) {
-//  ast_node_t *node = make_node(type);
-//  switch (type) {
-//    case '+': case '-': case '*': case '/':
-//      node->u.add.left = left;
-//      node->u.add.right = right;
-//      return node;
-//    default :
-//      fprintf(stderr, "Unsupported node type %d\n", type);
-//      exit(1);
-//  }
-//}
 
 ast_node_t *make_add_node(ast_node_t *left, ast_node_t *right) {
-//  return make_bin_op('+', left, right);
   ast_node_t *node = malloc(sizeof(*node));
   node->type = '+';
   node->u.add.left = left;
@@ -184,7 +172,6 @@ ast_node_t *make_add_node(ast_node_t *left, ast_node_t *right) {
 }
 
 ast_node_t *make_div_node(ast_node_t *left, ast_node_t *right) {
-//  return make_bin_op('/', left, right);
   ast_node_t *node = malloc(sizeof(*node));
   node->type = '/';
   node->u.div.left = left;
@@ -193,7 +180,6 @@ ast_node_t *make_div_node(ast_node_t *left, ast_node_t *right) {
 }
 
 ast_node_t *make_sub_node(ast_node_t *left, ast_node_t *right) {
-//  return make_bin_op('-', left, right);
   ast_node_t *node = malloc(sizeof(*node));
   node->type = '-';
   node->u.sub.left = left;
@@ -202,11 +188,17 @@ ast_node_t *make_sub_node(ast_node_t *left, ast_node_t *right) {
 }
 
 ast_node_t *make_mul_node(ast_node_t *left, ast_node_t *right) {
-//  return make_bin_op('*', left, right);
   ast_node_t *node = malloc(sizeof(*node));
   node->type = '*';
   node->u.mul.left = left;
   node->u.mul.right = right;
+  return node;
+}
+
+ast_node_t *make_id_node(char *id) {
+  ast_node_t *node = malloc(sizeof(*node));
+  node->type = ID_NODE;
+  node->u.id = id;
   return node;
 }
 
@@ -291,6 +283,9 @@ void write_node(ast_node_t *node) {
       write_node(node->u.add.right);
       printf("%c", node->type);
       break;
+    case ID_NODE:
+      printf("%s", node->u.id);
+      break;
     default :
       printf("It's a bug for printing node of type %d\n", node->type);
       exit(1);
@@ -322,12 +317,12 @@ void write_tokens(token_vector_t *vector) {
     }
   }
 }
-
-void convert_write(char *str) {
-  printf("%s => ", str);
-  write_tokens(infix2postfix(str));
-  printf("\n");
-}
+//
+//void convert_write(char *str) {
+//  printf("%s => ", str);
+//  write_tokens(infix2postfix(str));
+//  printf("\n");
+//}
 
 void move(lexer_t *lexer) {
   lexer->pos++;
@@ -515,6 +510,10 @@ ast_node_t *parse_factor(parser_t *parser) {
       x = make_num_node(token->u.number);
       parser_move(parser);
       return x;
+    case ID:
+      x = make_id_node(token->u.id);
+      parser_move(parser);
+      return x;
     default :
       fprintf(stderr, "Syntax error\n");
       exit(1);
@@ -561,13 +560,17 @@ ast_node_t *parse_prog(parser_t *parser) {
   return parse_expr(parser);
 }
 
-int main(int argc, char *argv[]) {
-  lexer_t *lexer = make_lexer("11*2+3/1");
+void convert_write(char *str) {
+  lexer_t *lexer = make_lexer(str);
   parser_t *parser = make_parser(lexer);
   ast_node_t *node = parse_prog(parser);
   write_node(node);
-  printf("\n");
-//  convert_write("1 + (1)");
+  putchar('\n');
+}
+
+int main(int argc, char *argv[]) {
+  convert_write("11*2+3/1");
+  convert_write("1 + a");
 //  convert_write("(2 * 3)");
 //  convert_write("9 - (5 + 2)");
 //  convert_write("(1 + 2) * 3");
