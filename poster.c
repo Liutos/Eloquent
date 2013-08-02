@@ -16,6 +16,8 @@
 typedef struct token_t token_t;
 typedef struct token_vector_t token_vector_t;
 typedef struct lexer_t lexer_t;
+typedef struct ast_node_t ast_node_t;
+typedef struct parser_t parser_t;
 
 enum TOKEN_TYPE {
   NUMBER,
@@ -29,6 +31,14 @@ enum TOKEN_TYPE {
 enum {
   LEFT,
   RIGHT,
+};
+
+enum NODE_TYPE {
+  ADD_OP,
+  SUB_OP,
+  MUL_OP,
+  DIV_OP,
+  NUM,
 };
 
 struct token_t {
@@ -49,6 +59,30 @@ struct lexer_t {
 struct token_vector_t {
   int length, index;
   token_t **data;
+};
+
+struct ast_node_t {
+  enum NODE_TYPE type;
+  union {
+    struct {
+      ast_node_t *left, *right;
+    } add;
+    struct {
+      ast_node_t *left, *right;
+    } sub;
+    struct {
+      ast_node_t *left, *right;
+    } mul;
+    struct {
+      ast_node_t *left, *right;
+    } div;
+    int num_value;
+  } u;
+};
+
+struct parser_t {
+  lexer_t *lexer;
+  token_t *token;
 };
 
 token_vector_t *infix2postfix(char *);
@@ -111,6 +145,38 @@ token_vector_t *make_token_vector(int length) {
   tv->index = 0;
   tv->data = calloc(length, sizeof(token_t *));
   return tv;
+}
+
+parser_t *make_parser(lexer_t *lexer) {
+  parser_t *parser = malloc(sizeof(*parser));
+  parser->lexer = lexer;
+  parser->token = NULL;
+  return parser;
+}
+
+ast_node_t *make_node(enum NODE_TYPE type) {
+  ast_node_t *node = malloc(sizeof(*node));
+  node->type = type;
+  return node;
+}
+
+ast_node_t *make_num_node(int value) {
+  ast_node_t *node = make_node(NUM);
+  node->u.num_value = value;
+  return node;
+}
+
+ast_node_t *make_bin_op(enum NODE_TYPE type, ast_node_t *left, ast_node_t *right) {
+  ast_node_t *node = make_node(type);
+  switch (type) {
+    case ADD_OP: case SUB_OP: case MUL_OP: case DIV_OP:
+      node->u.add.left = left;
+      node->u.add.right = right;
+      return node;
+    default :
+      fprintf(stderr, "Unsupported node type %d\n", type);
+      exit(1);
+  }
 }
 
 lexer_t *make_lexer(char *source) {
@@ -182,6 +248,18 @@ int is_left_assoc(token_t *op) {
 
 int is_right_assoc(token_t *op) {
   return op_associate(op) == RIGHT;
+}
+
+void write_node(ast_node_t *node) {
+  switch (node->type) {
+    case NUM:
+      printf("%d", node->u.num_value);
+      break;
+    case ADD_OP: case SUB_OP: case MUL_OP: case DIV_OP:
+      write_node(node->u.add.left);
+      printf("%d", node->type);
+      write_node(node->u.add.right);
+  }
 }
 
 void write_tokens(token_vector_t *vector) {
@@ -392,4 +470,61 @@ token_vector_t *get_tokens(char *str) {
     tk = scan(lexer);
   }
   return v;
+}
+
+token_t *next_token(parser_t *parser) {
+  parser->token = scan(parser->lexer);
+  return parser->token;
+}
+
+ast_node_t *parse_token(parser_t *parser) {
+  token_t *token = next_token(parser);
+  switch (token->type) {
+    case NUMBER:
+      return make_num_node(token->u.number);
+    default :
+      fprintf(stderr, "Syntax error\n");
+      exit(1);
+  }
+}
+
+ast_node_t *parse_factor(parser_t *parser) {
+  ast_node_t *node = parse_token(parser);
+  token_t *token = next_token(parser);
+  while (token->type == OPERATOR && (token->u.operator == '*' || token->u.operator == '/')) {
+    switch (token->u.operator) {
+      case '*':
+        node = make_bin_op(MUL_OP, node, parse_token(parser));
+        break;
+      case '/':
+        node = make_bin_op(DIV_OP, node, parse_token(parser));
+        break;
+    }
+    token = next_token(parser);
+  }
+  return node;
+}
+
+ast_node_t *parse_term(parser_t *parser) {
+  ast_node_t *node = parse_factor(parser);
+  printf("In parse_term --- node is ");
+  write_node(node);
+  token_t *token = next_token(parser);
+  while (token->type == OPERATOR && (token->u.operator == '+' || token->u.operator == '-')) {
+    switch (token->u.operator) {
+      case '+':
+        node = make_bin_op(ADD_OP, node, parse_factor(parser));
+        break;
+      case '-':
+        node = make_bin_op(SUB_OP, node, parse_factor(parser));
+        break;
+    }
+    token = next_token(parser);
+  }
+  return node;
+}
+
+ast_node_t *parse_expr(parser_t *parser) {
+  printf("Using parse_expr\n");
+  return parse_term(parser);
 }
