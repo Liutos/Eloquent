@@ -40,6 +40,7 @@ enum NODE_TYPE {
   DIV_OP,
   NUM,
   ID_NODE,
+  ASSIGN_NODE,
 };
 
 struct token_t {
@@ -79,6 +80,9 @@ struct ast_node_t {
     } div;
     int num_value;
     char *id;
+    struct {
+      ast_node_t *lv, *rv;
+    } assign;
   } u;
 };
 
@@ -91,7 +95,7 @@ token_vector_t *infix2postfix(char *);
 void write_tokens(token_vector_t *);
 void convert_write(char *);
 token_vector_t *get_tokens(char *);
-ast_node_t *parse_expr(parser_t *);
+ast_node_t *parse_assign(parser_t *);
 
 token_t *make_number(int number) {
   token_t *tk = malloc(sizeof(struct token_t));
@@ -212,6 +216,13 @@ ast_node_t *make_id_node(char *id) {
   return node;
 }
 
+ast_node_t *make_assign_node(ast_node_t *lv, ast_node_t *rv) {
+  ast_node_t *node = make_node(ASSIGN_NODE);
+  node->u.assign.lv = lv;
+  node->u.assign.rv = rv;
+  return node;
+}
+
 lexer_t *make_lexer(char *source) {
   lexer_t *lexer = malloc(sizeof(*lexer));
   lexer->source = source;
@@ -295,6 +306,11 @@ void write_node(ast_node_t *node) {
       break;
     case ID_NODE:
       printf("%s", node->u.id);
+      break;
+    case ASSIGN_NODE:
+      write_node(node->u.assign.lv);
+      write_node(node->u.assign.rv);
+      printf("<=>");
       break;
     default :
       printf("It's a bug for printing node of type %d\n", node->type);
@@ -526,7 +542,7 @@ ast_node_t *parse_factor(parser_t *parser) {
       return x;
     case LPAREN:
       parser_move(parser);
-      x = parse_expr(parser);
+      x = parse_assign(parser);
       match(parser, RPAREN);
       return x;
     default :
@@ -571,8 +587,24 @@ ast_node_t *parse_expr(parser_t *parser) {
   return node;
 }
 
+ast_node_t *parse_assign(parser_t *parser) {
+  ast_node_t *node = parse_expr(parser);
+  if (node->type == ID_NODE) {
+    if (parser->look->type == OPERATOR && parser->look->u.operator == '=') {
+      parser_move(parser);
+      return make_assign_node(node, parse_assign(parser));
+    } else
+      return node;
+  } else if (parser->look->type == OPERATOR && parser->look->u.operator == '=') {
+    fprintf(stderr, "Syntax error: Invalid left-value\n");
+    exit(1);
+  } else
+    return node;
+}
+
 ast_node_t *parse_prog(parser_t *parser) {
-  return parse_expr(parser);
+//  return parse_expr(parser);
+  return parse_assign(parser);
 }
 
 void convert_write(char *str) {
@@ -591,7 +623,7 @@ int main(int argc, char *argv[]) {
   convert_write("(2 * 3)");
   convert_write("9 - (5 + 2)");
   convert_write("(1 + 2) * 3");
-//  convert_write("(1 + 2) ^ 3!");
-//  convert_write("var = 1 + 2");
+  convert_write("var = 1 + 2");
+  convert_write("var = val = (1 + 1) * 2");
   return 0;
 }
