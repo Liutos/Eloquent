@@ -21,7 +21,6 @@ typedef struct parser_t parser_t;
 
 enum TOKEN_TYPE {
   NUMBER=256,
-  OPERATOR,
   ID,
   EOF_TOKEN,
   COMMA,
@@ -139,8 +138,7 @@ token_t *make_number(int number) {
 
 token_t *make_operator(char op) {
   token_t *tk = malloc(sizeof(struct token_t));
-  tk->type = OPERATOR;
-  tk->u.operator = op;
+  tk->type = op;
   return tk;
 }
 
@@ -548,15 +546,18 @@ ast_node_t *parse_factor(parser_t *parser) {
 ast_node_t *parse_term(parser_t *parser) {
   ast_node_t *node = parse_factor(parser);
   token_t *token = parser->look;
-  while (token->type == OPERATOR && (token->u.operator == '*' || token->u.operator == '/')) {
+  while (token->type == '*' || token->type == '/') {
     parser_move(parser);
-    switch (token->u.operator) {
+    switch (token->type) {
       case '*':
         node = make_mul_node(node, parse_factor(parser));
         break;
       case '/':
         node = make_div_node(node, parse_factor(parser));
         break;
+      default :
+        fprintf(stderr, "Token must be * or /\n");
+        exit(1);
     }
     token = parser->look;
   }
@@ -566,15 +567,18 @@ ast_node_t *parse_term(parser_t *parser) {
 ast_node_t *parse_expr(parser_t *parser) {
   ast_node_t *node = parse_term(parser);
   token_t *token = parser->look;
-  while (token->type == OPERATOR && (token->u.operator == '+' || token->u.operator == '-')) {
+  while (token->type == '+' || token->type == '-') {
     parser_move(parser);
-    switch (token->u.operator) {
+    switch (token->type) {
       case '+':
         node = make_add_node(node, parse_term(parser));
         break;
       case '-':
         node = make_sub_node(node, parse_term(parser));
         break;
+      default :
+        fprintf(stderr, "Token must be + or -\n");
+        exit(1);
     }
     token = parser->look;
   }
@@ -584,12 +588,12 @@ ast_node_t *parse_expr(parser_t *parser) {
 ast_node_t *parse_assign(parser_t *parser) {
   ast_node_t *node = parse_expr(parser);
   if (node->type == ID_NODE) {
-    if (parser->look->type == OPERATOR && parser->look->u.operator == '=') {
+    if (parser->look->type == '=') {
       parser_move(parser);
       return make_assign_node(node, parse_assign(parser));
     } else
       return node;
-  } else if (parser->look->type == OPERATOR && parser->look->u.operator == '=') {
+  } else if (parser->look->type == '=') {
     fprintf(stderr, "Syntax error: Invalid left-value\n");
     exit(1);
   } else
