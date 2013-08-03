@@ -91,6 +91,7 @@ token_vector_t *infix2postfix(char *);
 void write_tokens(token_vector_t *);
 void convert_write(char *);
 token_vector_t *get_tokens(char *);
+ast_node_t *parse_expr(parser_t *);
 
 token_t *make_number(int number) {
   token_t *tk = malloc(sizeof(struct token_t));
@@ -142,6 +143,15 @@ token_vector_t *make_token_vector(int length) {
 void parser_move(parser_t *parser) {
   token_t *scan(lexer_t *);
   parser->look = scan(parser->lexer);
+}
+
+void match(parser_t *parser, enum TOKEN_TYPE type) {
+  if (parser->look->type == type)
+    parser_move(parser);
+  else {
+    fprintf(stderr, "Syntax error. Expecting token of type %d\n", type);
+    exit(1);
+  }
 }
 
 parser_t *make_parser(lexer_t *lexer) {
@@ -514,6 +524,11 @@ ast_node_t *parse_factor(parser_t *parser) {
       x = make_id_node(token->u.id);
       parser_move(parser);
       return x;
+    case LPAREN:
+      parser_move(parser);
+      x = parse_expr(parser);
+      match(parser, RPAREN);
+      return x;
     default :
       fprintf(stderr, "Syntax error\n");
       exit(1);
@@ -561,6 +576,7 @@ ast_node_t *parse_prog(parser_t *parser) {
 }
 
 void convert_write(char *str) {
+  printf("%s => ", str);
   lexer_t *lexer = make_lexer(str);
   parser_t *parser = make_parser(lexer);
   ast_node_t *node = parse_prog(parser);
@@ -571,9 +587,10 @@ void convert_write(char *str) {
 int main(int argc, char *argv[]) {
   convert_write("11*2+3/1");
   convert_write("1 + a");
-//  convert_write("(2 * 3)");
-//  convert_write("9 - (5 + 2)");
-//  convert_write("(1 + 2) * 3");
+  convert_write("(1)");
+  convert_write("(2 * 3)");
+  convert_write("9 - (5 + 2)");
+  convert_write("(1 + 2) * 3");
 //  convert_write("(1 + 2) ^ 3!");
 //  convert_write("var = 1 + 2");
   return 0;
