@@ -25,6 +25,7 @@ enum TOKEN_TYPE {
   ID,
   IF,
   NUM,
+  WHILE,
 };
 
 enum NODE_TYPE {
@@ -36,6 +37,8 @@ enum NODE_TYPE {
   IF_NODE,
   NUM_NODE,
   OFFSET_NODE,
+  SEQ_NODE,
+  WHILE_NODE,
 };
 
 struct token_t {
@@ -79,6 +82,12 @@ struct ast_node_t {
     struct {
       ast_node_t *array, *index;
     } offset;
+    struct {
+      ast_node_t *expr, *rest;
+    } seq;
+    struct {
+      ast_node_t *test, *body;
+    } while_stmt;
   } u;
 };
 
@@ -89,6 +98,7 @@ struct parser_t {
 
 void convert_write(char *);
 ast_node_t *parse_assign(parser_t *);
+ast_node_t *parse_stmt(parser_t *);
 
 /* Token Constructors */
 token_t *make_token(enum TOKEN_TYPE type) {
@@ -96,11 +106,11 @@ token_t *make_token(enum TOKEN_TYPE type) {
   tk->type = type;
   return tk;
 }
-
-token_t *make_eof_token(void) {
-  token_t *tk = make_token(EOF);
-  return tk;
-}
+//
+//token_t *make_eof_token(void) {
+//  token_t *tk = make_token(EOF);
+//  return tk;
+//}
 
 token_t *make_id(char *id) {
   token_t *tk = make_token(ID);
@@ -159,7 +169,7 @@ token_t *scan(lexer_t *lexer) {
   char c = lexer->c;
   switch (c) {
     case '\0':
-      return make_eof_token();
+      return make_token(EOF);
     case ' ': case '\t': case '\n':
       move(lexer);
       return scan(lexer);
@@ -168,7 +178,7 @@ token_t *scan(lexer_t *lexer) {
       return get_num_token(lexer);
     case '+': case '-': case '*': case '/': case '=':
     case '^': case '!': case '[': case ']': case '(':
-    case ')': case ',':
+    case ')': case ',': case '{': case '}':
       move(lexer);
       return make_operator(c);
     default : {
@@ -178,6 +188,8 @@ token_t *scan(lexer_t *lexer) {
         return make_reserve(IF);
       } else if (strcmp("else", name) == 0)
         return make_reserve(ELSE);
+      else if (strcmp("while", name) == 0)
+        return make_reserve(WHILE);
       else
         return id;
     }
@@ -274,6 +286,20 @@ ast_node_t *make_offset_node(ast_node_t *array, ast_node_t *index) {
   return node;
 }
 
+ast_node_t *make_seq_node(ast_node_t *expr, ast_node_t *rest) {
+  ast_node_t *node = make_node(SEQ_NODE);
+  node->u.seq.expr = expr;
+  node->u.seq.rest = rest;
+  return node;
+}
+
+ast_node_t *make_while_node(ast_node_t *test, ast_node_t *body) {
+  ast_node_t *node = make_node(WHILE_NODE);
+  node->u.while_stmt.test = test;
+  node->u.while_stmt.body = body;
+  return node;
+}
+
 void write_node(ast_node_t *node) {
   if (!node)
     return;
@@ -319,6 +345,16 @@ void write_node(ast_node_t *node) {
       write_node(node->u.offset.array);
       write_node(node->u.offset.index);
       printf("<[]>");
+      break;
+    case SEQ_NODE:
+      write_node(node->u.seq.expr);
+      write_node(node->u.seq.rest);
+      printf("<seq>");
+      break;
+    case WHILE_NODE:
+      write_node(node->u.while_stmt.test);
+      write_node(node->u.while_stmt.body);
+      printf("<while>");
       break;
     default :
       printf("It's a bug for printing node of type %d\n", node->type);
@@ -424,10 +460,27 @@ ast_node_t *parse_assign(parser_t *parser) {
     return node;
 }
 
+ast_node_t *parse_block(parser_t *parser) {
+  match(parser, '{');
+  ast_node_t *head = make_seq_node(NULL, NULL);
+  ast_node_t *pre = head;
+  while (parser->look->type != '}') {
+    ast_node_t *node = make_seq_node(parse_stmt(parser), NULL);
+    pre->u.seq.rest = node;
+    pre = node;
+  }
+  match(parser, '}');
+  return head->u.seq.rest;
+}
+
 ast_node_t *parse_stmt(parser_t *parser) {
   token_t *token = parser->look;
   ast_node_t *tp;
   switch (token->type) {
+    case '{': {
+      return parse_block(parser);
+    }
+      break;
     case IF: {
       match(parser, IF);
       match(parser, '(');
@@ -441,6 +494,15 @@ ast_node_t *parse_stmt(parser_t *parser) {
         match(parser, ELSE);
         return make_else_node(pred, tp, parse_stmt(parser));
       }
+    }
+      break;
+    case WHILE: {
+      match(parser, WHILE);
+      match(parser, '(');
+      ast_node_t *test = parse_assign(parser);
+      match(parser, ')');
+      ast_node_t *body = parse_stmt(parser);
+      return make_while_node(test, body);
     }
       break;
     default :
@@ -462,18 +524,21 @@ void convert_write(char *str) {
 }
 
 int main(int argc, char *argv[]) {
-//  convert_write("11*2+3/1");
-//  convert_write("1 + a");
-//  convert_write("(1)");
-//  convert_write("(2 * 3)");
-//  convert_write("9 - (5 + 2)");
-//  convert_write("(1 + 2) * 3");
-//  convert_write("var = 1 + 2");
-//  convert_write("var = val = (1 + 1) * 2");
-//  convert_write("fn()");
-//  convert_write("fn(1)");
-//  convert_write("fn(1, 2)");
-//  convert_write("a[1 + 1][2]");
+  convert_write("11*2+3/1");
+  convert_write("1 + a");
+  convert_write("(1)");
+  convert_write("(2 * 3)");
+  convert_write("9 - (5 + 2)");
+  convert_write("(1 + 2) * 3");
+  convert_write("var = 1 + 2");
+  convert_write("var = val = (1 + 1) * 2");
+  convert_write("fn()");
+  convert_write("fn(1)");
+  convert_write("fn(1, 2)");
+  convert_write("a[1 + 1][2]");
   convert_write("if ( x = 0 ) 0 - x else x");
+  convert_write("while (x = 0) {x + 1}");
+  convert_write("{a = 1}");
+  convert_write("{a = 1 b = 2}");
   return 0;
 }
