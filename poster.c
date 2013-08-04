@@ -20,10 +20,8 @@ typedef struct token_t token_t;
 
 enum TOKEN_TYPE {
   _TYPE_START_=255,
-  COMMA,
-  EOF_TOKEN,
   ID,
-  NUMBER,
+  NUM,
 };
 
 enum NODE_TYPE {
@@ -78,15 +76,9 @@ void convert_write(char *);
 ast_node_t *parse_assign(parser_t *);
 
 /* Token Constructors */
-token_t *make_comma(void) {
-  token_t *tk = malloc(sizeof(*tk));
-  tk->type = COMMA;
-  return tk;
-}
-
 token_t *make_eof_token(void) {
   token_t *tk = malloc(sizeof(*tk));
-  tk->type = EOF_TOKEN;
+  tk->type = EOF;
   return tk;
 }
 
@@ -97,15 +89,9 @@ token_t *make_id(char *id) {
   return tk;
 }
 
-token_t *make_lparen(void) {
-  token_t *tk = malloc(sizeof(struct token_t));
-  tk->type = '(';
-  return tk;
-}
-
 token_t *make_number(int number) {
   token_t *tk = malloc(sizeof(struct token_t));
-  tk->type = NUMBER;
+  tk->type = NUM;
   tk->u.number = number;
   return tk;
 }
@@ -113,12 +99,6 @@ token_t *make_number(int number) {
 token_t *make_operator(char op) {
   token_t *tk = malloc(sizeof(struct token_t));
   tk->type = op;
-  return tk;
-}
-
-token_t *make_rparen(void) {
-  token_t *tk = malloc(sizeof(struct token_t));
-  tk->type = ')';
   return tk;
 }
 
@@ -270,18 +250,10 @@ token_t *scan(lexer_t *lexer) {
     case '5': case '6': case '7': case '8': case '9':
       return get_num_token(lexer);
     case '+': case '-': case '*': case '/': case '=':
-    case '^': case '!':
+    case '^': case '!': case '[': case ']': case '(':
+    case ')': case ',':
       move(lexer);
       return make_operator(c);
-    case '(':
-      move(lexer);
-      return make_lparen();
-    case ')':
-      move(lexer);
-      return make_rparen();
-    case ',':
-      move(lexer);
-      return make_comma();
     default :
       return get_id_token(lexer);
   }
@@ -296,7 +268,7 @@ ast_node_t *parse_args(parser_t *parser) {
     pre->u.args.rest = node;
     pre = node;
     if (parser->look->type != ')')
-      match(parser, COMMA);
+      match(parser, ',');
   }
   match(parser, ')');
   return head->u.args.rest;
@@ -306,7 +278,7 @@ ast_node_t *parse_factor(parser_t *parser) {
   token_t *token = parser->look;
   ast_node_t *x = NULL;
   switch (token->type) {
-    case NUMBER:
+    case NUM:
       x = make_num_node(token->u.number);
       parser_move(parser);
       return x;
