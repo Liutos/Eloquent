@@ -8,6 +8,7 @@
 #include <ctype.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 
 #include "object.h"
 #include "type.h"
@@ -20,7 +21,9 @@ typedef struct token_t token_t;
 
 enum TOKEN_TYPE {
   _TYPE_START_=255,
+  ELSE,
   ID,
+  IF,
   NUM,
 };
 
@@ -28,7 +31,9 @@ enum NODE_TYPE {
   ARGS_NODE,
   ASSIGN_NODE,
   CALL_NODE,
+  ELSE_NODE,
   ID_NODE,
+  IF_NODE,
   NUM_NODE,
   OFFSET_NODE,
 };
@@ -51,11 +56,14 @@ struct lexer_t {
 struct ast_node_t {
   enum NODE_TYPE type;
   union {
+    int num_value;
+    char *id;
+    struct {
+      ast_node_t *arg, *rest;
+    } args;
     struct {
       ast_node_t *left, *right;
     } arith;
-    int num_value;
-    char *id;
     struct {
       ast_node_t *lv, *rv;
     } assign;
@@ -63,8 +71,11 @@ struct ast_node_t {
       ast_node_t *fn, *args;
     } call;
     struct {
-      ast_node_t *arg, *rest;
-    } args;
+      ast_node_t *pred, *then_part, *else_part;
+    } else_stmt;
+    struct {
+      ast_node_t *pred, *then_part;
+    } if_stmt;
     struct {
       ast_node_t *array, *index;
     } offset;
@@ -80,29 +91,36 @@ void convert_write(char *);
 ast_node_t *parse_assign(parser_t *);
 
 /* Token Constructors */
-token_t *make_eof_token(void) {
+token_t *make_token(enum TOKEN_TYPE type) {
   token_t *tk = malloc(sizeof(*tk));
-  tk->type = EOF;
+  tk->type = type;
+  return tk;
+}
+
+token_t *make_eof_token(void) {
+  token_t *tk = make_token(EOF);
   return tk;
 }
 
 token_t *make_id(char *id) {
-  token_t *tk = malloc(sizeof(struct token_t));
-  tk->type = ID;
+  token_t *tk = make_token(ID);
   tk->u.id = id;
   return tk;
 }
 
-token_t *make_number(int number) {
-  token_t *tk = malloc(sizeof(struct token_t));
-  tk->type = NUM;
+token_t *make_num(int number) {
+  token_t *tk = make_token(NUM);
   tk->u.number = number;
   return tk;
 }
 
 token_t *make_operator(char op) {
-  token_t *tk = malloc(sizeof(struct token_t));
-  tk->type = op;
+  token_t *tk = make_token(op);
+  return tk;
+}
+
+token_t *make_reserve(enum TOKEN_TYPE type) {
+  token_t *tk = make_token(type);
   return tk;
 }
 
@@ -125,7 +143,7 @@ token_t *get_num_token(lexer_t *lexer) {
     n = n * 10 + lexer->c - '0';
     move(lexer);
   }
-  return make_number(n);
+  return make_num(n);
 }
 
 token_t *get_id_token(lexer_t *lexer) {
@@ -153,8 +171,16 @@ token_t *scan(lexer_t *lexer) {
     case ')': case ',':
       move(lexer);
       return make_operator(c);
-    default :
-      return get_id_token(lexer);
+    default : {
+      token_t *id = get_id_token(lexer);
+      char *name = id->u.id;
+      if (strcmp("if", name) == 0) {
+        return make_reserve(IF);
+      } else if (strcmp("else", name) == 0)
+        return make_reserve(ELSE);
+      else
+        return id;
+    }
   }
 }
 
@@ -185,13 +211,6 @@ ast_node_t *make_node(enum NODE_TYPE type) {
   return node;
 }
 
-ast_node_t *make_args_node(ast_node_t *arg, ast_node_t *rest) {
-  ast_node_t *node = make_node(ARGS_NODE);
-  node->u.args.arg = arg;
-  node->u.args.rest = rest;
-  return node;
-}
-
 ast_node_t *make_assign_node(ast_node_t *lv, ast_node_t *rv) {
   ast_node_t *node = make_node(ASSIGN_NODE);
   node->u.assign.lv = lv;
@@ -199,10 +218,46 @@ ast_node_t *make_assign_node(ast_node_t *lv, ast_node_t *rv) {
   return node;
 }
 
+ast_node_t *make_args_node(ast_node_t *arg, ast_node_t *rest) {
+  ast_node_t *node = make_node(ARGS_NODE);
+  node->u.args.arg = arg;
+  node->u.args.rest = rest;
+  return node;
+}
+
+ast_node_t *make_arith_node(enum NODE_TYPE op, ast_node_t *left, ast_node_t *right) {
+  ast_node_t *node = make_node(op);
+  node->u.arith.left = left;
+  node->u.arith.right = right;
+  return node;
+}
+
 ast_node_t *make_call_node(ast_node_t *fn, ast_node_t *args) {
   ast_node_t *node = make_node(CALL_NODE);
   node->u.call.fn = fn;
   node->u.call.args = args;
+  return node;
+}
+
+ast_node_t *make_else_node(ast_node_t *pred, ast_node_t *tp, ast_node_t *ep) {
+  ast_node_t *node = make_node(ELSE_NODE);
+  node->u.else_stmt.pred = pred;
+  node->u.else_stmt.then_part = tp;
+  node->u.else_stmt.else_part = ep;
+  return node;
+}
+
+ast_node_t *make_id_node(char *id) {
+  ast_node_t *node = malloc(sizeof(*node));
+  node->type = ID_NODE;
+  node->u.id = id;
+  return node;
+}
+
+ast_node_t *make_if_node(ast_node_t *pred, ast_node_t *tp) {
+  ast_node_t *node = make_node(IF);
+  node->u.if_stmt.pred = pred;
+  node->u.if_stmt.then_part = tp;
   return node;
 }
 
@@ -219,49 +274,46 @@ ast_node_t *make_offset_node(ast_node_t *array, ast_node_t *index) {
   return node;
 }
 
-ast_node_t *make_arith_node(enum NODE_TYPE op, ast_node_t *left, ast_node_t *right) {
-  ast_node_t *node = make_node(op);
-  node->u.arith.left = left;
-  node->u.arith.right = right;
-  return node;
-}
-
-ast_node_t *make_id_node(char *id) {
-  ast_node_t *node = malloc(sizeof(*node));
-  node->type = ID_NODE;
-  node->u.id = id;
-  return node;
-}
-
 void write_node(ast_node_t *node) {
   if (!node)
     return;
   switch (node->type) {
-    case NUM_NODE:
-      printf("%d", node->u.num_value);
-      break;
     case '+': case '-': case '*': case '/':
       write_node(node->u.arith.left);
       write_node(node->u.arith.right);
       printf("%c", node->type);
-      break;
-    case ID_NODE:
-      printf("%s", node->u.id);
       break;
     case ASSIGN_NODE:
       write_node(node->u.assign.lv);
       write_node(node->u.assign.rv);
       printf("<=>");
       break;
+    case ARGS_NODE:
+      write_node(node->u.args.arg);
+      write_node(node->u.args.rest);
+      printf("<args>");
+      break;
     case CALL_NODE:
       write_node(node->u.call.fn);
       write_node(node->u.call.args);
       printf("<call>");
       break;
-    case ARGS_NODE:
-      write_node(node->u.args.arg);
-      write_node(node->u.args.rest);
-      printf("<args>");
+    case ELSE_NODE:
+      write_node(node->u.else_stmt.pred);
+      write_node(node->u.else_stmt.then_part);
+      write_node(node->u.else_stmt.else_part);
+      printf("<else>");
+      break;
+    case ID_NODE:
+      printf("%s", node->u.id);
+      break;
+    case IF_NODE:
+      write_node(node->u.if_stmt.pred);
+      write_node(node->u.if_stmt.then_part);
+      printf("<if>");
+      break;
+    case NUM_NODE:
+      printf("%d", node->u.num_value);
       break;
     case OFFSET_NODE:
       write_node(node->u.offset.array);
@@ -321,7 +373,6 @@ ast_node_t *parse_factor(parser_t *parser) {
       x = make_id_node(token->u.id);
       parser_move(parser);
       if (parser->look->type == '(' || parser->look->type == '[') {
-//        return make_call_node(x, parse_args(parser));
         return parse_postfix(x, parser);
       } else
         return x;
@@ -373,8 +424,32 @@ ast_node_t *parse_assign(parser_t *parser) {
     return node;
 }
 
+ast_node_t *parse_stmt(parser_t *parser) {
+  token_t *token = parser->look;
+  ast_node_t *tp;
+  switch (token->type) {
+    case IF: {
+      match(parser, IF);
+      match(parser, '(');
+      ast_node_t *pred = parse_assign(parser);
+      match(parser, ')');
+      tp = parse_stmt(parser);
+      token = parser->look;
+      if (token->type != ELSE)
+        return make_if_node(pred, tp);
+      else {
+        match(parser, ELSE);
+        return make_else_node(pred, tp, parse_stmt(parser));
+      }
+    }
+      break;
+    default :
+      return parse_assign(parser);
+  }
+}
+
 ast_node_t *parse_prog(parser_t *parser) {
-  return parse_assign(parser);
+  return parse_stmt(parser);
 }
 
 void convert_write(char *str) {
@@ -387,17 +462,18 @@ void convert_write(char *str) {
 }
 
 int main(int argc, char *argv[]) {
-  convert_write("11*2+3/1");
-  convert_write("1 + a");
-  convert_write("(1)");
-  convert_write("(2 * 3)");
-  convert_write("9 - (5 + 2)");
-  convert_write("(1 + 2) * 3");
-  convert_write("var = 1 + 2");
-  convert_write("var = val = (1 + 1) * 2");
-  convert_write("fn()");
-  convert_write("fn(1)");
-  convert_write("fn(1, 2)");
-  convert_write("a[1 + 1][2]");
+//  convert_write("11*2+3/1");
+//  convert_write("1 + a");
+//  convert_write("(1)");
+//  convert_write("(2 * 3)");
+//  convert_write("9 - (5 + 2)");
+//  convert_write("(1 + 2) * 3");
+//  convert_write("var = 1 + 2");
+//  convert_write("var = val = (1 + 1) * 2");
+//  convert_write("fn()");
+//  convert_write("fn(1)");
+//  convert_write("fn(1, 2)");
+//  convert_write("a[1 + 1][2]");
+  convert_write("if ( x = 0 ) 0 - x else x");
   return 0;
 }
