@@ -539,6 +539,11 @@ lt *ast2lisp(ast_node_t *node) {
       return S(node->u.id);
     case NUM_NODE:
       return make_fixnum(node->u.num_value);
+    case ASSIGN_NODE: {
+      lt *lv = ast2lisp(node->u.assign.lv);
+      lt *rv = ast2lisp(node->u.assign.rv);
+      return list3(S("set!"), lv, rv);
+    }
     default :
       fprintf(stderr, "I don't want to process type %d now.\n", node->type);
       exit(1);
@@ -581,5 +586,7 @@ int main(int argc, char *argv[]) {
   write_ast_lisp("1 * (1 + 1)");
   write_ast_lisp("1 + 2 * (3 - 4) / 5");
   write_ast_lisp("b*b - 4 * a * c");
+  write_ast_lisp("var = 1");
+  write_ast_lisp("a = b = c = 1");
   return 0;
 }
