@@ -268,7 +268,7 @@ ast_node_t *make_id_node(char *id) {
 }
 
 ast_node_t *make_if_node(ast_node_t *pred, ast_node_t *tp) {
-  ast_node_t *node = make_node(IF);
+  ast_node_t *node = make_node(IF_NODE);
   node->u.if_stmt.pred = pred;
   node->u.if_stmt.then_part = tp;
   return node;
@@ -535,15 +535,20 @@ lt *ast2lisp(ast_node_t *node) {
       name[1] = '\0';
       return list3(S(strdup(name)), left, right);
     }
-    case ID_NODE:
-      return S(node->u.id);
-    case NUM_NODE:
-      return make_fixnum(node->u.num_value);
     case ASSIGN_NODE: {
       lt *lv = ast2lisp(node->u.assign.lv);
       lt *rv = ast2lisp(node->u.assign.rv);
       return list3(S("set!"), lv, rv);
     }
+    case ID_NODE:
+      return S(node->u.id);
+    case IF_NODE: {
+      lt *pred = ast2lisp(node->u.if_stmt.pred);
+      lt *tp = ast2lisp(node->u.if_stmt.then_part);
+      return list3(S("if"), pred, tp);
+    }
+    case NUM_NODE:
+      return make_fixnum(node->u.num_value);
     default :
       fprintf(stderr, "I don't want to process type %d now.\n", node->type);
       exit(1);
@@ -588,5 +593,6 @@ int main(int argc, char *argv[]) {
   write_ast_lisp("b*b - 4 * a * c");
   write_ast_lisp("var = 1");
   write_ast_lisp("a = b = c = 1");
+  write_ast_lisp("if ( x = 0 ) 0 - x");
   return 0;
 }
