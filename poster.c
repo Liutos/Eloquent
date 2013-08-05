@@ -527,6 +527,14 @@ void convert_write(char *str) {
 lt *ast2lisp(ast_node_t *node) {
   assert(node != NULL);
   switch (node->type) {
+    case '+': case '-': case '*': case '/': {
+      lt *left = ast2lisp(node->u.arith.left);
+      lt *right = ast2lisp(node->u.arith.right);
+      char name[2];
+      name[0] = node->type;
+      name[1] = '\0';
+      return list3(S(strdup(name)), left, right);
+    }
     case NUM_NODE:
       return make_fixnum(node->u.num_value);
     default :
@@ -564,5 +572,11 @@ int main(int argc, char *argv[]) {
 //  convert_write("{a = 1}");
 //  convert_write("{a = 1 b = 2}");
   write_ast_lisp("123");
+  write_ast_lisp("1 + 1");
+  write_ast_lisp("1 - 1");
+  write_ast_lisp("1 * 1");
+  write_ast_lisp("1 / 1");
+  write_ast_lisp("1 * (1 + 1)");
+  write_ast_lisp("1 + 2 * (3 - 4) / 5");
   return 0;
 }
