@@ -535,10 +535,34 @@ lt *ast2lisp(ast_node_t *node) {
       name[1] = '\0';
       return list3(S(strdup(name)), left, right);
     }
+    case ARGS_NODE: {
+      lt *arg = ast2lisp(node->u.args.arg);
+      ast_node_t *r = node->u.args.rest;
+      if (r == NULL)
+        return list1(arg);
+      else
+        return make_pair(arg, ast2lisp(r));
+    }
     case ASSIGN_NODE: {
       lt *lv = ast2lisp(node->u.assign.lv);
       lt *rv = ast2lisp(node->u.assign.rv);
       return list3(S("set!"), lv, rv);
+    }
+    case CALL_NODE: {
+      lt *fn = ast2lisp(node->u.call.fn);
+      ast_node_t *tmp = node->u.call.args;
+      if (tmp == NULL)
+        return list1(fn);
+      else {
+        lt *args = ast2lisp(tmp);
+        return make_pair(fn, args);
+      }
+    }
+    case ELSE_NODE: {
+      lt *pred = ast2lisp(node->u.else_stmt.pred);
+      lt *tp = ast2lisp(node->u.else_stmt.then_part);
+      lt *ep = ast2lisp(node->u.else_stmt.else_part);
+      return make_pair(S("if"), list3(pred, tp, ep));
     }
     case ID_NODE:
       return S(node->u.id);
@@ -594,5 +618,8 @@ int main(int argc, char *argv[]) {
   write_ast_lisp("var = 1");
   write_ast_lisp("a = b = c = 1");
   write_ast_lisp("if ( x = 0 ) 0 - x");
+  write_ast_lisp("if (x = 0) 0 - x else x");
+  write_ast_lisp("fn()");
+  write_ast_lisp("fn(1, 2)");
   return 0;
 }
