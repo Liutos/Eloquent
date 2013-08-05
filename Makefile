@@ -12,7 +12,7 @@ macros.o: macros.c object.h prims.h type.h utilities.h
 object.o: object.c object.h type.h
 	$(CC) $(CFLAGS) -c $< -o $@
 
-poster.o: poster.c object.h type.h utilities.h
+poster.o: poster.c object.h prims.h type.h utilities.h
 	$(CC) $(CFLAGS) -c $< -o $@
 
 prims.o: prims.c object.h type.h utilities.h
@@ -38,7 +38,7 @@ vm_test.o: vm_test.c compiler.h macros.h object.h prims.h type.h vm.h
 test_compiler: compiler_test.o compiler.o macros.o object.o prims.o utilities.o vm.o
 	$(CC) $(CFLAGS) $^ -o bin/$@
 
-test_poster: poster.o object.o utilities.o
+test_poster: poster.o compiler.o object.o prims.o utilities.o vm.o
 	$(CC) $(CFLAGS) $^ -o bin/$@
 
 test_repl: repl_test.o compiler.o macros.o object.o prims.o utilities.o vm.c

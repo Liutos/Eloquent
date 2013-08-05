@@ -11,6 +11,7 @@
 #include <string.h>
 
 #include "object.h"
+#include "prims.h"
 #include "type.h"
 #include "utilities.h"
 
@@ -523,22 +524,45 @@ void convert_write(char *str) {
   putchar('\n');
 }
 
+lt *ast2lisp(ast_node_t *node) {
+  assert(node != NULL);
+  switch (node->type) {
+    case NUM_NODE:
+      return make_fixnum(node->u.num_value);
+    default :
+      fprintf(stderr, "I don't want to process type %d now.\n", node->type);
+      exit(1);
+  }
+}
+
+void write_ast_lisp(char *str) {
+  printf("%s => ", str);
+  lexer_t *l = make_lexer(str);
+  parser_t *p = make_parser(l);
+  ast_node_t *a = parse_prog(p);
+  lt *obj = ast2lisp(a);
+  write_object(obj, standard_out);
+  putchar('\n');
+}
+
 int main(int argc, char *argv[]) {
-  convert_write("11*2+3/1");
-  convert_write("1 + a");
-  convert_write("(1)");
-  convert_write("(2 * 3)");
-  convert_write("9 - (5 + 2)");
-  convert_write("(1 + 2) * 3");
-  convert_write("var = 1 + 2");
-  convert_write("var = val = (1 + 1) * 2");
-  convert_write("fn()");
-  convert_write("fn(1)");
-  convert_write("fn(1, 2)");
-  convert_write("a[1 + 1][2]");
-  convert_write("if ( x = 0 ) 0 - x else x");
-  convert_write("while (x = 0) {x + 1}");
-  convert_write("{a = 1}");
-  convert_write("{a = 1 b = 2}");
+  init_global_variable();
+//  convert_write("11*2+3/1");
+//  convert_write("1 + a");
+//  convert_write("(1)");
+//  convert_write("(2 * 3)");
+//  convert_write("9 - (5 + 2)");
+//  convert_write("(1 + 2) * 3");
+//  convert_write("var = 1 + 2");
+//  convert_write("var = val = (1 + 1) * 2");
+//  convert_write("fn()");
+//  convert_write("fn(1)");
+//  convert_write("fn(1, 2)");
+//  convert_write("a[1 + 1][2]");
+//  convert_write("if ( x = 0 ) 0 - x else x");
+//  convert_write("while (x = 0) {x + 1}");
+//  convert_write("{a = 1}");
+//  convert_write("{a = 1 b = 2}");
+  write_ast_lisp("123");
   return 0;
 }
