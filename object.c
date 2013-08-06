@@ -290,12 +290,13 @@ lisp_object_t *make_primitive(int arity, void *C_function, char *Lisp_name, int 
   return p;
 }
 
-lt *make_retaddr(lt *code, lt *env, int pc, int throw_flag) {
+lt *make_retaddr(lt *code, lt *env, int pc, int throw_flag, int sp) {
   lt *retaddr = make_object(RETADDR);
   retaddr_code(retaddr) = code;
   retaddr_env(retaddr) = env;
   retaddr_pc(retaddr) = pc;
   retaddr_throw_flag(retaddr) = throw_flag;
+  retaddr_sp(retaddr) = sp;
   return retaddr;
 }
 

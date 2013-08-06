@@ -14,7 +14,9 @@
 int main(int argc, char *argv[])
 {
   char *inputs[] = {
-      "(if (> x y) #f (if (= x y) #f #t))",
+//      "(+ 1 1)",
+//      "(< 1 2)",
+      "(vector-top [1 2 3])",
   };
   init_global_variable();
   init_prims();

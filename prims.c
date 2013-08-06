@@ -795,6 +795,12 @@ lt *lt_vector_set(lt *vector, lt *index, lt *new_value) {
   return vector;
 }
 
+lt *lt_vector_top(lt *vector) {
+  assert(isvector(vector));
+  assert(vector_last(vector) > 0);
+  return vector_value(vector)[vector_last(vector)];
+}
+
 lt *lt_vector_to_list(lt *vector) {
   lt *lt_list_nreverse(lt *);
   int length = vector_length(vector);
@@ -1251,6 +1257,7 @@ void init_prims(void) {
   ADD(2, FALSE, lt_vector_push_extend, "vector-push-extend");
   ADD(2, FALSE, lt_vector_ref, "vector-ref");
   ADD(3, FALSE, lt_vector_set, "vector-set!");
+  ADD(1, FALSE, lt_vector_top, "vector-top");
   ADD(1, FALSE, lt_vector_to_list, "vector->list");
   /* General */
   ADD(1, FALSE, lt_is_constant, "is-constant?");

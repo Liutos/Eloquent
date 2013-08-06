@@ -94,6 +94,8 @@ pub lisp_object_t *run_by_llam(lisp_object_t *code_vector) {
           vector_last(args)++;
         }
         env = make_pair(args, env);
+        lt *ret = pair_head(return_stack);
+        retaddr_sp(ret) = vector_last(stack);
       }
         break;
       case ARGSD: {
@@ -113,6 +115,8 @@ pub lisp_object_t *run_by_llam(lisp_object_t *code_vector) {
           vector_value(args)[i] = arg;
         }
         env = make_pair(args, env);
+        lt *ret = pair_head(return_stack);
+        retaddr_sp(ret) = vector_last(stack);
       }
         break;
       case CALL: {
@@ -132,7 +136,8 @@ pub lisp_object_t *run_by_llam(lisp_object_t *code_vector) {
           writef(standard_out, "lt_type_of(func) is %?\n", lt_type_of(func));
           assert(isfunction(func));
         }
-        lisp_object_t *retaddr = make_retaddr(code, env, pc, throw_exception);
+        lisp_object_t *retaddr =
+            make_retaddr(code, env, pc, throw_exception, vector_last(stack));
         return_stack = make_pair(retaddr, return_stack);
         code = function_code(func);
         env = function_env(func);
@@ -236,6 +241,10 @@ pub lisp_object_t *run_by_llam(lisp_object_t *code_vector) {
             exit(1);
         }
         move_stack();
+        if (!isnull(return_stack)) {
+          lt *ret = pair_head(return_stack);
+          retaddr_sp(ret) = vector_last(stack);
+        }
         lt_vector_push(stack, val);
 //        When the primitive function's execution is finished, they will put the return
 //        value at the top of stack. If this return value is a signaled exception, and the
@@ -244,12 +253,25 @@ pub lisp_object_t *run_by_llam(lisp_object_t *code_vector) {
 //        return value, should be left at the top of stack, as the return value, and it
 //        will be used by the expandsion code of `try-with' block, in other word, CATCH
 //        by the language.
-        if (is_signaled(vlast(stack, 0)) && throw_exception)
-          goto return_label;
+        while (is_signaled(vlast(stack, 0)) && throw_exception) {
+//          goto return_label;
+          if (isnull(return_stack))
+            goto halt;
+          lt *ex = lt_vector_pop(stack);
+          lt *ret = pair_head(return_stack);
+          return_stack = pair_tail(return_stack);
+          vector_last(stack) = retaddr_sp(ret);
+          code = retaddr_code(ret);
+          env = retaddr_env(ret);
+          pc = retaddr_pc(ret);
+          throw_exception = retaddr_throw_flag(ret);
+          vector_last(stack) = retaddr_sp(ret);
+          lt_vector_push(stack, ex);
+        }
       }
         break;
       case RETURN: {
-        return_label:
+//        return_label:
         if (isnull(return_stack))
           break;
         lisp_object_t *retaddr = pair_head(return_stack);
@@ -258,6 +280,20 @@ pub lisp_object_t *run_by_llam(lisp_object_t *code_vector) {
         env = retaddr_env(retaddr);
         pc = retaddr_pc(retaddr);
         throw_exception = retaddr_throw_flag(retaddr);
+        while (is_signaled(vlast(stack, 0)) && throw_exception) {
+          if (isnull(return_stack))
+            goto halt;
+          lt *ex = lt_vector_pop(stack);
+          lt *ret = pair_head(return_stack);
+          return_stack = pair_tail(return_stack);
+          vector_last(stack) = retaddr_sp(ret);
+          code = retaddr_code(ret);
+          env = retaddr_env(ret);
+          pc = retaddr_pc(ret);
+          throw_exception = retaddr_throw_flag(ret);
+          vector_last(stack) = retaddr_sp(ret);
+          lt_vector_push(stack, ex);
+        }
       }
         break;
       default :
@@ -266,6 +302,7 @@ pub lisp_object_t *run_by_llam(lisp_object_t *code_vector) {
     }
     pc++;
   }
+  halt:
   assert(isfalse(lt_is_vector_empty(stack)));
   return vlast(stack, 0);
 }

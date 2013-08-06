@@ -119,7 +119,7 @@ struct lisp_object_t {
       void *C_function;
     } primitive;
     struct {
-      int pc, throw_flag;
+      int pc, sp, throw_flag;
       lt *code;
       lt *env;
     } retaddr;
@@ -181,6 +181,7 @@ struct string_builder_t {
 #define retaddr_env(x) ((x)->u.retaddr.env)
 #define retaddr_pc(x) ((x)->u.retaddr.pc)
 #define retaddr_throw_flag(x) ((x)->u.retaddr.throw_flag)
+#define retaddr_sp(x) ((x)->u.retaddr.sp)
 #define string_value(x) ((x)->u.string.value)
 #define symbol_name(x) ((x)->u.symbol.name)
 #define symbol_value(x) ((x)->u.symbol.global_value)

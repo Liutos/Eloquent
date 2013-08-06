@@ -69,7 +69,7 @@ extern lt *make_macro(lt *, lt *);
 extern lt *make_output_file(FILE *);
 extern lt *make_pair(lt *, lt *);
 extern lt *make_primitive(int, void *, char *, int);
-extern lt *make_retaddr(lt *code, lt *env, int pc, int throw_flag);
+extern lt *make_retaddr(lt *code, lt *env, int pc, int throw_flag, int sp);
 extern string_builder_t *make_str_builder(void);
 extern lt *make_string(char *);
 extern lt *make_symbol(char *);
