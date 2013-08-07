@@ -150,8 +150,20 @@ pub lisp_object_t *run_by_llam(lisp_object_t *code_vector) {
         throw_exception = FALSE;
         break;
       case CHECKEX:
-        fprintf(stderr, "Instruction CHECKEX is not supported yet\n");
-        exit(1);
+        while (is_signaled(vlast(stack, 0)) && throw_exception) {
+          if (isnull(return_stack))
+            goto halt;
+          lt *ex = lt_vector_pop(stack);
+          lt *ret = pair_head(return_stack);
+          return_stack = pair_tail(return_stack);
+          vector_last(stack) = retaddr_sp(ret);
+          code = retaddr_code(ret);
+          env = retaddr_env(ret);
+          pc = retaddr_pc(ret);
+          throw_exception = retaddr_throw_flag(ret);
+          vector_last(stack) = retaddr_sp(ret);
+          lt_vector_push(stack, ex);
+        }
         break;
       case CONST:
         lt_vector_push(stack, op_const_value(ins));
@@ -200,7 +212,6 @@ pub lisp_object_t *run_by_llam(lisp_object_t *code_vector) {
         lt_vector_push(stack, value);
       }
         break;
-//        DONE: Fix the wrong implementation of user-defined macro.
       case MACROFN: {
         lisp_object_t *func = op_macro_func(ins);
         func = make_function(env, the_empty_list, function_code(func));
@@ -257,20 +268,6 @@ pub lisp_object_t *run_by_llam(lisp_object_t *code_vector) {
 //        return value, should be left at the top of stack, as the return value, and it
 //        will be used by the expandsion code of `try-with' block, in other word, CATCH
 //        by the language.
-        while (is_signaled(vlast(stack, 0)) && throw_exception) {
-          if (isnull(return_stack))
-            goto halt;
-          lt *ex = lt_vector_pop(stack);
-          lt *ret = pair_head(return_stack);
-          return_stack = pair_tail(return_stack);
-          vector_last(stack) = retaddr_sp(ret);
-          code = retaddr_code(ret);
-          env = retaddr_env(ret);
-          pc = retaddr_pc(ret);
-          throw_exception = retaddr_throw_flag(ret);
-          vector_last(stack) = retaddr_sp(ret);
-          lt_vector_push(stack, ex);
-        }
       }
         break;
       case RETURN: {
@@ -282,20 +279,6 @@ pub lisp_object_t *run_by_llam(lisp_object_t *code_vector) {
         env = retaddr_env(retaddr);
         pc = retaddr_pc(retaddr);
         throw_exception = retaddr_throw_flag(retaddr);
-        while (is_signaled(vlast(stack, 0)) && throw_exception) {
-          if (isnull(return_stack))
-            goto halt;
-          lt *ex = lt_vector_pop(stack);
-          lt *ret = pair_head(return_stack);
-          return_stack = pair_tail(return_stack);
-          vector_last(stack) = retaddr_sp(ret);
-          code = retaddr_code(ret);
-          env = retaddr_env(ret);
-          pc = retaddr_pc(ret);
-          throw_exception = retaddr_throw_flag(ret);
-          vector_last(stack) = retaddr_sp(ret);
-          lt_vector_push(stack, ex);
-        }
       }
         break;
       default :

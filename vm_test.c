@@ -19,6 +19,8 @@ int main(int argc, char *argv[])
       "(+ 1 (/ 2 0))",
       "(set! div (lambda (x) (/ x 0)))",
       "(div 1)",
+      "(+ (- 2 1) (/ 3 0))",
+      "(+ 1 (+ 2 (+ 3 (/ 4 0))))",
   };
   init_global_variable();
   init_prims();
