@@ -535,6 +535,8 @@ lt *lt_add(lt *n, lt *m) {
 
 lisp_object_t *lt_div(lisp_object_t *n, lisp_object_t *m) {
   assert(isnumber(n) && isnumber(m));
+  if ((isfixnum(m) && fixnum_value(m) == 0) || (isfloat(m) && float_value(m) == 0))
+    return signal_exception("Diveded by zero");
   if (isfixnum(n) && isfixnum(m))
     return make_fixnum(fixnum_value(n) / fixnum_value(m));
   if (isfixnum(n) && isfloat(m))
