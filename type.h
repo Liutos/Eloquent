@@ -59,6 +59,7 @@ enum OPCODE_TYPE {
   ARGSD,
   CALL,
   CATCH,
+  CHECKEX,
   CONST,
   DECL,
   FN,

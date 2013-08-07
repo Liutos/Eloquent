@@ -149,6 +149,10 @@ pub lisp_object_t *run_by_llam(lisp_object_t *code_vector) {
       case CATCH:
         throw_exception = FALSE;
         break;
+      case CHECKEX:
+        fprintf(stderr, "Instruction CHECKEX is not supported yet\n");
+        exit(1);
+        break;
       case CONST:
         lt_vector_push(stack, op_const_value(ins));
         break;
@@ -254,7 +258,6 @@ pub lisp_object_t *run_by_llam(lisp_object_t *code_vector) {
 //        will be used by the expandsion code of `try-with' block, in other word, CATCH
 //        by the language.
         while (is_signaled(vlast(stack, 0)) && throw_exception) {
-//          goto return_label;
           if (isnull(return_stack))
             goto halt;
           lt *ex = lt_vector_pop(stack);
@@ -271,7 +274,6 @@ pub lisp_object_t *run_by_llam(lisp_object_t *code_vector) {
       }
         break;
       case RETURN: {
-//        return_label:
         if (isnull(return_stack))
           break;
         lisp_object_t *retaddr = pair_head(return_stack);

@@ -114,12 +114,15 @@ void write_opcode(lt *opcode, lt *dest) {
     case CATCH:
       write_raw_string("#<CATCH>", dest);
       break;
-    case DECL:
-      writef(dest, "#<DECL %S>", op_decl_var(opcode));
+    case CHECKEX:
+      write_raw_string("#<CHECKEX>", dest);
       break;
     case CONST: 
     	writef(dest, "#<CONST %?>", op_const_value(opcode)); 
     	break;
+    case DECL:
+      writef(dest, "#<DECL %S>", op_decl_var(opcode));
+      break;
     case FJUMP: 
     	writef(dest, "#<FJUMP %?>", op_fjump_label(opcode)); 
     	break;
@@ -1189,10 +1192,10 @@ lt *lt_read_from_string(lt *string) {
 }
 
 void init_prims(void) {
-#define ADD(arity, restp, function_name, Lisp_name)                            \
+#define ADD(arity, restp, function_name, Lisp_name)                     \
   do {                                                                  \
     func =                                                              \
-        make_primitive(arity, (void *)function_name, Lisp_name, restp);        \
+        make_primitive(arity, (void *)function_name, Lisp_name, restp); \
     symbol_value(S(Lisp_name)) = func;                                  \
   } while (0)
 

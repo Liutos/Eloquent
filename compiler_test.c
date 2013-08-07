@@ -14,14 +14,14 @@
 int main(int argc, char *argv[])
 {
   char *inputs[] = {
-//      "(+ 1 1)",
-//      "(< 1 2)",
-      "(vector-top [1 2 3])",
+      "(+ 1 1)",
+      "((lambda (x y) (> x y)) 1 2)",
+//      "(vector-top [1 2 3])",
   };
   init_global_variable();
   init_prims();
   init_macros();
-  load_init_file();
+//  load_init_file();
   for (int i = 0; i < sizeof(inputs) / sizeof(char *); i++) {
     write_raw_string(">> ", standard_out);
     write_raw_string(inputs[i], standard_out);

@@ -124,6 +124,9 @@ lisp_object_t *gen(enum TYPE opcode, ...) {
     case CATCH:
       ins = make_op_catch();
       break;
+    case CHECKEX:
+      ins = make_op_checkex();
+      break;
     case CONST: {
       lisp_object_t *value = va_arg(ap, lisp_object_t *);
       ins = make_op_const(value);
@@ -392,11 +395,13 @@ pub lisp_object_t *compile_object(lisp_object_t *object, lisp_object_t *env) {
     if (is_primitive_fun(fn))
       return seq(compile_args(args, env),
                  compile_object(fn, env),
-                 gen(PRIM, lt_list_length(args)));
+                 gen(PRIM, lt_list_length(args)),
+                 gen(CHECKEX));
     else
       return seq(compile_args(args, env),
                  compile_object(fn, env),
-                 gen(CALL, lt_list_length(args)));
+                 gen(CALL, lt_list_length(args)),
+                 gen(CHECKEX));
   }
   writef(standard_out, "Impossible --- Unable to compile %?\n", object);
   exit(1);

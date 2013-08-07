@@ -360,6 +360,10 @@ lisp_object_t *make_op_call(lisp_object_t *arity) {
   return mkopcode(CALL, "CALL", 1, arity);
 }
 
+lt *make_op_checkex(void) {
+  return mkopcode(CHECKEX, "CHECKEX", 0);
+}
+
 lisp_object_t *make_op_const(lisp_object_t *value) {
   return mkopcode(CONST, "CONST", 1, value);
 }
