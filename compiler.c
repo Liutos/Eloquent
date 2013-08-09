@@ -358,7 +358,6 @@ void add_local_var(lt *var, lt *env) {
   }
 }
 
-/* TODO: The support for built-in macros. */
 /* TODO: The support for tail call optimization. */
 pub lisp_object_t *compile_object(lisp_object_t *object, lisp_object_t *env) {
   if (issymbol(object))

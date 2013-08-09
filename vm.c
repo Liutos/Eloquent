@@ -87,6 +87,11 @@ pub lisp_object_t *run_by_llam(lisp_object_t *code_vector) {
     lisp_object_t *ins = raw_vector_ref(code, pc);
     switch (opcode_type(ins)) {
       case ARGS: {
+//        Check the number of arguments passed
+        lt *argc = op_args_arity(ins);
+        if (fixnum_value(argc) != nargs)
+          return signal_exception("The number of arguments passed is wrong");
+
         lisp_object_t *args = make_vector(fixnum_value(op_args_arity(ins)));
         for (int i = fixnum_value(op_args_arity(ins)) - 1; i >= 0; i--) {
           lisp_object_t *arg = lt_vector_pop(stack);
