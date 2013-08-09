@@ -117,6 +117,9 @@ void write_opcode(lt *opcode, lt *dest) {
     case CHECKEX:
       write_raw_string("#<CHECKEX>", dest);
       break;
+    case CHKTYPE:
+      writef(dest, "#<CHKTYPE %d %?>", op_chktype_pos(opcode), op_chktype_type(opcode));
+      break;
     case CONST: 
     	writef(dest, "#<CONST %?>", op_const_value(opcode)); 
     	break;

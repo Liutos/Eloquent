@@ -246,6 +246,7 @@ lt *make_function(lt *env, lt *args, lt *code) {
   function_env(func) = env;
   function_args(func) = args;
   function_code(func) = code;
+  function_signature(func) = make_empty_list();
   return func;
 }
 
@@ -362,6 +363,10 @@ lisp_object_t *make_op_call(lisp_object_t *arity) {
 
 lt *make_op_checkex(void) {
   return mkopcode(CHECKEX, "CHECKEX", 0);
+}
+
+lt *make_op_chktype(lt *position, lt *target_type) {
+  return mkopcode(CHKTYPE, "CHKTYPE", 2, position, target_type);
 }
 
 lisp_object_t *make_op_const(lisp_object_t *value) {

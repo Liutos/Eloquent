@@ -60,6 +60,7 @@ enum OPCODE_TYPE {
   CALL,
   CATCH,
   CHECKEX,
+  CHKTYPE,
   CONST,
   DECL,
   FN,
@@ -91,6 +92,7 @@ struct lisp_object_t {
       lt *code;
       lt *env;
       lt *args;
+      lt *signature;
     } function;
     struct {
       int colnum, linum, openp;
@@ -159,6 +161,7 @@ struct string_builder_t {
 #define function_args(x) ((x)->u.function.args)
 #define function_env(x) ((x)->u.function.env)
 #define function_code(x) ((x)->u.function.code)
+#define function_signature(x) ((x)->u.function.signature)
 #define input_file_colnum(x) ((x)->u.input_file.colnum)
 #define input_file_file(x) ((x)->u.input_file.file)
 #define input_file_linum(x) ((x)->u.input_file.linum)
@@ -199,6 +202,8 @@ struct string_builder_t {
 #define op_argsd_arity(x) oparg1(x)
 #define op_args_arity(x) oparg1(x)
 #define op_call_arity(x) oparg1(x)
+#define op_chktype_pos(x) oparg1(x)
+#define op_chktype_type(x) oparg2(x)
 #define op_const_value(x) oparg1(x)
 #define op_decl_var(x) oparg1(x)
 #define op_fjump_label(x) oparg1(x)
