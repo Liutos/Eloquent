@@ -15,8 +15,6 @@ int main(int argc, char *argv[])
 {
   char *inputs[] = {
       "(+ 1 1)",
-      "((lambda (x y) (> x y)) 1 2)",
-//      "(vector-top [1 2 3])",
   };
   init_global_variable();
   init_prims();

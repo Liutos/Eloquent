@@ -124,13 +124,14 @@ lisp_object_t *gen(enum TYPE opcode, ...) {
     case CATCH:
       ins = make_op_catch();
       break;
-    case CHECKEX: {
+    case CHECKEX:
+      ins = make_op_checkex();
+      break;
+    case CHKTYPE: {
       lt *position = va_arg(ap, lt *);
       lt *type = va_arg(ap, lt *);
-      ins = make_op_checkex(position, type);
+      ins = make_op_chktype(position, type);
     }
-      break;
-    case CHKTYPE:
       break;
     case CONST: {
       lisp_object_t *value = va_arg(ap, lisp_object_t *);

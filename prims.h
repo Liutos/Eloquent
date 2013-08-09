@@ -20,6 +20,7 @@ extern void write_raw_char(char, lt *);
 extern void write_raw_string(char *, lt *);
 extern void writef(lt *, const char *, ...);
 
+/* Arithmetic */
 extern F2(lt_add);
 extern F2(lt_div);
 extern F2(lt_gt);
@@ -27,10 +28,12 @@ extern F2(lt_mod);
 extern F2(lt_mul);
 extern F2(lt_numeric_eq);
 extern F2(lt_sub);
+/* Character */
 extern F1(lt_char_code);
 extern F1(lt_code_char);
 extern F1(lt_read_char);
 extern F1(lt_read_line);
+/* List */
 extern F1(lt_head);
 extern F1(lt_list_length);
 extern F1(lt_list_nreverse);
@@ -40,27 +43,33 @@ extern F2(lt_nthtail);
 extern F2(lt_set_head);
 extern F2(lt_set_tail);
 extern F1(lt_tail);
+/* String */
 extern F2(lt_char_at);
 extern F1(lt_string_length);
 extern F3(lt_string_set);
+/* Symbol */
 extern F1(lt_intern);
 extern F1(lt_symbol_name);
 extern F1(lt_symbol_value);
+/* Vector */
 extern F1(lt_is_vector_empty);
 extern F1(lt_list_to_vector);
 extern F2(lt_vector_push_extend);
 extern F2(lt_vector_last_nth);
 extern F1(lt_vector_pop);
 extern F2(lt_vector_push);
-extern F2(lt_vector_reF);
+extern F2(lt_vector_ref);
 extern F3(lt_vector_set);
 extern F1(lt_vector_to_list);
+/* General */
 extern F2(lt_eq);
 extern F2(lt_eql);
 extern F2(lt_equal);
 extern F0(lt_object_size);
 extern F1(lt_type_of);
 extern F1(lt_is_constant);
+extern F2(lt_is_kind);
+/* Function */
 extern F1(lt_expand_macro);
 extern F1(lt_function_arity);
 extern F2(lt_simple_apply);

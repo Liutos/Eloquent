@@ -948,6 +948,10 @@ lisp_object_t *lt_type_of(lisp_object_t *object) {
   }
 }
 
+lt *lt_is_kind_of(lt *object, lt *type_name) {
+  return lt_eq(lt_type_of(object), type_name);
+}
+
 /* Reader */
 int peek_char(lisp_object_t *input_file) {
   FILE *in = input_file_file(input_file);
@@ -1272,6 +1276,7 @@ void init_prims(void) {
   ADD(2, FALSE, lt_eq, "eq");
   ADD(2, FALSE, lt_eql, "eql");
   ADD(2, FALSE, lt_equal, "equal");
+  ADD(2, FALSE, lt_is_kind_of, "of-type?");
   ADD(0, FALSE, lt_object_size, "object-size");
   ADD(1, FALSE, lt_type_of, "type-of");
 }
