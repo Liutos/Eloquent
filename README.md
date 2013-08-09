@@ -22,11 +22,11 @@ Eloquent is a reference implementation of 233-Lisp, which is a personal dialect 
 
 ## First: Define The New Function
 
-Define the new primitive function in file `prims.c', and put its declaration into the header file `prims.h'. The data type of the formal parameters and return value of this new function must be `struct lisp\_object\_t *', which also named `lt *' by typedef.
+Define the new primitive function in file prims.c, and put its declaration into the header file prims.h. The data type of the formal parameters and return value of this new function must be struct lisp\_object\_t *, which also named lt * by typedef.
 
 ## Second: Install The New Function
 
-Register this new function into the implementation's global environment. In the body of function `init\_prims', use the predefined macro ADD for installing. Macro ADD has four parameters, their meaning list as follow:
+Register this new function into the implementation's global environment. In the body of function init\_prims, use the predefined macro ADD for installing. Macro ADD has four parameters, their meaning list as follow:
 
 1. arity. It's the total number of parameters of a primitive function. The rest parameter, for example, the parameter y in form (x . y) is also counted. Therefor, parameters list (x . y) means arity of 2.
 2. restp. A flag indicates whether the function accepts variable number of parameters or not.
