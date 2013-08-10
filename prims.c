@@ -118,7 +118,7 @@ void write_opcode(lt *opcode, lt *dest) {
       write_raw_string("#<CHECKEX>", dest);
       break;
     case CHKTYPE:
-      writef(dest, "#<CHKTYPE %d %?>", op_chktype_pos(opcode), op_chktype_type(opcode));
+      writef(dest, "#<CHKTYPE %d %? %d>", op_chktype_pos(opcode), op_chktype_type(opcode), op_chktype_nargs(opcode));
       break;
     case CONST: 
     	writef(dest, "#<CONST %?>", op_const_value(opcode)); 
@@ -1209,6 +1209,7 @@ void init_prims(void) {
   lisp_object_t *func;
   /* Arithmetic operations */
   ADD(2, FALSE, lt_add, "+");
+  primitive_signature(symbol_value(S("+"))) = read_object_from_string("((or FIXNUM FLONUM) (or FIXNUM FLONUM))");
   ADD(2, FALSE, lt_div, "/");
   ADD(2, FALSE, lt_gt, ">");
   ADD(2, FALSE, lt_mod, "mod");

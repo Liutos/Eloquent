@@ -246,7 +246,6 @@ lt *make_function(lt *env, lt *args, lt *code) {
   function_env(func) = env;
   function_args(func) = args;
   function_code(func) = code;
-  function_signature(func) = make_empty_list();
   return func;
 }
 
@@ -288,6 +287,7 @@ lisp_object_t *make_primitive(int arity, void *C_function, char *Lisp_name, int 
   primitive_func(p) = C_function;
   primitive_restp(p) = restp;
   primitive_Lisp_name(p) = Lisp_name;
+  primitive_signature(p) = make_empty_list();
   return p;
 }
 
@@ -365,8 +365,8 @@ lt *make_op_checkex(void) {
   return mkopcode(CHECKEX, "CHECKEX", 0);
 }
 
-lt *make_op_chktype(lt *position, lt *target_type) {
-  return mkopcode(CHKTYPE, "CHKTYPE", 2, position, target_type);
+lt *make_op_chktype(lt *position, lt *target_type, lt *nargs) {
+  return mkopcode(CHKTYPE, "CHKTYPE", 3, position, target_type, nargs);
 }
 
 lisp_object_t *make_op_const(lisp_object_t *value) {

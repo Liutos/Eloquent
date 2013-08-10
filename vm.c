@@ -66,6 +66,27 @@ void set_local_var(lisp_object_t *env, int i, int j, lisp_object_t *value) {
   set_in_frame(pair_head(env), j, value);
 }
 
+int is_type_satisfy(lt *arg, lt *pred) {
+  if (pred == S("object"))
+    return TRUE;
+  else if (issymbol(pred))
+    return !isfalse(lt_is_kind_of(arg, pred));
+  else if (is_tag_list(pred, S("or"))) {
+    lt *types = pair_tail(pred);
+    while (ispair(types)) {
+      lt *t = pair_head(types);
+      if (is_type_satisfy(arg, t) == FALSE)
+        return FALSE;
+      else
+        types = pair_tail(types);
+    }
+    return TRUE;
+  } else {
+    fprintf(stderr, "Unknown type predicate. Please check the signature declarations in function `init_prims' in file `prims.c'.\n");
+    exit(1);
+  }
+}
+
 /* TODO: Exception signaling and handling. */
 pub lisp_object_t *run_by_llam(lisp_object_t *code_vector) {
 #define _arg(N) vlast(stack, primitive_arity(func) - N)
@@ -174,6 +195,9 @@ pub lisp_object_t *run_by_llam(lisp_object_t *code_vector) {
           vector_last(stack) = retaddr_sp(ret);
           lt_vector_push(stack, ex);
         }
+        break;
+      case CHKTYPE:
+        printf("Warnning: Instruction CHKTYPE is not implemented.\n");
         break;
       case CONST:
         lt_vector_push(stack, op_const_value(ins));

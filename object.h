@@ -78,7 +78,7 @@ extern lt *make_op_args(lt *);
 extern lt *make_op_argsd(lt *);
 extern lt *make_op_call(lt *);
 extern lt *make_op_checkex(void);
-extern lt *make_op_chktype(lt *, lt *);
+extern lt *make_op_chktype(lt *, lt *, lt *);
 extern lt *make_op_const(lt *);
 extern lt *make_op_decl(lt *);
 extern lt *make_op_fjump(lt *);

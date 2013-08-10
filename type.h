@@ -92,7 +92,6 @@ struct lisp_object_t {
       lt *code;
       lt *env;
       lt *args;
-      lt *signature;
     } function;
     struct {
       int colnum, linum, openp;
@@ -120,6 +119,7 @@ struct lisp_object_t {
       int restp;
       char *Lisp_name;
       void *C_function;
+      lt *signature;
     } primitive;
     struct {
       int pc, sp, throw_flag;
@@ -161,7 +161,6 @@ struct string_builder_t {
 #define function_args(x) ((x)->u.function.args)
 #define function_env(x) ((x)->u.function.env)
 #define function_code(x) ((x)->u.function.code)
-#define function_signature(x) ((x)->u.function.signature)
 #define input_file_colnum(x) ((x)->u.input_file.colnum)
 #define input_file_file(x) ((x)->u.input_file.file)
 #define input_file_linum(x) ((x)->u.input_file.linum)
@@ -180,6 +179,7 @@ struct string_builder_t {
 #define primitive_Lisp_name(x) ((x)->u.primitive.Lisp_name)
 #define primitive_arity(x) ((x)->u.primitive.arity)
 #define primitive_func(x) ((x)->u.primitive.C_function)
+#define primitive_signature(x) ((x)->u.primitive.signature)
 #define primitive_restp(x) ((x)->u.primitive.restp)
 #define retaddr_code(x) ((x)->u.retaddr.code)
 #define retaddr_env(x) ((x)->u.retaddr.env)
@@ -204,6 +204,7 @@ struct string_builder_t {
 #define op_call_arity(x) oparg1(x)
 #define op_chktype_pos(x) oparg1(x)
 #define op_chktype_type(x) oparg2(x)
+#define op_chktype_nargs(x) oparg3(x)
 #define op_const_value(x) oparg1(x)
 #define op_decl_var(x) oparg1(x)
 #define op_fjump_label(x) oparg1(x)

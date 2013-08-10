@@ -68,7 +68,7 @@ extern F2(lt_equal);
 extern F0(lt_object_size);
 extern F1(lt_type_of);
 extern F1(lt_is_constant);
-extern F2(lt_is_kind);
+extern F2(lt_is_kind_of);
 /* Function */
 extern F1(lt_expand_macro);
 extern F1(lt_function_arity);

@@ -130,7 +130,8 @@ lisp_object_t *gen(enum TYPE opcode, ...) {
     case CHKTYPE: {
       lt *position = va_arg(ap, lt *);
       lt *type = va_arg(ap, lt *);
-      ins = make_op_chktype(position, type);
+      lt *nargs = va_arg(ap, lt *);
+      ins = make_op_chktype(position, type, nargs);
     }
       break;
     case CONST: {
@@ -340,7 +341,7 @@ lisp_object_t *gen_var(lisp_object_t *symbol, lisp_object_t *env) {
   }
 }
 
-int is_primitive_fun(lt *variable) {
+int is_primitive_fun_name(lt *variable) {
   return issymbol(variable) &&
       is_symbol_bound(variable) &&
       isprimitive(symbol_value(variable));
@@ -364,6 +365,20 @@ int add_local_var(lt *var, lt *env) {
     pair_head(env) = list1(var);
     return TRUE;
   }
+}
+
+lt *compile_type_check(lt *prim, lt *nargs) {
+  lt *sig = primitive_signature(prim);
+  assert(ispair(sig) || isnull(sig));
+  lt *seq = make_empty_list();
+  int i = 0;
+  while (!isnull(sig)) {
+    lt *pred = pair_head(sig);
+    seq = append2(gen(CHKTYPE, make_fixnum(i), pred, nargs), seq);
+    sig = pair_tail(sig);
+    i++;
+  }
+  return seq;
 }
 
 /* TODO: The support for tail call optimization. */
@@ -408,12 +423,14 @@ pub lisp_object_t *compile_object(lisp_object_t *object, lisp_object_t *env) {
     lisp_object_t *args = pair_tail(object);
     lisp_object_t *fn = pair_head(object);
     /* Generating different instruction when calling primitive and anything else */
-    if (is_primitive_fun(fn))
+    if (is_primitive_fun_name(fn)) {
+      lt *nargs = lt_list_length(args);
       return seq(compile_args(args, env),
+                 compile_type_check(symbol_value(fn), nargs),
                  compile_object(fn, env),
-                 gen(PRIM, lt_list_length(args)),
+                 gen(PRIM, nargs),
                  gen(CHECKEX));
-    else
+    } else
       return seq(compile_args(args, env),
                  compile_object(fn, env),
                  gen(CALL, lt_list_length(args)),
