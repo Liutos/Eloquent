@@ -230,6 +230,20 @@ pub lisp_object_t *run_by_llam(lisp_object_t *code_vector) {
       case PRIM: {
         nargs = fixnum_value(op_prim_nargs(ins));
         lisp_object_t *func = lt_vector_pop(stack);
+        int arity = primitive_arity(func);
+        int restp = primitive_restp(func);
+//        Check the number of arguments passed
+        if (restp == TRUE) {
+          arity--;
+          if (nargs < arity)
+            return signal_exception("Too few arguments passed");
+        } else {
+          if (nargs > arity)
+            return signal_exception("Too many arguments passed");
+          else if (nargs < arity)
+            return signal_exception("Too few arguments passed");
+        }
+
         lisp_object_t *val = NULL;
         assert(isprimitive(func));
 //        Preprocess the arguments on the stack if the primitive function takes
