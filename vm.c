@@ -6,6 +6,7 @@
  */
 #include <assert.h>
 #include <stdlib.h>
+#include <string.h>
 
 #include "object.h"
 #include "prims.h"
@@ -75,12 +76,12 @@ int is_type_satisfy(lt *arg, lt *pred) {
     lt *types = pair_tail(pred);
     while (ispair(types)) {
       lt *t = pair_head(types);
-      if (is_type_satisfy(arg, t) == FALSE)
-        return FALSE;
+      if (is_type_satisfy(arg, t) == TRUE)
+        return TRUE;
       else
         types = pair_tail(types);
     }
-    return TRUE;
+    return FALSE;
   } else {
     fprintf(stderr, "Unknown type predicate. Please check the signature declarations in function `init_prims' in file `prims.c'.\n");
     exit(1);
@@ -196,8 +197,17 @@ pub lisp_object_t *run_by_llam(lisp_object_t *code_vector) {
           lt_vector_push(stack, ex);
         }
         break;
-      case CHKTYPE:
-        printf("Warnning: Instruction CHKTYPE is not implemented.\n");
+      case CHKTYPE: {
+        lt *index = op_chktype_pos(ins);
+        lt *pred = op_chktype_type(ins);
+        lt *nargs = op_chktype_nargs(ins);
+        lt *arg = vlast(stack, fixnum_value(nargs) - fixnum_value(index) - 1);
+        if (is_type_satisfy(arg, pred) == FALSE) {
+          char msg[256];
+          sprintf(msg, "Argument at index %d is not of target type", fixnum_value(index));
+          return signal_exception(strdup(msg));
+        }
+      }
         break;
       case CONST:
         lt_vector_push(stack, op_const_value(ins));

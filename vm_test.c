@@ -16,11 +16,8 @@ int main(int argc, char *argv[])
 {
   char *inputs[] = {
       "(+ 1 2)",
-      "(+ 1 2 3)",
-      "(list 1)",
-      "(+ 1)",
-      "((lambda (x . y) (list x y)) 1)",
-      "((lambda (x y . z) z) 1)",
+      "(+ 1 #\\a)",
+      "(+ #\\a 0)",
   };
   init_global_variable();
   init_prims();
