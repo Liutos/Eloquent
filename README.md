@@ -4,6 +4,12 @@
 
 Eloquent is a reference implementation of 233-Lisp, which is a personal dialect of Lisp.
 
+# Use As Script
+
+Write your code and save them into a file, assume the file name is script.scm, you can load this file as following
+
+    ./test_repl -l script.scm
+
 # Building
 
 ## Build The Compiler Test

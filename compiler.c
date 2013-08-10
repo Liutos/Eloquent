@@ -346,15 +346,23 @@ int is_primitive_fun(lt *variable) {
       isprimitive(symbol_value(variable));
 }
 
-void add_local_var(lt *var, lt *env) {
+int add_local_var(lt *var, lt *env) {
   if (env == null_env)
-    return;
+    return FALSE;
   assert(ispair(pair_head(env)) || isnull(pair_head(env)));
   if (ispair(pair_head(env))) {
+    lt *tmp = pair_head(env);
+    while (ispair(tmp)) {
+      if (pair_head(tmp) == var)
+        return FALSE;
+      tmp = pair_tail(tmp);
+    }
     lt *c = list1(var);
     pair_head(env) = seq(pair_head(env), c);
+    return TRUE;
   } else {
     pair_head(env) = list1(var);
+    return TRUE;
   }
 }
 
@@ -390,8 +398,11 @@ pub lisp_object_t *compile_object(lisp_object_t *object, lisp_object_t *env) {
   if (is_tag_list(object, S("catch")))
     return gen(CATCH);
   if (is_tag_list(object, S("declare"))) {
-    add_local_var(second(object), env);
-    return gen(DECL, second(object));
+    int result = add_local_var(second(object), env);
+    if (result)
+      return gen(DECL, second(object));
+    else
+      return make_empty_list();
   }
   if (ispair(object)) {
     lisp_object_t *args = pair_tail(object);
