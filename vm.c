@@ -89,8 +89,10 @@ pub lisp_object_t *run_by_llam(lisp_object_t *code_vector) {
       case ARGS: {
 //        Check the number of arguments passed
         lt *argc = op_args_arity(ins);
-        if (fixnum_value(argc) != nargs)
-          return signal_exception("The number of arguments passed is wrong");
+        if (fixnum_value(argc) > nargs)
+          return signal_exception("Too few arguments passed");
+        else if (fixnum_value(argc) < nargs)
+          return signal_exception("Too many arguments passed");
 
         lisp_object_t *args = make_vector(fixnum_value(op_args_arity(ins)));
         for (int i = fixnum_value(op_args_arity(ins)) - 1; i >= 0; i--) {
@@ -104,6 +106,9 @@ pub lisp_object_t *run_by_llam(lisp_object_t *code_vector) {
       }
         break;
       case ARGSD: {
+        int req = fixnum_value(op_argsd_arity(ins));
+        if (nargs < req)
+          return signal_exception("Too few arguments passed");
 //        Assume the arity of subprogram is N, then the last nargs - N elements
 //        belongs to the last parameter of this subprogram. Therefore, collects
 //        this nargs - N elements into a list as one argument, and collects
