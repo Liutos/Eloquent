@@ -1206,10 +1206,18 @@ void init_prims(void) {
     symbol_value(S(Lisp_name)) = func;                                  \
   } while (0)
 
+#define SIG(Lisp_name, ...) \
+  do { \
+    lt *func = symbol_value(S(Lisp_name)); \
+    primitive_signature(func) = raw_list(__VA_ARGS__, NULL); \
+  } while (0)
+
+#define OR(...) make_pair(S("or"), raw_list(__VA_ARGS__, NULL))
+
   lisp_object_t *func;
   /* Arithmetic operations */
   ADD(2, FALSE, lt_add, "+");
-  primitive_signature(symbol_value(S("+"))) = read_object_from_string("((or FIXNUM FLONUM) (or FIXNUM FLONUM))");
+  SIG("+", OR(S("FIXNUM"), S("FLONUM")), OR(S("FIXNUM"), S("FIXNUM")));
   ADD(2, FALSE, lt_div, "/");
   ADD(2, FALSE, lt_gt, ">");
   ADD(2, FALSE, lt_mod, "mod");

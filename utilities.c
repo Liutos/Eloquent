@@ -54,6 +54,19 @@ lt *list3(lt *e1, lt *e2, lt *e3) {
   return make_pair(e1, list2(e2, e3));
 }
 
+lt *raw_list(lt *e0, ...) {
+  lt *lt_list_nreverse(lt *);
+  va_list ap;
+  va_start(ap, e0);
+  e0 = list1(e0);
+  lt *next = va_arg(ap, lt *);
+  while (next != NULL) {
+    e0 = make_pair(next, e0);
+    next = va_arg(ap, lt *);
+  }
+  return lt_list_nreverse(e0);
+}
+
 lt *append2(lt *l1, lt *l2) {
   if (isnull(l1))
     return l2;
