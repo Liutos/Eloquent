@@ -28,7 +28,7 @@ lt *the_undef;
 
 #define DEFTYPE(tag, name) {.type=tag, .u={.type={tag, name}}}
 
-struct lisp_object_t lt_types[] = {
+struct lisp_object_t lt_types[VECTOR + 1] = {
     DEFTYPE(BOOL, "bool"),
     DEFTYPE(CHARACTER, "character"),
     DEFTYPE(EMPTY_LIST, "empty-list"),

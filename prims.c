@@ -295,6 +295,11 @@ void write_object(lt *x, lt *output_file) {
     case TUNDEF:
       write_raw_string("#<UNDEF>", output_file);
       break;
+    case TYPE:
+      write_raw_string("#<TYPE ", output_file);
+      write_raw_string(type_name(x), output_file);
+      write_raw_char('>', output_file);
+      break;
     case VECTOR: {
       lisp_object_t **vector = vector_value(x);
       write_raw_string("[", output_file);

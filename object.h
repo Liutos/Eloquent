@@ -25,6 +25,8 @@ lisp_object_t *standard_out;
 lisp_object_t *symbol_list;
 lisp_object_t *the_undef;
 
+struct lisp_object_t lt_types[VECTOR + 1];
+
 extern void *checked_malloc(size_t);
 
 extern int is_pointer(lt *);
