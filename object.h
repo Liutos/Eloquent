@@ -73,6 +73,7 @@ extern lt *make_retaddr(lt *code, lt *env, int pc, int throw_flag, int sp);
 extern string_builder_t *make_str_builder(void);
 extern lt *make_string(char *);
 extern lt *make_symbol(char *);
+extern lt *make_type(enum TYPE, char *);
 extern lt *make_vector(int);
 extern lt *make_op_args(lt *);
 extern lt *make_op_argsd(lt *);

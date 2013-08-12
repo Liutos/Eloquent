@@ -26,6 +26,32 @@ lt *the_false;
 lt *the_true;
 lt *the_undef;
 
+#define DEFTYPE(tag, name) {.type=tag, .u={.type={tag, name}}}
+
+struct lisp_object_t lt_types[] = {
+    DEFTYPE(BOOL, "bool"),
+    DEFTYPE(CHARACTER, "character"),
+    DEFTYPE(EMPTY_LIST, "empty-list"),
+    DEFTYPE(FIXNUM, "fixnum"),
+    DEFTYPE(TCLOSE, "tclose"),
+    DEFTYPE(TEOF, "teof"),
+    DEFTYPE(TUNDEF, "tundef"),
+    DEFTYPE(EXCEPTION, "exception"),
+    DEFTYPE(FUNCTION, "function"),
+    DEFTYPE(FLOAT, "float"),
+    DEFTYPE(INPUT_FILE, "input-file"),
+    DEFTYPE(MACRO, "macro"),
+    DEFTYPE(OPCODE, "opcode"),
+    DEFTYPE(OUTPUT_FILE, "output-file"),
+    DEFTYPE(PAIR, "pair"),
+    DEFTYPE(PRIMITIVE_FUNCTION, "primitive-function"),
+    DEFTYPE(RETADDR, "retaddr"),
+    DEFTYPE(STRING, "string"),
+    DEFTYPE(SYMBOL, "symbol"),
+    DEFTYPE(TYPE, "type"),
+    DEFTYPE(VECTOR, "vector"),
+};
+
 #define OBJECT_INIT_COUNT 2000
 
 /* Type predicate */
@@ -320,6 +346,13 @@ lisp_object_t *make_symbol(char *name) {
   symbol->u.symbol.name = name;
   symbol_value(symbol) = the_undef;
   return symbol;
+}
+
+lt *make_type(enum TYPE type, char *name) {
+  lt *t = make_object(TYPE);
+  type_tag(t) = type;
+  type_name(t) = name;
+  return t;
 }
 
 lisp_object_t *make_vector(int length) {
