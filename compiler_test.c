@@ -22,6 +22,7 @@ int main(int argc, char *argv[])
       "(if 1 2 3 4)",
       "(set! 1 2)",
       "(set! a 2 3)",
+      "((lambda (a + b) (+ a b)) 1 2 3)",
   };
   init_global_variable();
   init_prims();

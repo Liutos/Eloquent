@@ -345,7 +345,9 @@ lisp_object_t *gen_var(lisp_object_t *symbol, lisp_object_t *env) {
   }
 }
 
-int is_primitive_fun_name(lt *variable) {
+int is_primitive_fun_name(lt *variable, lt *env) {
+  if (issymbol(variable) && is_var_in_env(variable, env))
+    return FALSE;
   return issymbol(variable) &&
       is_symbol_bound(variable) &&
       isprimitive(symbol_value(variable));
@@ -437,7 +439,7 @@ pub lisp_object_t *compile_object(lisp_object_t *object, lisp_object_t *env) {
     lisp_object_t *args = pair_tail(object);
     lisp_object_t *fn = pair_head(object);
     /* Generating different instruction when calling primitive and anything else */
-    if (is_primitive_fun_name(fn)) {
+    if (is_primitive_fun_name(fn, env)) {
       lt *nargs = lt_list_length(args);
       args = compile_args(args, env);
       if (is_signaled(args))
