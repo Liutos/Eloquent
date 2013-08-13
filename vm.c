@@ -70,7 +70,7 @@ void set_local_var(lisp_object_t *env, int i, int j, lisp_object_t *value) {
 int is_type_satisfy(lt *arg, lt *pred) {
   if (pred == S("object"))
     return TRUE;
-  else if (issymbol(pred))
+  else if (istype(pred))
     return !isfalse(lt_is_kind_of(arg, pred));
   else if (is_tag_list(pred, S("or"))) {
     lt *types = pair_tail(pred);

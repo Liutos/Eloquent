@@ -950,8 +950,8 @@ lisp_object_t *lt_type_of(lisp_object_t *object) {
   return &lt_types[type_of(object)];
 }
 
-lt *lt_is_kind_of(lt *object, lt *type_name) {
-  return lt_eq(lt_type_of(object), type_name);
+lt *lt_is_kind_of(lt *object, lt *type) {
+  return lt_eq(lt_type_of(object), type);
 }
 
 /* Reader */
@@ -1216,10 +1216,12 @@ void init_prims(void) {
 
 #define OR(...) make_pair(S("or"), raw_list(__VA_ARGS__, NULL))
 
+#define T(tag) (&lt_types[tag])
+
   lisp_object_t *func;
   /* Arithmetic operations */
   ADD(2, FALSE, lt_add, "+");
-  SIG("+", OR(S("FIXNUM"), S("FLONUM")), OR(S("FIXNUM"), S("FIXNUM")));
+  SIG("+", OR(T(FIXNUM), T(FLOAT)), OR(T(FIXNUM), T(FIXNUM)));
   ADD(2, FALSE, lt_div, "/");
   ADD(2, FALSE, lt_gt, ">");
   ADD(2, FALSE, lt_mod, "mod");

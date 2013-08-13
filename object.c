@@ -87,6 +87,7 @@ mktype_pred(ispair, PAIR)
 mktype_pred(isprimitive, PRIMITIVE_FUNCTION)
 mktype_pred(isstring, STRING)
 mktype_pred(issymbol, SYMBOL)
+mktype_pred(istype, TYPE)
 mktype_pred(isvector, VECTOR)
 
 int is_immediate(lt *object) {

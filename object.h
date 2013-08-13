@@ -41,6 +41,7 @@ extern int ispair(lt *);
 extern int isprimitive(lt *);
 extern int isstring(lt *);
 extern int issymbol(lt *);
+extern int istype(lt *);
 extern int isvector(lt *);
 extern int ischar(lt *);
 extern int isfixnum(lt *);
