@@ -41,14 +41,16 @@ int main(int argc, char *argv[]) {
     write_raw_string(">> ", standard_out);
     lt *expr = read_object(standard_in);
     expr = compile_to_bytecode(expr);
-    expr = run_by_llam(expr);
+    if (!is_signaled(expr))
+      expr = run_by_llam(expr);
     if (iseof(expr)) {
       write_raw_string("Goodbye!\n", standard_out);
       break;
     }
-    write_raw_string("=> ", standard_out);
-    write_object(expr, standard_out);
-    write_raw_char('\n', standard_out);
+    if (is_signaled(expr))
+      writef(standard_out, "%?\n", expr);
+    else
+      writef(standard_out, "=> %?\n", expr);
   }
   return 0;
 }

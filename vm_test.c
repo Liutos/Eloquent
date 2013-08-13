@@ -15,9 +15,7 @@
 int main(int argc, char *argv[])
 {
   char *inputs[] = {
-      "(+ 1 #\\a)",
-      "(+ 1 1)",
-      "(+ #\\a 1)",
+      "(quote 1 2)",
   };
   init_global_variable();
   init_prims();
@@ -27,7 +25,8 @@ int main(int argc, char *argv[])
     writef(standard_out, ">> %s\n", make_string(inputs[i]));
     lisp_object_t *expr = read_object_from_string(inputs[i]);
     expr = compile_to_bytecode(expr);
-    expr = run_by_llam(expr);
+    if (!is_signaled(expr))
+      expr = run_by_llam(expr);
     if (is_signaled(expr))
       writef(standard_out, "%?\n", expr);
     else

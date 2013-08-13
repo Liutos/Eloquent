@@ -212,9 +212,13 @@ int islength1(lisp_object_t *list) {
 lisp_object_t *compile_args(lisp_object_t *args, lisp_object_t *env) {
   if (isnull(args))
     return the_empty_list;
-  else
-    return append2(compile_object(pair_head(args), env),
-                      compile_args(pair_tail(args), env));
+  else {
+    lt *arg = compile_object(pair_head(args), env);
+    if (is_signaled(arg))
+      return arg;
+    else
+      return append2(arg, compile_args(pair_tail(args), env));
+  }
 }
 
 lisp_object_t *compile_begin(lisp_object_t *exps, lisp_object_t *env) {
@@ -389,8 +393,11 @@ pub lisp_object_t *compile_object(lisp_object_t *object, lisp_object_t *env) {
     return gen(CONST, object);
   if (is_macro_form(object))
     return compile_object(lt_expand_macro(object), env);
-  if (is_tag_list(object, S("quote")))
+  if (is_tag_list(object, S("quote"))) {
+    if (pair_length(object) != 2)
+      return signal_exception("There must and be only one argument of a quote form");
     return gen(CONST, second(object));
+  }
   if (is_tag_list(object, S("begin")))
     return compile_begin(pair_tail(object), env);
   if (is_tag_list(object, S("set!"))) {
@@ -425,7 +432,10 @@ pub lisp_object_t *compile_object(lisp_object_t *object, lisp_object_t *env) {
     /* Generating different instruction when calling primitive and anything else */
     if (is_primitive_fun_name(fn)) {
       lt *nargs = lt_list_length(args);
-      return seq(compile_args(args, env),
+      args = compile_args(args, env);
+      if (is_signaled(args))
+        return args;
+      return seq(args,
                  compile_type_check(symbol_value(fn), nargs),
                  compile_object(fn, env),
                  gen(PRIM, nargs),
@@ -441,5 +451,9 @@ pub lisp_object_t *compile_object(lisp_object_t *object, lisp_object_t *env) {
 }
 
 lt *compile_to_bytecode(lt *form) {
-  return assemble(compile_object(form, null_env));
+  lt *x = compile_object(form, null_env);
+  if (is_signaled(x))
+    return x;
+  else
+    return assemble(x);
 }
