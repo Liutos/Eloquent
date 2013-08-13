@@ -913,6 +913,16 @@ lt *lt_equal(lt *x, lt *y) {
   return the_false;
 }
 
+lt *lt_find_type(lt *name) {
+  assert(issymbol(name));
+  for (int i = 0; i < sizeof(lt_types) / sizeof(struct lisp_object_t); i++) {
+    if (strcmp(lt_types[i].u.type.name, symbol_name(name)) == 0)
+      return &lt_types[i];
+  }
+  fprintf(stderr, "Unknown type name %s\n", symbol_name(name));
+  exit(1);
+}
+
 lt *lt_is_constant(lt *object) {
   if (is_tag_list(object, S("quote")))
     return make_true();
@@ -1275,6 +1285,9 @@ void init_prims(void) {
   ADD(1, FALSE, lt_is_fbound, "fbound?");
   ADD(1, FALSE, lt_symbol_name, "symbol-name");
   ADD(1, FALSE, lt_symbol_value, "symbol-value");
+  /* Type */
+  ADD(1, FALSE, lt_find_type, "find-type");
+  SIG("find-type", T(SYMBOL));
   /* Vector */
   ADD(1, FALSE, lt_list_to_vector, "list->vector");
   ADD(1, FALSE, lt_vector_pop, "vector-pop");
