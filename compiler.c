@@ -401,11 +401,18 @@ pub lisp_object_t *compile_object(lisp_object_t *object, lisp_object_t *env) {
   if (is_tag_list(object, S("begin")))
     return compile_begin(pair_tail(object), env);
   if (is_tag_list(object, S("set!"))) {
+    if (pair_length(object) != 3)
+      return signal_exception("There must and be only two arguments of a set! form");
+    if (!issymbol(second(object)))
+      return signal_exception("The variable as the first variable must be of type symbol");
     lisp_object_t *value = compile_object(third(object), env);
     lisp_object_t *set = gen_set(second(object), env);
     return seq(value, set);
   }
   if (is_tag_list(object, S("if"))) {
+    int len = pair_length(object);
+    if (!(3 <= len && len <= 4))
+      return signal_exception("The number of arguments of a if form must between 3 and 4");
     lisp_object_t *pred = second(object);
     lisp_object_t *then = third(object);
     lisp_object_t *else_part = fourth(object);

@@ -16,6 +16,13 @@ int main(int argc, char *argv[])
 {
   char *inputs[] = {
       "(quote 1 2)",
+      "(type-of (quote 1 2))",
+      "(if)",
+      "(if 1)",
+      "(if 1 2)",
+      "(if 1 2 3 4)",
+      "(set! 1 2)",
+      "(set! a 2 3)",
   };
   init_global_variable();
   init_prims();
