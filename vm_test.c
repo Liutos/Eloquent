@@ -15,7 +15,7 @@
 int main(int argc, char *argv[])
 {
   char *inputs[] = {
-      "(+ 1 1)",
+      "(type-of 1)",
   };
   init_global_variable();
   init_prims();

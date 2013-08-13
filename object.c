@@ -26,7 +26,7 @@ lt *the_false;
 lt *the_true;
 lt *the_undef;
 
-#define DEFTYPE(tag, name) {.type=tag, .u={.type={tag, name}}}
+#define DEFTYPE(tag, name) {.type=TYPE, .u={.type={tag, name}}}
 
 struct lisp_object_t lt_types[VECTOR + 1] = {
     DEFTYPE(BOOL, "bool"),

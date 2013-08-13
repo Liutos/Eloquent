@@ -168,39 +168,35 @@ void write_opcode(lt *opcode, lt *dest) {
 }
 
 void write_compiled_function(lt *function, int indent, lt *dest) {
-  lt *lt_type_of(lt *);
-	writef(dest, "#<COMPILED-FUNCTION %p\n", function);
-	if (!isvector(function_code(function))) {
-	  writef(standard_out, "type_of(function_code(function)) is %S\n", lt_type_of(function_code(function)));
-	  assert(isvector(function_code(function)));
-	}
-	for (int i = 0; i < vector_length(function_code(function)); i++) {
-		lt *ins = vector_value(function_code(function))[i];
-		write_n_spaces(indent, dest);
-		if (is_label(ins)) {
-			writef(dest, "%S:", ins);
-			int rest_width = 8 - (strlen(symbol_name(ins)) + 2);
-			write_n_spaces(rest_width, dest);
-			continue;
-		} else
-			write_raw_string("    ", dest);
-		write_raw_string(opcode_op(ins), dest);
-		int rest_width = 8 - strlen(opcode_op(ins));
-		write_n_spaces(rest_width, dest);
-		if (opcode_name(ins) == FN) {
-			write_compiled_function(op_fn_func(ins), output_file_colnum(dest), dest);
-		} else {
-			for (int j = 0; j < vector_length(opcode_oprands(ins)); j++) {
-				write_object(vector_value(opcode_oprands(ins))[j], dest);
-				if (j != vector_length(opcode_oprands(ins)) - 1)
-					write_raw_char(' ', dest);
-			}
-		}
-		write_raw_char('\n', dest);
-	}
-	for (int j = 0; j < indent; j++)
-		write_raw_char(' ', dest);
-	write_raw_char('>', dest);
+  writef(dest, "#<COMPILED-FUNCTION %p\n", function);
+  assert(isvector(function_code(function)));
+  for (int i = 0; i < vector_length(function_code(function)); i++) {
+    lt *ins = vector_value(function_code(function))[i];
+    write_n_spaces(indent, dest);
+    if (is_label(ins)) {
+      writef(dest, "%S:", ins);
+      int rest_width = 8 - (strlen(symbol_name(ins)) + 2);
+      write_n_spaces(rest_width, dest);
+      continue;
+    } else
+      write_raw_string("    ", dest);
+    write_raw_string(opcode_op(ins), dest);
+    int rest_width = 8 - strlen(opcode_op(ins));
+    write_n_spaces(rest_width, dest);
+    if (opcode_name(ins) == FN) {
+      write_compiled_function(op_fn_func(ins), output_file_colnum(dest), dest);
+    } else {
+      for (int j = 0; j < vector_length(opcode_oprands(ins)); j++) {
+	write_object(vector_value(opcode_oprands(ins))[j], dest);
+	if (j != vector_length(opcode_oprands(ins)) - 1)
+	  write_raw_char(' ', dest);
+      }
+    }
+    write_raw_char('\n', dest);
+  }
+  for (int j = 0; j < indent; j++)
+    write_raw_char(' ', dest);
+  write_raw_char('>', dest);
 }
 
 void write_object(lt *x, lt *output_file) {
@@ -930,27 +926,28 @@ lt *lt_object_size(void) {
 }
 
 lisp_object_t *lt_type_of(lisp_object_t *object) {
-#define mktype(type) case type: return S(#type)
+/* #define mktype(type) case type: return S(#type) */
 
-  switch (type_of(object)) {
-    mktype(BOOL);
-    mktype(CHARACTER);
-    mktype(FIXNUM);
-    mktype(FLOAT);
-    mktype(FUNCTION);
-    mktype(INPUT_FILE);
-    mktype(MACRO);
-    mktype(OPCODE);
-    mktype(OUTPUT_FILE);
-    mktype(PAIR);
-    mktype(PRIMITIVE_FUNCTION);
-    mktype(STRING);
-    mktype(SYMBOL);
-    mktype(VECTOR);
-    default :
-      fprintf(stdout, "Unknown type %d of object\n", type_of(object));
-      exit(1);
-  }
+/*   switch (type_of(object)) { */
+/*     mktype(BOOL); */
+/*     mktype(CHARACTER); */
+/*     mktype(FIXNUM); */
+/*     mktype(FLOAT); */
+/*     mktype(FUNCTION); */
+/*     mktype(INPUT_FILE); */
+/*     mktype(MACRO); */
+/*     mktype(OPCODE); */
+/*     mktype(OUTPUT_FILE); */
+/*     mktype(PAIR); */
+/*     mktype(PRIMITIVE_FUNCTION); */
+/*     mktype(STRING); */
+/*     mktype(SYMBOL); */
+/*     mktype(VECTOR); */
+/*     default : */
+/*       fprintf(stdout, "Unknown type %d of object\n", type_of(object)); */
+/*       exit(1); */
+/*   } */
+  return &lt_types[type_of(object)];
 }
 
 lt *lt_is_kind_of(lt *object, lt *type_name) {
