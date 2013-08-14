@@ -15,7 +15,8 @@
 int main(int argc, char *argv[])
 {
   char *inputs[] = {
-      "(+ 1)",
+      "a",
+      "(+ 1 a)",
   };
   init_global_variable();
   init_prims();

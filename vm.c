@@ -235,10 +235,11 @@ pub lisp_object_t *run_by_llam(lisp_object_t *code_vector) {
       case GVAR: {
         lisp_object_t *sym = op_gvar_var(ins);
         if (symbol_value(sym) == the_undef) {
-          fprintf(stdout, "Undefined global variable: %s\n", symbol_name(sym));
-          exit(1);
-        }
-        lt_vector_push(stack, symbol_value(sym));
+          char msg[256];
+          sprintf(msg, "Undefined global variable %s", symbol_name(sym));
+          lt_vector_push(stack, signal_exception(strdup(msg)));
+        } else
+          lt_vector_push(stack, symbol_value(sym));
       }
         break;
       case JUMP: pc = fixnum_value(op_jump_label(ins)) - 1; break;
