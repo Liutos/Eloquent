@@ -398,6 +398,10 @@ int is_argc_satisfy(int argc, lt *prim_name) {
     return argc == arity;
 }
 
+lt *compiler_error(char *message) {
+  return make_exception(message, TRUE, S("COMPILER-ERROR"));
+}
+
 /* TODO: The support for tail call optimization. */
 pub lisp_object_t *compile_object(lisp_object_t *object, lisp_object_t *env) {
   if (issymbol(object))
@@ -408,16 +412,16 @@ pub lisp_object_t *compile_object(lisp_object_t *object, lisp_object_t *env) {
     return compile_object(lt_expand_macro(object), env);
   if (is_tag_list(object, S("quote"))) {
     if (pair_length(object) != 2)
-      return signal_exception("There must and be only one argument of a quote form");
+      return compiler_error("There must and be only one argument of a quote form");
     return gen(CONST, second(object));
   }
   if (is_tag_list(object, S("begin")))
     return compile_begin(pair_tail(object), env);
   if (is_tag_list(object, S("set!"))) {
     if (pair_length(object) != 3)
-      return signal_exception("There must and be only two arguments of a set! form");
+      return compiler_error("There must and be only two arguments of a set! form");
     if (!issymbol(second(object)))
-      return signal_exception("The variable as the first variable must be of type symbol");
+      return compiler_error("The variable as the first variable must be of type symbol");
     lisp_object_t *value = compile_object(third(object), env);
     lisp_object_t *set = gen_set(second(object), env);
     return seq(value, set);
@@ -425,7 +429,7 @@ pub lisp_object_t *compile_object(lisp_object_t *object, lisp_object_t *env) {
   if (is_tag_list(object, S("if"))) {
     int len = pair_length(object);
     if (!(3 <= len && len <= 4))
-      return signal_exception("The number of arguments of a if form must between 3 and 4");
+      return compiler_error("The number of arguments of a if form must between 3 and 4");
     lisp_object_t *pred = second(object);
     lisp_object_t *then = third(object);
     lisp_object_t *else_part = fourth(object);
@@ -453,7 +457,7 @@ pub lisp_object_t *compile_object(lisp_object_t *object, lisp_object_t *env) {
     if (is_primitive_fun_name(fn, env)) {
       lt *nargs = lt_list_length(args);
       if (!is_argc_satisfy(fixnum_value(nargs), fn))
-        return signal_exception("The number of arguments passed to primitive function is wrong");
+        return compiler_error("The number of arguments passed to primitive function is wrong");
       args = compile_args(args, env);
       if (is_signaled(args))
         return args;

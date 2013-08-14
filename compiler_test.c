@@ -15,6 +15,8 @@ int main(int argc, char *argv[])
 {
   char *inputs[] = {
       "(+ 1)",
+      "(quote 1 2)",
+      "(if 1)",
   };
   init_global_variable();
   init_prims();
