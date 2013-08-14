@@ -1,44 +1,44 @@
 # Eloquent
 
-# Introduction
+# 简介
 
-Eloquent is a reference implementation of 233-Lisp, which is a personal dialect of Lisp.
+Eloquent 是一个233-Lisp的参考实现，后者是一门个人Lisp方言。
 
-# Use As Script
+# 作为脚本使用
 
-Write your code and save them into a file, assume the file name is script.scm, you can load this file as following
+将你所写的代码保存到文件中，假设这个文件名为script.scm，那么可以像下面这样加载这个文件
 
     ./test_repl -l script.scm
 
-# Building
+# 构建
 
-## Build The Compiler Test
+## 构建编译器测试
 
     make test_compiler
 
-## Build The Virtual Machine Test
+## 构建虚拟机测试
 
     make test_vm
 
-## Build The REPL
+## 构建REPL
 
     make test_repl
 
-# Add A New Primitive Function
+# 添加一个新的原语函数
 
-## First: Define The New Function
+## 第一步：定义这个新函数
 
-Define the new primitive function in file prims.c, and put its declaration into the header file prims.h. The data type of the formal parameters and return value of this new function must be struct lisp\_object\_t *, which also named lt * by typedef.
+在文件 prims.c 中定义这个新的原语函数，然后将它的原型声明放到文件 prims.h 中。这个新函数的形参和返回值的类型都必须是 struct lisp\_object\_t *，也可以使用被 typedef 过的类型名 lt *。
 
-## Second: Install The New Function
+## 第二步：安装这个新函数
 
-Register this new function into the implementation's global environment. In the body of function init\_prims, use the predefined macro ADD for installing. Macro ADD has four parameters, their meaning list as follow:
+在语言实现的全局环境中注册这个新的函数。在函数 init\_prims 的函数体部分，用预定义好的宏 ADD 进行安装。宏 ADD 有四个参数，它们各自的含义分别如下：
 
-1. arity. It's the total number of parameters of a primitive function. The rest parameter, for example, the parameter y in form (x . y) is also counted. Therefor, parameters list (x . y) means arity of 2.
-2. restp. A flag indicates whether the function accepts variable number of parameters or not.
-3. function_name. The name of the function been defined.
-4. Lisp_name. It's a C string, used to be the function name in the Lisp code.
+1. arity。是指一个原语函数的参数的总数。对于rest参数，例如参数列表 (x . y) 中的 y 也被计算在内。因此，参数列表 (x . y) 意味着这个原语函数的参数个数为2。
+2. restp。这是一个表示一个函数是否能够接收任意多个参数的标记。
+3. function_name。原语函数的名字
+4. Lisp_name。这是一个 C 语言中的字符串，用来作为该函数在 Lisp 代码中的函数名。
 
-## Third: It's OK Now!
+## 第三步：现在一切就绪！
 
-The new primitive function is invokable in the Lisp code level.
+这个新的原语函数可以在 Lisp 代码中被调用了。
