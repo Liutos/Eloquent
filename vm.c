@@ -88,6 +88,15 @@ int is_type_satisfy(lt *arg, lt *pred) {
   }
 }
 
+lt *type_error(lt *index, lt *pred) {
+  char msg[256];
+  FILE *buf = fmemopen(msg, sizeof(msg), "w");
+  lt *file = make_output_file(buf);
+  writef(file, "The argument at index %d is not satisfy with predicate %?", index, pred);
+  lt_close_out(file);
+  return make_exception(strdup(msg), TRUE, S("TYPE-ERROR"));
+}
+
 /* TODO: Exception signaling and handling. */
 pub lisp_object_t *run_by_llam(lisp_object_t *code_vector) {
 #define _arg(N) vlast(stack, primitive_arity(func) - N)
@@ -203,9 +212,10 @@ pub lisp_object_t *run_by_llam(lisp_object_t *code_vector) {
         lt *nargs = op_chktype_nargs(ins);
         lt *arg = vlast(stack, fixnum_value(nargs) - fixnum_value(index) - 1);
         if (is_type_satisfy(arg, pred) == FALSE) {
-          char msg[256];
-          sprintf(msg, "Argument at index %d is not of target type", fixnum_value(index));
-          return signal_exception(strdup(msg));
+//          char msg[256];
+//          sprintf(msg, "Argument at index %d is not of target type", fixnum_value(index));
+//          return signal_exception(strdup(msg));
+          return type_error(index, pred);
         }
       }
         break;
