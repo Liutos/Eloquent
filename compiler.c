@@ -387,6 +387,17 @@ lt *compile_type_check(lt *prim, lt *nargs) {
   return seq;
 }
 
+int is_argc_satisfy(int argc, lt *prim_name) {
+  lt *fn = symbol_value(prim_name);
+  assert(isprimitive(fn));
+  int arity = primitive_arity(fn);
+  if (primitive_restp(fn)) {
+    arity--;
+    return argc >= arity;
+  } else
+    return argc == arity;
+}
+
 /* TODO: The support for tail call optimization. */
 pub lisp_object_t *compile_object(lisp_object_t *object, lisp_object_t *env) {
   if (issymbol(object))
@@ -441,6 +452,8 @@ pub lisp_object_t *compile_object(lisp_object_t *object, lisp_object_t *env) {
     /* Generating different instruction when calling primitive and anything else */
     if (is_primitive_fun_name(fn, env)) {
       lt *nargs = lt_list_length(args);
+      if (!is_argc_satisfy(fixnum_value(nargs), fn))
+        return signal_exception("The number of arguments passed to primitive function is wrong");
       args = compile_args(args, env);
       if (is_signaled(args))
         return args;
