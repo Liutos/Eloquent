@@ -15,8 +15,7 @@
 int main(int argc, char *argv[])
 {
   char *inputs[] = {
-      "a",
-      "(+ 1 a)",
+      "#\\sparc",
   };
   init_global_variable();
   init_prims();

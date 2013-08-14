@@ -85,6 +85,7 @@ struct lisp_object_t {
     struct {
       int signal_flag;
       char *message;
+      lt *exception_tag;
     } exception;
     struct {
       float value;
@@ -162,6 +163,7 @@ struct string_builder_t {
 /* Accessor macros */
 #define exception_msg(x) ((x)->u.exception.message)
 #define exception_flag(x) ((x)->u.exception.signal_flag)
+#define exception_tag(x) ((x)->u.exception.exception_tag)
 #define float_value(x) ((x)->u.float_num.value)
 #define function_args(x) ((x)->u.function.args)
 #define function_env(x) ((x)->u.function.env)

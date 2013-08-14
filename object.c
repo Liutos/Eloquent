@@ -255,10 +255,11 @@ lt *make_fixnum(int value) {
   return (lt *)((value << FIXNUM_BITS) | FIXNUM_TAG);
 }
 
-lt *make_exception(char *message, int signal_flag) {
+lt *make_exception(char *message, int signal_flag, lt *tag) {
   lt *ex = make_object(EXCEPTION);
   exception_msg(ex) = message;
   exception_flag(ex) = signal_flag;
+  exception_tag(ex) = tag;
   return ex;
 }
 

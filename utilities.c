@@ -102,7 +102,7 @@ lisp_object_t *reader_error(char *format, ...) {
   va_list ap;
   va_start(ap, format);
   vsprintf(msg, format, ap);
-  return make_exception(strdup(msg), TRUE);
+  return make_exception(strdup(msg), TRUE, S("READER-ERROR"));
 }
 
 char *sb2string(string_builder_t *sb) {
@@ -120,7 +120,7 @@ void sb_add_char(string_builder_t *sb, char c) {
 }
 
 lt *signal_exception(char *message) {
-  return make_exception(message, TRUE);
+  return make_exception(message, TRUE, S("ERROR"));
 }
 
 lt *signal_typerr(char *type_name) {

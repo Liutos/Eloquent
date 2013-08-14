@@ -231,7 +231,8 @@ void write_object(lt *x, lt *output_file) {
     	write_raw_string("()", output_file);
     	break;
     case EXCEPTION:
-      write_raw_string("ERROR: ", output_file);
+      writef(output_file, "%S: ", exception_tag(x));
+//      write_raw_string("ERROR: ", output_file);
       write_raw_string(exception_msg(x), output_file);
       break;
     case FIXNUM:
