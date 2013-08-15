@@ -15,7 +15,9 @@
 int main(int argc, char *argv[])
 {
   char *inputs[] = {
-      "(1 2 3)",
+      "(null? 1)",
+      "(null? '())",
+      "(null? [])",
   };
   init_global_variable();
   init_prims();

@@ -728,7 +728,7 @@ lisp_object_t *lt_is_vector_full(lisp_object_t *vector) {
 }
 
 lisp_object_t *lt_list_to_vector(lisp_object_t *list) {
-  assert(ispair(list));
+  assert(ispair(list) || isnull(list));
   int len = pair_length(list);
   lisp_object_t *vector = make_vector(len);
   for (int i = 0; i < len; i++) {
@@ -1229,6 +1229,8 @@ void init_prims(void) {
   /* Character */
   ADD(1, FALSE, lt_char_code, "char-code");
   ADD(1, FALSE, lt_code_char, "code-char");
+  /* Exception */
+  ADD(1, FALSE, get_exception_tag, "exception-tag");
   /* Function */
   ADD(1, FALSE, lt_eval, "eval");
   ADD(1, FALSE, lt_expand_macro, "expand-macro");
@@ -1287,9 +1289,9 @@ void init_prims(void) {
   ADD(1, FALSE, lt_vector_to_list, "vector->list");
   /* General */
   ADD(1, FALSE, lt_is_constant, "is-constant?");
-  ADD(2, FALSE, lt_eq, "eq");
-  ADD(2, FALSE, lt_eql, "eql");
-  ADD(2, FALSE, lt_equal, "equal");
+  ADD(2, FALSE, lt_eq, "eq?");
+  ADD(2, FALSE, lt_eql, "eql?");
+  ADD(2, FALSE, lt_equal, "equal?");
   ADD(2, FALSE, lt_is_kind_of, "of-type?");
   ADD(0, FALSE, lt_object_size, "object-size");
   ADD(1, FALSE, lt_type_of, "type-of");

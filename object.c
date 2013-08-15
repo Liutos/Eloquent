@@ -52,7 +52,7 @@ struct lisp_object_t lt_types[VECTOR + 1] = {
     DEFTYPE(VECTOR, "vector"),
 };
 
-#define OBJECT_INIT_COUNT 2000
+#define OBJECT_INIT_COUNT 5000
 
 /* Type predicate */
 int ischar(lt *object) {
@@ -473,6 +473,10 @@ lisp_object_t *find_or_create_symbol(char *name) {
   lisp_object_t *sym = make_symbol(name);
   symbol_list = make_pair(sym, symbol_list);
   return sym;
+}
+
+lt *get_exception_tag(lt *exception) {
+  return exception_tag(exception);
 }
 
 void init_global_variable(void) {

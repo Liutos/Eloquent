@@ -12,6 +12,7 @@
 #include "type.h"
 #include "utilities.h"
 
+/* cond */
 lt *cond_pred(lt *clause) {
   return pair_head(clause);
 }
@@ -56,6 +57,7 @@ lt *lt_cond_macro(lt *clauses) {
   }
 }
 
+/* let */
 lt *lt_let_macro(lt *bindings, lt *body) {
   lt *pars= make_empty_list();
   lt *args= make_empty_list();
@@ -71,16 +73,19 @@ lt *lt_let_macro(lt *bindings, lt *body) {
   return make_pair(lambda, args);
 }
 
+/* var */
 lt *lt_var_macro(lt *var, lt *val) {
   lt *decl = list2(S("declare"), var);
   lt *setf = list3(S("set!"), var, val);
   return list3(S("begin"), decl, setf);
 }
 
+/* push */
 lt *lt_push_macro(lt *x, lt *list) {
   return list3(S("set!"), list, list3(S("cons"), x, list));
 }
 
+/* quasiquote */
 lt *quasiq(lt *x) {
   if (!ispair(x)) {
     if (!isfalse(lt_is_constant(x)))
