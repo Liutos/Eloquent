@@ -11,14 +11,12 @@
 #include <stdlib.h>
 #include <string.h>
 
+#include "compiler.h"
 #include "object.h"
+#include "prims.h"
 #include "type.h"
 #include "utilities.h"
-
-void write_object(lt *, lt *);
-lt *compile_to_bytecode(lt *);
-lt *read_object(lt *);
-lt *run_by_llam(lt *);
+#include "vm.h"
 
 /* Writer */
 void write_raw_char(char c, lt *dest_port) {
@@ -462,6 +460,16 @@ lt *lt_is_file_open(lt *file) {
     return booleanize(input_file_openp(file));
   else
     return booleanize(output_file_openp(file));
+}
+
+lt *lt_load_file(lt *file) {
+  assert(isinput_file(file));
+  lt *expr = read_object(file);
+  while (!iseof(expr)) {
+    lt_eval(expr);
+    expr = read_object(file);
+  }
+  return make_true();
 }
 
 lt *lt_open_in(lt *path) {
@@ -937,27 +945,6 @@ lt *lt_object_size(void) {
 }
 
 lisp_object_t *lt_type_of(lisp_object_t *object) {
-/* #define mktype(type) case type: return S(#type) */
-
-/*   switch (type_of(object)) { */
-/*     mktype(BOOL); */
-/*     mktype(CHARACTER); */
-/*     mktype(FIXNUM); */
-/*     mktype(FLOAT); */
-/*     mktype(FUNCTION); */
-/*     mktype(INPUT_FILE); */
-/*     mktype(MACRO); */
-/*     mktype(OPCODE); */
-/*     mktype(OUTPUT_FILE); */
-/*     mktype(PAIR); */
-/*     mktype(PRIMITIVE_FUNCTION); */
-/*     mktype(STRING); */
-/*     mktype(SYMBOL); */
-/*     mktype(VECTOR); */
-/*     default : */
-/*       fprintf(stdout, "Unknown type %d of object\n", type_of(object)); */
-/*       exit(1); */
-/*   } */
   return &lt_types[type_of(object)];
 }
 
@@ -1246,11 +1233,11 @@ void init_prims(void) {
   ADD(1, FALSE, lt_eval, "eval");
   ADD(1, FALSE, lt_expand_macro, "expand-macro");
   ADD(1, FALSE, lt_function_arity, "function-arity");
-  ADD(1, FALSE, lt_load, "load");
   ADD(2, FALSE, lt_simple_apply, "simple-apply");
   /* Input File */
   ADD(1, FALSE, lt_close_in, "close-in");
   ADD(1, FALSE, lt_is_file_open, "file-open?");
+  ADD(1, FALSE, lt_load_file, "load-file");
   ADD(1, FALSE, lt_open_in, "open-in");
   ADD(1, FALSE, lt_read_char, "read-char");
   ADD(1, FALSE, lt_read_line, "read-line");
@@ -1309,6 +1296,12 @@ void init_prims(void) {
 }
 
 void load_init_file(void) {
-  lt *path = make_string("init.scm");
-  lt_load(path);
+  const char *init_file = "init.scm";
+  FILE *fp = fopen(init_file, "r");
+  if (fp == NULL) {
+    fprintf(stderr, "INFO: No initialization file.\n");
+    return;
+  }
+  lt *file = make_input_file(fp);
+  lt_load_file(file);
 }
