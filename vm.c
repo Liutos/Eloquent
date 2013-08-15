@@ -174,7 +174,7 @@ pub lisp_object_t *run_by_llam(lisp_object_t *code_vector) {
         	goto call_primitive;
         }
         if (!isfunction(func))
-          return signal_exception("The object at the first place is not a function");        }
+          return signal_exception("The object at the first place is not a function");
         lisp_object_t *retaddr =
             make_retaddr(code, env, pc, throw_exception, vector_last(stack));
         return_stack = make_pair(retaddr, return_stack);
