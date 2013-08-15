@@ -33,6 +33,8 @@ extern F1(lt_char_code);
 extern F1(lt_code_char);
 extern F1(lt_read_char);
 extern F1(lt_read_line);
+/* Output File */
+extern F1(lt_close_out);
 /* List */
 extern F1(lt_head);
 extern F1(lt_list_length);
