@@ -448,7 +448,7 @@ pub lisp_object_t *compile_object(lisp_object_t *object, lisp_object_t *env) {
     if (result)
       return gen(DECL, second(object));
     else
-      return make_empty_list();
+      return gen(CONST, make_empty_list());
   }
   if (ispair(object)) {
     lisp_object_t *args = pair_tail(object);
