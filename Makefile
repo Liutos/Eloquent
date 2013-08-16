@@ -34,14 +34,17 @@ vm_test.o: vm_test.c compiler.h macros.h object.h prims.h type.h vm.h
 # Test Executable
 test_compiler: compiler_test.o compiler.o macros.o object.o prims.o utilities.o vm.o
 	if [ ! -d bin ]; then mkdir bin; fi
+	cp init.scm bin/
 	$(CC) $(CFLAGS) $^ -o bin/$@
 
 test_repl: repl_test.o compiler.o macros.o object.o prims.o utilities.o vm.c
 	if [ ! -d bin ]; then mkdir bin; fi
+	cp init.scm bin/
 	$(CC) $(CFLAGS) $^ -o bin/$@
 
 test_vm: vm_test.o compiler.o macros.o object.o prims.o utilities.o vm.o
 	if [ ! -d bin ]; then mkdir bin; fi
+	cp init.scm bin/
 	$(CC) $(CFLAGS) $^ -o bin/$@
 
 .PHONY: clean dir
