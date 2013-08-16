@@ -18,6 +18,7 @@ extern int is_tag_list(lt *list, lt *tag);
 extern lt *list1(lt *);
 extern lt *list2(lt *, lt *);
 extern lt *list3(lt *, lt *, lt *);
+extern lt *list4(lt *, lt *, lt *, lt *e);
 extern lt *append2(lt *, lt *);
 extern lt *append_n(lt *, ...);
 extern lt *lt_raw_nth(lt *, int);

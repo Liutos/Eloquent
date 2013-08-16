@@ -118,6 +118,44 @@ lt *quasiq(lt *x) {
   exit(1);
 }
 
+/* try-catch */
+lt *handler_tag(lt *handler) {
+  return list2(S("quote"), pair_head(handler));
+}
+
+lt *handler_var(lt *handler) {
+  return pair_head(second(handler));
+}
+
+lt *handler_action(lt *handler) {
+  return lt_nthtail(handler, make_fixnum(2));
+}
+
+lt *make_single_let(lt *var, lt *val, lt *action) {
+  lt *bindings = list1(list2(var, val));
+  return make_pair(S("let"), make_pair(bindings, action));
+}
+
+lt *handler2if(lt *ex, lt *handlers) {
+  if (isnull(handlers))
+    return ex;
+  else {
+    lt *handler = pair_head(handlers);
+    lt *rest = pair_tail(handlers);
+    lt *pred = list3(S("eql?"), list2(S("exception-tag"), ex), handler_tag(handler));
+    lt *tp = make_single_let(handler_var(handler), ex, handler_action(handler));
+    return make_pair(S("if"), list3(pred, tp, handler2if(ex, rest)));
+  }
+}
+
+lt *try_catch_macro(lt *form, lt *handlers) {
+  lt *tmp = lt_gensym();
+  lt *handler_forms = handler2if(tmp, handlers);
+  lt *val = list3(S("var"), tmp, form);
+  lt *catch = list1(S("catch"));
+  return list4(S("begin"), catch, val, handler_forms);
+}
+
 void init_macros(void) {
   lt *func;
 #define DM(arity, restp, func_name, Lisp_name) \
@@ -128,6 +166,7 @@ void init_macros(void) {
 
   DM(1, TRUE, lt_cond_macro, "cond");
   DM(2, TRUE, lt_let_macro, "let");
+  DM(2, TRUE, try_catch_macro, "try-catch");
   DM(2, FALSE, lt_var_macro, "var");
   DM(2, FALSE, lt_push_macro, "push");
   DM(1, FALSE, quasiq, "quasiquote");

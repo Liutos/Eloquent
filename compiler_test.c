@@ -14,9 +14,7 @@
 int main(int argc, char *argv[])
 {
   char *inputs[] = {
-      "(+ 1)",
-      "(quote 1 2)",
-      "(if 1)",
+      "((lambda () (try-catch (/ 1 0) (ERROR (ex) -1))))",
   };
   init_global_variable();
   init_prims();

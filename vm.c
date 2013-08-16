@@ -193,6 +193,7 @@ pub lisp_object_t *run_by_llam(lisp_object_t *code_vector) {
         break;
       case CATCH:
         throw_exception = FALSE;
+        lt_vector_push(stack, make_empty_list());
         break;
       case CHECKEX:
         while (is_signaled(vlast(stack, 0)) && throw_exception) {

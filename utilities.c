@@ -54,6 +54,10 @@ lt *list3(lt *e1, lt *e2, lt *e3) {
   return make_pair(e1, list2(e2, e3));
 }
 
+lt *list4(lt *e1, lt *e2, lt *e3, lt *e4) {
+  return make_pair(e1, list3(e2, e3, e4));
+}
+
 lt *raw_list(lt *e0, ...) {
   lt *lt_list_nreverse(lt *);
   va_list ap;
