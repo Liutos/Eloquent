@@ -15,9 +15,7 @@
 int main(int argc, char *argv[])
 {
   char *inputs[] = {
-      "(null? 1)",
-      "(null? '())",
-      "(null? [])",
+      "(ify-clause 'key '(1 (+ 1 1)))",
   };
   init_global_variable();
   init_prims();

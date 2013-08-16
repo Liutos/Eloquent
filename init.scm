@@ -23,3 +23,14 @@
       '()
     (cons (fn (head seq))
           (map (tail seq) fn))))
+
+(define ify-clause (key clause)
+  `((eql? ,key ,(head clause)) ,@(tail clause)))
+
+(defmacro case (keyform . clauses)
+  (let ((key (gensym)))
+    `(let ((,key ,keyform))
+       (cond
+        ,@(map clauses
+               (lambda (clause)
+                 `((eql? ,key ,(head clause)) ,@(tail clause))))))))

@@ -173,8 +173,14 @@ pub lisp_object_t *run_by_llam(lisp_object_t *code_vector) {
         	lt_vector_push(stack, func);
         	goto call_primitive;
         }
-        if (!isfunction(func))
-          return signal_exception("The object at the first place is not a function");
+        if (!isfunction(func)) {
+          char msg[1000];
+          FILE *fp = fmemopen(msg, sizeof(msg), "w");
+          lt *file = make_output_file(fp);
+          writef(file, "The object %? at the first place is not a function", func);
+          lt_close_out(file);
+          return signal_exception(msg);
+        }
         lisp_object_t *retaddr =
             make_retaddr(code, env, pc, throw_exception, vector_last(stack));
         return_stack = make_pair(retaddr, return_stack);
