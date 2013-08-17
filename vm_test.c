@@ -15,7 +15,8 @@
 int main(int argc, char *argv[])
 {
   char *inputs[] = {
-      "(string->symbol \"abcdefghijklmnopqrstuvwxyz\")",
+      "(set! a 1)",
+      "(tagbody start (if (= a 0) 1 (begin (set! a (- a 1)) (goto start))))",
   };
   init_global_variable();
   init_prims();

@@ -402,6 +402,20 @@ lt *compiler_error(char *message) {
   return make_exception(message, TRUE, S("COMPILER-ERROR"));
 }
 
+lt *compile_tagbody(lt *forms, lt *env) {
+  if (isnull(forms))
+    return make_empty_list();
+  else {
+    lt *form = pair_head(forms);
+    if (issymbol(form))
+      return seq(list1(form), compile_tagbody(pair_tail(forms), env));
+    else {
+      lt *part1 = compile_object(form, env);
+      return seq(part1, compile_tagbody(pair_tail(forms), env));
+    }
+  }
+}
+
 /* TODO: The support for tail call optimization. */
 pub lisp_object_t *compile_object(lisp_object_t *object, lisp_object_t *env) {
   if (issymbol(object))
@@ -449,6 +463,11 @@ pub lisp_object_t *compile_object(lisp_object_t *object, lisp_object_t *env) {
       return gen(DECL, second(object));
     else
       return gen(CONST, make_empty_list());
+  }
+  if (is_tag_list(object, S("goto")))
+    return gen(JUMP, second(object));
+  if (is_tag_list(object, S("tagbody"))) {
+    return compile_tagbody(pair_tail(object), env);
   }
   if (ispair(object)) {
     lisp_object_t *args = pair_tail(object);
