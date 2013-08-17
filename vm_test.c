@@ -15,8 +15,7 @@
 int main(int argc, char *argv[])
 {
   char *inputs[] = {
-//      "(expand-macro '(try-catch (/ 1 0) (ERROR (ex) -1)))",
-      "((lambda () (try-catch (/ 1 0) (ERROR (ex) -1))))",
+      "(list 1 1 1)",
   };
   init_global_variable();
   init_prims();

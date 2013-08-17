@@ -10,6 +10,10 @@ Eloquent 是一个233-Lisp的参考实现，后者是一门个人Lisp方言。
 
     ./test_repl -l script.scm
 
+# 依赖
+
+* libgc-dev
+
 # 构建
 
 ## 构建编译器测试

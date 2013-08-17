@@ -19,15 +19,12 @@ lisp_object_t *the_true;
 lt *gensym_counter;
 lisp_object_t *null_env;
 lisp_object_t *the_empty_list;
-lt *object_pool;                        /* An array contains lt. */
 lisp_object_t *standard_in;
 lisp_object_t *standard_out;
 lisp_object_t *symbol_list;
 lisp_object_t *the_undef;
 
 struct lisp_object_t lt_types[VECTOR + 1];
-
-extern void *checked_malloc(size_t);
 
 extern int is_pointer(lt *);
 extern int isexception(lt *);

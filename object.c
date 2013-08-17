@@ -10,13 +10,13 @@
 #include <stdlib.h>
 #include <string.h>
 
+#include <gc/gc.h>
+
 #include "object.h"
 #include "type.h"
 
-lt *free_objects;
 lt *gensym_counter;
 lt *null_env;
-lt *object_pool;
 lt *standard_in;
 lt *standard_out;
 lt *symbol_list;
@@ -51,8 +51,6 @@ struct lisp_object_t lt_types[VECTOR + 1] = {
     DEFTYPE(TYPE, "type"),
     DEFTYPE(VECTOR, "vector"),
 };
-
-#define OBJECT_INIT_COUNT 5000
 
 /* Type predicate */
 int ischar(lt *object) {
@@ -145,85 +143,9 @@ int type_of(lisp_object_t *x) {
   return x->type;
 }
 
-void init_object_pool(void) {
-  static int flag = 0;
-  if (flag == 1) return;
-  flag = 1;
-  object_pool = calloc(OBJECT_INIT_COUNT, sizeof(lt));
-  for (int i = 0; i < OBJECT_INIT_COUNT - 1; i++)
-    object_pool[i].next = &object_pool[i + 1];
-  object_pool[OBJECT_INIT_COUNT - 1].next = NULL;
-  free_objects = &object_pool[0];
-}
-
-void mark_lt_object(lt *object) {
-	if (!is_pointer(object) || object == NULL)
-		return;
-	if (object->gc_mark_flag == TRUE)
-		return;
-	object->gc_mark_flag = TRUE;
-	switch (type_of(object)) {
-	case FUNCTION:
-		mark_lt_object(function_args(object));
-		mark_lt_object(function_code(object));
-		mark_lt_object(function_env(object));
-		break;
-	case OPCODE:
-		mark_lt_object(opcode_oprands(object));
-		break;
-	case PAIR:
-		mark_lt_object(pair_head(object));
-		mark_lt_object(pair_tail(object));
-		break;
-	case SYMBOL:
-		mark_lt_object(symbol_value(object));
-		break;
-	case VECTOR:
-		for (int i = 0; i <= vector_last(object); i++)
-			mark_lt_object(vector_value(object)[i]);
-		break;
-	default :;
-	}
-}
-
-void mark_all(void) {
-	mark_lt_object(symbol_list);
-}
-
-void sweep_all(void) {
-	for (int i = 0; i < OBJECT_INIT_COUNT; i++) {
-		lt *obj = &object_pool[i];
-		if (obj->use_flag == TRUE && obj->gc_mark_flag == FALSE) {
-			obj->use_flag = FALSE;
-			obj->next = free_objects;
-			free_objects = obj;
-		} else
-			obj->gc_mark_flag = FALSE;
-	}
-}
-
-void trigger_gc(void) {
-	mark_all();
-	sweep_all();
-}
-
 /* Constructor functions */
 lt *allocate_object(void) {
-  if (free_objects == NULL) {
-    printf("Pool is full, program terminated.\n");
-    exit(1);
-  }
-  lt *obj = free_objects;
-  free_objects = free_objects->next;
-  obj->gc_mark_flag = FALSE;
-  obj->use_flag = TRUE;
-  return obj;
-}
-
-void *checked_malloc(size_t size) {
-  void *p = malloc(size);
-  assert(p != NULL);
-  return p;
+  return GC_MALLOC(sizeof(struct lisp_object_t));
 }
 
 lisp_object_t *make_object(enum TYPE type) {
@@ -361,7 +283,7 @@ lisp_object_t *make_vector(int length) {
   lisp_object_t *vector = make_object(VECTOR);
   vector_last(vector) = -1;
   vector_length(vector) = length;
-  vector_value(vector) = checked_malloc(length * sizeof(lisp_object_t *));
+  vector_value(vector) = GC_MALLOC(length * sizeof(lisp_object_t *));
   return vector;
 }
 
@@ -480,7 +402,6 @@ lt *get_exception_tag(lt *exception) {
 }
 
 void init_global_variable(void) {
-  init_object_pool();
   /* Initialize global variables */
   the_false = make_false();
   the_true = make_true();

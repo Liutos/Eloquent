@@ -10,6 +10,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <gc/gc.h>
 
 #include "compiler.h"
 #include "object.h"
@@ -784,7 +785,7 @@ lt *lt_vector_push_extend(lt *vector, lt *x) {
     return lt_vector_push(vector, x);
   else {
     int length = vector_length(vector) + 1;
-    lt **value = checked_malloc(length * sizeof(lt *));
+    lt **value = GC_MALLOC(length * sizeof(lt *));
     for (int i = 0; i < length - 1; i++)
       value[i] = vector_value(vector)[i];
     vector_value(vector) = value;
