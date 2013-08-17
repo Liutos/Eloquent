@@ -11,6 +11,8 @@
 #include <stdlib.h>
 #include <string.h>
 
+#include <gc/gc.h>
+
 #include "object.h"
 #include "type.h"
 
@@ -117,7 +119,7 @@ char *sb2string(string_builder_t *sb) {
 void sb_add_char(string_builder_t *sb, char c) {
   if (sb->index >= sb->length) {
     sb->length += 20;
-    sb->string = realloc(sb->string, sb->length * sizeof(char));
+    sb->string = GC_realloc(sb->string, sb->length * sizeof(char));
   }
   sb->string[sb->index] = c;
   sb->index++;

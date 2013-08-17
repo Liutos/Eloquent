@@ -252,9 +252,9 @@ lt *make_retaddr(lt *code, lt *env, int pc, int throw_flag, int sp) {
 }
 
 string_builder_t *make_str_builder(void) {
-  string_builder_t *sb = malloc(sizeof(*sb));
+  string_builder_t *sb = GC_MALLOC(sizeof(*sb));
   sb->length = 20;
-  sb->string = malloc(sb->length * sizeof(char));
+  sb->string = GC_MALLOC(sb->length * sizeof(char));
   sb->index = 0;
   return sb;
 }

@@ -15,7 +15,7 @@
 int main(int argc, char *argv[])
 {
   char *inputs[] = {
-      "(list 1 1 1)",
+      "(string->symbol \"abcdefghijklmnopqrstuvwxyz\")",
   };
   init_global_variable();
   init_prims();
