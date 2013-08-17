@@ -397,8 +397,12 @@ lisp_object_t *find_or_create_symbol(char *name) {
   return sym;
 }
 
-lt *get_exception_tag(lt *exception) {
+lt *lt_exception_tag(lt *exception) {
   return exception_tag(exception);
+}
+
+lt *lt_type_name(lt *type) {
+  return S(type_name(type));
 }
 
 void init_global_variable(void) {

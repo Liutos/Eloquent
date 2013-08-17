@@ -1228,9 +1228,12 @@ void init_prims(void) {
   ADD(2, FALSE, lt_sub, "-");
   /* Character */
   ADD(1, FALSE, lt_char_code, "char-code");
+  SIG("char-code", T(CHARACTER));
   ADD(1, FALSE, lt_code_char, "code-char");
+  SIG("code-char", T(FIXNUM));
   /* Exception */
-  ADD(1, FALSE, get_exception_tag, "exception-tag");
+  ADD(1, FALSE, lt_exception_tag, "exception-tag");
+  SIG("exception-tag", T(EXCEPTION));
   /* Function */
   ADD(1, FALSE, lt_eval, "eval");
   ADD(1, FALSE, lt_expand_macro, "expand-macro");
@@ -1278,6 +1281,8 @@ void init_prims(void) {
   /* Type */
   ADD(1, FALSE, lt_find_type, "find-type");
   SIG("find-type", T(SYMBOL));
+  ADD(1, FALSE, lt_type_name, "type-name");
+  SIG("type-name", T(TYPE));
   /* Vector */
   ADD(1, FALSE, lt_list_to_vector, "list->vector");
   ADD(1, FALSE, lt_vector_pop, "vector-pop");

@@ -96,7 +96,10 @@ extern lt *make_op_return(void);
 extern lt *make_op_catch();
 
 extern lt *find_or_create_symbol(char *);
-extern lt *get_exception_tag(lt *);
+
+extern lt *lt_exception_tag(lt *);
+extern lt *lt_type_name(lt *);
+
 extern void init_global_variable(void);
 
 /* tagging system

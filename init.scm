@@ -33,4 +33,7 @@
        (cond
         ,@(map clauses
                (lambda (clause)
-                 `((eql? ,key ,(head clause)) ,@(tail clause))))))))
+                 `((eql? ,key ',(head clause)) ,@(tail clause))))))))
+
+(defmacro typecase (keyform . clauses)
+  `(case (type-name (type-of ,keyform)) ,@clauses))
