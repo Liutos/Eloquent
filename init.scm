@@ -33,7 +33,9 @@
        (cond
         ,@(map clauses
                (lambda (clause)
-                 `((eql? ,key ',(head clause)) ,@(tail clause))))))))
+                 (if (eq? 'else (head clause))
+                     `(#t ,@(tail clause))
+                   `((eql? ,key ',(head clause)) ,@(tail clause)))))))))
 
 (defmacro typecase (keyform . clauses)
   `(case (type-name (type-of ,keyform)) ,@clauses))
@@ -47,3 +49,13 @@
        (set! n (- n 1))
        (set! lst (tail lst))
        (goto nth)))))
+
+(define pair? (x)
+  (if (eq? 'pair (type-name (type-of x)))
+      #t
+    #f))
+
+(define atom? (x)
+  (if (pair? x)
+      #f
+    #t))

@@ -15,12 +15,9 @@
 int main(int argc, char *argv[])
 {
   char *inputs[] = {
-//      "(expand-macro '(let () (+ 1 1)))",
-//      "(expand-macro '(let ((x 1)) (+ x 1)))",
-      "nth",
-      "(nth 0 '(1 2 3))",
-      "(nth 1 '(1 2 3))",
-      "(nth 2 '(1 2 3))",
+      "(atom? '())",
+      "(atom? '(1 2 3))",
+      "(atom? 1)",
   };
   init_global_variable();
   init_prims();
