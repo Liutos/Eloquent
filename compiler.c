@@ -416,7 +416,6 @@ lt *compile_tagbody(lt *forms, lt *env) {
   }
 }
 
-/* TODO: The support for tail call optimization. */
 lisp_object_t *compile_object(lisp_object_t *object, lisp_object_t *env) {
   if (issymbol(object))
     return gen_var(object, env);

@@ -55,9 +55,8 @@
     (name-lambda ,name ,pars ,@body)))
 
 (defun nth (n lst)
-  (if (= n 0)
-      (head lst)
-    (nth (- n 1) (tail lst))))
+  (cond ((= n 0) (head lst))
+        (else (nth (- n 1) (tail lst)))))
 
 (define pair? (x)
   (if (eq? 'pair (type-name (type-of x)))

@@ -162,6 +162,8 @@ lt *try_catch_macro(lt *form, lt *handlers) {
 lt *tco(lt *name, lt *pars, lt *form, int islast) {
   if (!ispair(form))
     return form;
+  if (is_macro_form(form))
+    return tco(name, pars, lt_expand_macro(form), islast);
   lt *op = pair_head(form);
   if (op == S("if")) {
     lt *pred = second(form);
