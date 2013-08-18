@@ -15,8 +15,8 @@
 int main(int argc, char *argv[])
 {
   char *inputs[] = {
-      "(set! a 1)",
-      "(tagbody start (if (= a 0) 1 (begin (set! a (- a 1)) (goto start))))",
+      "(expand-macro '(let () (+ 1 1)))",
+      "(expand-macro '(let ((x 1)) (+ x 1)))",
   };
   init_global_variable();
   init_prims();

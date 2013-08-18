@@ -98,7 +98,7 @@ lt *type_error(lt *index, lt *pred) {
 }
 
 /* TODO: Exception signaling and handling. */
-pub lisp_object_t *run_by_llam(lisp_object_t *code_vector) {
+lisp_object_t *run_by_llam(lisp_object_t *code_vector) {
 #define _arg(N) vlast(stack, primitive_arity(func) - N)
 #define _arg1 _arg(1)
 #define _arg2 _arg(2)

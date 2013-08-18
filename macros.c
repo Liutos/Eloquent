@@ -61,6 +61,8 @@ lt *lt_cond_macro(lt *clauses) {
 lt *lt_let_macro(lt *bindings, lt *body) {
   lt *pars= make_empty_list();
   lt *args= make_empty_list();
+  if (isnull(bindings))
+    return make_pair(S("begin"), body);
   while (ispair(bindings)) {
     lt *bd = pair_head(bindings);
     pars = make_pair(pair_head(bd), pars);

@@ -155,7 +155,6 @@ struct string_builder_t {
 
 #define FALSE 0
 #define TRUE 1
-#define pub
 
 #define character_value(x) (((int)x) >> CHAR_BITS)
 #define fixnum_value(x) (((int)(x)) >> FIXNUM_BITS)
