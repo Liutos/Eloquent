@@ -59,3 +59,16 @@
   (if (pair? x)
       #f
     #t))
+
+(define butlast (list)
+  (if (eq? list '())
+      '()
+    (if (eq? (tail list) '())
+        '()
+      (cons (head list)
+            (butlast (tail list))))))
+
+(defmacro and2 (e1 e2)
+  `(if ,e1
+       ,e2
+     #f))

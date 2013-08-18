@@ -15,9 +15,9 @@
 int main(int argc, char *argv[])
 {
   char *inputs[] = {
-      "(atom? '())",
-      "(atom? '(1 2 3))",
-      "(atom? 1)",
+      "(and2 #f (/ 1 0))",
+      "(and2 #t #f)",
+      "(and2 #t '())",
   };
   init_global_variable();
   init_prims();
