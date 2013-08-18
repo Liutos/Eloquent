@@ -37,3 +37,13 @@
 
 (defmacro typecase (keyform . clauses)
   `(case (type-name (type-of ,keyform)) ,@clauses))
+
+(define nth (n lst)
+  (tagbody
+   nth
+    (if (= n 0)
+        (head lst)
+      (begin
+       (set! n (- n 1))
+       (set! lst (tail lst))
+       (goto nth)))))

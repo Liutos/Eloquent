@@ -14,8 +14,7 @@
 int main(int argc, char *argv[])
 {
   char *inputs[] = {
-      "(goto my-nth)",
-      "(tagbody nth (+ 1 1) (goto nth))",
+      "nth",
   };
   init_global_variable();
   init_prims();
