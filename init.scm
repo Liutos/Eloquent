@@ -40,15 +40,24 @@
 (defmacro typecase (keyform . clauses)
   `(case (type-name (type-of ,keyform)) ,@clauses))
 
-(define nth (n lst)
+(define nth-m (n lst)
   (tagbody
-   nth
+   nth-m
     (if (= n 0)
         (head lst)
       (begin
        (set! n (- n 1))
        (set! lst (tail lst))
-       (goto nth)))))
+       (goto nth-m)))))
+
+(defmacro defun (name pars . body)
+  `(set! ,name
+    (name-lambda ,name ,pars ,@body)))
+
+(defun nth (n lst)
+  (if (= n 0)
+      (head lst)
+    (nth (- n 1) (tail lst))))
 
 (define pair? (x)
   (if (eq? 'pair (type-name (type-of x)))

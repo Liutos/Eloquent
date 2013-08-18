@@ -409,6 +409,13 @@ lt *lt_expand_macro(lt *form) {
           result = ((f2) primitive_func(proc))(arg1, arg2);
         }
           break;
+        case 3: {
+          lt *arg1 = lt_raw_nth(args, 0);
+          lt *arg2 = lt_raw_nth(args, 1);
+          lt *arg3 = lt_raw_nth(args, 2);
+          result = ((f3)primitive_func(proc))(arg1, arg2, arg3);
+        }
+          break;
         default:
           printf("Macro with arity %d is unsupported yet.\n",
           primitive_arity(proc));

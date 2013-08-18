@@ -415,34 +415,6 @@ lt *compile_tagbody(lt *forms, lt *env) {
     }
   }
 }
-//
-//lt *tco(lt *name, lt *pars, lt *form, int islast) {
-//  if (!ispair(form))
-//    return form;
-//  lt *op = pair_head(form);
-//  if (op == S("if")) {
-//    lt *pred = second(form);
-//    lt *tp = tco(name, pars, third(form), islast);
-//    lt *ep = tco(name, pars, fourth(form), islast);
-//    return list4(S("if"), pred, tp, ep);
-//  }
-//  if (op == S("begin")) {
-//    lt *actions = pair_tail(form);
-//    lt *sets = make_empty_list();
-//    if (!(isnull(actions) || isnull(pair_tail(actions)))) {
-//      while (!isnull(pair_tail(actions))) {
-//        lt *p = pair_head(actions);
-//        sets = make_pair(tco(name, pars, p, FALSE), sets);
-//        actions = pair_tail(actions);
-//      }
-//    }
-//    return make_pair(S("begin"),
-//        seq(sets, list1(tco(name, pars, pair_head(actions), islast))));
-//  }
-//  if (op == name && islast) {
-//
-//  }
-//}
 
 /* TODO: The support for tail call optimization. */
 lisp_object_t *compile_object(lisp_object_t *object, lisp_object_t *env) {
