@@ -15,10 +15,10 @@
 int main(int argc, char *argv[])
 {
   char *inputs[] = {
-      "nth",
-      "(nth 0 '(1 2 3))",
-      "(nth 1 '(1 2 3))",
-      "(nth 2 '(1 2 3))",
+      "(expand-macro '(name-lambda length-tco (n list) (if (null? list) n (length-tco (+ n 1) (tail list)))))",
+      "length-tco",
+      "(length '())",
+      "(length '(1 2 3)",
   };
   init_global_variable();
   init_prims();

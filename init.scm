@@ -80,3 +80,11 @@
   `(if ,e1
        ,e2
      #f))
+
+(define length-tco (n list)
+  (if (null? list)
+      n
+    (length-tco (+ n 1) (tail list))))
+
+(define length (list)
+  (length-tco 0 list))
