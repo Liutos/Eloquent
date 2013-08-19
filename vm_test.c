@@ -15,9 +15,8 @@
 int main(int argc, char *argv[])
 {
   char *inputs[] = {
-      "(nt-level 1)",
-      "(nt-level 2.0)",
-      "(fx->fp 1)",
+      "(nt-convert 1 'fixnum 'flonum)",
+      "(nt-convert #\\1 'character 'fixnum)",
   };
   init_global_variable();
   init_prims();

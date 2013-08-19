@@ -596,6 +596,13 @@ lt *lt_fp_eq(lt *n, lt *m) {
   return booleanize(float_value(n) == float_value(m));
 }
 
+lt *lt_nt_convert(lt *val, lt *origin, lt *target) {
+  if (origin == S("fixnum") && target == S("flonum"))
+    return lt_fx2fp(val);
+  else
+    return signal_exception("Unknown convert rules");
+}
+
 /* TODO: Find a more elegant way of defining arithmetic operations. */
 lt *lt_add(lt *n, lt *m) {
   assert(isnumber(n) && isnumber(m));
@@ -1292,6 +1299,7 @@ void init_prims(void) {
   ADD(2, FALSE, lt_fp_mul, "fp*");
   ADD(2, FALSE, lt_fp_div, "fp/");
   ADD(2, FALSE, lt_fp_eq, "fp=");
+  ADD(3, FALSE, lt_nt_convert, "nt-convert");
   /* Generic */
   ADD(2, FALSE, lt_add, "+");
   SIG("+", OR(T(FIXNUM), T(FLOAT)), OR(T(FIXNUM), T(FIXNUM)));
