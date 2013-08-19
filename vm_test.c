@@ -15,14 +15,9 @@
 int main(int argc, char *argv[])
 {
   char *inputs[] = {
-      "(fx+ 1 1)",
-      "(fx- 2 1)",
-      "(fx* 2 3)",
-      "(fx/ 4 2)",
-      "(fp+ 1.0 1.0)",
-      "(fp- 2.0 1.0)",
-      "(fp* 2.0 3.0)",
-      "(fp/ 4.0 2.0)",
+      "(nt-level 1)",
+      "(nt-level 2.0)",
+      "(fx->fp 1)",
   };
   init_global_variable();
   init_prims();

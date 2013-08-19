@@ -543,6 +543,13 @@ lt *lt_list_reverse(lt *list) {
 }
 
 /* Arithmetic Operations */
+lt *lt_nt_level(lt *n) {
+  if (isfixnum(n))
+    return make_fixnum(0);
+  else
+    return make_fixnum(1);
+}
+
 /* Arithmetic Operations for Fixnum */
 lt *lt_fx_add(lt *n, lt *m) {
   return make_fixnum(fixnum_value(n) + fixnum_value(m));
@@ -562,6 +569,10 @@ lt *lt_fx_div(lt *n, lt *m) {
 
 lt *lt_fx_eq(lt *n, lt *m) {
   return booleanize(fixnum_value(n) == fixnum_value(m));
+}
+
+lt *lt_fx2fp(lt *n) {
+  return make_float(fixnum_value(n));
 }
 
 /* Arithmetic Operations for Floating-Point Number */
@@ -1267,12 +1278,14 @@ void init_prims(void) {
 
   lisp_object_t *func;
   /* Arithmetic operations */
+  ADD(1, FALSE, lt_nt_level, "nt-level");
   /* For Fixnum */
   ADD(2, FALSE, lt_fx_add, "fx+");
   ADD(2, FALSE, lt_fx_sub, "fx-");
   ADD(2, FALSE, lt_fx_mul, "fx*");
   ADD(2, FALSE, lt_fx_div, "fx/");
   ADD(2, FALSE, lt_fx_eq, "fx=");
+  ADD(1, FALSE, lt_fx2fp, "fx->fp");
   /* For Floating-Point Number */
   ADD(2, FALSE, lt_fp_add, "fp+");
   ADD(2, FALSE, lt_fp_sub, "fp-");
