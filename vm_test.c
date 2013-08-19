@@ -15,10 +15,14 @@
 int main(int argc, char *argv[])
 {
   char *inputs[] = {
-      "(expand-macro '(name-lambda length-tco (n list) (if (null? list) n (length-tco (+ n 1) (tail list)))))",
-      "length-tco",
-      "(length '())",
-      "(length '(1 2 3)",
+      "(fx+ 1 1)",
+      "(fx- 2 1)",
+      "(fx* 2 3)",
+      "(fx/ 4 2)",
+      "(fp+ 1.0 1.0)",
+      "(fp- 2.0 1.0)",
+      "(fp* 2.0 3.0)",
+      "(fp/ 4.0 2.0)",
   };
   init_global_variable();
   init_prims();
