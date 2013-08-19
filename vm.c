@@ -109,7 +109,7 @@ lisp_object_t *run_by_llam(lisp_object_t *code_vector) {
   int nargs = 0;
   int pc = 0;
   int throw_exception = TRUE;
-  lisp_object_t *stack = make_vector(10);
+  lisp_object_t *stack = make_vector(50);
   lt *code = code_vector;
   lisp_object_t *env = null_env;
   lisp_object_t *return_stack = the_empty_list;

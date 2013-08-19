@@ -8,7 +8,7 @@
 
 (define abs (x)
   (if (> 0 x)
-      (- 0 x)
+      (bin- 0 x)
       x))
 
 (define < (x y)
@@ -46,7 +46,7 @@
     (if (= n 0)
         (head lst)
       (begin
-       (set! n (- n 1))
+       (set! n (bin- n 1))
        (set! lst (tail lst))
        (goto nth-m)))))
 
@@ -56,7 +56,7 @@
 
 (defun nth (n lst)
   (cond ((= n 0) (head lst))
-        (else (nth (- n 1) (tail lst)))))
+        (else (nth (bin- n 1) (tail lst)))))
 
 (define pair? (x)
   (if (eq? 'pair (type-name (type-of x)))
@@ -84,7 +84,27 @@
 (define length-tco (n list)
   (if (null? list)
       n
-    (length-tco (+ n 1) (tail list))))
+    (length-tco (bin+ n 1) (tail list))))
 
 (define length (list)
   (length-tco 0 list))
+
+(define fixnum? (n)
+  (eq? 'fixnum (type-name (type-of n))))
+
+(define float? (n)
+  (eq? 'float (type-name (type-of n))))
+
+(defmacro define-bin-arith (name opl oph)
+  (let ((n (gensym))
+        (m (gensym)))
+    `(define ,name (,n ,m)
+       (cond ((and2 (fixnum? ,n) (fixnum? ,m)) (,opl ,n ,m))
+             ((and2 (fixnum? ,n) (float? ,m)) (,oph (fx->fp ,n) ,m))
+             ((and2 (float? ,n) (fixnum? ,m)) (,oph ,n (fx->fp ,m)))
+             (else (,oph ,n ,m))))))
+
+(define-bin-arith bin+ fx+ fp+)
+(define-bin-arith bin- fx- fp-)
+(define-bin-arith bin* fx* fp*)
+(define-bin-arith bin/ fx/ fp/)

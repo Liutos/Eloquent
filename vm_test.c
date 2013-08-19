@@ -15,8 +15,28 @@
 int main(int argc, char *argv[])
 {
   char *inputs[] = {
-      "(nt-convert 1 'fixnum 'flonum)",
-      "(nt-convert #\\1 'character 'fixnum)",
+      "(bin+ 1 1)",
+      "(bin+ 1 1.0)",
+      "(bin+ 1.0 1)",
+      "(bin+ 1.0 1.0)",
+      "(bin- 1 1)",
+      "(bin- 1 1.0)",
+      "(bin- 1.0 1)",
+      "(bin- 1.0 1.0)",
+      "(bin* 1 1)",
+      "(bin* 1 1.0)",
+      "(bin* 1.0 1)",
+      "(bin* 1.0 1.0)",
+      "(bin/ 1 1)",
+      "(bin/ 1 1.0)",
+      "(bin/ 1.0 1)",
+      "(bin/ 1.0 1.0)",
+      "(bin/ 1 0)",
+      "(bin/ 1 0.0)",
+      "(abs -1)",
+      "(< -1 0)",
+      "(nth 1 '(1 2 3))",
+      "(length '(1 2 3))",
   };
   init_global_variable();
   init_prims();

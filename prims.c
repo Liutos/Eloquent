@@ -564,6 +564,8 @@ lt *lt_fx_mul(lt *n, lt *m) {
 }
 
 lt *lt_fx_div(lt *n, lt *m) {
+  if (fixnum_value(m) == 0)
+    return signal_exception("Divided by zero");
   return make_fixnum(fixnum_value(n) / fixnum_value(m));
 }
 
@@ -589,6 +591,8 @@ lt *lt_fp_mul(lt *n, lt *m) {
 }
 
 lt *lt_fp_div(lt *n, lt *m) {
+  if (float_value(m) == 0)
+    return signal_exception("Divided by zero");
   return make_float(float_value(n) / float_value(m));
 }
 
@@ -602,33 +606,32 @@ lt *lt_nt_convert(lt *val, lt *origin, lt *target) {
   else
     return signal_exception("Unknown convert rules");
 }
-
-/* TODO: Find a more elegant way of defining arithmetic operations. */
-lt *lt_add(lt *n, lt *m) {
-  assert(isnumber(n) && isnumber(m));
-  if (isfixnum(n) && isfixnum(m))
-    return make_fixnum(fixnum_value(n) + fixnum_value(m));
-  if (isfixnum(n) && isfloat(m))
-    return make_float(fixnum_value(n) + float_value(m));
-  if (isfloat(n) && isfixnum(m))
-    return make_float(float_value(n) + fixnum_value(m));
-  else
-    return make_float(float_value(n) + float_value(m));
-}
-
-lisp_object_t *lt_div(lisp_object_t *n, lisp_object_t *m) {
-  assert(isnumber(n) && isnumber(m));
-  if ((isfixnum(m) && fixnum_value(m) == 0) || (isfloat(m) && float_value(m) == 0))
-    return signal_exception("Diveded by zero");
-  if (isfixnum(n) && isfixnum(m))
-    return make_fixnum(fixnum_value(n) / fixnum_value(m));
-  if (isfixnum(n) && isfloat(m))
-    return make_float(fixnum_value(n) / float_value(m));
-  if (isfloat(n) && isfixnum(m))
-    return make_float(float_value(n) / fixnum_value(m));
-  else
-    return make_float(float_value(n) / float_value(m));
-}
+//
+//lt *lt_add(lt *n, lt *m) {
+//  assert(isnumber(n) && isnumber(m));
+//  if (isfixnum(n) && isfixnum(m))
+//    return make_fixnum(fixnum_value(n) + fixnum_value(m));
+//  if (isfixnum(n) && isfloat(m))
+//    return make_float(fixnum_value(n) + float_value(m));
+//  if (isfloat(n) && isfixnum(m))
+//    return make_float(float_value(n) + fixnum_value(m));
+//  else
+//    return make_float(float_value(n) + float_value(m));
+//}
+//
+//lisp_object_t *lt_div(lisp_object_t *n, lisp_object_t *m) {
+//  assert(isnumber(n) && isnumber(m));
+//  if ((isfixnum(m) && fixnum_value(m) == 0) || (isfloat(m) && float_value(m) == 0))
+//    return signal_exception("Divided by zero");
+//  if (isfixnum(n) && isfixnum(m))
+//    return make_fixnum(fixnum_value(n) / fixnum_value(m));
+//  if (isfixnum(n) && isfloat(m))
+//    return make_float(fixnum_value(n) / float_value(m));
+//  if (isfloat(n) && isfixnum(m))
+//    return make_float(float_value(n) / fixnum_value(m));
+//  else
+//    return make_float(float_value(n) / float_value(m));
+//}
 
 lisp_object_t *lt_gt(lisp_object_t *n, lisp_object_t *m) {
   assert(isnumber(n) && isnumber(m));
@@ -647,17 +650,17 @@ lisp_object_t *lt_mod(lisp_object_t *n, lisp_object_t *m) {
   return make_fixnum(fixnum_value(n) % fixnum_value(m));
 }
 
-lisp_object_t *lt_mul(lisp_object_t *n, lisp_object_t *m) {
-  assert(isnumber(n) && isnumber(m));
-  if (isfixnum(n) && isfixnum(m))
-    return make_fixnum(fixnum_value(n) * fixnum_value(m));
-  if (isfixnum(n) && isfloat(m))
-    return make_float(fixnum_value(n) * float_value(m));
-  if (isfloat(n) && isfixnum(m))
-    return make_float(float_value(n) * fixnum_value(m));
-  else
-    return make_float(float_value(n) * float_value(m));
-}
+//lisp_object_t *lt_mul(lisp_object_t *n, lisp_object_t *m) {
+//  assert(isnumber(n) && isnumber(m));
+//  if (isfixnum(n) && isfixnum(m))
+//    return make_fixnum(fixnum_value(n) * fixnum_value(m));
+//  if (isfixnum(n) && isfloat(m))
+//    return make_float(fixnum_value(n) * float_value(m));
+//  if (isfloat(n) && isfixnum(m))
+//    return make_float(float_value(n) * fixnum_value(m));
+//  else
+//    return make_float(float_value(n) * float_value(m));
+//}
 
 lisp_object_t *lt_numeric_eq(lisp_object_t *n, lisp_object_t *m) {
   assert(isnumber(n) && isnumber(m));
@@ -671,17 +674,17 @@ lisp_object_t *lt_numeric_eq(lisp_object_t *n, lisp_object_t *m) {
     return booleanize(float_value(n) == float_value(m));
 }
 
-lisp_object_t *lt_sub(lisp_object_t *n, lisp_object_t *m) {
-  assert(isnumber(n) && isnumber(m));
-  if (isfixnum(n) && isfixnum(m))
-    return make_fixnum(fixnum_value(n) - fixnum_value(m));
-  if (isfixnum(n) && isfloat(m))
-    return make_float(fixnum_value(n) - float_value(m));
-  if (isfloat(n) && isfixnum(m))
-    return make_float(float_value(n) - fixnum_value(m));
-  else
-    return make_float(float_value(n) - float_value(m));
-}
+//lisp_object_t *lt_sub(lisp_object_t *n, lisp_object_t *m) {
+//  assert(isnumber(n) && isnumber(m));
+//  if (isfixnum(n) && isfixnum(m))
+//    return make_fixnum(fixnum_value(n) - fixnum_value(m));
+//  if (isfixnum(n) && isfloat(m))
+//    return make_float(fixnum_value(n) - float_value(m));
+//  if (isfloat(n) && isfixnum(m))
+//    return make_float(float_value(n) - fixnum_value(m));
+//  else
+//    return make_float(float_value(n) - float_value(m));
+//}
 
 /* Character */
 lisp_object_t *lt_char_code(lisp_object_t *c) {
@@ -1301,14 +1304,14 @@ void init_prims(void) {
   ADD(2, FALSE, lt_fp_eq, "fp=");
   ADD(3, FALSE, lt_nt_convert, "nt-convert");
   /* Generic */
-  ADD(2, FALSE, lt_add, "+");
-  SIG("+", OR(T(FIXNUM), T(FLOAT)), OR(T(FIXNUM), T(FIXNUM)));
-  ADD(2, FALSE, lt_div, "/");
+//  ADD(2, FALSE, lt_add, "+");
+//  SIG("+", OR(T(FIXNUM), T(FLOAT)), OR(T(FIXNUM), T(FIXNUM)));
+//  ADD(2, FALSE, lt_div, "/");
   ADD(2, FALSE, lt_gt, ">");
   ADD(2, FALSE, lt_mod, "mod");
-  ADD(2, FALSE, lt_mul, "*");
+//  ADD(2, FALSE, lt_mul, "*");
   ADD(2, FALSE, lt_numeric_eq, "=");
-  ADD(2, FALSE, lt_sub, "-");
+//  ADD(2, FALSE, lt_sub, "-");
   /* Character */
   ADD(1, FALSE, lt_char_code, "char-code");
   SIG("char-code", T(CHARACTER));
