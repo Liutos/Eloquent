@@ -241,10 +241,12 @@ lisp_object_t *make_primitive(int arity, void *C_function, char *Lisp_name, int 
   return p;
 }
 
-lt *make_retaddr(lt *code, lt *env, int pc, int throw_flag, int sp) {
+lt *make_retaddr(lt *code, lt *env, int need, int nvals, int pc, int throw_flag, int sp) {
   lt *retaddr = make_object(RETADDR);
   retaddr_code(retaddr) = code;
   retaddr_env(retaddr) = env;
+  retaddr_need(retaddr) = need;
+  retaddr_nvals(retaddr) = nvals;
   retaddr_pc(retaddr) = pc;
   retaddr_throw_flag(retaddr) = throw_flag;
   retaddr_sp(retaddr) = sp;
@@ -366,6 +368,14 @@ lt *make_op_macro(lt *func) {
 	return mkopcode(MACROFN, "MACROFN", 1, func);
 }
 
+lt *make_op_mvcall(void) {
+  return mkopcode(MVCALL, "MVCALL", 0);
+}
+
+lt *make_op_need(void) {
+  return mkopcode(NEED, "NEED", 0);
+}
+
 lisp_object_t *make_op_pop(void) {
   return mkopcode(POP, "POP", 0);
 }
@@ -376,6 +386,10 @@ lisp_object_t *make_op_prim(lisp_object_t *nargs) {
 
 lisp_object_t *make_op_return(void) {
   return mkopcode(RETURN, "RETURN", 0);
+}
+
+lt *make_op_values(lt *nargs) {
+  return mkopcode(VALUES, "VALUES", 1, nargs);
 }
 
 lt *make_op_catch(void) {

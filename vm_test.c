@@ -15,28 +15,9 @@
 int main(int argc, char *argv[])
 {
   char *inputs[] = {
-      "(bin+ 1 1)",
-      "(bin+ 1 1.0)",
-      "(bin+ 1.0 1)",
-      "(bin+ 1.0 1.0)",
-      "(bin- 1 1)",
-      "(bin- 1 1.0)",
-      "(bin- 1.0 1)",
-      "(bin- 1.0 1.0)",
-      "(bin* 1 1)",
-      "(bin* 1 1.0)",
-      "(bin* 1.0 1)",
-      "(bin* 1.0 1.0)",
-      "(bin/ 1 1)",
-      "(bin/ 1 1.0)",
-      "(bin/ 1.0 1)",
-      "(bin/ 1.0 1.0)",
-      "(bin/ 1 0)",
-      "(bin/ 1 0.0)",
-      "(abs -1)",
-      "(< -1 0)",
-      "(nth 1 '(1 2 3))",
-      "(length '(1 2 3))",
+      "(define foo() (values 1 2 3))",
+      "(define bar () (call-with-values list (foo)))",
+      "(bar)",
   };
   init_global_variable();
   init_prims();

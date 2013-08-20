@@ -72,9 +72,12 @@ enum OPCODE_TYPE {
   LSET,
   LVAR,
   MACROFN,
+  MVCALL,
+  NEED,
   POP,
   PRIM,
   RETURN,
+  VALUES,
 };
 
 struct lisp_object_t {
@@ -124,7 +127,7 @@ struct lisp_object_t {
       lt *signature;
     } primitive;
     struct {
-      int pc, sp, throw_flag;
+      int need, nvals, pc, sp, throw_flag;
       lt *code;
       lt *env;
     } retaddr;
@@ -189,6 +192,8 @@ struct string_builder_t {
 #define primitive_restp(x) ((x)->u.primitive.restp)
 #define retaddr_code(x) ((x)->u.retaddr.code)
 #define retaddr_env(x) ((x)->u.retaddr.env)
+#define retaddr_need(x) ((x)->u.retaddr.need)
+#define retaddr_nvals(x) ((x)->u.retaddr.nvals)
 #define retaddr_pc(x) ((x)->u.retaddr.pc)
 #define retaddr_throw_flag(x) ((x)->u.retaddr.throw_flag)
 #define retaddr_sp(x) ((x)->u.retaddr.sp)
@@ -228,5 +233,6 @@ struct string_builder_t {
 #define op_lvar_var(x) oparg3(x)
 #define op_macro_func(x) oparg1(x)
 #define op_prim_nargs(x) oparg1(x)
+#define op_values_nargs(x) oparg1(x)
 
 #endif /* TYPE_H_ */

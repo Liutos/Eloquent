@@ -107,6 +107,8 @@ lisp_object_t *run_by_llam(lisp_object_t *code_vector) {
 
   assert(isvector(code_vector));
   int nargs = 0;
+  int need = FALSE;
+  int nvals = 1;
   int pc = 0;
   int throw_exception = TRUE;
   lisp_object_t *stack = make_vector(50);
@@ -181,7 +183,7 @@ lisp_object_t *run_by_llam(lisp_object_t *code_vector) {
           return signal_exception(msg);
         }
         lisp_object_t *retaddr =
-            make_retaddr(code, env, pc, throw_exception, vector_last(stack));
+            make_retaddr(code, env, need, 0, pc, throw_exception, vector_last(stack));
         return_stack = make_pair(retaddr, return_stack);
         code = function_code(func);
         env = function_env(func);
@@ -277,6 +279,15 @@ lisp_object_t *run_by_llam(lisp_object_t *code_vector) {
         lt_vector_push(stack, make_macro(func, env));
       }
       	break;
+      case MVCALL: {
+        lt *new_ins = make_op_call(make_fixnum(nvals));
+        lt_vector_set(code, make_fixnum(pc), new_ins);
+        pc--;
+      }
+        break;
+      case NEED:
+        need = TRUE;
+        break;
       case POP:
         lt_vector_pop(stack);
         break;
@@ -350,9 +361,22 @@ lisp_object_t *run_by_llam(lisp_object_t *code_vector) {
         return_stack = pair_tail(return_stack);
         code = retaddr_code(retaddr);
         env = retaddr_env(retaddr);
+        need = retaddr_need(retaddr);
+        nvals = retaddr_nvals(retaddr);
         pc = retaddr_pc(retaddr);
         throw_exception = retaddr_throw_flag(retaddr);
+//        Removes the duplicated arguments pushed by `values' special form
+        if (need == FALSE) {
+          for (int i = 1; i < nvals; i++)
+            lt_vector_pop(stack);
+        }
       }
+        break;
+      case VALUES:
+        if (!isnull(return_stack)) {
+          lt *retaddr = pair_head(return_stack);
+          retaddr_nvals(retaddr) = fixnum_value(op_values_nargs(ins));
+        }
         break;
       default :
         fprintf(stdout, "In run_by_llam --- Invalid opcode %d\n", type_of(ins));

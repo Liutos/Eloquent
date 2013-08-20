@@ -180,6 +180,12 @@ lisp_object_t *gen(enum TYPE opcode, ...) {
     case MACROFN:
       ins = make_op_macro(va_arg(ap, lt *));
       break;
+    case MVCALL:
+      ins = make_op_mvcall();
+      break;
+    case NEED:
+      ins = make_op_need();
+      break;
     case POP:
       ins = make_op_pop();
       break;
@@ -188,6 +194,9 @@ lisp_object_t *gen(enum TYPE opcode, ...) {
       break;
     case RETURN:
       ins = make_op_return();
+      break;
+    case VALUES:
+      ins = make_op_values(va_arg(ap, lt *));
       break;
     default:
       fprintf(stdout, "Invalid opcode %d\n", opcode);
@@ -467,6 +476,15 @@ lisp_object_t *compile_object(lisp_object_t *object, lisp_object_t *env) {
     return gen(JUMP, second(object));
   if (is_tag_list(object, S("tagbody"))) {
     return compile_tagbody(pair_tail(object), env);
+  }
+  if (is_tag_list(object, S("call-with-values"))) {
+    lt *fn = compile_object(second(object), env);
+    lt *vals = compile_object(third(object), env);
+    return seq(gen(NEED), vals, fn, gen(MVCALL), gen(CHECKEX));
+  }
+  if (is_tag_list(object, S("values"))) {
+    lt *args = compile_args(pair_tail(object), env);
+    return seq(args, gen(VALUES, lt_list_length(pair_tail(object))));
   }
   if (ispair(object)) {
     lisp_object_t *args = pair_tail(object);
