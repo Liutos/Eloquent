@@ -138,3 +138,8 @@
 (define / (n . ns)
   (cond ((null? ns) (bin/ 1 n))
         (else (bin/ n (reduce bin* ns)))))
+
+(define gcd (n m)
+  (if (= m 0)
+      n
+    (gcd m (mod n m))))
