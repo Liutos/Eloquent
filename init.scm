@@ -115,3 +115,10 @@
        (if ,v
            ,v
          ,e2))))
+
+(defun reduce (fn list)
+  (cond ((null? list) (signal "Parameter list can't be an empty list."))
+        ((null? (tail list))
+         (head list))
+        (else
+         (fn (head list) (reduce fn (tail list))))))

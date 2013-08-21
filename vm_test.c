@@ -15,8 +15,10 @@
 int main(int argc, char *argv[])
 {
   char *inputs[] = {
-      "(signal \"Function signal test\")",
-      "(begin (signal \"Embed signal test\") (/ 1 0))",
+      "(reduce bin+ '())",
+      "(reduce bin+ '(1))",
+      "(reduce bin+ '(1 2))",
+      "(reduce bin+ '(1 2 3))",
   };
   init_global_variable();
   init_prims();
