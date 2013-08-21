@@ -15,9 +15,10 @@
 int main(int argc, char *argv[])
 {
   char *inputs[] = {
-      "(define foo() (values 1 2 3))",
-      "(define bar () (call-with-values list (foo)))",
-      "(bar)",
+      "(or2 1 2)",
+      "(or2 1 #f)",
+      "(or2 #f #f)",
+      "(or2 #t #f)",
   };
   init_global_variable();
   init_prims();

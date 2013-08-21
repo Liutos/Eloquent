@@ -108,3 +108,10 @@
 (define-bin-arith bin- fx- fp-)
 (define-bin-arith bin* fx* fp*)
 (define-bin-arith bin/ fx/ fp/)
+
+(defmacro or2 (e1 e2)
+  (let ((v (gensym)))
+    `(let ((,v ,e1))
+       (if ,v
+           ,v
+         ,e2))))
