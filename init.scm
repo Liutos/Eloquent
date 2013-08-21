@@ -122,3 +122,19 @@
          (head list))
         (else
          (fn (head list) (reduce fn (tail list))))))
+
+(define + ns
+  (cond ((null? ns) 0)
+        (else (reduce bin+ ns))))
+
+(define * ns
+  (cond ((null? ns) 1)
+        (else (reduce bin* ns))))
+
+(define - (n . ns)
+  (cond ((null? ns) (bin- 0 n))
+        (else (bin- n (reduce bin+ ns)))))
+
+(define / (n . ns)
+  (cond ((null? ns) (bin/ 1 n))
+        (else (bin/ n (reduce bin* ns)))))

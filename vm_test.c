@@ -15,10 +15,16 @@
 int main(int argc, char *argv[])
 {
   char *inputs[] = {
-      "(reduce bin+ '())",
-      "(reduce bin+ '(1))",
-      "(reduce bin+ '(1 2))",
-      "(reduce bin+ '(1 2 3))",
+      "(- 1)",
+      "(- 1 2)",
+      "(- 1 2 3)",
+      "(*)",
+      "(* 2)",
+      "(* 1 2)",
+      "(* 1 2 3)",
+      "(/ 2)",
+      "(/ 4 2)",
+      "(/ 1 0 2 3 4)",
   };
   init_global_variable();
   init_prims();
