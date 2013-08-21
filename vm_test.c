@@ -15,10 +15,8 @@
 int main(int argc, char *argv[])
 {
   char *inputs[] = {
-      "(or2 1 2)",
-      "(or2 1 #f)",
-      "(or2 #f #f)",
-      "(or2 #t #f)",
+      "(signal \"Function signal test\")",
+      "(begin (signal \"Embed signal test\") (/ 1 0))",
   };
   init_global_variable();
   init_prims();

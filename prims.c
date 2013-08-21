@@ -346,6 +346,11 @@ lt *lt_raw_nthtail(lt *list, int n) {
   return list;
 }
 
+/* Exception */
+lt *lt_signal_exception(lt *message) {
+  return signal_exception(string_value(message));
+}
+
 /* Function */
 lt *lt_eval(lt *form) {
   return run_by_llam(compile_to_bytecode(form));
@@ -1320,6 +1325,8 @@ void init_prims(void) {
   /* Exception */
   ADD(1, FALSE, lt_exception_tag, "exception-tag");
   SIG("exception-tag", T(EXCEPTION));
+  ADD(1, FALSE, lt_signal_exception, "signal");
+  SIG("signal", T(STRING));
   /* Function */
   ADD(1, FALSE, lt_eval, "eval");
   ADD(1, FALSE, lt_expand_macro, "expand-macro");
