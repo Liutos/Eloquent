@@ -15,9 +15,7 @@
 int main(int argc, char *argv[])
 {
   char *inputs[] = {
-      "(gcd 1 2)",
-      "(gcd 2 4)",
-      "(gcd 81 90)",
+      "(a 1 2)",
   };
   init_global_variable();
   init_prims();

@@ -196,6 +196,7 @@ lisp_object_t *run_by_llam(lisp_object_t *code_vector) {
         throw_exception = FALSE;
         lt_vector_push(stack, make_empty_list());
         break;
+        check_exception:
       case CHECKEX:
         while (is_signaled(vlast(stack, 0)) && throw_exception) {
           if (isnull(return_stack))
@@ -254,6 +255,7 @@ lisp_object_t *run_by_llam(lisp_object_t *code_vector) {
           char msg[256];
           sprintf(msg, "Undefined global variable %s", symbol_name(sym));
           lt_vector_push(stack, signal_exception(strdup(msg)));
+          goto check_exception;
         } else
           lt_vector_push(stack, symbol_value(sym));
       }
