@@ -18,6 +18,7 @@ int main(int argc, char *argv[])
   };
   init_global_variable();
   init_prims();
+  init_compiled_prims();
   init_macros();
   load_init_file();
   for (int i = 0; i < sizeof(inputs) / sizeof(char *); i++) {
@@ -25,7 +26,6 @@ int main(int argc, char *argv[])
     write_raw_string(inputs[i], standard_out);
     write_raw_char('\n', standard_out);
     lisp_object_t *expr = read_object_from_string(inputs[i]);
-//    expr = compile_to_bytecode(expr);
     expr = compile_object(expr, null_env);
     if (is_signaled(expr))
       writef(standard_out, "%?\n", expr);

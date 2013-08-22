@@ -15,10 +15,12 @@
 int main(int argc, char *argv[])
 {
   char *inputs[] = {
-      "(a 1 2)",
+      "identity",
+      "(identity 1)",
   };
   init_global_variable();
   init_prims();
+  init_compiled_prims();
   init_macros();
   load_init_file();
   for (int i = 0; i < sizeof(inputs) / sizeof(char *); i++) {
