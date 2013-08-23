@@ -54,7 +54,7 @@
   `(set! ,name
     (name-lambda ,name ,pars ,@body)))
 
-(defun nth (n lst)
+(define nth (n lst)
   (cond ((= n 0) (head lst))
         (else (nth (bin- n 1) (tail lst)))))
 
@@ -116,7 +116,7 @@
            ,v
          ,e2))))
 
-(defun reduce (fn list)
+(define reduce (fn list)
   (cond ((null? list) (signal "Parameter list can't be an empty list."))
         ((null? (tail list))
          (head list))
@@ -139,7 +139,44 @@
   (cond ((null? ns) (bin/ 1 n))
         (else (bin/ n (reduce bin* ns)))))
 
-(define gcd (n m)
+(define get-ks (kvs)
+  (if (null? kvs)
+      '()
+    (cons (head kvs)
+          (get-ks (tail (tail kvs))))))
+
+(define get-vs (kvs)
+  (if (null? kvs)
+      '()
+    (cons (head (tail kvs))
+          (get-vs (tail (tail kvs))))))
+
+(define ngensym (n)
+  (if (= n 0)
+      '()
+    (cons (gensym)
+          (ngensym (- n 1)))))
+
+(define map2 (fn list1 list2)
+  (if (or2 (null? list1) (null? list2))
+      '()
+    (cons (fn (head list1) (head list2))
+          (map2 fn (tail list1) (tail list2)))))
+
+(define pset!-fv (kvs)
+  (let ((tmps (ngensym (/ (length kvs) 2)))
+        (ks (get-ks kvs))
+        (vs (get-vs kvs)))
+    `(let ,(map2 list tmps vs)
+       ,@(map2 (lambda (k tmp)
+                 `(set! ,k ,tmp))
+               ks tmps))))
+
+(defmacro pset! kvs
+  (pset!-fv kvs))
+
+(defun gcd (n m)
   (if (= m 0)
       n
     (gcd m (mod n m))))
+

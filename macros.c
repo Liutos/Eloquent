@@ -190,14 +190,18 @@ lt *tco(lt *name, lt *pars, lt *form, int islast) {
     while (ispair(tmp)) {
       lt *par = pair_head(pars);
       lt *arg = pair_head(tmp);
-      arg = list3(S("set!"), par, arg);
+//      arg = list3(S("set!"), par, arg);
+//      args = make_pair(arg, args);
+      args = make_pair(par, args);
       args = make_pair(arg, args);
       pars = pair_tail(pars);
       tmp = pair_tail(tmp);
     }
     args = lt_list_nreverse(args);
-    return make_pair(S("begin"),
-        seq(args, list1(list2(S("goto"), name))));
+    args = make_pair(S("pset!"), args);
+//    return make_pair(S("begin"),
+//        seq(args, list1(list2(S("goto"), name))));
+    return list3(S("begin"), args, list2(S("goto"), name));
   } else {
     lt *tmp = pair_tail(form);
     lt *args = make_empty_list();
