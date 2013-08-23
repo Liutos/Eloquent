@@ -15,10 +15,10 @@
 int main(int argc, char *argv[])
 {
   char *inputs[] = {
-      "(expand-macro '(defun gcd (n m) (if (= m 0) n (gcd m (mod n m)))))",
-      "(expand-macro '(name-lambda gcd (n m) (if (= m 0) n (gcd m (mod n m)))))",
-      "(name-lambda gcd (n m) (if (= m 0) n (gcd m (mod n m))))",
-//      "(defun gcd (n m) (if (= m 0) n (gcd m (mod n m))))",
+      "(gcd 1 2)",
+      "(gcd 2 1)",
+      "(gcd 2 4)",
+      "(gcd 81 90)",
   };
   init_global_variable();
   init_prims();
