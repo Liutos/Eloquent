@@ -364,7 +364,7 @@ int is_primitive_fun_name(lt *variable, lt *env) {
 int add_local_var(lt *var, lt *env) {
   if (isnull_env(env))
     return FALSE;
-  assert(ispair(environment_bindings(env)) || ispair(environment_bindings(env)));
+  assert(ispair(environment_bindings(env)) || isnull(environment_bindings(env)));
   if (ispair(environment_bindings(env))) {
     lt *tmp = environment_bindings(env);
     while (ispair(tmp)) {
