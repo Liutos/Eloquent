@@ -425,6 +425,10 @@ lt *compile_tagbody(lt *forms, lt *env) {
   }
 }
 
+int is_single_gvar(lt *seq) {
+  return isnull(pair_tail(seq)) && opcode_type(pair_head(seq)) == GVAR;
+}
+
 lisp_object_t *compile_object(lisp_object_t *object, lisp_object_t *env) {
   if (issymbol(object))
     return gen_var(object, env);
@@ -489,6 +493,9 @@ lisp_object_t *compile_object(lisp_object_t *object, lisp_object_t *env) {
   if (ispair(object)) {
     lisp_object_t *args = pair_tail(object);
     lisp_object_t *fn = pair_head(object);
+    lt *op = compile_object(fn, env);
+    if (is_single_gvar(op) && isundef(symbol_value(fn)))
+      writef(standard_error, "Warning: Function named %S is undefined.\n", fn);
     /* Generating different instruction when calling primitive and anything else */
     if (is_primitive_fun_name(fn, env)) {
       lt *nargs = lt_list_length(args);
@@ -499,12 +506,12 @@ lisp_object_t *compile_object(lisp_object_t *object, lisp_object_t *env) {
         return args;
       return seq(args,
                  compile_type_check(symbol_value(fn), nargs),
-                 compile_object(fn, env),
+                 op,
                  gen(PRIM, nargs),
                  gen(CHECKEX));
     } else
       return seq(compile_args(args, env),
-                 compile_object(fn, env),
+                 op,
                  gen(CALL, lt_list_length(args)),
                  gen(CHECKEX));
   }

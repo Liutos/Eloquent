@@ -17,6 +17,7 @@
 
 lt *gensym_counter;
 lt *null_env;
+lt *standard_error;
 lt *standard_in;
 lt *standard_out;
 lt *symbol_list;
@@ -426,12 +427,14 @@ void init_global_variable(void) {
   the_empty_list = make_empty_list();
   gensym_counter = make_fixnum(0);
   null_env = the_empty_list;
+  standard_error = make_output_file(stderr);
   standard_in = make_input_file(stdin);
   standard_out = make_output_file(stdout);
   symbol_list = the_empty_list;
   the_undef = make_undef();
 
   symbol_value(S("*gensym-counter*")) = gensym_counter;
+  symbol_value(S("*standard-error*")) = standard_error;
   symbol_value(S("*standard-output*")) = standard_out;
   symbol_value(S("*standard-input*")) = standard_in;
 
