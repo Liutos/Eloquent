@@ -88,6 +88,7 @@ struct lisp_object_t {
   union {
     struct {
       lt *bindings;
+      lt *next;
     } environment;
     struct {
       int signal_flag;
@@ -168,6 +169,7 @@ struct string_builder_t {
 
 /* Accessor macros */
 #define environment_bindings(x) ((x)->u.environment.bindings)
+#define environment_next(x) ((x)->u.environment.next)
 #define exception_msg(x) ((x)->u.exception.message)
 #define exception_flag(x) ((x)->u.exception.signal_flag)
 #define exception_tag(x) ((x)->u.exception.exception_tag)

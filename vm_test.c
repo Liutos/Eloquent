@@ -15,11 +15,14 @@
 int main(int argc, char *argv[])
 {
   char *inputs[] = {
-      "*standard-error*",
-      "(+ 1 1)",
-      "foobar",
-      "(lambda () (foobar))",
+//      "*standard-error*",
+//      "(fx+ 1 1)",
+//      "((lambda (x) (fx+ 1 x)) 1)",
+//      "((lambda (x . y) (cons x y)) 1 2 3)",
       "(gcd 81 90)",
+//      "foobar",
+//      "(lambda () (foobar))",
+//      "(gcd 81 90)",
   };
   init_global_variable();
   init_prims();

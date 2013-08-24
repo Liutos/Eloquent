@@ -229,6 +229,9 @@ void write_object(lt *x, lt *output_file) {
     case EMPTY_LIST:
     	write_raw_string("()", output_file);
     	break;
+    case ENVIRONMENT:
+      writef(output_file, "#<ENVIRONMENT %? %p>", environment_bindings(x), x);
+      break;
     case EXCEPTION:
       writef(output_file, "%S: ", exception_tag(x));
       write_raw_string(exception_msg(x), output_file);

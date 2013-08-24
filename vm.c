@@ -14,18 +14,16 @@
 #include "utilities.h"
 
 void add_local_variable(lt *var, lt *env) {
-//  if (env == null_env)
   if (isnull_env(env))
     return;
-//  assert(isvector(pair_head(env)));
   assert(isvector(environment_bindings(env)));
-//  lt_vector_push_extend(pair_head(env), make_undef());
   lt_vector_push_extend(environment_bindings(env), make_undef());
 }
 
 lt *walk_in_env(lt *env, int n) {
+  assert(isenvironment(env));
   while (n-- > 0)
-    env = pair_tail(env);
+    env = environment_next(env);
   return env;
 }
 
@@ -42,8 +40,8 @@ lisp_object_t *find_in_frame(lisp_object_t *bindings, int j) {
 }
 
 lisp_object_t *locate_var(lisp_object_t *env, int i, int j) {
+  assert(isenvironment(env) || isnull_env(env));
   env = walk_in_env(env, i);
-//  return find_in_frame(pair_head(env), j);
   return find_in_frame(environment_bindings(env), j);
 }
 
@@ -68,7 +66,6 @@ void set_in_frame(lisp_object_t *bindings, int j, lisp_object_t *value) {
 
 void set_local_var(lisp_object_t *env, int i, int j, lisp_object_t *value) {
   env = walk_in_env(env, i);
-//  set_in_frame(pair_head(env), j, value);
   set_in_frame(environment_bindings(env), j, value);
 }
 
@@ -137,7 +134,7 @@ lisp_object_t *run_by_llam(lisp_object_t *code_vector) {
           vector_value(args)[i] = arg;
           vector_last(args)++;
         }
-        env = make_pair(args, env);
+        env = make_environment(args, env);
         lt *ret = pair_head(return_stack);
         retaddr_sp(ret) = vector_last(stack);
       }
@@ -161,7 +158,7 @@ lisp_object_t *run_by_llam(lisp_object_t *code_vector) {
           lt *arg = lt_vector_pop(stack);
           vector_value(args)[i] = arg;
         }
-        env = make_pair(args, env);
+        env = make_environment(args, env);
         lt *ret = pair_head(return_stack);
         retaddr_sp(ret) = vector_last(stack);
       }
@@ -224,9 +221,6 @@ lisp_object_t *run_by_llam(lisp_object_t *code_vector) {
         lt *nargs = op_chktype_nargs(ins);
         lt *arg = vlast(stack, fixnum_value(nargs) - fixnum_value(index) - 1);
         if (is_type_satisfy(arg, pred) == FALSE) {
-//          char msg[256];
-//          sprintf(msg, "Argument at index %d is not of target type", fixnum_value(index));
-//          return signal_exception(strdup(msg));
           return type_error(index, pred);
         }
       }

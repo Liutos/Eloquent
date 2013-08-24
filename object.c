@@ -183,9 +183,10 @@ lt *make_fixnum(int value) {
   return (lt *)((value << FIXNUM_BITS) | FIXNUM_TAG);
 }
 
-lt *make_environment(lt *bindings) {
+lt *make_environment(lt *bindings, lt *next) {
   lt *env = make_object(ENVIRONMENT);
   environment_bindings(env) = bindings;
+  environment_next(env) = next;
   return env;
 }
 

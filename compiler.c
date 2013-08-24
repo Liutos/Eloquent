@@ -36,7 +36,6 @@ lt *get_offset(lt *label, lt *labels) {
     labels = pair_tail(labels);
   }
   fprintf(stdout, "Impossible!!! %s not found!\n", symbol_name(label));
-//  write_expr("labels", last_labels);
   writef(standard_out, "labels => %?\n", last_labels);
   exit(1);
 }
@@ -266,12 +265,10 @@ lt *make_proper_args(lt *args) {
 }
 
 lt *compile_lambda(lt *args, lt *body, lt *env) {
-//  assert(is_all_symbol(args));
-//  lisp_object_t *len = lt_list_length(args);
   lt *arg_ins = gen_args(args, 0);
   lisp_object_t *code =
       seq(arg_ins,
-          compile_begin(body, make_pair(make_proper_args(args), env)),
+          compile_begin(body, make_environment(make_proper_args(args), env)),
           gen(RETURN));
   lisp_object_t *func = make_function(env, args, code);
   return func;
@@ -319,16 +316,15 @@ lisp_object_t *is_var_in_frame(lisp_object_t *var, lisp_object_t *bindings) {
 
 lisp_object_t *is_var_in_env(lisp_object_t *symbol, lisp_object_t *env) {
   assert(issymbol(symbol));
+  assert(isenvironment(env) || isnull_env(env));
   int i = 0;
-//  while (env != null_env) {
   while (!isnull_env(env)) {
-//    lisp_object_t *bindings = pair_head(env);
     lt *bindings = environment_bindings(env);
     assert(isnull(bindings) || ispair(bindings) || isvector(bindings));
     lisp_object_t *j = is_var_in_frame(symbol, bindings);
     if (j != NULL)
       return make_pair(make_fixnum(i), j);
-    env = pair_tail(env);
+    env = environment_next(env);
     i++;
   }
   return NULL;
@@ -346,6 +342,7 @@ lisp_object_t *gen_set(lisp_object_t *symbol, lisp_object_t *env) {
 }
 
 lisp_object_t *gen_var(lisp_object_t *symbol, lisp_object_t *env) {
+  assert(isenvironment(env) || isnull_env(env));
   lisp_object_t *co = is_var_in_env(symbol, env);
   if (co == NULL)
     return gen(GVAR, symbol);
@@ -365,14 +362,10 @@ int is_primitive_fun_name(lt *variable, lt *env) {
 }
 
 int add_local_var(lt *var, lt *env) {
-//  if (env == null_env)
   if (isnull_env(env))
     return FALSE;
-//  assert(ispair(pair_head(env)) || isnull(pair_head(env)));
   assert(ispair(environment_bindings(env)) || ispair(environment_bindings(env)));
-//  if (ispair(pair_head(env))) {
   if (ispair(environment_bindings(env))) {
-//    lt *tmp = pair_head(env);
     lt *tmp = environment_bindings(env);
     while (ispair(tmp)) {
       if (pair_head(tmp) == var)
@@ -380,11 +373,9 @@ int add_local_var(lt *var, lt *env) {
       tmp = pair_tail(tmp);
     }
     lt *c = list1(var);
-//    pair_head(env) = seq(pair_head(env), c);
     environment_bindings(env) = seq(environment_bindings(env), c);
     return TRUE;
   } else {
-//    pair_head(env) = list1(var);
     environment_bindings(env) = list1(var);
     return TRUE;
   }
