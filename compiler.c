@@ -320,8 +320,10 @@ lisp_object_t *is_var_in_frame(lisp_object_t *var, lisp_object_t *bindings) {
 lisp_object_t *is_var_in_env(lisp_object_t *symbol, lisp_object_t *env) {
   assert(issymbol(symbol));
   int i = 0;
-  while (env != null_env) {
-    lisp_object_t *bindings = pair_head(env);
+//  while (env != null_env) {
+  while (!isnull_env(env)) {
+//    lisp_object_t *bindings = pair_head(env);
+    lt *bindings = environment_bindings(env);
     assert(isnull(bindings) || ispair(bindings) || isvector(bindings));
     lisp_object_t *j = is_var_in_frame(symbol, bindings);
     if (j != NULL)
@@ -363,21 +365,27 @@ int is_primitive_fun_name(lt *variable, lt *env) {
 }
 
 int add_local_var(lt *var, lt *env) {
-  if (env == null_env)
+//  if (env == null_env)
+  if (isnull_env(env))
     return FALSE;
-  assert(ispair(pair_head(env)) || isnull(pair_head(env)));
-  if (ispair(pair_head(env))) {
-    lt *tmp = pair_head(env);
+//  assert(ispair(pair_head(env)) || isnull(pair_head(env)));
+  assert(ispair(environment_bindings(env)) || ispair(environment_bindings(env)));
+//  if (ispair(pair_head(env))) {
+  if (ispair(environment_bindings(env))) {
+//    lt *tmp = pair_head(env);
+    lt *tmp = environment_bindings(env);
     while (ispair(tmp)) {
       if (pair_head(tmp) == var)
         return FALSE;
       tmp = pair_tail(tmp);
     }
     lt *c = list1(var);
-    pair_head(env) = seq(pair_head(env), c);
+//    pair_head(env) = seq(pair_head(env), c);
+    environment_bindings(env) = seq(environment_bindings(env), c);
     return TRUE;
   } else {
-    pair_head(env) = list1(var);
+//    pair_head(env) = list1(var);
+    environment_bindings(env) = list1(var);
     return TRUE;
   }
 }

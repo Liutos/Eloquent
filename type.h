@@ -39,6 +39,7 @@ enum TYPE {
   TEOF,
   TUNDEF,
   /* tagged-union */
+  ENVIRONMENT,
   EXCEPTION,
   FUNCTION,
   FLOAT,
@@ -85,6 +86,9 @@ struct lisp_object_t {
   int use_flag;
   enum TYPE type;
   union {
+    struct {
+      lt *bindings;
+    } environment;
     struct {
       int signal_flag;
       char *message;
@@ -163,6 +167,7 @@ struct string_builder_t {
 #define fixnum_value(x) (((int)(x)) >> FIXNUM_BITS)
 
 /* Accessor macros */
+#define environment_bindings(x) ((x)->u.environment.bindings)
 #define exception_msg(x) ((x)->u.exception.message)
 #define exception_flag(x) ((x)->u.exception.signal_flag)
 #define exception_tag(x) ((x)->u.exception.exception_tag)

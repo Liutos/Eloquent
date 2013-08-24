@@ -14,10 +14,13 @@
 #include "utilities.h"
 
 void add_local_variable(lt *var, lt *env) {
-  if (env == null_env)
+//  if (env == null_env)
+  if (isnull_env(env))
     return;
-  assert(isvector(pair_head(env)));
-  lt_vector_push_extend(pair_head(env), make_undef());
+//  assert(isvector(pair_head(env)));
+  assert(isvector(environment_bindings(env)));
+//  lt_vector_push_extend(pair_head(env), make_undef());
+  lt_vector_push_extend(environment_bindings(env), make_undef());
 }
 
 lt *walk_in_env(lt *env, int n) {
@@ -40,7 +43,8 @@ lisp_object_t *find_in_frame(lisp_object_t *bindings, int j) {
 
 lisp_object_t *locate_var(lisp_object_t *env, int i, int j) {
   env = walk_in_env(env, i);
-  return find_in_frame(pair_head(env), j);
+//  return find_in_frame(pair_head(env), j);
+  return find_in_frame(environment_bindings(env), j);
 }
 
 lisp_object_t *raw_vector_ref(lisp_object_t *vector, int index) {
@@ -64,7 +68,8 @@ void set_in_frame(lisp_object_t *bindings, int j, lisp_object_t *value) {
 
 void set_local_var(lisp_object_t *env, int i, int j, lisp_object_t *value) {
   env = walk_in_env(env, i);
-  set_in_frame(pair_head(env), j, value);
+//  set_in_frame(pair_head(env), j, value);
+  set_in_frame(environment_bindings(env), j, value);
 }
 
 int is_type_satisfy(lt *arg, lt *pred) {

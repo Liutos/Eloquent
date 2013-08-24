@@ -75,6 +75,7 @@ int is_of_type(lisp_object_t *object, enum TYPE type) {
     return is_of_type(object, type);            \
   }
 
+mktype_pred(isenvironment, ENVIRONMENT);
 mktype_pred(isexception, EXCEPTION)
 mktype_pred(isfloat, FLOAT)
 mktype_pred(isfunction, FUNCTION)
@@ -119,6 +120,10 @@ int is_signaled(lisp_object_t *object) {
 
 int isdot(lisp_object_t *object) {
   return object == the_dot_symbol;
+}
+
+int isnull_env(lt *obj) {
+  return obj == null_env;
 }
 
 int isnumber(lisp_object_t *object) {
@@ -176,6 +181,12 @@ lisp_object_t *make_character(char value) {
 
 lt *make_fixnum(int value) {
   return (lt *)((value << FIXNUM_BITS) | FIXNUM_TAG);
+}
+
+lt *make_environment(lt *bindings) {
+  lt *env = make_object(ENVIRONMENT);
+  environment_bindings(env) = bindings;
+  return env;
 }
 
 lt *make_exception(char *message, int signal_flag, lt *tag) {

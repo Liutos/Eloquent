@@ -28,6 +28,7 @@ lisp_object_t *the_undef;
 struct lisp_object_t lt_types[VECTOR + 1];
 
 extern int is_pointer(lt *);
+extern int isenvironment(lt *);
 extern int isexception(lt *);
 extern int isfloat(lt *);
 extern int isfunction(lt *);
@@ -52,6 +53,7 @@ extern int isundef(lt *);
 extern int isclose(lt *);
 extern int isboolean(lt *);
 extern int is_signaled(lt *);
+extern int isnull_env(lt *);
 extern int isnumber(lt *);
 extern int type_of(lt *);
 extern lt *make_false(void);
