@@ -134,7 +134,8 @@ lisp_object_t *run_by_llam(lisp_object_t *code_vector) {
           vector_value(args)[i] = arg;
           vector_last(args)++;
         }
-        env = make_environment(args, env);
+//        env = make_environment(args, env);
+        environment_bindings(env) = args;
         lt *ret = pair_head(return_stack);
         retaddr_sp(ret) = vector_last(stack);
       }
@@ -158,7 +159,8 @@ lisp_object_t *run_by_llam(lisp_object_t *code_vector) {
           lt *arg = lt_vector_pop(stack);
           vector_value(args)[i] = arg;
         }
-        env = make_environment(args, env);
+//        env = make_environment(args, env);
+        environment_bindings(env) = args;
         lt *ret = pair_head(return_stack);
         retaddr_sp(ret) = vector_last(stack);
       }
@@ -192,6 +194,7 @@ lisp_object_t *run_by_llam(lisp_object_t *code_vector) {
         pc = -1;
         throw_exception = TRUE;
         nargs = fixnum_value(op_call_arity(ins));
+        env = make_environment(make_empty_list(), env);
       }
         break;
       case CATCH:
