@@ -15,8 +15,8 @@
 int main(int argc, char *argv[])
 {
   char *inputs[] = {
-      "(gcd 81 90)",
-      "((lambda (x . y) (cons x y)) 1 2 3)",
+      "((lambda () (var x 1) x))",
+      "x",
   };
   init_global_variable();
   init_prims();

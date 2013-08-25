@@ -266,9 +266,10 @@ lt *make_proper_args(lt *args) {
 
 lt *compile_lambda(lt *args, lt *body, lt *env) {
   lt *arg_ins = gen_args(args, 0);
+  env = make_environment(make_proper_args(args), env);
   lisp_object_t *code =
       seq(arg_ins,
-          compile_begin(body, make_environment(make_proper_args(args), env)),
+          compile_begin(body, env),
           gen(RETURN));
   lisp_object_t *func = make_function(env, args, code, null_env);
   return func;

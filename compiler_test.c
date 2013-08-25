@@ -14,7 +14,7 @@
 int main(int argc, char *argv[])
 {
   char *inputs[] = {
-      "(function-env (let ((a 1)) (lambda (x) x)))",
+      "(function-cenv (lambda () (var x 1) x))",
   };
   init_global_variable();
   init_prims();
