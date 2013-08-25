@@ -15,8 +15,11 @@
 int main(int argc, char *argv[])
 {
   char *inputs[] = {
+      "(function-cenv (lambda () (var x 1) x))",
+      "(lambda () (var x 1) x)",
       "((lambda () (var x 1) x))",
-      "x",
+      "((lambda () (try-catch (/ 1 0) (ERROR (e) -1))))",
+      "(function-cenv (lambda (x) (var x 1) x))",
   };
   init_global_variable();
   init_prims();

@@ -122,9 +122,6 @@ void write_opcode(lt *opcode, lt *dest) {
     case CONST: 
     	writef(dest, "#<CONST %?>", op_const_value(opcode)); 
     	break;
-    case DECL:
-      writef(dest, "#<DECL %S>", op_decl_var(opcode));
-      break;
     case FJUMP: 
     	writef(dest, "#<FJUMP %?>", op_fjump_label(opcode)); 
     	break;

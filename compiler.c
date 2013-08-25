@@ -138,11 +138,6 @@ lisp_object_t *gen(enum TYPE opcode, ...) {
       ins = make_op_const(value);
     }
       break;
-    case DECL: {
-      lt *symbol = va_arg(ap, lt *);
-      ins = make_op_decl(symbol);
-    }
-      break;
     case FJUMP: {
       lisp_object_t *label = va_arg(ap, lisp_object_t *);
       ins = make_op_fjump(label);
@@ -362,23 +357,23 @@ int is_primitive_fun_name(lt *variable, lt *env) {
       isprimitive(symbol_value(variable));
 }
 
-int add_local_var(lt *var, lt *env) {
+lt *add_local_var(lt *var, lt *env) {
   if (isnull_env(env))
-    return FALSE;
+    return env;
   assert(ispair(environment_bindings(env)) || isnull(environment_bindings(env)));
   if (ispair(environment_bindings(env))) {
     lt *tmp = environment_bindings(env);
     while (ispair(tmp)) {
       if (pair_head(tmp) == var)
-        return FALSE;
+        return env;
       tmp = pair_tail(tmp);
     }
     lt *c = list1(var);
     environment_bindings(env) = seq(environment_bindings(env), c);
-    return TRUE;
+    return env;
   } else {
     environment_bindings(env) = list1(var);
-    return TRUE;
+    return env;
   }
 }
 
@@ -469,12 +464,9 @@ lisp_object_t *compile_object(lisp_object_t *object, lisp_object_t *env) {
   }
   if (is_tag_list(object, S("catch")))
     return gen(CATCH);
-  if (is_tag_list(object, S("declare"))) {
-    int result = add_local_var(second(object), env);
-    if (result)
-      return gen(DECL, second(object));
-    else
-      return gen(CONST, make_empty_list());
+  if (is_tag_list(object, S("var"))) {
+    env = add_local_var(second(object), env);
+    return compile_object(make_pair(S("set!"), pair_tail(object)), env);
   }
   if (is_tag_list(object, S("goto")))
     return gen(JUMP, second(object));

@@ -234,17 +234,12 @@ lisp_object_t *run_by_llam(lisp_object_t *code_vector) {
       case CONST:
         lt_vector_push(stack, op_const_value(ins));
         break;
-      case DECL:
-        add_local_variable(op_decl_var(ins), env);
-        lt_vector_push(stack, make_empty_list());
-        break;
       case FJUMP:
         if (isfalse(lt_vector_pop(stack)))
           pc = fixnum_value(op_fjump_label(ins)) - 1;
         break;
       case FN: {
         lisp_object_t *func = op_fn_func(ins);
-//        func = make_function(env, the_empty_list, function_code(func));
         lt *cenv = function_cenv(func);
         func = make_function(cenv, the_empty_list, function_code(func), env);
         lt_vector_push(stack, func);
