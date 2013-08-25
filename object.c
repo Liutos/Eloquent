@@ -204,11 +204,12 @@ lisp_object_t *make_float(float value) {
   return flt_num;
 }
 
-lt *make_function(lt *env, lt *args, lt *code) {
+lt *make_function(lt *cenv, lt *args, lt *code, lt *renv) {
   lt *func = make_object(FUNCTION);
-  function_env(func) = env;
+  function_cenv(func) = cenv;
   function_args(func) = args;
   function_code(func) = code;
+  function_renv(func) = renv;
   return func;
 }
 

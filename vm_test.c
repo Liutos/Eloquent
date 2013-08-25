@@ -15,14 +15,10 @@
 int main(int argc, char *argv[])
 {
   char *inputs[] = {
-//      "*standard-error*",
-//      "(fx+ 1 1)",
-//      "((lambda (x) (fx+ 1 x)) 1)",
-//      "((lambda (x . y) (cons x y)) 1 2 3)",
-      "(gcd 81 90)",
-//      "foobar",
-//      "(lambda () (foobar))",
-//      "(gcd 81 90)",
+      "(function-cenv (lambda (x) x))",
+      "(function-renv (lambda (x) x))",
+      "(function-cenv (let ((a 1)) (lambda (x) x)))",
+      "(function-renv (let ((a 1)) (lambda (x) x)))",
   };
   init_global_variable();
   init_prims();

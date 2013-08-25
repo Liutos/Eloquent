@@ -270,7 +270,7 @@ lt *compile_lambda(lt *args, lt *body, lt *env) {
       seq(arg_ins,
           compile_begin(body, make_environment(make_proper_args(args), env)),
           gen(RETURN));
-  lisp_object_t *func = make_function(env, args, code);
+  lisp_object_t *func = make_function(env, args, code, null_env);
   return func;
 }
 

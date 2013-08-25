@@ -447,6 +447,14 @@ lt *lt_function_arity(lt *function) {
     return lt_list_length(function_args(function));
 }
 
+lt *lt_function_cenv(lt *f) {
+  return function_cenv(f);
+}
+
+lt *lt_function_renv(lt *f) {
+  return function_renv(f);
+}
+
 lt *lt_load(lt *path) {
   lt *lt_close_in(lt *);
   lt *lt_open_in(lt *);
@@ -1279,6 +1287,8 @@ void init_prims(void) {
   ADD(1, FALSE, lt_eval, "eval");
   ADD(1, FALSE, lt_expand_macro, "expand-macro");
   ADD(1, FALSE, lt_function_arity, "function-arity");
+  ADD(1, FALSE, lt_function_cenv, "function-cenv");
+  ADD(1, FALSE, lt_function_renv, "function-renv");
   ADD(2, FALSE, lt_simple_apply, "simple-apply");
   /* Input File */
   ADD(1, FALSE, lt_close_in, "close-in");
@@ -1357,6 +1367,6 @@ void load_init_file(void) {
 void init_compiled_prims(void) {
   lt *code = seq(gen(ARGS, make_fixnum(1)), gen(LVAR, make_fixnum(0), make_fixnum(0), S("x")), gen(RETURN));
   code = assemble(code);
-  lt *func = make_function(null_env, raw_list(S("x")), code);
+  lt *func = make_function(null_env, raw_list(S("x")), code, null_env);
   symbol_value(S("identity")) = func;
 }

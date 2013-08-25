@@ -190,7 +190,7 @@ lisp_object_t *run_by_llam(lisp_object_t *code_vector) {
             make_retaddr(code, env, need, 0, pc, throw_exception, vector_last(stack));
         return_stack = make_pair(retaddr, return_stack);
         code = function_code(func);
-        env = function_env(func);
+        env = function_renv(func);
         pc = -1;
         throw_exception = TRUE;
         nargs = fixnum_value(op_call_arity(ins));
@@ -241,7 +241,9 @@ lisp_object_t *run_by_llam(lisp_object_t *code_vector) {
         break;
       case FN: {
         lisp_object_t *func = op_fn_func(ins);
-        func = make_function(env, the_empty_list, function_code(func));
+//        func = make_function(env, the_empty_list, function_code(func));
+        lt *cenv = function_cenv(func);
+        func = make_function(cenv, the_empty_list, function_code(func), env);
         lt_vector_push(stack, func);
       }
         break;
@@ -279,7 +281,8 @@ lisp_object_t *run_by_llam(lisp_object_t *code_vector) {
         break;
       case MACROFN: {
         lisp_object_t *func = op_macro_func(ins);
-        func = make_function(env, the_empty_list, function_code(func));
+        lt *cenv = function_cenv(func);
+        func = make_function(cenv, the_empty_list, function_code(func), env);
         lt_vector_push(stack, make_macro(func, env));
       }
       	break;
