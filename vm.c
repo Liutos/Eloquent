@@ -135,14 +135,12 @@ lisp_object_t *run_by_llam(lisp_object_t *code_vector) {
         else if (fixnum_value(argc) < nargs)
           return signal_exception("Too many arguments passed");
 
-        lisp_object_t *args = make_vector(fixnum_value(op_args_arity(ins)));
+        lt *args = environment_bindings(env);
         for (int i = fixnum_value(op_args_arity(ins)) - 1; i >= 0; i--) {
           lisp_object_t *arg = lt_vector_pop(stack);
           vector_value(args)[i] = arg;
           vector_last(args)++;
         }
-//        env = make_environment(args, env);
-        environment_bindings(env) = args;
         lt *ret = pair_head(return_stack);
         retaddr_sp(ret) = vector_last(stack);
       }
@@ -161,13 +159,11 @@ lisp_object_t *run_by_llam(lisp_object_t *code_vector) {
           rest = make_pair(arg, rest);
         }
         lt_vector_push(stack, rest);
-        lt *args = make_vector(fixnum_value(op_args_arity(ins)) + 1);
+        lt *args = environment_bindings(env);
         for (int i = fixnum_value(op_argsd_arity(ins)); i >= 0; i--) {
           lt *arg = lt_vector_pop(stack);
           vector_value(args)[i] = arg;
         }
-//        env = make_environment(args, env);
-        environment_bindings(env) = args;
         lt *ret = pair_head(return_stack);
         retaddr_sp(ret) = vector_last(stack);
       }
@@ -201,8 +197,6 @@ lisp_object_t *run_by_llam(lisp_object_t *code_vector) {
         pc = -1;
         throw_exception = TRUE;
         nargs = fixnum_value(op_call_arity(ins));
-//        TODO: Create the new runtime environment based on the the compile time environment.
-//        env = make_environment(make_empty_list(), env);
         env = comp2run_env(function_cenv(func), env);
       }
         break;
