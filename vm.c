@@ -99,6 +99,13 @@ lt *type_error(lt *index, lt *pred) {
   return make_exception(strdup(msg), TRUE, S("TYPE-ERROR"));
 }
 
+lt *comp2run_env(lt *comp_env, lt *next) {
+  lt *pars = environment_bindings(comp_env);
+  assert(ispair(pars) || isnull(pars));
+  lt *len = lt_list_length(pars);
+  return make_environment(make_vector(fixnum_value(len)), next);
+}
+
 lisp_object_t *run_by_llam(lisp_object_t *code_vector) {
 #define _arg(N) vlast(stack, primitive_arity(func) - N)
 #define _arg1 _arg(1)
@@ -194,7 +201,9 @@ lisp_object_t *run_by_llam(lisp_object_t *code_vector) {
         pc = -1;
         throw_exception = TRUE;
         nargs = fixnum_value(op_call_arity(ins));
-        env = make_environment(make_empty_list(), env);
+//        TODO: Create the new runtime environment based on the the compile time environment.
+//        env = make_environment(make_empty_list(), env);
+        env = comp2run_env(function_cenv(func), env);
       }
         break;
       case CATCH:

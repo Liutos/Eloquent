@@ -439,7 +439,9 @@ void init_global_variable(void) {
   the_true = make_true();
   the_empty_list = make_empty_list();
   gensym_counter = make_fixnum(0);
-  null_env = the_empty_list;
+//  null_env = the_empty_list;
+  null_env = make_environment(the_empty_list, NULL);
+  environment_next(null_env) = null_env;
   standard_error = make_output_file(stderr);
   standard_in = make_input_file(stdin);
   standard_out = make_output_file(stdout);
