@@ -81,13 +81,17 @@
        ,e2
      #f))
 
-(define length-tco (n list)
-  (if (null? list)
-      n
-    (length-tco (bin+ n 1) (tail list))))
-
 (define length (list)
-  (length-tco 0 list))
+  (let ((aux (lambda (n list)
+               (tagbody
+                aux
+                 (if (null? list)
+                     n
+                   (begin
+                    (set! n (+ n 1))
+                    (set! list (tail list))
+                    (goto aux)))))))
+    (aux 0 list)))
 
 (define fixnum? (n)
   (eq? 'fixnum (type-name (type-of n))))
