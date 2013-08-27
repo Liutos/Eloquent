@@ -500,12 +500,12 @@ lisp_object_t *compile_object(lisp_object_t *object, lisp_object_t *env) {
                  compile_type_check(symbol_value(fn), nargs),
                  op,
                  gen(PRIM, nargs),
-                 gen(CHECKEX));
+                 (is_check_type? gen(CHECKEX): the_empty_list));
     } else
       return seq(compile_args(args, env),
                  op,
                  gen(CALL, lt_list_length(args)),
-                 gen(CHECKEX));
+                 (is_check_type? gen(CHECKEX): the_empty_list));
   }
   writef(standard_out, "Impossible --- Unable to compile %?\n", object);
   exit(1);

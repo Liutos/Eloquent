@@ -15,6 +15,7 @@
 #include "object.h"
 #include "type.h"
 
+int is_check_type;
 lt *gensym_counter;
 lt *null_env;
 lt *standard_error;
@@ -431,11 +432,11 @@ lt *lt_type_name(lt *type) {
 
 void init_global_variable(void) {
   /* Initialize global variables */
+  is_check_type = TRUE;
   the_false = make_false();
   the_true = make_true();
   the_empty_list = make_empty_list();
   gensym_counter = make_fixnum(0);
-//  null_env = the_empty_list;
   null_env = make_environment(the_empty_list, NULL);
   environment_next(null_env) = null_env;
   standard_error = make_output_file(stderr);

@@ -15,9 +15,9 @@
 int main(int argc, char *argv[])
 {
   char *inputs[] = {
-      "length",
-      "(length '())",
-      "(length '(1 2 3))",
+      "(lambda () (fx+ 1 1))",
+      "(switch-type-check)",
+      "(lambda () (fx+ 1 1))",
   };
   init_global_variable();
   init_prims();
