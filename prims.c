@@ -515,6 +515,16 @@ lt *lt_read_line(lt *in_port) {
 }
 
 /* List */
+lt *lt_list_last(lt *list) {
+  tco:
+  if (isnull(pair_tail(list)))
+    return pair_head(list);
+  else {
+    list = pair_tail(list);
+    goto tco;
+  }
+}
+
 lt *lt_list_length(lt *list) {
   if (isnull(list))
     return make_fixnum(0);
@@ -1309,6 +1319,8 @@ void init_prims(void) {
   ADD(2, FALSE, make_pair, "cons");
   ADD(1, FALSE, lt_head, "head");
   ADD(1, TRUE, lt_list, "list");
+  ADD(1, FALSE, lt_list_last, "list-last");
+  SIG("list-last", T(PAIR));
   ADD(1, FALSE, lt_list_length, "list-length");
   ADD(1, FALSE, lt_list_nreverse, "list-reverse!");
   ADD(1, FALSE, lt_list_reverse, "list-reverse");

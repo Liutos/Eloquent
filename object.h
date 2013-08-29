@@ -74,7 +74,7 @@ extern lt *make_macro(lt *, lt *);
 extern lt *make_output_file(FILE *);
 extern lt *make_pair(lt *, lt *);
 extern lt *make_primitive(int, void *, char *, int);
-extern lt *make_retaddr(lt *code, lt *env, int need, int nvals, int pc, int throw_flag, int sp);
+extern lt *make_retaddr(lt *code, lt *env, lt *fn, int need, int nvals, int pc, int throw_flag, int sp);
 extern string_builder_t *make_str_builder(void);
 extern lt *make_string(char *);
 extern lt *make_symbol(char *);
@@ -99,7 +99,7 @@ extern lt *make_op_mvcall(void);
 extern lt *make_op_need(void);
 extern lt *make_op_pop(void);
 extern lt *make_op_prim(lt *);
-extern lt *make_op_return(void);
+extern lt *make_op_return(lt *);
 extern lt *make_op_values(lt *);
 extern lt *make_op_catch();
 

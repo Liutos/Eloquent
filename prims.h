@@ -37,6 +37,7 @@ extern F1(lt_read_line);
 extern F1(lt_close_out);
 /* List */
 extern F1(lt_head);
+extern F1(lt_list_last);
 extern F1(lt_list_length);
 extern F1(lt_list_nreverse);
 extern F1(lt_list_reverse);

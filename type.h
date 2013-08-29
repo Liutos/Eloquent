@@ -103,6 +103,7 @@ struct lisp_object_t {
 //      1. An environment records the information at compile time, only can be initialized when compiling;
 //      2. An environment holds the parameters and local variables, only can be initialized when running.
 //      `cenv' means `compile environment' and `renv' means `runtime environment'.
+      int cp;
       lt *cenv, *renv;
       lt *args;
     } function;
@@ -138,6 +139,7 @@ struct lisp_object_t {
       int need, nvals, pc, sp, throw_flag;
       lt *code;
       lt *env;
+      lt *fn;
     } retaddr;
     struct {
       int length;
@@ -179,6 +181,7 @@ struct string_builder_t {
 #define float_value(x) ((x)->u.float_num.value)
 #define function_args(x) ((x)->u.function.args)
 #define function_cenv(x) ((x)->u.function.cenv)
+#define function_cp(x) ((x)->u.function.cp)
 #define function_renv(x) ((x)->u.function.renv)
 #define function_code(x) ((x)->u.function.code)
 #define input_file_colnum(x) ((x)->u.input_file.colnum)
@@ -203,6 +206,7 @@ struct string_builder_t {
 #define primitive_restp(x) ((x)->u.primitive.restp)
 #define retaddr_code(x) ((x)->u.retaddr.code)
 #define retaddr_env(x) ((x)->u.retaddr.env)
+#define retaddr_fn(x) ((x)->u.retaddr.fn)
 #define retaddr_need(x) ((x)->u.retaddr.need)
 #define retaddr_nvals(x) ((x)->u.retaddr.nvals)
 #define retaddr_pc(x) ((x)->u.retaddr.pc)
@@ -243,6 +247,7 @@ struct string_builder_t {
 #define op_lvar_var(x) oparg3(x)
 #define op_macro_func(x) oparg1(x)
 #define op_prim_nargs(x) oparg1(x)
+#define op_return_flag(x) oparg1(x)
 #define op_values_nargs(x) oparg1(x)
 
 #endif /* TYPE_H_ */

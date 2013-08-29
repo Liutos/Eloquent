@@ -190,11 +190,12 @@ lisp_object_t *run_by_llam(lisp_object_t *code_vector) {
           return signal_exception(msg);
         }
         lisp_object_t *retaddr =
-            make_retaddr(code, env, need, 0, pc, throw_exception, vector_last(stack));
+            make_retaddr(code, env, func, need, 0, pc, throw_exception, vector_last(stack));
         return_stack = make_pair(retaddr, return_stack);
         code = function_code(func);
         env = function_renv(func);
-        pc = -1;
+//        pc = -1;
+        pc = function_cp(func);
         throw_exception = TRUE;
         nargs = fixnum_value(op_call_arity(ins));
         env = comp2run_env(function_cenv(func), env);
@@ -363,6 +364,11 @@ lisp_object_t *run_by_llam(lisp_object_t *code_vector) {
         if (isnull(return_stack))
           break;
         lisp_object_t *retaddr = pair_head(return_stack);
+//        Store the current position in compiled instructions if flag is true
+        lt *flag = op_return_flag(ins);
+        if (flag == the_true)
+          function_cp(retaddr_fn(retaddr)) = pc;
+
         return_stack = pair_tail(return_stack);
         code = retaddr_code(retaddr);
         env = retaddr_env(retaddr);

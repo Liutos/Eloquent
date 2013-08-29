@@ -187,7 +187,7 @@ lisp_object_t *gen(enum TYPE opcode, ...) {
       ins = make_op_prim(va_arg(ap, lisp_object_t *));
       break;
     case RETURN:
-      ins = make_op_return();
+      ins = make_op_return(va_arg(ap, lt *));
       break;
     case VALUES:
       ins = make_op_values(va_arg(ap, lt *));
@@ -224,6 +224,11 @@ lisp_object_t *compile_args(lisp_object_t *args, lisp_object_t *env) {
   }
 }
 
+int is_no_value_return(lt *inseq) {
+  lt *ins = lt_list_last(inseq);
+  return opcode_type(ins) == RETURN;
+}
+
 lisp_object_t *compile_begin(lisp_object_t *exps, lisp_object_t *env) {
   if (isnull(exps))
     return gen(CONST, the_empty_list);
@@ -231,7 +236,7 @@ lisp_object_t *compile_begin(lisp_object_t *exps, lisp_object_t *env) {
     return compile_object(first(exps), env);
   else {
     lisp_object_t *st = compile_object(first(exps), env);
-    lisp_object_t *nd = gen(POP);
+    lisp_object_t *nd = is_no_value_return(st) ? the_empty_list: gen(POP);
     lisp_object_t *rd = compile_begin(pair_tail(exps), env);
     return seq(st, nd, rd);
   }
@@ -265,7 +270,7 @@ lt *compile_lambda(lt *args, lt *body, lt *env) {
   lisp_object_t *code =
       seq(arg_ins,
           compile_begin(body, env),
-          gen(RETURN));
+          gen(RETURN, the_false));
   lisp_object_t *func = make_function(env, args, code, null_env);
   return func;
 }
@@ -481,6 +486,11 @@ lisp_object_t *compile_object(lisp_object_t *object, lisp_object_t *env) {
   if (is_tag_list(object, S("values"))) {
     lt *args = compile_args(pair_tail(object), env);
     return seq(args, gen(VALUES, lt_list_length(pair_tail(object))));
+  }
+  if (is_tag_list(object, S("yield"))) {
+    lt *val = second(object);
+//    return gen(RETURN, the_true);
+    return seq(compile_object(val, env), gen(RETURN, the_true));
   }
   if (ispair(object)) {
     lisp_object_t *args = pair_tail(object);

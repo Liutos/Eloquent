@@ -15,9 +15,14 @@
 int main(int argc, char *argv[])
 {
   char *inputs[] = {
-      "(lambda () (fx+ 1 1))",
-      "(switch-type-check)",
-      "(lambda () (fx+ 1 1))",
+      "(set! abc (lambda () (yield 2) 1))",
+      "(abc)",
+      "(abc)",
+      "(abc)",
+      "(set! def (lambda () (yield 1) (yield 2)))",
+      "(def)",
+      "(def)",
+      "(def)",
   };
   init_global_variable();
   init_prims();

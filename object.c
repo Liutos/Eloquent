@@ -210,6 +210,7 @@ lt *make_function(lt *cenv, lt *args, lt *code, lt *renv) {
   function_cenv(func) = cenv;
   function_args(func) = args;
   function_code(func) = code;
+  function_cp(func) = -1;
   function_renv(func) = renv;
   return func;
 }
@@ -256,10 +257,11 @@ lisp_object_t *make_primitive(int arity, void *C_function, char *Lisp_name, int 
   return p;
 }
 
-lt *make_retaddr(lt *code, lt *env, int need, int nvals, int pc, int throw_flag, int sp) {
+lt *make_retaddr(lt *code, lt *env, lt *fn, int need, int nvals, int pc, int throw_flag, int sp) {
   lt *retaddr = make_object(RETADDR);
   retaddr_code(retaddr) = code;
   retaddr_env(retaddr) = env;
+  retaddr_fn(retaddr) = fn;
   retaddr_need(retaddr) = need;
   retaddr_nvals(retaddr) = nvals;
   retaddr_pc(retaddr) = pc;
@@ -395,8 +397,8 @@ lisp_object_t *make_op_prim(lisp_object_t *nargs) {
   return mkopcode(PRIM, "PRIM", 1, nargs);
 }
 
-lisp_object_t *make_op_return(void) {
-  return mkopcode(RETURN, "RETURN", 0);
+lisp_object_t *make_op_return(lt *flag) {
+  return mkopcode(RETURN, "RETURN", 1, flag);
 }
 
 lt *make_op_values(lt *nargs) {

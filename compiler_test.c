@@ -14,7 +14,8 @@
 int main(int argc, char *argv[])
 {
   char *inputs[] = {
-      "(lambda () (var x 1) x)",
+      "(lambda () 1 2 3 4)",
+      "(lambda () (yield 2) (yield 1))",
   };
   init_global_variable();
   init_prims();
