@@ -191,10 +191,11 @@ lt *make_environment(lt *bindings, lt *next) {
   return env;
 }
 
-lt *make_exception(char *message, int signal_flag, lt *tag) {
+lt *make_exception(char *message, int signal_flag, lt *tag, lt *backtrace) {
   lt *ex = make_object(EXCEPTION);
   exception_msg(ex) = message;
   exception_flag(ex) = signal_flag;
+  exception_backtrace(ex) = backtrace;
   exception_tag(ex) = tag;
   return ex;
 }

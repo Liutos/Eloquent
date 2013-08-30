@@ -15,10 +15,10 @@
 int main(int argc, char *argv[])
 {
   char *inputs[] = {
-      "(set! fn (lambda () (yield 2)))",
-      "(fn)",
-      "(fn)",
-      "(fn)",
+      "(set! f1 (lambda () (fx/ 1 0)))",
+      "(set! f2 (lambda () (f1)))",
+      "(set! f3 (lambda () (f2)))",
+      "(f3)",
   };
   init_global_variable();
   init_prims();

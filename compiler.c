@@ -408,7 +408,7 @@ int is_argc_satisfy(int argc, lt *prim_name) {
 }
 
 lt *compiler_error(char *message) {
-  return make_exception(message, TRUE, S("COMPILER-ERROR"));
+  return make_exception(message, TRUE, S("COMPILER-ERROR"), the_empty_list);
 }
 
 lt *compile_tagbody(lt *forms, lt *env) {

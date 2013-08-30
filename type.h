@@ -92,6 +92,7 @@ struct lisp_object_t {
     struct {
       int signal_flag;
       char *message;
+      lt *backtrace;
       lt *exception_tag;
     } exception;
     struct {
@@ -177,6 +178,7 @@ struct string_builder_t {
 #define environment_next(x) ((x)->u.environment.next)
 #define exception_msg(x) ((x)->u.exception.message)
 #define exception_flag(x) ((x)->u.exception.signal_flag)
+#define exception_backtrace(x) ((x)->u.exception.backtrace)
 #define exception_tag(x) ((x)->u.exception.exception_tag)
 #define float_value(x) ((x)->u.float_num.value)
 #define function_args(x) ((x)->u.function.args)

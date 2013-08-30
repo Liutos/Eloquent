@@ -229,9 +229,16 @@ void write_object(lt *x, lt *output_file) {
     case ENVIRONMENT:
       writef(output_file, "#<ENVIRONMENT %? %p>", environment_bindings(x), x);
       break;
-    case EXCEPTION:
+    case EXCEPTION: {
       writef(output_file, "%S: ", exception_tag(x));
-      write_raw_string(exception_msg(x), output_file);
+//      write_raw_string(exception_msg(x), output_file);
+      writef(output_file, "%s\n", make_string(exception_msg(x)));
+      lt *backtrace = exception_backtrace(x);
+      while (!isnull(backtrace)) {
+        write_object(pair_head(backtrace), output_file);
+        backtrace = pair_tail(backtrace);
+      }
+    }
       break;
     case FIXNUM:
     	writef(output_file, "%d", x);

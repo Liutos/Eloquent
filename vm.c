@@ -96,7 +96,7 @@ lt *type_error(lt *index, lt *pred) {
   lt *file = make_output_file(buf);
   writef(file, "The argument at index %d is not satisfy with predicate %?", index, pred);
   lt_close_out(file);
-  return make_exception(strdup(msg), TRUE, S("TYPE-ERROR"));
+  return make_exception(strdup(msg), TRUE, S("TYPE-ERROR"), the_empty_list);
 }
 
 lt *comp2run_env(lt *comp_env, lt *next) {
@@ -212,6 +212,8 @@ lisp_object_t *run_by_llam(lisp_object_t *code_vector) {
             goto halt;
           lt *ex = lt_vector_pop(stack);
           lt *ret = pair_head(return_stack);
+          lt *fn = retaddr_fn(ret);
+          exception_backtrace(ex) = make_pair(fn, exception_backtrace(ex));
           return_stack = pair_tail(return_stack);
           vector_last(stack) = retaddr_sp(ret);
           code = retaddr_code(ret);

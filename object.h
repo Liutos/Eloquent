@@ -66,7 +66,7 @@ extern lt *make_close(void);
 extern lt *make_character(char);
 extern lt *make_fixnum(int);
 extern lt *make_environment(lt *, lt *);
-extern lt *make_exception(char *, int, lt *);
+extern lt *make_exception(char *, int, lt *, lt *backtrace);
 extern lt *make_float(float);
 extern lt *make_function(lt *cenv, lt *args, lt *code, lt *renv);
 extern lt *make_input_file(FILE *);
