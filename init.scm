@@ -3,8 +3,10 @@
         `(set! ,var (macro ,pars ,@body))))
 
 (defmacro define (var pars . body)
-  `(set! ,var
-         (lambda ,pars ,@body)))
+  `(begin
+    (set! ,var
+          (lambda ,pars ,@body))
+    (set-function-name! ,var ',var)))
 
 (define abs (x)
   (if (> 0 x)

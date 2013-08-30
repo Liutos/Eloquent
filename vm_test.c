@@ -15,9 +15,9 @@
 int main(int argc, char *argv[])
 {
   char *inputs[] = {
-      "(set! f1 (lambda () (fx/ 1 0)))",
-      "(set! f2 (lambda () (f1)))",
-      "(set! f3 (lambda () (f2)))",
+      "(define f1 () (fx/ 1 0))",
+      "(define f2 () (f1))",
+      "(define f3 () (f2))",
       "(f3)",
   };
   init_global_variable();

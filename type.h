@@ -107,6 +107,7 @@ struct lisp_object_t {
       int cp;
       lt *cenv, *renv;
       lt *args;
+      lt *name;
     } function;
     struct {
       int colnum, linum, openp;
@@ -186,6 +187,7 @@ struct string_builder_t {
 #define function_cp(x) ((x)->u.function.cp)
 #define function_renv(x) ((x)->u.function.renv)
 #define function_code(x) ((x)->u.function.code)
+#define function_name(x) ((x)->u.function.name)
 #define input_file_colnum(x) ((x)->u.input_file.colnum)
 #define input_file_file(x) ((x)->u.input_file.file)
 #define input_file_linum(x) ((x)->u.input_file.linum)

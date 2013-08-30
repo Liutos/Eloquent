@@ -212,6 +212,7 @@ lt *make_function(lt *cenv, lt *args, lt *code, lt *renv) {
   function_args(func) = args;
   function_code(func) = code;
   function_cp(func) = -1;
+  function_name(func) = the_undef;
   function_renv(func) = renv;
   return func;
 }

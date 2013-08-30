@@ -164,7 +164,7 @@ void write_opcode(lt *opcode, lt *dest) {
 }
 
 void write_compiled_function(lt *function, int indent, lt *dest) {
-  writef(dest, "#<COMPILED-FUNCTION %p\n", function);
+  writef(dest, "#<COMPILED-FUNCTION %p name: %?\n", function, function_name(function));
   assert(isvector(function_code(function)));
   for (int i = 0; i < vector_length(function_code(function)); i++) {
     lt *ins = vector_value(function_code(function))[i];
@@ -183,9 +183,9 @@ void write_compiled_function(lt *function, int indent, lt *dest) {
       write_compiled_function(op_fn_func(ins), output_file_colnum(dest), dest);
     } else {
       for (int j = 0; j < vector_length(opcode_oprands(ins)); j++) {
-	write_object(vector_value(opcode_oprands(ins))[j], dest);
-	if (j != vector_length(opcode_oprands(ins)) - 1)
-	  write_raw_char(' ', dest);
+        write_object(vector_value(opcode_oprands(ins))[j], dest);
+        if (j != vector_length(opcode_oprands(ins)) - 1)
+          write_raw_char(' ', dest);
       }
     }
     write_raw_char('\n', dest);
@@ -231,11 +231,12 @@ void write_object(lt *x, lt *output_file) {
       break;
     case EXCEPTION: {
       writef(output_file, "%S: ", exception_tag(x));
-//      write_raw_string(exception_msg(x), output_file);
       writef(output_file, "%s\n", make_string(exception_msg(x)));
       lt *backtrace = exception_backtrace(x);
       while (!isnull(backtrace)) {
-        write_object(pair_head(backtrace), output_file);
+        writef(output_file, "%?", function_name(pair_head(backtrace)));
+        if (!isnull(pair_tail(backtrace)))
+          write_raw_char('\n', output_file);
         backtrace = pair_tail(backtrace);
       }
     }
@@ -453,6 +454,15 @@ lt *lt_function_arity(lt *function) {
 
 lt *lt_function_cenv(lt *f) {
   return function_cenv(f);
+}
+
+lt *lt_function_name(lt *f) {
+  return function_name(f);
+}
+
+lt *lt_set_function_name(lt *f, lt *name) {
+  function_name(f) = name;
+  return f;
 }
 
 lt *lt_function_renv(lt *f) {
@@ -1310,6 +1320,9 @@ void init_prims(void) {
   ADD(1, FALSE, lt_expand_macro, "expand-macro");
   ADD(1, FALSE, lt_function_arity, "function-arity");
   ADD(1, FALSE, lt_function_cenv, "function-cenv");
+  ADD(1, FALSE, lt_function_name, "function-name");
+  ADD(2, FALSE, lt_set_function_name, "set-function-name!");
+  SIG("set-function-name!", T(FUNCTION), T(SYMBOL));
   ADD(1, FALSE, lt_function_renv, "function-renv");
   ADD(2, FALSE, lt_simple_apply, "simple-apply");
   /* Input File */
