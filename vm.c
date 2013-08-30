@@ -368,6 +368,8 @@ lisp_object_t *run_by_llam(lisp_object_t *code_vector) {
         lt *flag = op_return_flag(ins);
         if (flag == the_true)
           function_cp(retaddr_fn(retaddr)) = pc;
+        else
+          function_cp(retaddr_fn(retaddr)) = -1;
 
         return_stack = pair_tail(return_stack);
         code = retaddr_code(retaddr);

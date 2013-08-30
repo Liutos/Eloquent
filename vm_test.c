@@ -19,10 +19,6 @@ int main(int argc, char *argv[])
       "(abc)",
       "(abc)",
       "(abc)",
-      "(set! def (lambda () (yield 1) (yield 2)))",
-      "(def)",
-      "(def)",
-      "(def)",
   };
   init_global_variable();
   init_prims();
