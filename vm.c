@@ -383,6 +383,9 @@ lisp_object_t *run_by_llam(lisp_object_t *code_vector) {
           for (int i = 1; i < nvals; i++)
             lt_vector_pop(stack);
         }
+//        Place the empty list as the default return value on the operand stack
+        if (vector_last(stack) == retaddr_sp(retaddr))
+          lt_vector_push(stack, the_empty_list);
       }
         break;
       case VALUES:
