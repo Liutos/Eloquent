@@ -1044,10 +1044,15 @@ lt *lt_switch_type_check(void) {
 
 /* Reader */
 int peek_char(lisp_object_t *input_file) {
-  FILE *in = input_file_file(input_file);
-  int c = getc(in);
-  ungetc(c, in);
-  return c;
+  assert(isinput_file(input_file) || isinput_string(input_file));
+  if (isinput_file(input_file)) {
+    FILE *in = input_file_file(input_file);
+    int c = getc(in);
+    ungetc(c, in);
+    return c;
+  } else {
+    return input_string_value(input_file)[input_string_index(input_file)];
+  }
 }
 
 void unget_char(int c, lisp_object_t *input_file) {
@@ -1062,7 +1067,7 @@ void unget_char(int c, lisp_object_t *input_file) {
 }
 
 int isdelimiter(int c) {
-  int ds[] = { EOF, ' ', '\n', '(', ')', '"', '[', ']', ';' };
+  int ds[] = { EOF, ' ', '\n', '(', ')', '"', '[', ']', ';', '\0'};
   for (int i = 0; i < sizeof(ds) / sizeof(int); i++) {
     if (ds[i] == c)
       return TRUE;
@@ -1283,10 +1288,11 @@ lisp_object_t *read_object(lisp_object_t *input_file) {
 }
 
 lisp_object_t *read_object_from_string(char *text) {
-  FILE *in = fmemopen(text, strlen(text), "r");
-  lisp_object_t *inf = make_input_file(in);
+//  FILE *in = fmemopen(text, strlen(text), "r");
+//  lisp_object_t *inf = make_input_file(in);
+  lt *inf = make_input_string(text);
   lt *obj = read_object(inf);
-  fclose(in);
+//  fclose(in);
   return obj;
 }
 

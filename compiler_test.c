@@ -4,6 +4,8 @@
  *  Created on: 2013年7月19日
  *      Author: liutos
  */
+#include <string.h>
+
 #include "compiler.h"
 #include "macros.h"
 #include "object.h"
@@ -26,7 +28,7 @@ int main(int argc, char *argv[])
     write_raw_string(">> ", standard_out);
     write_raw_string(inputs[i], standard_out);
     write_raw_char('\n', standard_out);
-    lisp_object_t *expr = read_object_from_string(inputs[i]);
+    lisp_object_t *expr = read_object_from_string(strdup(inputs[i]));
     expr = compile_to_bytecode(expr);
     if (is_signaled(expr))
       writef(standard_out, "%?\n", expr);

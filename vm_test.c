@@ -5,6 +5,8 @@
  *
  * Copyright (C) 2013-06-07 liutos <mat.liutos@gmail.com>
  */
+#include <string.h>
+
 #include "compiler.h"
 #include "macros.h"
 #include "object.h"
@@ -15,12 +17,13 @@
 int main(int argc, char *argv[])
 {
   char *inputs[] = {
-      "make-input-string",
-      "(set! is (make-input-string \"Hello world!\\n\"))",
-      "read-char-from-string",
-      "(read-char-from-string is)", // #\H
-      "(read-char-from-string is)", // #\e
-      "(read-char-from-string is)", // #\l
+//      "a",
+//      "make-input-string",
+      "(set! is (make-input-string \"abc\"))",
+//      "read-char-from-string",
+      "(read-char-from-string is)", // #\a
+//      "(read-char-from-string is)", // #\e
+//      "(read-char-from-string is)", // #\l
       "(unget-char-to-string #\\m is)", // #\m
       "(read-char-from-string is)", // #\m
   };
@@ -28,10 +31,10 @@ int main(int argc, char *argv[])
   init_prims();
   init_compiled_prims();
   init_macros();
-  load_init_file();
+//  load_init_file();
   for (int i = 0; i < sizeof(inputs) / sizeof(char *); i++) {
     writef(standard_out, ">> %s\n", make_string(inputs[i]));
-    lisp_object_t *expr = read_object_from_string(inputs[i]);
+    lisp_object_t *expr = read_object_from_string(strdup(inputs[i]));
     expr = compile_to_bytecode(expr);
     if (!is_signaled(expr))
       expr = run_by_llam(expr);
