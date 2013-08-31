@@ -8,11 +8,6 @@
           (lambda ,pars ,@body))
     (set-function-name! ,var ',var)))
 
-(define abs (x)
-  (if (> 0 x)
-      (bin- 0 x)
-      x))
-
 (define < (x y)
   (cond ((> x y) #f)
         ((= x y) #f)
@@ -42,23 +37,9 @@
 (defmacro typecase (keyform . clauses)
   `(case (type-name (type-of ,keyform)) ,@clauses))
 
-(define nth-m (n lst)
-  (tagbody
-   nth-m
-    (if (= n 0)
-        (head lst)
-      (begin
-       (set! n (bin- n 1))
-       (set! lst (tail lst))
-       (goto nth-m)))))
-
 (defmacro defun (name pars . body)
   `(set! ,name
     (name-lambda ,name ,pars ,@body)))
-
-(define nth (n lst)
-  (cond ((= n 0) (head lst))
-        (else (nth (bin- n 1) (tail lst)))))
 
 (define pair? (x)
   (if (eq? 'pair (type-name (type-of x)))
@@ -90,7 +71,7 @@
                  (if (null? list)
                      n
                    (begin
-                    (set! n (+ n 1))
+                    (set! n (fx+ n 1))
                     (set! list (tail list))
                     (goto aux)))))))
     (aux 0 list)))
@@ -114,6 +95,25 @@
 (define-bin-arith bin- fx- fp-)
 (define-bin-arith bin* fx* fp*)
 (define-bin-arith bin/ fx/ fp/)
+
+(define abs (x)
+  (if (> 0 x)
+      (bin- 0 x)
+      x))
+
+(define nth-m (n lst)
+  (tagbody
+   nth-m
+    (if (= n 0)
+        (head lst)
+      (begin
+       (set! n (bin- n 1))
+       (set! lst (tail lst))
+       (goto nth-m)))))
+
+(define nth (n lst)
+  (cond ((= n 0) (head lst))
+        (else (nth (bin- n 1) (tail lst)))))
 
 (defmacro or2 (e1 e2)
   (let ((v (gensym)))

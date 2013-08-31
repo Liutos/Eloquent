@@ -38,6 +38,7 @@ struct lisp_object_t lt_types[VECTOR + 1] = {
     DEFTYPE(TCLOSE, "tclose"),
     DEFTYPE(TEOF, "teof"),
     DEFTYPE(TUNDEF, "tundef"),
+    DEFTYPE(ENVIRONMENT, "environment"),
     DEFTYPE(EXCEPTION, "exception"),
     DEFTYPE(FUNCTION, "function"),
     DEFTYPE(FLOAT, "float"),

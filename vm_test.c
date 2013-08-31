@@ -17,20 +17,13 @@
 int main(int argc, char *argv[])
 {
   char *inputs[] = {
-      "make-input-string",
-      "(set! is (make-input-string \"Hello\"))",
-      "read-char-from-string",
-      "(read-char-from-string is)", // #\H
-      "(read-char-from-string is)", // #\e
-      "(read-char-from-string is)", // #\l
-      "(unget-char-to-string #\\m is)", // #\m
-      "(read-char-from-string is)", // #\m
+      "(type-of '(1 2))",
   };
   init_global_variable();
   init_prims();
   init_compiled_prims();
   init_macros();
-//  load_init_file();
+  load_init_file();
   for (int i = 0; i < sizeof(inputs) / sizeof(char *); i++) {
     writef(standard_out, ">> %s\n", make_string(inputs[i]));
     lisp_object_t *expr = read_object_from_string(strdup(inputs[i]));
