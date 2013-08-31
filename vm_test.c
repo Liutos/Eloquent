@@ -15,10 +15,14 @@
 int main(int argc, char *argv[])
 {
   char *inputs[] = {
-      "(define f1 () (fx/ 1 0))",
-      "(define f2 () (f1))",
-      "(define f3 () (f2))",
-      "(f3)",
+      "make-input-string",
+      "(set! is (make-input-string \"Hello world!\\n\"))",
+      "read-char-from-string",
+      "(read-char-from-string is)", // #\H
+      "(read-char-from-string is)", // #\e
+      "(read-char-from-string is)", // #\l
+      "(unget-char-to-string #\\m is)", // #\m
+      "(read-char-from-string is)", // #\m
   };
   init_global_variable();
   init_prims();

@@ -42,6 +42,7 @@ struct lisp_object_t lt_types[VECTOR + 1] = {
     DEFTYPE(FUNCTION, "function"),
     DEFTYPE(FLOAT, "float"),
     DEFTYPE(INPUT_FILE, "input-file"),
+    DEFTYPE(INPUT_STRING, "input-string"),
     DEFTYPE(MACRO, "macro"),
     DEFTYPE(OPCODE, "opcode"),
     DEFTYPE(OUTPUT_FILE, "output-file"),
@@ -76,11 +77,12 @@ int is_of_type(lisp_object_t *object, enum TYPE type) {
     return is_of_type(object, type);            \
   }
 
-mktype_pred(isenvironment, ENVIRONMENT);
+mktype_pred(isenvironment, ENVIRONMENT)
 mktype_pred(isexception, EXCEPTION)
 mktype_pred(isfloat, FLOAT)
 mktype_pred(isfunction, FUNCTION)
 mktype_pred(isinput_file, INPUT_FILE)
+mktype_pred(isinput_string, INPUT_STRING)
 mktype_pred(ismacro, MACRO)
 mktype_pred(isoutput_file, OUTPUT_FILE)
 mktype_pred(isopcode, OPCODE)
@@ -226,6 +228,15 @@ lisp_object_t *make_input_file(FILE *file) {
   return inf;
 }
 
+lt *make_input_string(char *value) {
+  lt *obj = make_object(INPUT_STRING);
+  input_string_colnum(obj) = 0;
+  input_string_index(obj) = 0;
+  input_string_linum(obj) = 1;
+  input_string_value(obj) = value;
+  return obj;
+}
+
 lt *make_macro(lt *procedure, lt *environment) {
   lt *obj = make_object(MACRO);
   macro_procedure(obj) = procedure;
@@ -282,7 +293,7 @@ string_builder_t *make_str_builder(void) {
 
 lisp_object_t *make_string(char *value) {
   lisp_object_t *string = make_object(STRING);
-  string->u.string.value = value;
+  string_value(string) = value;
   return string;
 }
 
@@ -411,6 +422,7 @@ lt *make_op_catch(void) {
   return mkopcode(CATCH, "CATCH", 0);
 }
 
+// Simple wrappers for some C functions
 /* TODO: Use a hash table for storing symbols. */
 lisp_object_t *find_or_create_symbol(char *name) {
   lisp_object_t *tmp_sym_list = symbol_list;
@@ -428,6 +440,10 @@ lisp_object_t *find_or_create_symbol(char *name) {
 
 lt *lt_exception_tag(lt *exception) {
   return exception_tag(exception);
+}
+
+lt *lt_make_input_string(lt *string) {
+  return make_input_string(string_value(string));
 }
 
 lt *lt_type_name(lt *type) {

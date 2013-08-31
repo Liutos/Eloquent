@@ -44,6 +44,7 @@ enum TYPE {
   FUNCTION,
   FLOAT,
   INPUT_FILE,
+  INPUT_STRING,
   MACRO,
   OPCODE,
   OUTPUT_FILE,
@@ -113,6 +114,10 @@ struct lisp_object_t {
       int colnum, linum, openp;
       FILE *file;
     } input_file;
+    struct {
+      int colnum, index, linum;
+      char *value;
+    } input_string;
     struct {
       lt *environment;
       lt *procedure;
@@ -192,6 +197,10 @@ struct string_builder_t {
 #define input_file_file(x) ((x)->u.input_file.file)
 #define input_file_linum(x) ((x)->u.input_file.linum)
 #define input_file_openp(x) ((x)->u.input_file.openp)
+#define input_string_colnum(x) ((x)->u.input_string.colnum)
+#define input_string_index(x) ((x)->u.input_string.index)
+#define input_string_linum(x) ((x)->u.input_string.linum)
+#define input_string_value(x) ((x)->u.input_string.value)
 #define macro_procedure(x) ((x)->u.macro.procedure)
 #define macro_environment(x) ((x)->u.macro.environment)
 #define opcode_name(x) ((x)->u.opcode.name)

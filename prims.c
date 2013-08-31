@@ -248,8 +248,11 @@ void write_object(lt *x, lt *output_file) {
     	writef(output_file, "%f", x);
     	break;
     case INPUT_FILE:
-    	writef(output_file, "#<INPUT-FILE %p>");
+    	writef(output_file, "#<INPUT-FILE %p>", x);
     	break;
+    case INPUT_STRING:
+      writef(output_file, "#<INPUT-STRING %p>", x);
+      break;
     case MACRO:
     	writef(output_file, "#<MACRO %?>", macro_procedure(x));
       break;
@@ -322,9 +325,15 @@ void write_object(lt *x, lt *output_file) {
 }
 
 int get_char(lt *input_file) {
-  FILE *in = input_file_file(input_file);
-  input_file_colnum(input_file)++;
-  return getc(in);
+  assert(isinput_file(input_file) || isinput_string(input_file));
+  if (isinput_file(input_file)) {
+    FILE *in = input_file_file(input_file);
+    input_file_colnum(input_file)++;
+    return getc(in);
+  } else {
+    input_string_index(input_file)++;
+    return input_string_value(input_file)[input_string_index(input_file) - 1];
+  }
 }
 
 lt *lt_raw_nth(lt *list, int n) {
@@ -529,6 +538,19 @@ lt *lt_read_line(lt *in_port) {
     c = get_char(in_port);
   }
   return make_string(sb2string(sb));
+}
+
+/* Input String */
+lt *lt_read_char_from_string(lt *in_str) {
+  assert(isinput_string(in_str));
+  return make_character(get_char(in_str));
+}
+
+lt *lt_unget_char_to_string(lt *c, lt *in_str) {
+  void unget_char(int, lt *);
+  assert(isinput_string(in_str));
+  unget_char(character_value(c), in_str);
+  return c;
 }
 
 /* List */
@@ -1029,8 +1051,14 @@ int peek_char(lisp_object_t *input_file) {
 }
 
 void unget_char(int c, lisp_object_t *input_file) {
-  ungetc(c, input_file_file(input_file));
-  input_file_colnum(input_file)--;
+  assert(isinput_file(input_file) || isinput_string(input_file));
+  if (isinput_file(input_file)) {
+    ungetc(c, input_file_file(input_file));
+    input_file_colnum(input_file)--;
+  } else {
+    input_string_index(input_file)--;
+    input_string_value(input_file)[input_string_index(input_file)] = c;
+  }
 }
 
 int isdelimiter(int c) {
@@ -1333,6 +1361,10 @@ void init_prims(void) {
   ADD(1, FALSE, lt_read_char, "read-char");
   ADD(1, FALSE, lt_read_line, "read-line");
   ADD(1, FALSE, lt_read_from_string, "read-from-string");
+  /* Input String */
+  ADD(1, FALSE, lt_make_input_string, "make-input-string");
+  ADD(1, FALSE, lt_read_char_from_string, "read-char-from-string");
+  ADD(2, FALSE, lt_unget_char_to_string, "unget-char-to-string");
   /* List */
   ADD(1, TRUE, lt_append, "append");
   ADD(2, FALSE, lt_is_tag_list, "is-tag-list?");

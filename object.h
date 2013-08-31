@@ -34,6 +34,7 @@ extern int isexception(lt *);
 extern int isfloat(lt *);
 extern int isfunction(lt *);
 extern int isinput_file(lt *);
+extern int isinput_string(lt *);
 extern int ismacro(lt *);
 extern int isopcode(lt *);
 extern int isoutput_file(lt *);
@@ -70,6 +71,7 @@ extern lt *make_exception(char *, int, lt *, lt *backtrace);
 extern lt *make_float(float);
 extern lt *make_function(lt *cenv, lt *args, lt *code, lt *renv);
 extern lt *make_input_file(FILE *);
+extern lt *make_input_string(char *);
 extern lt *make_macro(lt *, lt *);
 extern lt *make_output_file(FILE *);
 extern lt *make_pair(lt *, lt *);
@@ -103,9 +105,10 @@ extern lt *make_op_return(lt *);
 extern lt *make_op_values(lt *);
 extern lt *make_op_catch();
 
+// Simple wrappers for some C functions
 extern lt *find_or_create_symbol(char *);
-
 extern lt *lt_exception_tag(lt *);
+extern lt *lt_make_input_string(lt *);
 extern lt *lt_type_name(lt *);
 
 extern void init_global_variable(void);
