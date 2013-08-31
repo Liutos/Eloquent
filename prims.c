@@ -324,15 +324,15 @@ void write_object(lt *x, lt *output_file) {
   }
 }
 
-int get_char(lt *input_file) {
-  assert(isinput_file(input_file) || isinput_string(input_file));
-  if (isinput_file(input_file)) {
-    FILE *in = input_file_file(input_file);
-    input_file_colnum(input_file)++;
+int get_char(lt *input) {
+  assert(isinput_file(input) || isinput_string(input));
+  if (isinput_file(input)) {
+    FILE *in = input_file_file(input);
+    input_file_colnum(input)++;
     return getc(in);
   } else {
-    input_string_index(input_file)++;
-    return input_string_value(input_file)[input_string_index(input_file) - 1];
+    input_string_index(input)++;
+    return input_string_value(input)[input_string_index(input) - 1];
   }
 }
 
@@ -1043,26 +1043,26 @@ lt *lt_switch_type_check(void) {
 }
 
 /* Reader */
-int peek_char(lisp_object_t *input_file) {
-  assert(isinput_file(input_file) || isinput_string(input_file));
-  if (isinput_file(input_file)) {
-    FILE *in = input_file_file(input_file);
+int peek_char(lisp_object_t *input) {
+  assert(isinput_file(input) || isinput_string(input));
+  if (isinput_file(input)) {
+    FILE *in = input_file_file(input);
     int c = getc(in);
     ungetc(c, in);
     return c;
   } else {
-    return input_string_value(input_file)[input_string_index(input_file)];
+    return input_string_value(input)[input_string_index(input)];
   }
 }
 
-void unget_char(int c, lisp_object_t *input_file) {
-  assert(isinput_file(input_file) || isinput_string(input_file));
-  if (isinput_file(input_file)) {
-    ungetc(c, input_file_file(input_file));
-    input_file_colnum(input_file)--;
+void unget_char(int c, lisp_object_t *input) {
+  assert(isinput_file(input) || isinput_string(input));
+  if (isinput_file(input)) {
+    ungetc(c, input_file_file(input));
+    input_file_colnum(input)--;
   } else {
-    input_string_index(input_file)--;
-    input_string_value(input_file)[input_string_index(input_file)] = c;
+    input_string_index(input)--;
+    input_string_value(input)[input_string_index(input)] = c;
   }
 }
 

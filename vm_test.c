@@ -17,13 +17,12 @@
 int main(int argc, char *argv[])
 {
   char *inputs[] = {
-//      "a",
-//      "make-input-string",
-      "(set! is (make-input-string \"abc\"))",
-//      "read-char-from-string",
-      "(read-char-from-string is)", // #\a
-//      "(read-char-from-string is)", // #\e
-//      "(read-char-from-string is)", // #\l
+      "make-input-string",
+      "(set! is (make-input-string \"Hello\"))",
+      "read-char-from-string",
+      "(read-char-from-string is)", // #\H
+      "(read-char-from-string is)", // #\e
+      "(read-char-from-string is)", // #\l
       "(unget-char-to-string #\\m is)", // #\m
       "(read-char-from-string is)", // #\m
   };
