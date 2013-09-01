@@ -155,6 +155,7 @@ struct lisp_object_t {
     struct {
       char *name;
       lt *global_value;
+      lt *macro;
     } symbol;
     struct {
       enum TYPE tag;
@@ -227,6 +228,7 @@ struct string_builder_t {
 #define retaddr_sp(x) ((x)->u.retaddr.sp)
 #define string_value(x) ((x)->u.string.value)
 #define symbol_name(x) ((x)->u.symbol.name)
+#define symbol_macro(x) ((x)->u.symbol.macro)
 #define symbol_value(x) ((x)->u.symbol.global_value)
 #define type_tag(x) ((x)->u.type.tag)
 #define type_name(x) ((x)->u.type.name)

@@ -17,8 +17,10 @@
 int main(int argc, char *argv[])
 {
   char *inputs[] = {
-      "(set-symbol-value! 'map2 1)",
-      "map2",
+      "(set-symbol-macro! 'abc (lambda () 1))",
+      "(symbol-macro 'abc)",
+      "(expand-macro '(push 1 lst))",
+      "(begin (set! lst '(1)) (push 2 lst) lst)",
   };
   init_global_variable();
   init_prims();

@@ -37,6 +37,8 @@ int is_macro_form(lt *form) {
   if (!issymbol(pair_head(form)))
     return FALSE;
   lt *symbol = pair_head(form);
+  if (isfunction(symbol_macro(symbol)) || isprimitive(symbol_macro(symbol)))
+    return TRUE;
   return is_symbol_bound(symbol) && ismacro(symbol_value(symbol));
 }
 

@@ -405,10 +405,18 @@ lt *quote_each_args(lt *args) {
             quote_each_args(pair_tail(args)));
 }
 
+lt *macro_fn(lt *macro_name) {
+  if (!isundef(symbol_macro(macro_name))) {
+    printf("In macro_fn - Get the value stored in macro cell of the symbol\n");
+    return symbol_macro(macro_name);
+  } else
+    return macro_procedure(symbol_value(macro_name));
+}
+
 lt *lt_expand_macro(lt *form) {
   if (is_macro_form(form)) {
-    lt *op = symbol_value(pair_head(form));
-    lt *proc = macro_procedure(op);
+    lt *op = pair_head(form);
+    lt *proc = macro_fn(op);
     assert(isprimitive(proc) || isfunction(proc));
     lt *result;
 //      TODO: Combine the two cases of function type
@@ -788,9 +796,18 @@ lt *lt_is_fbound(lt *symbol) {
     return make_false();
 }
 
+lt *lt_set_symbol_macro(lt *symbol, lt *macro_fn) {
+  symbol_macro(symbol) = macro_fn;
+  return symbol;
+}
+
 lt *lt_set_symbol_value(lt *symbol, lt *value) {
   symbol_value(symbol) = value;
   return value;
+}
+
+lt *lt_symbol_macro(lt *symbol) {
+  return symbol_macro(symbol);
 }
 
 lisp_object_t *lt_symbol_name(lisp_object_t *symbol) {
@@ -1408,7 +1425,9 @@ void init_prims(void) {
   ADD(1, FALSE, lt_intern, "string->symbol");
   ADD(1, FALSE, lt_is_bound, "bound?");
   ADD(1, FALSE, lt_is_fbound, "fbound?");
+  ADD(2, FALSE, lt_set_symbol_macro, "set-symbol-macro!");
   ADD(2, FALSE, lt_set_symbol_value, "set-symbol-value!");
+  ADD(1, FALSE, lt_symbol_macro, "symbol-macro");
   ADD(1, FALSE, lt_symbol_name, "symbol-name");
   ADD(1, FALSE, lt_symbol_value, "symbol-value");
   /* Type */

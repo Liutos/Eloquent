@@ -300,7 +300,8 @@ lisp_object_t *make_string(char *value) {
 
 lisp_object_t *make_symbol(char *name) {
   lisp_object_t *symbol = make_object(SYMBOL);
-  symbol->u.symbol.name = name;
+  symbol_name(symbol) = name;
+  symbol_macro(symbol) = the_undef;
   symbol_value(symbol) = the_undef;
   return symbol;
 }

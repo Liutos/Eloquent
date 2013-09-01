@@ -216,8 +216,8 @@ void init_macros(void) {
   lt *func;
 #define DM(arity, restp, func_name, Lisp_name) \
   do { \
-    func = make_macro(make_primitive(arity, func_name, Lisp_name, restp), null_env); \
-    symbol_value(S(Lisp_name)) = func; \
+    func = make_primitive(arity, func_name, Lisp_name, restp); \
+    symbol_macro(S(Lisp_name)) = func; \
   } while(0)
 
   DM(1, TRUE, lt_cond_macro, "cond");
