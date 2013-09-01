@@ -25,6 +25,9 @@ vm.o: vm.c object.h type.h prims.h utilities.h
 compiler_test.o: compiler_test.c macros.h object.h type.h prims.h compiler.h
 	$(CC) $(CFLAGS) -c $< -o $@
 
+init_test.o: init_test.c compiler.h macros.h object.h prims.h type.h vm.h
+	$(CC) $(CFLAGS) -c $< -o $@
+
 repl_test.o: repl_test.c compiler.h macros.h object.h prims.h vm.h
 	$(CC) $(CFLAGS) -c $< -o $@
 
@@ -33,6 +36,11 @@ vm_test.o: vm_test.c compiler.h macros.h object.h prims.h type.h vm.h
 
 # Test Executable
 test_compiler: compiler_test.o compiler.o macros.o object.o prims.o utilities.o vm.o
+	if [ ! -d bin ]; then mkdir bin; fi
+	cp init.scm bin/
+	$(CC) $^ -o bin/$@ $(CFLAGS)
+
+test_init: init_test.o compiler.o macros.o object.o prims.o utilities.o vm.o
 	if [ ! -d bin ]; then mkdir bin; fi
 	cp init.scm bin/
 	$(CC) $^ -o bin/$@ $(CFLAGS)

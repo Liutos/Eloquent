@@ -1367,6 +1367,7 @@ void init_prims(void) {
   /* Input File */
   ADD(1, FALSE, lt_close_in, "close-in");
   ADD(1, FALSE, lt_is_file_open, "file-open?");
+  ADD(1, FALSE, lt_load, "load");
   ADD(1, FALSE, lt_load_file, "load-file");
   ADD(1, FALSE, lt_open_in, "open-in");
   ADD(1, FALSE, lt_read_char, "read-char");
