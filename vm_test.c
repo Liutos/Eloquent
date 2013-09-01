@@ -17,9 +17,15 @@
 int main(int argc, char *argv[])
 {
   char *inputs[] = {
-      "(vector-ref [1 2 3] 0)",
-      "(vector-ref [1 2 3] 1)",
-      "(vector-ref [1 2 3] 3)",
+      "(fixnum? 1)",
+      "(fixnum? 1.0)",
+      "(float? 1)",
+      "(float? 1.0)",
+      "(and2 (fixnum? 1) (fixnum? 1.0))",
+      "(bin+ 1 1)",
+      "(bin+ 1 1.0)",
+      "(bin+ 1.0 1)",
+      "(bin+ 1.0 2.0)",
   };
   init_global_variable();
   init_prims();
