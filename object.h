@@ -96,7 +96,6 @@ extern lt *make_op_gvar(lt *);
 extern lt *make_op_jump(lt *);
 extern lt *make_op_lset(lt *i, lt *j, lt *symbol);
 extern lt *make_op_lvar(lt *i, lt *j, lt *symbol);
-extern lt *make_op_macro(lt *);
 extern lt *make_op_mvcall(void);
 extern lt *make_op_need(void);
 extern lt *make_op_pop(void);

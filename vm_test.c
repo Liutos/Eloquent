@@ -17,10 +17,11 @@
 int main(int argc, char *argv[])
 {
   char *inputs[] = {
-      "(set-symbol-macro! 'abc (lambda () 1))",
-      "(symbol-macro 'abc)",
+      "(defmacro push (x lst) `(set! ,lst (cons ,x ,lst)))",
       "(expand-macro '(push 1 lst))",
-      "(begin (set! lst '(1)) (push 2 lst) lst)",
+      "(begin (set! lst '(2)) (push 1 lst) lst)",
+      "<",
+      "(< -1 0)",
   };
   init_global_variable();
   init_prims();

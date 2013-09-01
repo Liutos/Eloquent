@@ -75,11 +75,6 @@ lt *lt_let_macro(lt *bindings, lt *body) {
   return make_pair(lambda, args);
 }
 
-/* push */
-lt *lt_push_macro(lt *x, lt *list) {
-  return list3(S("set!"), list, list3(S("cons"), x, list));
-}
-
 /* quasiquote */
 lt *quasiq(lt *x) {
   if (!ispair(x)) {
@@ -224,6 +219,5 @@ void init_macros(void) {
   DM(2, TRUE, lt_let_macro, "let");
   DM(3, TRUE, name_lambda_macro, "name-lambda");
   DM(2, TRUE, try_catch_macro, "try-catch");
-  DM(2, FALSE, lt_push_macro, "push");
   DM(1, FALSE, quasiq, "quasiquote");
 }

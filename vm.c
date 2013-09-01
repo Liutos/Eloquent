@@ -280,13 +280,6 @@ lisp_object_t *run_by_llam(lisp_object_t *code_vector) {
         lt_vector_push(stack, value);
       }
         break;
-      case MACROFN: {
-        lisp_object_t *func = op_macro_func(ins);
-        lt *cenv = function_cenv(func);
-        func = make_function(cenv, the_empty_list, function_code(func), env);
-        lt_vector_push(stack, make_macro(func, env));
-      }
-      	break;
       case MVCALL: {
         lt *new_ins = make_op_call(make_fixnum(nvals));
         lt_vector_set(code, make_fixnum(pc), new_ins);

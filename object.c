@@ -392,10 +392,6 @@ lt *make_op_lvar(lt *i, lt *j, lt *symbol) {
   return mkopcode(LVAR, "LVAR", 3, i, j, symbol);
 }
 
-lt *make_op_macro(lt *func) {
-	return mkopcode(MACROFN, "MACROFN", 1, func);
-}
-
 lt *make_op_mvcall(void) {
   return mkopcode(MVCALL, "MVCALL", 0);
 }

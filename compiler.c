@@ -81,11 +81,6 @@ lt *asm_second_pass(lt *code, lt *length, lt *labels) {
         ins = change_addr(ins, labels);
       if (opcode_name(ins) == FN)
         function_code(op_fn_func(ins)) = assemble(function_code(op_fn_func(ins)));
-      if (opcode_name(ins) == MACROFN) {
-        lt *func = op_macro_func(ins);
-        assert(isfunction(func));
-        function_code(func) = assemble(function_code(func));
-      }
       vector_value(code_vector)[index] = ins;
       vector_last(code_vector)++;
       index++;
@@ -170,9 +165,6 @@ lisp_object_t *gen(enum TYPE opcode, ...) {
       lisp_object_t *symbol = va_arg(ap, lisp_object_t *);
       ins = make_op_lvar(i, j, symbol);
     }
-      break;
-    case MACROFN:
-      ins = make_op_macro(va_arg(ap, lt *));
       break;
     case MVCALL:
       ins = make_op_mvcall();
@@ -463,10 +455,6 @@ lisp_object_t *compile_object(lisp_object_t *object, lisp_object_t *env) {
   }
   if (is_tag_list(object, S("lambda")))
     return gen(FN, compile_lambda(second(object), pair_tail(pair_tail(object)), env));
-  if (is_tag_list(object, S("macro"))) {
-    lt *proc = compile_lambda(second(object), pair_tail(pair_tail(object)), env);
-    return gen(MACROFN, proc);
-  }
   if (is_tag_list(object, S("catch")))
     return gen(CATCH);
   if (is_tag_list(object, S("var"))) {

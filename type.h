@@ -72,7 +72,6 @@ enum OPCODE_TYPE {
   JUMP,
   LSET,
   LVAR,
-  MACROFN,
   MVCALL,
   NEED,
   POP,
@@ -260,7 +259,6 @@ struct string_builder_t {
 #define op_lvar_i(x) oparg1(x)
 #define op_lvar_j(x) oparg2(x)
 #define op_lvar_var(x) oparg3(x)
-#define op_macro_func(x) oparg1(x)
 #define op_prim_nargs(x) oparg1(x)
 #define op_return_flag(x) oparg1(x)
 #define op_values_nargs(x) oparg1(x)

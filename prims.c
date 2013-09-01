@@ -145,9 +145,6 @@ void write_opcode(lt *opcode, lt *dest) {
       writef(dest, "#<LVAR %d %d %S>",
              op_lvar_i(opcode), op_lvar_j(opcode), op_lvar_var(opcode));
       break;
-    case MACROFN:
-    	writef(dest, "#<MACRO_FN %?>", op_macro_func(opcode));
-    	break;
     case POP: 
     	write_raw_string("#<POP>", dest); 
     	break;
@@ -406,10 +403,9 @@ lt *quote_each_args(lt *args) {
 }
 
 lt *macro_fn(lt *macro_name) {
-  if (!isundef(symbol_macro(macro_name))) {
-    printf("In macro_fn - Get the value stored in macro cell of the symbol\n");
+  if (!isundef(symbol_macro(macro_name)))
     return symbol_macro(macro_name);
-  } else
+  else
     return macro_procedure(symbol_value(macro_name));
 }
 
