@@ -250,9 +250,9 @@ void write_object(lt *x, lt *output_file) {
     case INPUT_STRING:
       writef(output_file, "#<INPUT-STRING %p>", x);
       break;
-    case MACRO:
-    	writef(output_file, "#<MACRO %?>", macro_procedure(x));
-      break;
+//    case MACRO:
+//    	writef(output_file, "#<MACRO %?>", macro_procedure(x));
+//      break;
     case OUTPUT_FILE:
     	writef(output_file, "#<OUTPUT-FILE %p>", x);
     	break;

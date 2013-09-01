@@ -39,7 +39,7 @@ int is_macro_form(lt *form) {
   lt *symbol = pair_head(form);
   if (isfunction(symbol_macro(symbol)) || isprimitive(symbol_macro(symbol)))
     return TRUE;
-  return is_symbol_bound(symbol) && ismacro(symbol_value(symbol));
+  return FALSE;
 }
 
 int is_tag_list(lisp_object_t *object, lisp_object_t *tag) {

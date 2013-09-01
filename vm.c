@@ -170,8 +170,6 @@ lisp_object_t *run_by_llam(lisp_object_t *code_vector) {
         break;
       case CALL: {
         lisp_object_t *func = lt_vector_pop(stack);
-        if (ismacro(func))
-          func = macro_procedure(func);
         if (isprimitive(func)) {
 //        	This is possible because the first element of a application list
 //        	might be a compound expression, and this compound one will return

@@ -44,7 +44,6 @@ struct lisp_object_t lt_types[VECTOR + 1] = {
     DEFTYPE(FLOAT, "float"),
     DEFTYPE(INPUT_FILE, "input-file"),
     DEFTYPE(INPUT_STRING, "input-string"),
-    DEFTYPE(MACRO, "macro"),
     DEFTYPE(OPCODE, "opcode"),
     DEFTYPE(OUTPUT_FILE, "output-file"),
     DEFTYPE(PAIR, "pair"),
@@ -84,7 +83,6 @@ mktype_pred(isfloat, FLOAT)
 mktype_pred(isfunction, FUNCTION)
 mktype_pred(isinput_file, INPUT_FILE)
 mktype_pred(isinput_string, INPUT_STRING)
-mktype_pred(ismacro, MACRO)
 mktype_pred(isoutput_file, OUTPUT_FILE)
 mktype_pred(isopcode, OPCODE)
 mktype_pred(ispair, PAIR)
@@ -235,13 +233,6 @@ lt *make_input_string(char *value) {
   input_string_index(obj) = 0;
   input_string_linum(obj) = 1;
   input_string_value(obj) = value;
-  return obj;
-}
-
-lt *make_macro(lt *procedure, lt *environment) {
-  lt *obj = make_object(MACRO);
-  macro_procedure(obj) = procedure;
-  macro_environment(obj) = environment;
   return obj;
 }
 
