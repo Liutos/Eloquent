@@ -788,6 +788,11 @@ lt *lt_is_fbound(lt *symbol) {
     return make_false();
 }
 
+lt *lt_set_symbol_value(lt *symbol, lt *value) {
+  symbol_value(symbol) = value;
+  return value;
+}
+
 lisp_object_t *lt_symbol_name(lisp_object_t *symbol) {
   assert(issymbol(symbol));
   return make_string(strdup(symbol_name(symbol)));
@@ -1402,6 +1407,7 @@ void init_prims(void) {
   ADD(1, FALSE, lt_intern, "string->symbol");
   ADD(1, FALSE, lt_is_bound, "bound?");
   ADD(1, FALSE, lt_is_fbound, "fbound?");
+  ADD(2, FALSE, lt_set_symbol_value, "set-symbol-value!");
   ADD(1, FALSE, lt_symbol_name, "symbol-name");
   ADD(1, FALSE, lt_symbol_value, "symbol-value");
   /* Type */

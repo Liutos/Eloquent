@@ -17,7 +17,8 @@
 int main(int argc, char *argv[])
 {
   char *inputs[] = {
-      "(type-of '(1 2))",
+      "(set-symbol-value! 'map2 1)",
+      "map2",
   };
   init_global_variable();
   init_prims();

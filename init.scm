@@ -3,6 +3,7 @@
         `(set! ,var (macro ,pars ,@body))))
 
 (defmacro define (var pars . body)
+  (set-symbol-value! var '())
   `(begin
     (set! ,var
           (lambda ,pars ,@body))
