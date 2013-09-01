@@ -477,7 +477,6 @@ lisp_object_t *compile_object(lisp_object_t *object, lisp_object_t *env) {
   }
   if (is_tag_list(object, S("yield"))) {
     lt *val = second(object);
-//    return gen(RETURN, the_true);
     return seq(compile_object(val, env), gen(RETURN, the_true));
   }
   if (ispair(object)) {

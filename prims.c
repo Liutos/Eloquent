@@ -215,11 +215,6 @@ void write_object(lt *x, lt *output_file) {
       }
     }
       break;
-    case FUNCTION: {
-    	int indent = output_file_colnum(output_file);
-    	write_compiled_function(x, indent, output_file);
-    }
-      break;
     case EMPTY_LIST:
     	write_raw_string("()", output_file);
     	break;
@@ -231,7 +226,11 @@ void write_object(lt *x, lt *output_file) {
       writef(output_file, "%s\n", make_string(exception_msg(x)));
       lt *backtrace = exception_backtrace(x);
       while (!isnull(backtrace)) {
-        writef(output_file, "%?", function_name(pair_head(backtrace)));
+        lt *fn = pair_head(backtrace);
+        if (isfunction(fn))
+          writef(output_file, "%?", function_name(pair_head(backtrace)));
+        else
+          write_raw_string(primitive_Lisp_name(fn), output_file);
         if (!isnull(pair_tail(backtrace)))
           write_raw_char('\n', output_file);
         backtrace = pair_tail(backtrace);
@@ -244,15 +243,17 @@ void write_object(lt *x, lt *output_file) {
     case FLOAT:
     	writef(output_file, "%f", x);
     	break;
+    case FUNCTION: {
+      int indent = output_file_colnum(output_file);
+      write_compiled_function(x, indent, output_file);
+    }
+      break;
     case INPUT_FILE:
     	writef(output_file, "#<INPUT-FILE %p>", x);
     	break;
     case INPUT_STRING:
       writef(output_file, "#<INPUT-STRING %p>", x);
       break;
-//    case MACRO:
-//    	writef(output_file, "#<MACRO %?>", macro_procedure(x));
-//      break;
     case OUTPUT_FILE:
     	writef(output_file, "#<OUTPUT-FILE %p>", x);
     	break;
@@ -898,7 +899,8 @@ lt *lt_vector_push_extend(lt *vector, lt *x) {
 lisp_object_t *lt_vector_ref(lisp_object_t *vector, lisp_object_t *index) {
   assert(isvector(vector));
   assert(isfixnum(index));
-  assert(vector_last(vector) > fixnum_value(index));
+  if (vector_last(vector) <= fixnum_value(index))
+    return signal_exception("Out of index when referencing a vector element");
   return vector_value(vector)[fixnum_value(index)];
 }
 
@@ -1306,11 +1308,8 @@ lisp_object_t *read_object(lisp_object_t *input_file) {
 }
 
 lisp_object_t *read_object_from_string(char *text) {
-//  FILE *in = fmemopen(text, strlen(text), "r");
-//  lisp_object_t *inf = make_input_file(in);
   lt *inf = make_input_string(text);
   lt *obj = read_object(inf);
-//  fclose(in);
   return obj;
 }
 

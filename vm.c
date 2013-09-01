@@ -123,6 +123,7 @@ lisp_object_t *run_by_llam(lisp_object_t *code_vector) {
   lisp_object_t *stack = make_vector(50);
   lt *code = code_vector;
   lisp_object_t *env = null_env;
+  lt *prim = NULL;
   lisp_object_t *return_stack = the_empty_list;
   while (pc < vector_length(code)) {
     lisp_object_t *ins = raw_vector_ref(code, pc);
@@ -192,7 +193,6 @@ lisp_object_t *run_by_llam(lisp_object_t *code_vector) {
         return_stack = make_pair(retaddr, return_stack);
         code = function_code(func);
         env = function_renv(func);
-//        pc = -1;
         pc = function_cp(func);
         throw_exception = TRUE;
         nargs = fixnum_value(op_call_arity(ins));
@@ -206,9 +206,13 @@ lisp_object_t *run_by_llam(lisp_object_t *code_vector) {
         check_exception:
       case CHECKEX:
         while (is_signaled(vlast(stack, 0)) && throw_exception) {
-          if (isnull(return_stack))
-            goto halt;
           lt *ex = lt_vector_pop(stack);
+          if (isnull(return_stack)) {
+            if (prim != NULL)
+              exception_backtrace(ex) = list1(prim);
+            lt_vector_push(stack, ex);
+            goto halt;
+          }
           lt *ret = pair_head(return_stack);
           lt *fn = retaddr_fn(ret);
           exception_backtrace(ex) = make_pair(fn, exception_backtrace(ex));
@@ -294,6 +298,7 @@ lisp_object_t *run_by_llam(lisp_object_t *code_vector) {
       case PRIM: {
         nargs = fixnum_value(op_prim_nargs(ins));
         lisp_object_t *func = lt_vector_pop(stack);
+        prim = func;
         int arity = primitive_arity(func);
         int restp = primitive_restp(func);
 //        Check the number of arguments passed

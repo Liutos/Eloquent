@@ -17,11 +17,9 @@
 int main(int argc, char *argv[])
 {
   char *inputs[] = {
-      "(defmacro push (x lst) `(set! ,lst (cons ,x ,lst)))",
-      "(expand-macro '(push 1 lst))",
-      "(begin (set! lst '(2)) (push 1 lst) lst)",
-      "<",
-      "(< -1 0)",
+      "(vector-ref [1 2 3] 0)",
+      "(vector-ref [1 2 3] 1)",
+      "(vector-ref [1 2 3] 3)",
   };
   init_global_variable();
   init_prims();
