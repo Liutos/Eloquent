@@ -46,6 +46,24 @@ int is_tag_list(lisp_object_t *object, lisp_object_t *tag) {
   return ispair(object) && (pair_head(object) == tag);
 }
 
+#define deform_pred(func_name, symbol_name) \
+  int func_name(lt *form) { \
+    return is_tag_list(form, S(symbol_name)); \
+  }
+
+deform_pred(is_begin_form, "begin")
+deform_pred(is_cwv_form, "call-with-values")
+deform_pred(is_catch_form, "catch")
+deform_pred(is_goto_form, "goto")
+deform_pred(is_if_form, "if")
+deform_pred(is_lambda_form, "lambda")
+deform_pred(is_quote_form, "quote")
+deform_pred(is_set_form, "set!")
+deform_pred(is_tagbody_form, "tagbody")
+deform_pred(is_values_form, "values")
+deform_pred(is_var_form, "var")
+deform_pred(is_yield_form, "yield")
+
 lt *list1(lt *element) {
   return make_pair(element, make_empty_list());
 }
