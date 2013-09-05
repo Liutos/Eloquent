@@ -17,13 +17,10 @@
 int main(int argc, char *argv[])
 {
   char *inputs[] = {
-      "(expand-macro '(pset! n m m (mod n m)))",
-      "(expand-macro '(name-lambda gcd (n m) (if (= m 0) n (gcd m (mod n m)))))",
-      "gcd",
-      "(gcd 2 4)", // 2
-      "(gcd 4 2)", // 2
-      "(gcd 81 90)", // 9
-      "(gcd 90 81)", // 9
+      "(set! file (open-in \"tmp.txt\"))",
+      "(eof? (read-char file))",
+      "(eof? (read-char file))",
+      "(eof? (read-char file))",
   };
   init_global_variable();
   init_prims();

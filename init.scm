@@ -19,6 +19,9 @@
     (set-function-name! ,name ',name)))
 
 ; Type Predicates
+(define eof? (x)
+  (eq? 'teof (type-name (type-of x))))
+
 (define fixnum? (n)
   (eq? 'fixnum (type-name (type-of n))))
 
