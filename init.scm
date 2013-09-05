@@ -15,7 +15,7 @@
   (set-symbol-value! name '())
   `(begin
     (set! ,name
-          (lambda ,pars ,@body))
+          (name-lambda ,name ,pars ,@body))
     (set-function-name! ,name ',name)))
 
 ; Type Predicates
@@ -91,3 +91,8 @@
   (cond ((> n m) #f)
         ((= n m) #f)
         (else #t)))
+
+(define gcd (n m)
+  (if (= m 0)
+      n
+    (gcd m (mod n m))))

@@ -75,6 +75,56 @@ lt *lt_let_macro(lt *bindings, lt *body) {
   return make_pair(lambda, args);
 }
 
+/* pset! */
+lt *get_ks(lt *kvs) {
+  if (isnull(kvs))
+    return the_empty_list;
+  else
+    return make_pair(pair_head(kvs), get_ks(pair_tail(pair_tail(kvs))));
+}
+
+lt *get_vs(lt *kvs) {
+  if (isnull(kvs))
+    return the_empty_list;
+  else
+    return make_pair(pair_head(pair_tail(kvs)), get_vs(pair_tail(pair_tail(kvs))));
+}
+
+lt *ngensym(int n) {
+  if (n == 0)
+    return the_empty_list;
+  else
+    return make_pair(lt_gensym(), ngensym(n - 1));
+}
+
+lt *lt_pset_macro(lt *kvs) {
+  lt *ks = get_ks(kvs);
+  lt *vs = get_vs(kvs);
+  lt *ns = ngensym(pair_length(vs));
+  lt *bd = the_empty_list;
+  lt *saved = ns;
+  while (!isnull(vs)) {
+    lt *expr = pair_head(vs);
+    lt *name = pair_head(ns);
+    bd = make_pair(list2(name, expr), bd);
+    vs = pair_tail(vs);
+    ns = pair_tail(ns);
+  }
+  bd = lt_list_nreverse(bd);
+  ns = saved;
+  lt *sets = the_empty_list;
+  while (!isnull(ks)) {
+    lt *var = pair_head(ks);
+    lt *name = pair_head(ns);
+    sets = make_pair(list3(S("set!"), var, name), sets);
+    ks = pair_tail(ks);
+    ns = pair_tail(ns);
+  }
+  sets = lt_list_nreverse(sets);
+  lt *result = make_pair(S("let"), make_pair(bd, sets));
+  return result;
+}
+
 /* quasiquote */
 lt *quasiq(lt *x) {
   if (!ispair(x)) {
@@ -219,5 +269,6 @@ void init_macros(void) {
   DM(2, TRUE, lt_let_macro, "let");
   DM(3, TRUE, name_lambda_macro, "name-lambda");
   DM(2, TRUE, try_catch_macro, "try-catch");
+  DM(1, TRUE, lt_pset_macro, "pset!");
   DM(1, FALSE, quasiq, "quasiquote");
 }
