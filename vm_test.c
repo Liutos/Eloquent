@@ -17,10 +17,7 @@
 int main(int argc, char *argv[])
 {
   char *inputs[] = {
-      "(set! file (open-in \"tmp.txt\"))",
-      "(eof? (read-char file))",
-      "(eof? (read-char file))",
-      "(eof? (read-char file))",
+      "(cat (open-in \"init.scm\"))",
   };
   init_global_variable();
   init_prims();

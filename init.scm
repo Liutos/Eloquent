@@ -99,3 +99,13 @@
   (if (= m 0)
       n
     (gcd m (mod n m))))
+
+; Unix CLI Tools
+;; cat
+(define cat (file)
+  (let ((c (read-char file)))
+    (if (eof? c)
+        #t
+      (begin
+        (write-char c *standard-output*)
+        (cat file)))))
