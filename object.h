@@ -20,6 +20,7 @@ lisp_object_t *the_true;
 lt *gensym_counter;
 lisp_object_t *null_env;
 lisp_object_t *the_empty_list;
+lt *the_eof;
 lt *standard_error;
 lisp_object_t *standard_in;
 lisp_object_t *standard_out;

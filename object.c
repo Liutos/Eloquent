@@ -24,6 +24,7 @@ lt *standard_out;
 lt *symbol_list;
 lt *the_dot_symbol;
 lt *the_empty_list;
+lt *the_eof;
 lt *the_false;
 lt *the_true;
 lt *the_undef;
@@ -445,6 +446,7 @@ void init_global_variable(void) {
   the_false = make_false();
   the_true = make_true();
   the_empty_list = make_empty_list();
+  the_eof = make_eof();
   gensym_counter = make_fixnum(0);
   null_env = make_environment(the_empty_list, NULL);
   environment_next(null_env) = null_env;

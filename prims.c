@@ -531,7 +531,11 @@ lt *lt_open_in(lt *path) {
 
 lt *lt_read_char(lt *in_port) {
   assert(isinput_file(in_port));
-  return make_character(get_char(in_port));
+  int c = get_char(in_port);
+  if (c == -1)
+    return the_eof;
+  else
+    return make_character(c);
 }
 
 lt *lt_read_line(lt *in_port) {

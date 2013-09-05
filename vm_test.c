@@ -17,15 +17,10 @@
 int main(int argc, char *argv[])
 {
   char *inputs[] = {
-      "(fixnum? 1)",
-      "(fixnum? 1.0)",
-      "(float? 1)",
-      "(float? 1.0)",
-      "(and2 (fixnum? 1) (fixnum? 1.0))",
-      "(bin+ 1 1)",
-      "(bin+ 1 1.0)",
-      "(bin+ 1.0 1)",
-      "(bin+ 1.0 2.0)",
+      "(set! file (open-in \"tmp.txt\"))",
+      "(read-char file)", // #\a
+      "(read-char file)", // #\newline
+      "(read-char file)", // #<EOF>
   };
   init_global_variable();
   init_prims();

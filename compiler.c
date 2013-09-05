@@ -428,16 +428,13 @@ lisp_object_t *compile_object(lisp_object_t *object, lisp_object_t *env) {
     return gen(CONST, object);
   if (is_macro_form(object))
     return compile_object(lt_expand_macro(object), env);
-//  if (is_tag_list(object, S("quote"))) {
   if (is_quote_form(object)) {
     if (pair_length(object) != 2)
       return compiler_error("There must and be only one argument of a quote form");
     return gen(CONST, second(object));
   }
-//  if (is_tag_list(object, S("begin")))
   if (is_begin_form(object))
     return compile_begin(pair_tail(object), env);
-//  if (is_tag_list(object, S("set!"))) {
   if (is_set_form(object)) {
     if (pair_length(object) != 3)
       return compiler_error("There must and be only two arguments of a set! form");
@@ -447,7 +444,6 @@ lisp_object_t *compile_object(lisp_object_t *object, lisp_object_t *env) {
     lisp_object_t *set = gen_set(second(object), env);
     return seq(value, set);
   }
-//  if (is_tag_list(object, S("if"))) {
   if (is_if_form(object)) {
     int len = pair_length(object);
     if (!(3 <= len && len <= 4))
@@ -457,36 +453,28 @@ lisp_object_t *compile_object(lisp_object_t *object, lisp_object_t *env) {
     lisp_object_t *else_part = fourth(object);
     return compile_if(pred, then, else_part, env);
   }
-//  if (is_tag_list(object, S("lambda")))
   if (is_lambda_form(object))
     return gen(FN, compile_lambda(second(object), pair_tail(pair_tail(object)), env));
-//  if (is_tag_list(object, S("catch")))
   if (is_catch_form(object))
     return gen(CATCH);
-//  if (is_tag_list(object, S("var"))) {
   if (is_var_form(object)) {
     env = add_local_var(second(object), env);
     return compile_object(make_pair(S("set!"), pair_tail(object)), env);
   }
-//  if (is_tag_list(object, S("goto")))
   if (is_goto_form(object))
     return gen(JUMP, second(object));
-//  if (is_tag_list(object, S("tagbody"))) {
   if (is_tagbody_form(object)) {
     return compile_tagbody(pair_tail(object), env);
   }
-//  if (is_tag_list(object, S("call-with-values"))) {
   if (is_cwv_form(object)) {
     lt *fn = compile_object(second(object), env);
     lt *vals = compile_object(third(object), env);
     return seq(gen(NEED), vals, fn, gen(MVCALL), gen(CHECKEX));
   }
-//  if (is_tag_list(object, S("values"))) {
   if (is_values_form(object)) {
     lt *args = compile_args(pair_tail(object), env);
     return seq(args, gen(VALUES, lt_list_length(pair_tail(object))));
   }
-//  if (is_tag_list(object, S("yield"))) {
   if (is_yield_form(object)) {
     lt *val = second(object);
     return seq(compile_object(val, env), gen(RETURN, the_true));
