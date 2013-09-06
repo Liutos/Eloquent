@@ -16,6 +16,8 @@
 #include "vm.h"
 
 int main(int argc, char *argv[]) {
+  int script_flag = FALSE;
+  lt *script_name = the_undef;
   init_global_variable();
   init_prims();
   init_compiled_prims();
@@ -26,16 +28,29 @@ int main(int argc, char *argv[]) {
   while ((opt = getopt(argc, argv, "l:")) != -1) {
     switch (opt) {
       case 'l': {
+        script_flag = TRUE;
         char *script = optarg;
-        lt *path = make_string(script);
-        lt_load(path);
-        exit(1);
+//        lt *path = make_string(script);
+        script_name = make_string(script);
+//        lt_load(path);
+//        exit(1);
       }
         break;
       default :
         fprintf(stderr, "Unknown command line option %c\n", opt);
         exit(1);
     }
+  }
+
+//  Initializes the command line arguments array
+//  the_argv = make_vector(argc);
+  for (int i = 0; i < argc; i++) {
+    lt_vector_push_extend(the_argv, make_string(argv[i]));
+  }
+
+  if (script_flag == TRUE) {
+    lt_load(script_name);
+    exit(0);
   }
 
   while (1) {

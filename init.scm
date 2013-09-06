@@ -100,6 +100,13 @@
       n
     (gcd m (mod n m))))
 
+; I/O
+;; Output
+(define print (x)
+  (write-object x *standard-output*)
+  (write-char #\newline *standard-output*)
+  #t)
+
 ; Unix CLI Tools
 ;; cat
 (define cat (file)

@@ -22,6 +22,7 @@ lt *standard_error;
 lt *standard_in;
 lt *standard_out;
 lt *symbol_list;
+lt *the_argv;
 lt *the_dot_symbol;
 lt *the_empty_list;
 lt *the_eof;
@@ -443,6 +444,7 @@ lt *lt_type_name(lt *type) {
 void init_global_variable(void) {
   /* Initialize global variables */
   is_check_type = TRUE;
+  the_argv = make_vector(0);
   the_false = make_false();
   the_true = make_true();
   the_empty_list = make_empty_list();
@@ -456,6 +458,7 @@ void init_global_variable(void) {
   symbol_list = the_empty_list;
   the_undef = make_undef();
 
+  symbol_value(S("*ARGV*")) = the_argv;
   symbol_value(S("*gensym-counter*")) = gensym_counter;
   symbol_value(S("*standard-error*")) = standard_error;
   symbol_value(S("*standard-output*")) = standard_out;

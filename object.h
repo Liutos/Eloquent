@@ -14,6 +14,7 @@
 
 /* OBJECT_H_ */
 int is_check_type;
+lt *the_argv;
 lisp_object_t *the_dot_symbol;
 lisp_object_t *the_false;
 lisp_object_t *the_true;

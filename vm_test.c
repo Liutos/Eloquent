@@ -17,7 +17,10 @@
 int main(int argc, char *argv[])
 {
   char *inputs[] = {
-      "(cat (open-in \"init.scm\"))",
+      "(write-object 1 *standard-output*)",
+      "(write-object '(1 2 3) *standard-output*)",
+      "(write-object [1 2 3 4] *standard-output*)",
+      "(print [1 2 3 4 ()])",
   };
   init_global_variable();
   init_prims();

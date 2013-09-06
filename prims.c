@@ -748,6 +748,11 @@ lt *lt_write_line(lt *str, lt *dest) {
   return str;
 }
 
+lt *lt_write_object(lt *object, lt *dest) {
+  write_object(object, dest);
+  return the_true;
+}
+
 /* String */
 lisp_object_t *lt_char_at(lisp_object_t *string, lisp_object_t *index) {
   assert(isstring(string) && isfixnum(index));
@@ -1414,6 +1419,7 @@ void init_prims(void) {
   ADD(1, FALSE, lt_open_out, "open-out");
   ADD(2, FALSE, lt_write_char, "write-char");
   ADD(2, FALSE, lt_write_line, "write-line");
+  ADD(2, FALSE, lt_write_object, "write-object");
   ADD(2, FALSE, lt_write_string, "write-string");
   /* String */
   ADD(2, FALSE, lt_char_at, "char-at");
