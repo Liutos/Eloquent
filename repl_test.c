@@ -30,10 +30,7 @@ int main(int argc, char *argv[]) {
       case 'l': {
         script_flag = TRUE;
         char *script = optarg;
-//        lt *path = make_string(script);
         script_name = make_string(script);
-//        lt_load(path);
-//        exit(1);
       }
         break;
       default :
@@ -43,7 +40,6 @@ int main(int argc, char *argv[]) {
   }
 
 //  Initializes the command line arguments array
-//  the_argv = make_vector(argc);
   for (int i = 0; i < argc; i++) {
     lt_vector_push_extend(the_argv, make_string(argv[i]));
   }
