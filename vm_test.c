@@ -17,8 +17,8 @@
 int main(int argc, char *argv[])
 {
   char *inputs[] = {
-      "wc",
-      "(wc (open-in \"init.scm\"))",
+      "(expand-macro '(name-lambda aux (file n) (let ((c (read-char file))) (if (eof? c) n (aux file (+ n 1))))))",
+      "(expand-macro '(while (> n 0) (set! n (- n 1))))",
   };
   init_global_variable();
   init_prims();

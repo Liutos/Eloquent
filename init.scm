@@ -136,11 +136,10 @@
         (cat file)))))
 
 (define wc (file)
-  (let ((aux '()))
-    (set! aux
-          (lambda (file n)
-            (let ((c (read-char file)))
-              (if (eof? c)
-                  n
-                (aux file (+ n 1))))))
-    (aux file 0)))
+  (var aux
+   (name-lambda aux (file n)
+     (let ((c (read-char file)))
+       (if (eof? c)
+           n
+         (aux file (+ n 1))))))
+  (aux file 0))
