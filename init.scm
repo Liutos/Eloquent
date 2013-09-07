@@ -38,6 +38,12 @@
 (define rest (list)
   (tail list))
 
+(define map (list fn)
+  (if (null? list)
+      '()
+    (cons (fn (first list))
+          (map (rest list) fn))))
+
 (define reduce (list fn)
   (cond ((null? list)
          (signal "Parameter `list' can't be an empty list."))

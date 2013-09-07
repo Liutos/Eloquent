@@ -17,8 +17,8 @@
 int main(int argc, char *argv[])
 {
   char *inputs[] = {
-      "(set! file (open-in \"init.scm\"))",
-      "(wc file)",
+      "(map '() (lambda (x) x))",
+      "(map '(1 2 3) (lambda (x) (+ x 1)))",
   };
   init_global_variable();
   init_prims();
