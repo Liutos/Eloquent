@@ -18,7 +18,9 @@ int main(int argc, char *argv[])
 {
   char *inputs[] = {
       "while-macro",
+//      "(switch-debug)",
       "(while-macro '(> n 0) '(set! n (- n 1)))",
+      "(let ((n 10)) (while (> n 0) (write-object n *standard-output*) (set! n (- n 1))) (write-char #\\newline *standard-output*))",
   };
   init_global_variable();
   init_prims();

@@ -127,6 +127,8 @@ lisp_object_t *run_by_llam(lisp_object_t *code_vector) {
   lisp_object_t *return_stack = the_empty_list;
   while (pc < vector_length(code)) {
     lisp_object_t *ins = raw_vector_ref(code, pc);
+    if (debug)
+      writef(standard_out, "ins is %?\n", ins);
     switch (opcode_type(ins)) {
       case ARGS: {
 //        Check the number of arguments passed
@@ -362,6 +364,8 @@ lisp_object_t *run_by_llam(lisp_object_t *code_vector) {
         if (isnull(return_stack))
           break;
         lisp_object_t *retaddr = pair_head(return_stack);
+        if (debug)
+          writef(standard_out, "retaddr is %?\n", retaddr);
 //        Store the current position in compiled instructions if flag is true
         lt *flag = op_return_flag(ins);
         if (flag == the_true)
@@ -382,8 +386,8 @@ lisp_object_t *run_by_llam(lisp_object_t *code_vector) {
             lt_vector_pop(stack);
         }
 //        Place the empty list as the default return value on the operand stack
-        if (vector_last(stack) == retaddr_sp(retaddr))
-          lt_vector_push(stack, the_empty_list);
+//        if (vector_last(stack) == retaddr_sp(retaddr))
+//          lt_vector_push(stack, the_empty_list);
       }
         break;
       case VALUES:
@@ -396,7 +400,8 @@ lisp_object_t *run_by_llam(lisp_object_t *code_vector) {
         fprintf(stdout, "In run_by_llam --- Invalid opcode %d\n", type_of(ins));
         exit(1);
     }
-    writef(standard_out, "stack is %?\n", stack);
+    if (debug)
+      writef(standard_out, "stack is %?\n", stack);
     pc++;
   }
   halt:

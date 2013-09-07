@@ -1063,6 +1063,14 @@ lt *lt_is_kind_of(lt *object, lt *type) {
   return lt_eq(lt_type_of(object), type);
 }
 
+lt *lt_switch_debug(void) {
+  if (debug)
+    debug = FALSE;
+  else
+    debug = TRUE;
+  return booleanize(debug);
+}
+
 lt *lt_switch_exception_check(void) {
   if (is_check_exception)
     is_check_exception = FALSE;
@@ -1465,6 +1473,7 @@ void init_prims(void) {
   ADD(2, FALSE, lt_is_kind_of, "of-type?");
   ADD(0, FALSE, lt_object_size, "object-size");
   ADD(1, FALSE, lt_type_of, "type-of");
+  ADD(0, FALSE, lt_switch_debug, "switch-debug");
   ADD(0, FALSE, lt_switch_exception_check, "switch-exception-check");
   ADD(0, FALSE, lt_switch_type_check, "switch-type-check");
 }
