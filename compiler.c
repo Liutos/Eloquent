@@ -469,7 +469,9 @@ lisp_object_t *compile_object(lisp_object_t *object, lisp_object_t *env) {
   if (is_cwv_form(object)) {
     lt *fn = compile_object(second(object), env);
     lt *vals = compile_object(third(object), env);
-    return seq(gen(NEED), vals, fn, gen(MVCALL), gen(CHECKEX));
+//    return seq(gen(NEED), vals, fn, gen(MVCALL), gen(CHECKEX));
+    return seq(gen(NEED), vals, fn, gen(MVCALL),
+        is_check_exception? gen(CHECKEX): the_empty_list);
   }
   if (is_values_form(object)) {
     lt *args = compile_args(pair_tail(object), env);
@@ -497,12 +499,12 @@ lisp_object_t *compile_object(lisp_object_t *object, lisp_object_t *env) {
                  compile_type_check(symbol_value(fn), nargs),
                  op,
                  gen(PRIM, nargs),
-                 (is_check_type? gen(CHECKEX): the_empty_list));
+                 (is_check_exception? gen(CHECKEX): the_empty_list));
     } else
       return seq(compile_args(args, env),
                  op,
                  gen(CALL, lt_list_length(args)),
-                 (is_check_type? gen(CHECKEX): the_empty_list));
+                 (is_check_exception? gen(CHECKEX): the_empty_list));
   }
   writef(standard_out, "Impossible --- Unable to compile %?\n", object);
   exit(1);

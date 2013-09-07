@@ -13,6 +13,7 @@
 #include "type.h"
 
 /* OBJECT_H_ */
+int is_check_exception;
 int is_check_type;
 lt *the_argv;
 lisp_object_t *the_dot_symbol;

@@ -15,6 +15,7 @@
 #include "object.h"
 #include "type.h"
 
+int is_check_exception;
 int is_check_type;
 lt *gensym_counter;
 lt *null_env;
@@ -443,6 +444,7 @@ lt *lt_type_name(lt *type) {
 
 void init_global_variable(void) {
   /* Initialize global variables */
+  is_check_exception = TRUE;
   is_check_type = TRUE;
   the_argv = make_vector(0);
   the_false = make_false();

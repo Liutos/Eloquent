@@ -16,8 +16,7 @@
 int main(int argc, char *argv[])
 {
   char *inputs[] = {
-      "(lambda () 1 2 3 4)",
-      "(lambda () (yield 2) (yield 1))",
+      "(while-macro '(> n 0) '(set! n (- n 1)))",
   };
   init_global_variable();
   init_prims();

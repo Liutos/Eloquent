@@ -396,6 +396,7 @@ lisp_object_t *run_by_llam(lisp_object_t *code_vector) {
         fprintf(stdout, "In run_by_llam --- Invalid opcode %d\n", type_of(ins));
         exit(1);
     }
+    writef(standard_out, "stack is %?\n", stack);
     pc++;
   }
   halt:
