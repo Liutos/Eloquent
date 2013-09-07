@@ -17,8 +17,7 @@
 int main(int argc, char *argv[])
 {
   char *inputs[] = {
-      "(map '() (lambda (x) x))",
-      "(map '(1 2 3) (lambda (x) (+ x 1)))",
+      "(expand-macro '(while (> n 0) (set! n (- n 1))))",
   };
   init_global_variable();
   init_prims();

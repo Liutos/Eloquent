@@ -18,6 +18,18 @@
           (name-lambda ,name ,pars ,@body))
     (set-function-name! ,name ',name)))
 
+; WHILE
+(defmacro while (test . body)
+  (let ((start (gensym))
+        (end (gensym)))
+    `(tagbody
+      ,start
+       (if ,test
+           (begin ,@body)
+         (goto ,end))
+      ,end
+       '())))
+
 ; Type Predicates
 (define eof? (x)
   (eq? 'teof (type-name (type-of x))))
