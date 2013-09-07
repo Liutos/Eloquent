@@ -27,7 +27,9 @@
     `(tagbody
       ,start
        (if ,test
-           (begin ,@body)
+           (begin
+            ,@body
+            (goto ,start))
          (goto ,end))
       ,end
        '())))
