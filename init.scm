@@ -135,11 +135,12 @@
         (write-char c *standard-output*)
         (cat file)))))
 
-(define wc-aux (file n)
-  (let ((c (read-char file)))
-    (if (eof? c)
-        n
-      (wc-aux file (+ n 1)))))
-
 (define wc (file)
-  (wc-aux file 0))
+  (let ((aux '()))
+    (set! aux
+          (lambda (file n)
+            (let ((c (read-char file)))
+              (if (eof? c)
+                  n
+                (aux file (+ n 1))))))
+    (aux file 0)))

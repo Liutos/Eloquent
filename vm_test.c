@@ -17,7 +17,8 @@
 int main(int argc, char *argv[])
 {
   char *inputs[] = {
-      "(expand-macro '(while (> n 0) (set! n (- n 1))))",
+      "wc",
+      "(wc (open-in \"init.scm\"))",
   };
   init_global_variable();
   init_prims();
