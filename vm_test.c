@@ -17,10 +17,8 @@
 int main(int argc, char *argv[])
 {
   char *inputs[] = {
-      "(write-object 1 *standard-output*)",
-      "(write-object '(1 2 3) *standard-output*)",
-      "(write-object [1 2 3 4] *standard-output*)",
-      "(print [1 2 3 4 ()])",
+      "(set! file (open-in \"init.scm\"))",
+      "(wc file)",
   };
   init_global_variable();
   init_prims();
