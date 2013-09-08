@@ -148,7 +148,9 @@ struct lisp_object_t {
 //      throw_flag: Indicates whether the current callee should throws the exception or not
 //      code: The bytecode instructions of the last caller
 //      env: The environment of the last caller
-//      fn: The last caller
+//      fn: The current callee. Use for two purposes
+//          1. Use for constructing function calling chain when throwing exception
+//          2. Stores the function to be used when modify its code pointer in the `yield' form
       int need, nvals, pc, sp, throw_flag;
       lt *code;
       lt *env;
