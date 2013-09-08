@@ -141,6 +141,14 @@ struct lisp_object_t {
       lt *signature;
     } primitive;
     struct {
+//      need: The number of return values accepted by caller
+//      nvals: The number of return values provided by callee
+//      pc: The index of instructions executed before entering the instructions of callee
+//      sp: The index of the element on argument stack before entering the callee
+//      throw_flag: Indicates whether the current callee should throws the exception or not
+//      code: The bytecode instructions of the last caller
+//      env: The environment of the last caller
+//      fn: The last caller
       int need, nvals, pc, sp, throw_flag;
       lt *code;
       lt *env;
