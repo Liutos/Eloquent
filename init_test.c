@@ -53,6 +53,9 @@ int main(int argc, char *argv[])
       "(* 1 2 3 4)",
       "(/ 1 2)",
       "(/ 1 2.0 4.0)",
+      "(remove 1 '(1 2 3))",
+      "(remove 'a '(a a a))",
+      "(remove \"a\" '(\"a\" 1 2 \"a\"))",
   };
   init_global_variable();
   init_prims();

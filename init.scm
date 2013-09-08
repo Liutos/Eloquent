@@ -60,6 +60,14 @@
     (cons (fn (first list))
           (map (rest list) fn))))
 
+(define remove (x list)
+  (cond ((null? list) '())
+        ((eql? x (first list))
+         (remove x (rest list)))
+        (else
+         (cons (first list)
+               (remove x (rest list))))))
+
 (define reduce (list fn)
   (cond ((null? list)
          (signal "Parameter `list' can't be an empty list."))
