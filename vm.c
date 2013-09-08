@@ -114,13 +114,18 @@ lisp_object_t *run_by_llam(lisp_object_t *code_vector) {
 #define move_stack() vector_last(stack) -= primitive_arity(func)
 #define vlast(v, n) lt_vector_last_nth(v, make_fixnum(n))
 
+  static lt *stack = NULL;
+  if (stack == NULL)
+    stack = make_vector(50);
+  else
+    vector_last(stack) = -1;
+
   assert(isvector(code_vector));
   int nargs = 0;
   int need = FALSE;
   int nvals = 1;
   int pc = 0;
   int throw_exception = TRUE;
-  lisp_object_t *stack = make_vector(50);
   lt *code = code_vector;
   lisp_object_t *env = null_env;
   lt *prim = NULL;
