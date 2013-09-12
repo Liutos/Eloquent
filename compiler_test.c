@@ -16,7 +16,7 @@
 int main(int argc, char *argv[])
 {
   char *inputs[] = {
-      "(while-macro '(> n 0) '(set! n (- n 1)))",
+      "(+ 1 2 3)",
   };
   init_global_variable();
   init_prims();

@@ -200,7 +200,7 @@ lisp_object_t *run_by_llam(lisp_object_t *code_vector) {
         return_stack = make_pair(retaddr, return_stack);
         code = function_code(func);
         env = function_renv(func);
-        pc = function_cp(func);
+        pc = -1;
         throw_exception = TRUE;
         nargs = fixnum_value(op_call_arity(ins));
         env = comp2run_env(function_cenv(func), env);
@@ -371,12 +371,6 @@ lisp_object_t *run_by_llam(lisp_object_t *code_vector) {
         lisp_object_t *retaddr = pair_head(return_stack);
         if (debug)
           writef(standard_out, "retaddr is %?\n", retaddr);
-//        Store the current position in compiled instructions if flag is true
-        lt *flag = op_return_flag(ins);
-        if (flag == the_true)
-          function_cp(retaddr_fn(retaddr)) = pc;
-        else
-          function_cp(retaddr_fn(retaddr)) = -1;
 
         return_stack = pair_tail(return_stack);
         code = retaddr_code(retaddr);
@@ -390,9 +384,6 @@ lisp_object_t *run_by_llam(lisp_object_t *code_vector) {
           for (int i = 1; i < nvals; i++)
             lt_vector_pop(stack);
         }
-//        Place the empty list as the default return value on the operand stack
-//        if (vector_last(stack) == retaddr_sp(retaddr))
-//          lt_vector_push(stack, the_empty_list);
       }
         break;
       case VALUES:

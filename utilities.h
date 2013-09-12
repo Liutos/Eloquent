@@ -27,7 +27,6 @@ extern int is_set_form(lt *);
 extern int is_tagbody_form(lt *);
 extern int is_values_form(lt *);
 extern int is_var_form(lt *);
-extern int is_yield_form(lt *);
 
 extern lt *list1(lt *);
 extern lt *list2(lt *, lt *);

@@ -179,7 +179,7 @@ lisp_object_t *gen(enum TYPE opcode, ...) {
       ins = make_op_prim(va_arg(ap, lisp_object_t *));
       break;
     case RETURN:
-      ins = make_op_return(va_arg(ap, lt *));
+      ins = make_op_return();
       break;
     case VALUES:
       ins = make_op_values(va_arg(ap, lt *));
@@ -204,6 +204,11 @@ int islength1(lisp_object_t *list) {
   return isnull(pair_tail(list));
 }
 
+// The order of arguments pushed onto operand stack is the same as the order of
+// formal parameters list scanned from left to right. Therefore, the left most
+// argument would be pushed to operand stack first.
+// The order of arguments on the operand stack from top to bottom, is opposite
+// to the order of arguments in environment binding from left to right.
 lisp_object_t *compile_args(lisp_object_t *args, lisp_object_t *env) {
   if (isnull(args))
     return the_empty_list;
@@ -476,10 +481,6 @@ lisp_object_t *compile_object(lisp_object_t *object, lisp_object_t *env) {
   if (is_values_form(object)) {
     lt *args = compile_args(pair_tail(object), env);
     return seq(args, gen(VALUES, lt_list_length(pair_tail(object))));
-  }
-  if (is_yield_form(object)) {
-    lt *val = second(object);
-    return seq(compile_object(val, env), gen(RETURN, the_true));
   }
   if (ispair(object)) {
     lisp_object_t *args = pair_tail(object);

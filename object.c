@@ -216,7 +216,6 @@ lt *make_function(lt *cenv, lt *args, lt *code, lt *renv) {
   function_cenv(func) = cenv;
   function_args(func) = args;
   function_code(func) = code;
-  function_cp(func) = -1;
   function_name(func) = the_undef;
   function_renv(func) = renv;
   return func;
@@ -403,8 +402,8 @@ lisp_object_t *make_op_prim(lisp_object_t *nargs) {
   return mkopcode(PRIM, "PRIM", 1, nargs);
 }
 
-lisp_object_t *make_op_return(lt *flag) {
-  return mkopcode(RETURN, "RETURN", 1, flag);
+lisp_object_t *make_op_return() {
+  return mkopcode(RETURN, "RETURN", 0);
 }
 
 lt *make_op_values(lt *nargs) {

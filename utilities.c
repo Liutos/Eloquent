@@ -62,7 +62,6 @@ deform_pred(is_set_form, "set!")
 deform_pred(is_tagbody_form, "tagbody")
 deform_pred(is_values_form, "values")
 deform_pred(is_var_form, "var")
-deform_pred(is_yield_form, "yield")
 
 lt *list1(lt *element) {
   return make_pair(element, make_empty_list());

@@ -102,7 +102,7 @@ extern lt *make_op_mvcall(void);
 extern lt *make_op_need(void);
 extern lt *make_op_pop(void);
 extern lt *make_op_prim(lt *);
-extern lt *make_op_return(lt *);
+extern lt *make_op_return(void);
 extern lt *make_op_values(lt *);
 extern lt *make_op_catch();
 

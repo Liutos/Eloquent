@@ -103,7 +103,6 @@ struct lisp_object_t {
 //      1. An environment records the information at compile time, only can be initialized when compiling;
 //      2. An environment holds the parameters and local variables, only can be initialized when running.
 //      `cenv' means `compile environment' and `renv' means `runtime environment'.
-      int cp;
       lt *cenv, *renv;
       lt *args;
       lt *name;
@@ -198,7 +197,6 @@ struct string_builder_t {
 #define float_value(x) ((x)->u.float_num.value)
 #define function_args(x) ((x)->u.function.args)
 #define function_cenv(x) ((x)->u.function.cenv)
-#define function_cp(x) ((x)->u.function.cp)
 #define function_renv(x) ((x)->u.function.renv)
 #define function_code(x) ((x)->u.function.code)
 #define function_name(x) ((x)->u.function.name)
@@ -269,7 +267,6 @@ struct string_builder_t {
 #define op_lvar_j(x) oparg2(x)
 #define op_lvar_var(x) oparg3(x)
 #define op_prim_nargs(x) oparg1(x)
-#define op_return_flag(x) oparg1(x)
 #define op_values_nargs(x) oparg1(x)
 
 #endif /* TYPE_H_ */
