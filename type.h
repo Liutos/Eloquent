@@ -71,12 +71,9 @@ enum OPCODE_TYPE {
   JUMP,
   LSET,
   LVAR,
-  MVCALL,
-  NEED,
   POP,
   PRIM,
   RETURN,
-  VALUES,
 };
 
 struct lisp_object_t {
@@ -150,7 +147,7 @@ struct lisp_object_t {
 //      fn: The current callee. Use for two purposes
 //          1. Use for constructing function calling chain when throwing exception
 //          2. Stores the function to be used when modify its code pointer in the `yield' form
-      int need, nvals, pc, sp, throw_flag;
+      int pc, sp, throw_flag;
       lt *code;
       lt *env;
       lt *fn;
@@ -227,8 +224,6 @@ struct string_builder_t {
 #define retaddr_code(x) ((x)->u.retaddr.code)
 #define retaddr_env(x) ((x)->u.retaddr.env)
 #define retaddr_fn(x) ((x)->u.retaddr.fn)
-#define retaddr_need(x) ((x)->u.retaddr.need)
-#define retaddr_nvals(x) ((x)->u.retaddr.nvals)
 #define retaddr_pc(x) ((x)->u.retaddr.pc)
 #define retaddr_throw_flag(x) ((x)->u.retaddr.throw_flag)
 #define retaddr_sp(x) ((x)->u.retaddr.sp)
@@ -267,6 +262,5 @@ struct string_builder_t {
 #define op_lvar_j(x) oparg2(x)
 #define op_lvar_var(x) oparg3(x)
 #define op_prim_nargs(x) oparg1(x)
-#define op_values_nargs(x) oparg1(x)
 
 #endif /* TYPE_H_ */

@@ -17,7 +17,6 @@ extern int is_symbol_bound(lt *);
 
 extern int is_tag_list(lt *list, lt *tag);
 extern int is_begin_form(lt *);
-extern int is_cwv_form(lt *);
 extern int is_catch_form(lt *);
 extern int is_goto_form(lt *);
 extern int is_if_form(lt *);
@@ -25,7 +24,6 @@ extern int is_lambda_form(lt *);
 extern int is_quote_form(lt *);
 extern int is_set_form(lt *);
 extern int is_tagbody_form(lt *);
-extern int is_values_form(lt *);
 extern int is_var_form(lt *);
 
 extern lt *list1(lt *);
