@@ -76,45 +76,38 @@
          (fn (first list) (reduce (rest list) fn)))))
 
 ; Arithmetic Operations
+(defmacro define-bin-arith (name lop hop)
+  (let ((n (gensym))
+        (m (gensym)))
+    `(define ,name (,n ,m)
+       (cond ((and2 (fixnum? ,n) (fixnum? ,m)) (,lop ,n ,m))
+             ((and2 (fixnum? ,n) (float? ,m)) (,hop (fx->fp ,n) ,m))
+             ((and2 (float? ,n) (fixnum? ,m)) (,hop ,n (fx->fp ,m)))
+             (else (,hop ,n ,m))))))
+
 ;; +
-(define bin+ (n m)
-  (cond ((and2 (fixnum? n) (fixnum? m)) (fx+ n m))
-        ((and2 (fixnum? n) (float? m)) (fp+ (fx->fp n) m))
-        ((and2 (float? n) (fixnum? m)) (fp+ n (fx->fp m)))
-        (else (fp+ n m))))
+(define-bin-arith bin+ fx+ fp+)
 
 (define + ns
   (cond ((null? ns) 0)
         (else (reduce ns bin+))))
 
 ;; -
-(define bin- (n m)
-  (cond ((and2 (fixnum? n) (fixnum? m)) (fx- n m))
-        ((and2 (fixnum? n) (float? m)) (fp- (fx->fp n) m))
-        ((and2 (float? n) (fixnum? m)) (fp- n (fx->fp m)))
-        (else (fp- n m))))
+(define-bin-arith bin- fx- fp-)
 
 (define - (n . ns)
   (cond ((null? ns) (bin- 0 n))
         (else (bin- n (reduce ns bin+)))))
 
 ;; *
-(define bin* (n m)
-  (cond ((and2 (fixnum? n) (fixnum? m)) (fx* n m))
-        ((and2 (fixnum? n) (float? m)) (fp* (fx->fp n) m))
-        ((and2 (float? n) (fixnum? m)) (fp* n (fx->fp m)))
-        (else (fp* n m))))
+(define-bin-arith bin* fx* fp*)
 
 (define * ns
   (cond ((null? ns) 1)
         (else (reduce ns bin*))))
 
 ;; /
-(define bin/ (n m)
-  (cond ((and2 (fixnum? n) (fixnum? m)) (fx/ n m))
-        ((and2 (fixnum? n) (float? m)) (fp/ (fx->fp n) m))
-        ((and2 (float? n) (fixnum? m)) (fp/ n (fx->fp m)))
-        (else (fp/ n m))))
+(define-bin-arith bin/ fx/ fp/)
 
 (define / (n . ns)
   (cond ((null? ns) (bin/ 1 n))
