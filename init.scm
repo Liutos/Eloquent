@@ -1,5 +1,3 @@
-(switch-exception-check)
-
 ; DEFMACRO
 (set-symbol-macro!
  'defmacro
@@ -148,15 +146,3 @@
            n
          (aux file (+ n 1))))))
   (aux file 0))
-
-; Test
-(define while-macro (test . body)
-  (let ((start (gensym))
-        (end (gensym)))
-    `(tagbody
-      ,start
-       (if ,test
-           (begin ,@body)
-         (goto ,end))
-      ,end
-       '())))
