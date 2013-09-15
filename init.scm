@@ -15,7 +15,7 @@
   (set-symbol-value! name '())
   `(begin
     (set! ,name
-          (name-lambda ,name ,pars ,@body))
+          (lambda ,pars ,@body))
     (set-function-name! ,name ',name)))
 
 ; WHILE
@@ -140,7 +140,7 @@
 
 (define wc (file)
   (var aux
-   (name-lambda aux (file n)
+   (lambda (file n)
      (let ((c (read-char file)))
        (if (eof? c)
            n

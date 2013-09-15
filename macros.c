@@ -196,67 +196,6 @@ lt *try_catch_macro(lt *form, lt *handlers) {
   return list4(S("begin"), catch, val, handler_forms);
 }
 
-/* name-lambda */
-lt *tco(lt *name, lt *pars, lt *form, int islast) {
-  if (!ispair(form))
-    return form;
-  if (is_macro_form(form))
-    return tco(name, pars, lt_expand_macro(form), islast);
-  lt *op = pair_head(form);
-  if (op == S("if")) {
-    lt *pred = second(form);
-    lt *tp = tco(name, pars, third(form), islast);
-    lt *ep = tco(name, pars, fourth(form), islast);
-    return list4(S("if"), pred, tp, ep);
-  }
-  if (op == S("begin")) {
-    lt *actions = pair_tail(form);
-    lt *sets = make_empty_list();
-    if (!(isnull(actions) || isnull(pair_tail(actions)))) {
-      while (!isnull(pair_tail(actions))) {
-        lt *p = pair_head(actions);
-        sets = make_pair(tco(name, pars, p, FALSE), sets);
-        actions = pair_tail(actions);
-      }
-    }
-    return make_pair(S("begin"),
-        seq(sets, list1(tco(name, pars, pair_head(actions), islast))));
-  }
-  if (op == name && islast) {
-    lt *tmp = pair_tail(form);
-    lt *args = make_empty_list();
-    while (ispair(tmp)) {
-      lt *par = pair_head(pars);
-      lt *arg = pair_head(tmp);
-      args = make_pair(par, args);
-      args = make_pair(arg, args);
-      pars = pair_tail(pars);
-      tmp = pair_tail(tmp);
-    }
-    args = lt_list_nreverse(args);
-    args = make_pair(S("pset!"), args);
-    return list3(S("begin"), args, list2(S("goto"), name));
-  } else {
-    lt *tmp = pair_tail(form);
-    lt *args = make_empty_list();
-    while (ispair(tmp)) {
-      lt *arg = pair_head(tmp);
-      arg = tco(name, pars, arg, FALSE);
-      args = make_pair(arg, args);
-      tmp = pair_tail(tmp);
-    }
-    args = lt_list_nreverse(args);
-    return make_pair(op, args);
-  }
-}
-
-lt *name_lambda_macro(lt *name, lt *pars, lt *body) {
-  lt *expr = tco(name, pars, make_pair(S("begin"), body), TRUE);
-  expr = make_pair(S("tagbody"), make_pair(name, pair_tail(expr)));
-  expr = list3(S("lambda"), pars, expr);
-  return expr;
-}
-
 void init_macros(void) {
   lt *func;
 #define DM(arity, restp, func_name, Lisp_name) \
@@ -267,7 +206,6 @@ void init_macros(void) {
 
   DM(1, TRUE, lt_cond_macro, "cond");
   DM(2, TRUE, lt_let_macro, "let");
-  DM(3, TRUE, name_lambda_macro, "name-lambda");
   DM(2, TRUE, try_catch_macro, "try-catch");
   DM(1, TRUE, lt_pset_macro, "pset!");
   DM(1, FALSE, quasiq, "quasiquote");
