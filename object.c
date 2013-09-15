@@ -47,7 +47,6 @@ struct lisp_object_t lt_types[VECTOR + 1] = {
     DEFTYPE(FUNCTION, "function"),
     DEFTYPE(FLOAT, "float"),
     DEFTYPE(INPUT_FILE, "input-file"),
-    DEFTYPE(INPUT_STRING, "input-string"),
     DEFTYPE(OPCODE, "opcode"),
     DEFTYPE(OUTPUT_FILE, "output-file"),
     DEFTYPE(PAIR, "pair"),
@@ -86,7 +85,6 @@ mktype_pred(isexception, EXCEPTION)
 mktype_pred(isfloat, FLOAT)
 mktype_pred(isfunction, FUNCTION)
 mktype_pred(isinput_file, INPUT_FILE)
-mktype_pred(isinput_string, INPUT_STRING)
 mktype_pred(isoutput_file, OUTPUT_FILE)
 mktype_pred(isopcode, OPCODE)
 mktype_pred(ispair, PAIR)
@@ -228,15 +226,6 @@ lisp_object_t *make_input_file(FILE *file) {
   input_file_colnum(inf) = 0;
   input_file_openp(inf) = TRUE;
   return inf;
-}
-
-lt *make_input_string(char *value) {
-  lt *obj = make_object(INPUT_STRING);
-  input_string_colnum(obj) = 0;
-  input_string_index(obj) = 0;
-  input_string_linum(obj) = 1;
-  input_string_value(obj) = value;
-  return obj;
 }
 
 lisp_object_t *make_output_file(FILE *file) {
@@ -418,10 +407,6 @@ lisp_object_t *find_or_create_symbol(char *name) {
 
 lt *lt_exception_tag(lt *exception) {
   return exception_tag(exception);
-}
-
-lt *lt_make_input_string(lt *string) {
-  return make_input_string(string_value(string));
 }
 
 lt *lt_type_name(lt *type) {

@@ -38,7 +38,6 @@ extern int isexception(lt *);
 extern int isfloat(lt *);
 extern int isfunction(lt *);
 extern int isinput_file(lt *);
-extern int isinput_string(lt *);
 extern int isopcode(lt *);
 extern int isoutput_file(lt *);
 extern int ispair(lt *);

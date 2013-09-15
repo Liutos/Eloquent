@@ -251,9 +251,6 @@ void write_object(lt *x, lt *output_file) {
     case INPUT_FILE:
     	writef(output_file, "#<INPUT-FILE %p>", x);
     	break;
-    case INPUT_STRING:
-      writef(output_file, "#<INPUT-STRING %p>", x);
-      break;
     case OUTPUT_FILE:
     	writef(output_file, "#<OUTPUT-FILE %p>", x);
     	break;
@@ -323,15 +320,10 @@ void write_object(lt *x, lt *output_file) {
 }
 
 int get_char(lt *input) {
-  assert(isinput_file(input) || isinput_string(input));
-  if (isinput_file(input)) {
-    FILE *in = input_file_file(input);
-    input_file_colnum(input)++;
-    return getc(in);
-  } else {
-    input_string_index(input)++;
-    return input_string_value(input)[input_string_index(input) - 1];
-  }
+  assert(isinput_file(input));
+  FILE *in = input_file_file(input);
+  input_file_colnum(input)++;
+  return getc(in);
 }
 
 lt *lt_raw_nth(lt *list, int n) {
@@ -361,12 +353,12 @@ lt *lt_raw_nthtail(lt *list, int n) {
   return list;
 }
 
-/* Exception */
+/* NOTE: Exception */
 lt *lt_signal_exception(lt *message) {
   return signal_exception(string_value(message));
 }
 
-/* Function */
+/* NOTE: Function */
 lt *lt_eval(lt *form) {
   return run_by_llam(compile_to_bytecode(form));
 }
@@ -497,7 +489,7 @@ lt *lt_load(lt *path) {
   return make_true();
 }
 
-/* Input Port */
+/* NOTE: Input Port */
 lt *lt_close_in(lt *file) {
   assert(isinput_file(file));
   fclose(input_file_file(file));
@@ -549,20 +541,7 @@ lt *lt_read_line(lt *in_port) {
   return make_string(sb2string(sb));
 }
 
-/* Input String */
-lt *lt_read_char_from_string(lt *in_str) {
-  assert(isinput_string(in_str));
-  return make_character(get_char(in_str));
-}
-
-lt *lt_unget_char_to_string(lt *c, lt *in_str) {
-  void unget_char(int, lt *);
-  assert(isinput_string(in_str));
-  unget_char(character_value(c), in_str);
-  return c;
-}
-
-/* List */
+/* NOTE: List */
 lt *lt_list_last(lt *list) {
   tco:
   if (isnull(pair_tail(list)))
@@ -613,7 +592,7 @@ lt *lt_list_reverse(lt *list) {
     return append2(lt_list_reverse(pair_tail(list)), list1(pair_head(list)));
 }
 
-/* Arithmetic Operations */
+/* NOTE: Arithmetic Operations */
 lt *lt_nt_level(lt *n) {
   if (isfixnum(n))
     return make_fixnum(0);
@@ -707,7 +686,7 @@ lisp_object_t *lt_numeric_eq(lisp_object_t *n, lisp_object_t *m) {
     return booleanize(float_value(n) == float_value(m));
 }
 
-/* Character */
+/* NOTE: Character */
 lisp_object_t *lt_char_code(lisp_object_t *c) {
   assert(ischar(c));
   return make_fixnum(character_value(c));
@@ -718,7 +697,7 @@ lisp_object_t *lt_code_char(lisp_object_t *code) {
   return make_character(fixnum_value(code));
 }
 
-/* Output File */
+/* NOTE: Output File */
 lt *lt_close_out(lt *file) {
   assert(isoutput_file(file));
   fclose(output_file_file(file));
@@ -753,7 +732,7 @@ lt *lt_write_object(lt *object, lt *dest) {
   return the_true;
 }
 
-/* String */
+/* NOTE: String */
 lisp_object_t *lt_char_at(lisp_object_t *string, lisp_object_t *index) {
   assert(isstring(string) && isfixnum(index));
   assert(strlen(string_value(string)) > fixnum_value(index));
@@ -773,7 +752,7 @@ lt *lt_string_set(lt *string, lt *index, lt *new_char) {
   return string;
 }
 
-/* Symbol */
+/* NOTE: Symbol */
 lisp_object_t *lt_intern(lisp_object_t *name) {
   assert(isstring(name));
   return find_or_create_symbol(string_value(name));
@@ -826,7 +805,7 @@ lisp_object_t *lt_symbol_value(lisp_object_t *symbol) {
   return symbol_value(symbol);
 }
 
-/* Vector */
+/* NOTE: Vector */
 lisp_object_t *lt_is_vector_empty(lisp_object_t *vector) {
   assert(isvector(vector));
   return booleanize(vector_last(vector) <= -1);
@@ -940,7 +919,7 @@ lt *lt_vector_to_list(lt *vector) {
   return lt_list_nreverse(list);
 }
 
-/* List */
+/* NOTE: List */
 lt *lt_append(lt *lists) {
   if (isnull(lists))
     return make_empty_list();
@@ -1008,7 +987,7 @@ lisp_object_t *lt_tail(lisp_object_t *pair) {
   return pair_tail(pair);
 }
 
-/* General */
+/* NOTE: General */
 lisp_object_t *lt_eq(lisp_object_t *x, lisp_object_t *y) {
   return booleanize(x == y);
 }
@@ -1087,28 +1066,19 @@ lt *lt_switch_type_check(void) {
   return booleanize(is_check_type);
 }
 
-/* Reader */
+/* NOTE: Reader */
 int peek_char(lisp_object_t *input) {
-  assert(isinput_file(input) || isinput_string(input));
-  if (isinput_file(input)) {
-    FILE *in = input_file_file(input);
-    int c = getc(in);
-    ungetc(c, in);
-    return c;
-  } else {
-    return input_string_value(input)[input_string_index(input)];
-  }
+  assert(isinput_file(input));
+  FILE *in = input_file_file(input);
+  int c = getc(in);
+  ungetc(c, in);
+  return c;
 }
 
 void unget_char(int c, lisp_object_t *input) {
-  assert(isinput_file(input) || isinput_string(input));
-  if (isinput_file(input)) {
-    ungetc(c, input_file_file(input));
-    input_file_colnum(input)--;
-  } else {
-    input_string_index(input)--;
-    input_string_value(input)[input_string_index(input)] = c;
-  }
+  assert(isinput_file(input));
+  ungetc(c, input_file_file(input));
+  input_file_colnum(input)--;
 }
 
 int isdelimiter(int c) {
@@ -1333,7 +1303,8 @@ lisp_object_t *read_object(lisp_object_t *input_file) {
 }
 
 lisp_object_t *read_object_from_string(char *text) {
-  lt *inf = make_input_string(text);
+  FILE *file = fmemopen(text, strlen(text), "r");
+  lt *inf = make_input_file(file);
   lt *obj = read_object(inf);
   return obj;
 }
@@ -1410,10 +1381,6 @@ void init_prims(void) {
   ADD(1, FALSE, lt_read_char, "read-char");
   ADD(1, FALSE, lt_read_line, "read-line");
   ADD(1, FALSE, lt_read_from_string, "read-from-string");
-  /* Input String */
-  ADD(1, FALSE, lt_make_input_string, "make-input-string");
-  ADD(1, FALSE, lt_read_char_from_string, "read-char-from-string");
-  ADD(2, FALSE, lt_unget_char_to_string, "unget-char-to-string");
   /* List */
   ADD(1, TRUE, lt_append, "append");
   ADD(2, FALSE, lt_is_tag_list, "is-tag-list?");
