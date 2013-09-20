@@ -21,6 +21,7 @@ int is_check_type;
 lt *gensym_counter;
 lt *null_env;
 lt *package;
+lt *pkgs;
 lt *standard_error;
 lt *standard_in;
 lt *standard_out;
@@ -411,6 +412,25 @@ lt *lt_package_name(lt *pkg) {
   return package_name(pkg);
 }
 
+lt *search_package(char *name, lt *packages) {
+  while (ispair(packages)) {
+    lt *pkg = pair_head(packages);
+    if (strcmp(string_value(package_name(pkg)), name) == 0)
+      return pkg;
+    packages = pair_tail(packages);
+  }
+  return NULL;
+}
+
+lt *ensure_package(char *name) {
+  lt *result = search_package(name, pkgs);
+  if (result)
+    return result;
+  lt *pkg = make_package(make_string(name), the_empty_list);
+  pkgs = make_pair(pkg, pkgs);
+  return pkg;
+}
+
 /* TODO: Use a hash table for storing symbols. */
 // Search the symbol with `name' in `symbol_table'
 lt *search_symbol_table(char *name, lt *symbol_table) {
@@ -444,6 +464,11 @@ lt *lt_type_name(lt *type) {
   return S(type_name(type));
 }
 
+void init_packages(void) {
+  pkgs = make_empty_list();
+  package = ensure_package("233");
+}
+
 void init_global_variable(void) {
   /* Initialize global variables */
   debug = FALSE;
@@ -458,13 +483,16 @@ void init_global_variable(void) {
   gensym_counter = make_fixnum(0);
   null_env = make_environment(the_empty_list, NULL);
   environment_next(null_env) = null_env;
-  package = make_package(make_string("233"), the_empty_list);
   standard_error = make_output_file(stderr);
   standard_in = make_input_file(stdin);
   standard_out = make_output_file(stdout);
   symbol_list = the_empty_list;
   the_undef = make_undef();
 
+//  Packages initialization
+  init_packages();
+
+// Global variables initialization
   symbol_value(S("*ARGV*")) = the_argv;
   symbol_value(S("*gensym-counter*")) = gensym_counter;
   symbol_value(S("*standard-error*")) = standard_error;
