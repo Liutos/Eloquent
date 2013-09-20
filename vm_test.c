@@ -19,6 +19,8 @@ int main(int argc, char *argv[])
   char *inputs[] = {
       "(symbol-package 'foobar)",
       "(package-name (symbol-package 'foobar))",
+      "(in-package \"233-user\")",
+      "(package-name (symbol-package 'foobar))",
   };
   init_global_variable();
   init_prims();
@@ -27,7 +29,7 @@ int main(int argc, char *argv[])
   init_macros();
   load_init_file();
   for (int i = 0; i < sizeof(inputs) / sizeof(char *); i++) {
-    writef(standard_out, ">> %s\n", make_string(inputs[i]));
+    writef(standard_out, "%s >> %s\n", package_name(package), make_string(inputs[i]));
     lisp_object_t *expr = read_object_from_string(strdup(inputs[i]));
     expr = compile_to_bytecode(expr);
     if (!is_signaled(expr))

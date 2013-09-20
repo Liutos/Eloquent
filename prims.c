@@ -738,6 +738,16 @@ lt *lt_write_object(lt *object, lt *dest) {
   return the_true;
 }
 
+/* NOTE: Package */
+lt *lt_in_package(lt *name) {
+  lt *pkg = search_package(string_value(name), pkgs);
+  if (pkg) {
+    package = pkg;
+    return the_true;
+  } else
+    return signal_exception("in-package: Undefined package with the name");
+}
+
 /* NOTE: String */
 lisp_object_t *lt_char_at(lisp_object_t *string, lisp_object_t *index) {
   assert(isstring(string) && isfixnum(index));
@@ -1411,6 +1421,7 @@ void init_prims(void) {
   ADD(2, FALSE, lt_write_object, "write-object");
   ADD(2, FALSE, lt_write_string, "write-string");
   /* Package */
+  ADD(1, FALSE, lt_in_package, "in-package");
   ADD(1, FALSE, lt_package_name, "package-name");
   /* String */
   ADD(2, FALSE, lt_char_at, "char-at");

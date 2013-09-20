@@ -408,6 +408,7 @@ lt *make_fn_inst(lt *prim) {
   return make_pair(mkopcode(primitive_opcode(prim), "", 0), the_empty_list);
 }
 
+// Package
 lt *lt_package_name(lt *pkg) {
   return package_name(pkg);
 }
@@ -466,6 +467,7 @@ lt *lt_type_name(lt *type) {
 
 void init_packages(void) {
   pkgs = make_empty_list();
+  ensure_package("233-user");
   package = ensure_package("233");
 }
 

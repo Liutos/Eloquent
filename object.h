@@ -24,6 +24,8 @@ lt *gensym_counter;
 lisp_object_t *null_env;
 lisp_object_t *the_empty_list;
 lt *the_eof;
+lt *pkgs;
+lt *package;
 lt *standard_error;
 lisp_object_t *standard_in;
 lisp_object_t *standard_out;
@@ -107,6 +109,7 @@ extern lt *make_fn_inst(lt *);
 extern lt *find_or_create_symbol(char *);
 // Simple wrappers for some C functions
 extern lt *lt_package_name(lt *);
+extern lt *search_package(char *, lt *);
 extern lt *lt_symbol_package(lt *);
 extern lt *lt_exception_tag(lt *);
 extern lt *lt_make_input_string(lt *);
