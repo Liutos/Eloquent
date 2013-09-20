@@ -257,6 +257,9 @@ void write_object(lt *x, lt *output_file) {
     case OUTPUT_FILE:
     	writef(output_file, "#<OUTPUT-FILE %p>", x);
     	break;
+    case PACKAGE:
+      writef(output_file, "#<PACKAGE name: %s>", package_name(x));
+      break;
     case PAIR:
       write_raw_string("(", output_file);
       write_object(pair_head(x), output_file);

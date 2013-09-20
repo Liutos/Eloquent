@@ -20,6 +20,7 @@ int is_check_exception;
 int is_check_type;
 lt *gensym_counter;
 lt *null_env;
+lt *package;
 lt *standard_error;
 lt *standard_in;
 lt *standard_out;
@@ -241,6 +242,13 @@ lisp_object_t *make_output_file(FILE *file) {
   return outf;
 }
 
+lt *make_package(lt *name, lt *symbol_table) {
+  lt *obj = make_object(PACKAGE);
+  package_name(obj) = name;
+  package_symbol_table(obj) = symbol_table;
+  return obj;
+}
+
 lisp_object_t *make_pair(lisp_object_t *head, lisp_object_t *tail) {
   lisp_object_t *pair = make_object(PAIR);
   pair_head(pair) = head;
@@ -398,19 +406,24 @@ lt *make_fn_inst(lt *prim) {
   return make_pair(mkopcode(primitive_opcode(prim), "", 0), the_empty_list);
 }
 
-// Simple wrappers for some C functions
 /* TODO: Use a hash table for storing symbols. */
-lisp_object_t *find_or_create_symbol(char *name) {
-  lisp_object_t *tmp_sym_list = symbol_list;
-  while (ispair(tmp_sym_list)) {
-    lisp_object_t *sym = pair_head(tmp_sym_list);
-    char *key = symbol_name(sym);
-    if (strcmp(key, name) == 0)
+// Search the symbol with `name' in `symbol_table'
+lt *search_symbol_table(char *name, lt *symbol_table) {
+  while (ispair(symbol_table)) {
+    lt *sym = pair_head(symbol_table);
+    if (strcmp(symbol_name(sym), name) == 0)
       return sym;
-    tmp_sym_list = pair_tail(tmp_sym_list);
+    symbol_table = pair_tail(symbol_table);
   }
-  lisp_object_t *sym = make_symbol(name);
-  symbol_list = make_pair(sym, symbol_list);
+  return NULL;
+}
+
+lt *find_or_create_symbol(char *name) {
+  lt *result = search_symbol_table(name, package_symbol_table(package));
+  if (result)
+    return result;
+  lt *sym = make_symbol(name);
+  package_symbol_table(package) = make_pair(sym, package_symbol_table(package));
   return sym;
 }
 
@@ -436,6 +449,7 @@ void init_global_variable(void) {
   gensym_counter = make_fixnum(0);
   null_env = make_environment(the_empty_list, NULL);
   environment_next(null_env) = null_env;
+  package = make_package(make_string("233"), the_empty_list);
   standard_error = make_output_file(stderr);
   standard_in = make_input_file(stdin);
   standard_out = make_output_file(stdout);
@@ -447,6 +461,7 @@ void init_global_variable(void) {
   symbol_value(S("*standard-error*")) = standard_error;
   symbol_value(S("*standard-output*")) = standard_out;
   symbol_value(S("*standard-input*")) = standard_in;
+  symbol_value(S("*package*")) = package;
 
   /* Symbol initialization */
   the_dot_symbol = S(".");

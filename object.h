@@ -76,6 +76,7 @@ extern lt *make_function(lt *cenv, lt *args, lt *code, lt *renv);
 extern lt *make_input_file(FILE *);
 extern lt *make_input_string(char *);
 extern lt *make_output_file(FILE *);
+extern lt *make_package(lt *, lt *);
 extern lt *make_pair(lt *, lt *);
 extern lt *make_primitive(int, void *, char *, int);
 extern lt *make_retaddr(lt *code, lt *env, lt *fn, int pc, int throw_flag, int sp);

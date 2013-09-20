@@ -46,6 +46,7 @@ enum TYPE {
   INPUT_FILE,
   OPCODE,
   OUTPUT_FILE,
+  PACKAGE,
   PAIR,
   PRIMITIVE_FUNCTION,
   RETADDR,
@@ -127,6 +128,10 @@ struct lisp_object_t {
       int colnum, linum, openp;
       FILE *file;
     } output_file;
+    struct {
+      lt *name;
+      lt *symbol_table;
+    } package;
     struct {
       lt *head;
       lt *tail;
@@ -217,6 +222,8 @@ struct string_builder_t {
 #define output_file_file(x) ((x)->u.output_file.file)
 #define output_file_linum(x) ((x)->u.output_file.linum)
 #define output_file_openp(x) ((x)->u.output_file.openp)
+#define package_name(x) ((x)->u.package.name)
+#define package_symbol_table(x) ((x)->u.package.symbol_table)
 #define pair_head(x) (x->u.pair.head)
 #define pair_tail(x) (x->u.pair.tail)
 #define primitive_Lisp_name(x) ((x)->u.primitive.Lisp_name)
