@@ -17,8 +17,8 @@
 int main(int argc, char *argv[])
 {
   char *inputs[] = {
-      "(set! file (open-in \"init.scm\"))",
-      "(wc file)",
+      "(expand-macro '(flet ((aux (x) (+ x 1))) (aux 1)))",
+      "(wc (open-in \"init.scm\"))",
   };
   init_global_variable();
   init_prims();

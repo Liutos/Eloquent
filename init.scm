@@ -18,6 +18,17 @@
           (lambda ,pars ,@body))
     (set-function-name! ,name ',name)))
 
+; FLET
+(defmacro flet (definition . body)
+  (let ((def (head definition)))
+    (let ((name (head def))
+          (args (head (tail def)))
+          (proc (tail (tail def))))
+      `(let ((,name '()))
+         (set! ,name
+          (lambda ,args ,@proc))
+         ,@body))))
+
 ; WHILE
 (defmacro while (test . body)
   (let ((start (gensym))
@@ -139,11 +150,9 @@
         (cat file)))))
 
 (define wc (file)
-  (let ((aux '()))
-    (set! aux
-      (lambda (file n)
-        (let ((c (read-char file)))
-          (if (eof? c)
-              n
-            (aux file (+ n 1))))))
-  (aux file 0)))
+  (flet ((aux (file n)
+          (let ((c (read-char file)))
+            (if (eof? c)
+                n
+              (aux file (+ n 1))))))
+    (aux file 0)))
