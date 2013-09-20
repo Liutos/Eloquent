@@ -188,12 +188,22 @@ lt *handler2if(lt *ex, lt *handlers) {
   }
 }
 
-lt *try_catch_macro(lt *form, lt *handlers) {
+// This implementation of try-catch based on `var' sepcial form is deprecated
+lt *deprecated_try_catch_macro(lt *form, lt *handlers) {
   lt *tmp = lt_gensym();
   lt *handler_forms = handler2if(tmp, handlers);
   lt *val = list3(S("var"), tmp, form);
   lt *catch = list1(S("catch"));
   return list4(S("begin"), catch, val, handler_forms);
+}
+
+lt *try_catch_macro(lt *form, lt *handlers) {
+  lt *tmp = lt_gensym();
+  lt *handler_forms = handler2if(tmp, handlers);
+  lt *bd = list2(tmp, form);
+  lt *catch = list1(S("catch"));
+  lt *lf = make_pair(S("let"), list2(list1(bd), handler_forms));
+  return list3(S("begin"), catch, lf);
 }
 
 void init_macros(void) {
