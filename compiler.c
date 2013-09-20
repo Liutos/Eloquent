@@ -350,26 +350,6 @@ int is_primitive_fun_name(lt *variable, lt *env) {
       isprimitive(symbol_value(variable));
 }
 
-lt *add_local_var(lt *var, lt *env) {
-  if (isnull_env(env))
-    return env;
-  assert(ispair(environment_bindings(env)) || isnull(environment_bindings(env)));
-  if (ispair(environment_bindings(env))) {
-    lt *tmp = environment_bindings(env);
-    while (ispair(tmp)) {
-      if (pair_head(tmp) == var)
-        return env;
-      tmp = pair_tail(tmp);
-    }
-    lt *c = list1(var);
-    environment_bindings(env) = seq(environment_bindings(env), c);
-    return env;
-  } else {
-    environment_bindings(env) = list1(var);
-    return env;
-  }
-}
-
 lt *compile_type_check(lt *prim, lt *nargs) {
   lt *sig = primitive_signature(prim);
   assert(ispair(sig) || isnull(sig));
@@ -453,10 +433,6 @@ lisp_object_t *compile_object(lisp_object_t *object, lisp_object_t *env) {
     return gen(FN, compile_lambda(second(object), pair_tail(pair_tail(object)), env));
   if (is_catch_form(object))
     return gen(CATCH);
-  if (is_var_form(object)) {
-    env = add_local_var(second(object), env);
-    return compile_object(make_pair(S("set!"), pair_tail(object)), env);
-  }
   if (is_goto_form(object))
     return gen(JUMP, second(object));
   if (is_tagbody_form(object)) {

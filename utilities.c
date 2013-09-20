@@ -59,7 +59,6 @@ deform_pred(is_lambda_form, "lambda")
 deform_pred(is_quote_form, "quote")
 deform_pred(is_set_form, "set!")
 deform_pred(is_tagbody_form, "tagbody")
-deform_pred(is_var_form, "var")
 
 lt *list1(lt *element) {
   return make_pair(element, make_empty_list());
