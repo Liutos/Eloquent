@@ -82,6 +82,7 @@ extern F1(lt_load);
 extern lt *read_object_from_string(char *);
 extern lt *read_object(lt *);
 
+extern void init_primitive_opcode(void);
 extern void init_prims(void);
 extern void load_init_file(void);
 extern void init_compiled_prims(void);

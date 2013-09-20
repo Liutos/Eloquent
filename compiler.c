@@ -476,11 +476,19 @@ lisp_object_t *compile_object(lisp_object_t *object, lisp_object_t *env) {
       args = compile_args(args, env);
       if (is_signaled(args))
         return args;
-      return seq(args,
-                 compile_type_check(symbol_value(fn), nargs),
-                 op,
-                 gen(PRIM, nargs),
-                 (is_check_exception? gen(CHECKEX): the_empty_list));
+      if (isopcode_fn(symbol_value(fn))) {
+        lt *prim = symbol_value(fn);
+        return seq(args,
+            compile_type_check(prim, nargs),
+            make_fn_inst(prim),
+            (is_check_exception? gen(CHECKEX): the_empty_list));
+      } else {
+        return seq(args,
+            compile_type_check(symbol_value(fn), nargs),
+            op,
+            gen(PRIM, nargs),
+            (is_check_exception? gen(CHECKEX): the_empty_list));
+      }
     } else
       return seq(compile_args(args, env),
                  op,

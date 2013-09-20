@@ -16,10 +16,11 @@
 int main(int argc, char *argv[])
 {
   char *inputs[] = {
-      "(+ 1 2 3)",
+      "(cons 1 2)",
   };
   init_global_variable();
   init_prims();
+  init_primitive_opcode();
   init_compiled_prims();
   init_macros();
   load_init_file();

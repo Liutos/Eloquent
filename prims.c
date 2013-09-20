@@ -154,6 +154,9 @@ void write_opcode(lt *opcode, lt *dest) {
     case RETURN: 
     	write_raw_string("#<RETURN>", dest); 
     	break;
+    case CONS:
+      write_raw_string("#<CONS>", dest);
+      break;
     default :
       printf("Unknown opcode\n");
       exit(1);
@@ -1443,6 +1446,12 @@ void init_prims(void) {
   ADD(0, FALSE, lt_switch_debug, "switch-debug");
   ADD(0, FALSE, lt_switch_exception_check, "switch-exception-check");
   ADD(0, FALSE, lt_switch_type_check, "switch-type-check");
+}
+
+void init_primitive_opcode(void) {
+  lt *func;
+  func = symbol_value(S("cons"));
+  primitive_opcode(func) = CONS;
 }
 
 void load_init_file(void) {

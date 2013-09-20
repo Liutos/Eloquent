@@ -368,6 +368,12 @@ lisp_object_t *run_by_llam(lisp_object_t *code_vector) {
         throw_exception = retaddr_throw_flag(retaddr);
       }
         break;
+      case CONS: {
+        lt *arg2 = lt_vector_pop(stack);
+        lt *arg1 = lt_vector_pop(stack);
+        lt_vector_push(stack, make_pair(arg1, arg2));
+      }
+        break;
       default :
         fprintf(stdout, "In run_by_llam --- Invalid opcode %d\n", type_of(ins));
         exit(1);

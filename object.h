@@ -59,6 +59,7 @@ extern int isboolean(lt *);
 extern int is_signaled(lt *);
 extern int isnull_env(lt *);
 extern int isnumber(lt *);
+extern int isopcode_fn(lt *);
 extern int type_of(lt *);
 extern lt *make_false(void);
 extern lt *make_true(void);
@@ -100,7 +101,8 @@ extern lt *make_op_lvar(lt *i, lt *j, lt *symbol);
 extern lt *make_op_pop(void);
 extern lt *make_op_prim(lt *);
 extern lt *make_op_return(void);
-extern lt *make_op_catch();
+extern lt *make_op_catch(void);
+extern lt *make_fn_inst(lt *);
 
 // Simple wrappers for some C functions
 extern lt *find_or_create_symbol(char *);

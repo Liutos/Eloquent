@@ -134,6 +134,10 @@ int isnumber(lisp_object_t *object) {
   return isfixnum(object) || isfloat(object);
 }
 
+int isopcode_fn(lt *prim) {
+  return isprimitive(prim) && primitive_opcode(prim) != NO;
+}
+
 int type_of(lisp_object_t *x) {
   if (isboolean(x))
     return BOOL;
@@ -251,6 +255,7 @@ lisp_object_t *make_primitive(int arity, void *C_function, char *Lisp_name, int 
   primitive_restp(p) = restp;
   primitive_Lisp_name(p) = Lisp_name;
   primitive_signature(p) = make_empty_list();
+  primitive_opcode(p) = NO;
   return p;
 }
 
@@ -387,6 +392,10 @@ lisp_object_t *make_op_return() {
 
 lt *make_op_catch(void) {
   return mkopcode(CATCH, "CATCH", 0);
+}
+
+lt *make_fn_inst(lt *prim) {
+  return make_pair(mkopcode(primitive_opcode(prim), "", 0), the_empty_list);
 }
 
 // Simple wrappers for some C functions
