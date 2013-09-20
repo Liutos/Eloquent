@@ -1410,6 +1410,8 @@ void init_prims(void) {
   ADD(2, FALSE, lt_write_line, "write-line");
   ADD(2, FALSE, lt_write_object, "write-object");
   ADD(2, FALSE, lt_write_string, "write-string");
+  /* Package */
+  ADD(1, FALSE, lt_package_name, "package-name");
   /* String */
   ADD(2, FALSE, lt_char_at, "char-at");
   ADD(1, FALSE, lt_string_length, "string-length");
@@ -1423,6 +1425,7 @@ void init_prims(void) {
   ADD(2, FALSE, lt_set_symbol_value, "set-symbol-value!");
   ADD(1, FALSE, lt_symbol_macro, "symbol-macro");
   ADD(1, FALSE, lt_symbol_name, "symbol-name");
+  ADD(1, FALSE, lt_symbol_package, "symbol-package");
   ADD(1, FALSE, lt_symbol_value, "symbol-value");
   /* Type */
   ADD(1, FALSE, lt_find_type, "find-type");

@@ -292,10 +292,11 @@ lisp_object_t *make_string(char *value) {
   return string;
 }
 
-lisp_object_t *make_symbol(char *name) {
+lisp_object_t *make_symbol(char *name, lt *package) {
   lisp_object_t *symbol = make_object(SYMBOL);
   symbol_name(symbol) = name;
   symbol_macro(symbol) = the_undef;
+  symbol_package(symbol) = package;
   symbol_value(symbol) = the_undef;
   return symbol;
 }
@@ -406,6 +407,10 @@ lt *make_fn_inst(lt *prim) {
   return make_pair(mkopcode(primitive_opcode(prim), "", 0), the_empty_list);
 }
 
+lt *lt_package_name(lt *pkg) {
+  return package_name(pkg);
+}
+
 /* TODO: Use a hash table for storing symbols. */
 // Search the symbol with `name' in `symbol_table'
 lt *search_symbol_table(char *name, lt *symbol_table) {
@@ -422,9 +427,13 @@ lt *find_or_create_symbol(char *name) {
   lt *result = search_symbol_table(name, package_symbol_table(package));
   if (result)
     return result;
-  lt *sym = make_symbol(name);
+  lt *sym = make_symbol(name, package);
   package_symbol_table(package) = make_pair(sym, package_symbol_table(package));
   return sym;
+}
+
+lt *lt_symbol_package(lt *symbol) {
+  return symbol_package(symbol);
 }
 
 lt *lt_exception_tag(lt *exception) {

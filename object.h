@@ -74,7 +74,6 @@ extern lt *make_exception(char *, int, lt *, lt *backtrace);
 extern lt *make_float(float);
 extern lt *make_function(lt *cenv, lt *args, lt *code, lt *renv);
 extern lt *make_input_file(FILE *);
-extern lt *make_input_string(char *);
 extern lt *make_output_file(FILE *);
 extern lt *make_package(lt *, lt *);
 extern lt *make_pair(lt *, lt *);
@@ -82,7 +81,7 @@ extern lt *make_primitive(int, void *, char *, int);
 extern lt *make_retaddr(lt *code, lt *env, lt *fn, int pc, int throw_flag, int sp);
 extern string_builder_t *make_str_builder(void);
 extern lt *make_string(char *);
-extern lt *make_symbol(char *);
+extern lt *make_symbol(char *, lt *);
 extern lt *make_type(enum TYPE, char *);
 extern lt *make_vector(int);
 extern lt *make_op_args(lt *);
@@ -105,8 +104,10 @@ extern lt *make_op_return(void);
 extern lt *make_op_catch(void);
 extern lt *make_fn_inst(lt *);
 
-// Simple wrappers for some C functions
 extern lt *find_or_create_symbol(char *);
+// Simple wrappers for some C functions
+extern lt *lt_package_name(lt *);
+extern lt *lt_symbol_package(lt *);
 extern lt *lt_exception_tag(lt *);
 extern lt *lt_make_input_string(lt *);
 extern lt *lt_type_name(lt *);

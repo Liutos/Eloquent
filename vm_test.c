@@ -17,8 +17,8 @@
 int main(int argc, char *argv[])
 {
   char *inputs[] = {
-      "(expand-macro '(flet ((aux (x) (+ x 1))) (aux 1)))",
-      "(wc (open-in \"init.scm\"))",
+      "(symbol-package 'foobar)",
+      "(package-name (symbol-package 'foobar))",
   };
   init_global_variable();
   init_prims();
