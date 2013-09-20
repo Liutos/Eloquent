@@ -17,9 +17,8 @@
 int main(int argc, char *argv[])
 {
   char *inputs[] = {
-      "(expand-macro '(try-catch (/ 1 0) (ERROR (e) 1)))",
-      "(try-catch (/ 1 0) (ERROR (e) 'something-happen))",
-      "(+ 1 (try-catch (+ (/ 1 0) 1) (ERROR (e) -1)))",
+      "(set! file (open-in \"init.scm\"))",
+      "(wc file)",
   };
   init_global_variable();
   init_prims();
