@@ -102,8 +102,6 @@ struct hash_table_t {
 };
 
 struct lisp_object_t {
-  int gc_mark_flag;
-  int use_flag;
   enum TYPE type;
   union {
     struct {
@@ -201,7 +199,6 @@ struct lisp_object_t {
       lt **value;
     } vector;
   } u;
-  lt *next;
 };
 
 struct string_builder_t {
