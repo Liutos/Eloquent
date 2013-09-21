@@ -151,6 +151,7 @@ struct lisp_object_t {
     struct {
       lt *name;
       hash_table_t *symbol_table;
+      lt *used_packages;
     } package;
     struct {
       lt *head;
@@ -251,6 +252,7 @@ struct string_builder_t {
 #define output_file_openp(x) ((x)->u.output_file.openp)
 #define package_name(x) ((x)->u.package.name)
 #define package_symbol_table(x) ((x)->u.package.symbol_table)
+#define package_used_packages(x) ((x)->u.package.used_packages)
 #define pair_head(x) (x->u.pair.head)
 #define pair_tail(x) (x->u.pair.tail)
 #define primitive_Lisp_name(x) ((x)->u.primitive.Lisp_name)

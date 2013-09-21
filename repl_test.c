@@ -51,7 +51,7 @@ int main(int argc, char *argv[]) {
   }
 
   while (1) {
-    write_raw_string(">> ", standard_out);
+    writef(standard_out, "%s >> ", package_name(package));
     lt *expr = read_object(standard_in);
     expr = compile_to_bytecode(expr);
     if (!is_signaled(expr))

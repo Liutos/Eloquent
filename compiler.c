@@ -268,7 +268,7 @@ lisp_object_t *make_label(void) {
   static char buffer[256];
   int i = sprintf(buffer, "L%d", label_count);
   label_count++;
-  return find_or_create_symbol(strndup(buffer, i));
+  return S(strndup(buffer, i));
 }
 
 lt *compile_if(lt *pred, lt *then, lt *else_part, lt *env) {

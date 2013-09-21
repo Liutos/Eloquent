@@ -745,7 +745,7 @@ lt *lt_in_package(lt *name) {
     package = pkg;
     return the_true;
   } else
-    return signal_exception("in-package: Undefined package with the name");
+    return signal_exception("Undefined package with the name");
 }
 
 /* NOTE: String */
@@ -771,7 +771,7 @@ lt *lt_string_set(lt *string, lt *index, lt *new_char) {
 /* NOTE: Symbol */
 lisp_object_t *lt_intern(lisp_object_t *name) {
   assert(isstring(name));
-  return find_or_create_symbol(string_value(name));
+  return S(string_value(name));
 }
 
 lt *lt_gensym(void) {
@@ -1232,7 +1232,7 @@ lisp_object_t *read_symbol(char start, lisp_object_t *input_file) {
   }
   if (isdelimiter(c) && c != EOF)
     unget_char(c, input_file);
-  return find_or_create_symbol(sb2string(buffer));
+  return S(sb2string(buffer));
 }
 
 lisp_object_t *read_vector(lisp_object_t *input_file) {

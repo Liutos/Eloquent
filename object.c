@@ -308,6 +308,7 @@ lt *make_package(lt *name, hash_table_t *symbol_table) {
   lt *obj = make_object(PACKAGE);
   package_name(obj) = name;
   package_symbol_table(obj) = symbol_table;
+  package_used_packages(obj) = the_empty_list;
   return obj;
 }
 
@@ -490,7 +491,13 @@ lt *ensure_package(char *name) {
     return result;
   lt *pkg = make_package(make_string(name), make_symbol_table());
   pkgs = make_pair(pkg, pkgs);
+  symbol_value(find_or_create_symbol("*package*", pkg)) = pkg;
   return pkg;
+}
+
+void use_package_in(lt *used, lt *pkg) {
+  package_used_packages(pkg) =
+      make_pair(used, package_used_packages(pkg));
 }
 
 /* Symbol */
@@ -521,8 +528,23 @@ lt *search_symbol_table(char *name, hash_table_t *symbol_table) {
   return search_ht((void *)name, symbol_table);
 }
 
-lt *find_or_create_symbol(char *name) {
-  lt *result = search_symbol_table(name, package_symbol_table(package));
+lt *find_symbol(char *name, lt *package) {
+  lt *sym = search_symbol_table(name, package_symbol_table(package));
+  if (sym)
+    return sym;
+  lt *useds = package_used_packages(package);
+  while (ispair(useds)) {
+    lt *pkg = pair_head(useds);
+    sym = search_symbol_table(name, package_symbol_table(pkg));
+    if (sym)
+      return sym;
+    useds = pair_tail(useds);
+  }
+  return NULL;
+}
+
+lt *find_or_create_symbol(char *name, lt *package) {
+  lt *result = find_symbol(name, package);
   if (result)
     return result;
   lt *sym = make_symbol(name, package);
@@ -544,8 +566,13 @@ lt *lt_type_name(lt *type) {
 
 void init_packages(void) {
   pkgs = make_empty_list();
-  ensure_package("233-user");
-  package = ensure_package("233");
+  lt *lisp = ensure_package("233");
+//  (defpackage :233-user
+//    (:use :233))
+  lt *user = ensure_package("233-user");
+  use_package_in(lisp, user);
+// Set the current package
+  package = user;
 }
 
 void init_global_variable(void) {
@@ -577,7 +604,6 @@ void init_global_variable(void) {
   symbol_value(S("*standard-error*")) = standard_error;
   symbol_value(S("*standard-output*")) = standard_out;
   symbol_value(S("*standard-input*")) = standard_in;
-  symbol_value(S("*package*")) = package;
 
   /* Symbol initialization */
   the_dot_symbol = S(".");
