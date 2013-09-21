@@ -63,6 +63,9 @@ extern int isnull_env(lt *);
 extern int isnumber(lt *);
 extern int isopcode_fn(lt *);
 extern int type_of(lt *);
+// Hash Table
+extern hash_table_t *make_hash_table(int, hash_fn_t, comp_fn_t);
+// Constructors
 extern lt *make_false(void);
 extern lt *make_true(void);
 extern lt *make_empty_list(void);

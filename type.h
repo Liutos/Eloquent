@@ -10,6 +10,10 @@
 
 #include <stdio.h>
 
+typedef unsigned int (*hash_fn_t)(void *);
+typedef int (*comp_fn_t)(void *, void *);
+typedef struct ht_slot_t ht_slot_t;
+typedef struct hash_table_t hash_table_t;
 typedef struct lisp_object_t lisp_object_t;
 typedef lisp_object_t lt;
 typedef lt *(*f0)(void);
@@ -77,6 +81,24 @@ enum OPCODE_TYPE {
 //  Primitive Function Instructions
   NO,
   CONS,
+};
+
+/* General Hash Table Definition */
+struct ht_slot_t {
+  void *key;
+  void *value;
+  ht_slot_t *next;
+};
+
+// slots: An array for storing key-values
+// length: Length of slots
+// hash_fn: Pointer to function for generating hash value used as index in slots
+// comp_fn: Pointer to function for comparing two keys when their hash value is equal
+struct hash_table_t {
+  ht_slot_t **slots;
+  int length;
+  hash_fn_t hash_fn;
+  comp_fn_t comp_fn;
 };
 
 struct lisp_object_t {
@@ -192,6 +214,15 @@ struct string_builder_t {
 
 #define character_value(x) (((int)x) >> CHAR_BITS)
 #define fixnum_value(x) (((int)(x)) >> FIXNUM_BITS)
+
+/* Hash Table */
+#define sl_key(x) ((x)->key)
+#define sl_value(x) ((x)->value)
+#define sl_next(x) ((x)->next)
+#define ht_slots(x) ((x)->slots)
+#define ht_length(x) ((x)->length)
+#define ht_hash_fn(x) ((x)->hash_fn)
+#define ht_comp_fn(x) ((x)->comp_fn)
 
 /* Accessor macros */
 #define environment_bindings(x) ((x)->u.environment.bindings)
