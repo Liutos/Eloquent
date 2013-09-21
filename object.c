@@ -493,11 +493,8 @@ lt *ensure_package(char *name) {
   return pkg;
 }
 
-/* TODO: Use a hash table for storing symbols. */
 /* Symbol */
-
-// The following algorithm comes from
-// http://bbs.csdn.net/topics/350030230
+// The following algorithm comes from http://bbs.csdn.net/topics/350030230
 unsigned int symbol_hash_fn(void *symbol) {
   char *name = (char *)symbol;
   int seed = 131;
