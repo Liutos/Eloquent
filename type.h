@@ -152,7 +152,7 @@ struct lisp_object_t {
     } output_file;
     struct {
       lt *name;
-      lt *symbol_table;
+      hash_table_t *symbol_table;
     } package;
     struct {
       lt *head;

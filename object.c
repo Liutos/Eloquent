@@ -304,7 +304,7 @@ lisp_object_t *make_output_file(FILE *file) {
   return outf;
 }
 
-lt *make_package(lt *name, lt *symbol_table) {
+lt *make_package(lt *name, hash_table_t *symbol_table) {
   lt *obj = make_object(PACKAGE);
   package_name(obj) = name;
   package_symbol_table(obj) = symbol_table;
@@ -488,7 +488,7 @@ lt *ensure_package(char *name) {
   lt *result = search_package(name, pkgs);
   if (result)
     return result;
-  lt *pkg = make_package(make_string(name), the_empty_list);
+  lt *pkg = make_package(make_string(name), make_symbol_table());
   pkgs = make_pair(pkg, pkgs);
   return pkg;
 }
@@ -515,15 +515,13 @@ int symbol_comp_fn(void *s1, void *s2) {
   return strcmp(n1, n2);
 }
 
+hash_table_t *make_symbol_table(void) {
+  return make_hash_table(31, symbol_hash_fn, symbol_comp_fn);
+}
+
 // Search the symbol with `name' in `symbol_table'
-lt *search_symbol_table(char *name, lt *symbol_table) {
-  while (ispair(symbol_table)) {
-    lt *sym = pair_head(symbol_table);
-    if (strcmp(symbol_name(sym), name) == 0)
-      return sym;
-    symbol_table = pair_tail(symbol_table);
-  }
-  return NULL;
+lt *search_symbol_table(char *name, hash_table_t *symbol_table) {
+  return search_ht((void *)name, symbol_table);
 }
 
 lt *find_or_create_symbol(char *name) {
@@ -531,7 +529,7 @@ lt *find_or_create_symbol(char *name) {
   if (result)
     return result;
   lt *sym = make_symbol(name, package);
-  package_symbol_table(package) = make_pair(sym, package_symbol_table(package));
+  set_ht((void *)name, (void *)sym, package_symbol_table(package));
   return sym;
 }
 

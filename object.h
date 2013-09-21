@@ -80,7 +80,7 @@ extern lt *make_float(float);
 extern lt *make_function(lt *cenv, lt *args, lt *code, lt *renv);
 extern lt *make_input_file(FILE *);
 extern lt *make_output_file(FILE *);
-extern lt *make_package(lt *, lt *);
+extern lt *make_package(lt *, hash_table_t *);
 extern lt *make_pair(lt *, lt *);
 extern lt *make_primitive(int, void *, char *, int);
 extern lt *make_retaddr(lt *code, lt *env, lt *fn, int pc, int throw_flag, int sp);
@@ -109,6 +109,7 @@ extern lt *make_op_return(void);
 extern lt *make_op_catch(void);
 extern lt *make_fn_inst(lt *);
 
+extern hash_table_t *make_symbol_table(void);
 extern lt *find_or_create_symbol(char *);
 // Simple wrappers for some C functions
 extern lt *lt_package_name(lt *);
