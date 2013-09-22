@@ -1337,6 +1337,8 @@ void init_prims(void) {
     symbol_value(S(Lisp_name)) = func;                                  \
   } while (0)
 
+#define NOREST(arity, function_name, Lisp_name) ADD(arity, FALSE, function_name, Lisp_name)
+
 #define SIG(Lisp_name, ...) \
   do { \
     lt *func = symbol_value(S(Lisp_name)); \
@@ -1349,120 +1351,120 @@ void init_prims(void) {
 
   lisp_object_t *func;
   /* Arithmetic operations */
-  ADD(1, FALSE, lt_nt_level, "nt-level");
+  NOREST(1, lt_nt_level, "nt-level");
   /* For Fixnum */
-  ADD(2, FALSE, lt_fx_add, "fx+");
-  ADD(2, FALSE, lt_fx_sub, "fx-");
-  ADD(2, FALSE, lt_fx_mul, "fx*");
-  ADD(2, FALSE, lt_fx_div, "fx/");
-  ADD(2, FALSE, lt_fx_eq, "fx=");
-  ADD(1, FALSE, lt_fx2fp, "fx->fp");
+  NOREST(2, lt_fx_add, "fx+");
+  NOREST(2, lt_fx_sub, "fx-");
+  NOREST(2, lt_fx_mul, "fx*");
+  NOREST(2, lt_fx_div, "fx/");
+  NOREST(2, lt_fx_eq, "fx=");
+  NOREST(1, lt_fx2fp, "fx->fp");
   /* For Floating-Point Number */
-  ADD(2, FALSE, lt_fp_add, "fp+");
-  ADD(2, FALSE, lt_fp_sub, "fp-");
-  ADD(2, FALSE, lt_fp_mul, "fp*");
-  ADD(2, FALSE, lt_fp_div, "fp/");
-  ADD(2, FALSE, lt_fp_eq, "fp=");
-  ADD(3, FALSE, lt_nt_convert, "nt-convert");
+  NOREST(2, lt_fp_add, "fp+");
+  NOREST(2, lt_fp_sub, "fp-");
+  NOREST(2, lt_fp_mul, "fp*");
+  NOREST(2, lt_fp_div, "fp/");
+  NOREST(2, lt_fp_eq, "fp=");
+  NOREST(3, lt_nt_convert, "nt-convert");
   /* Generic */
-  ADD(2, FALSE, lt_gt, ">");
-  ADD(2, FALSE, lt_mod, "mod");
-  ADD(2, FALSE, lt_numeric_eq, "=");
+  NOREST(2, lt_gt, ">");
+  NOREST(2, lt_mod, "mod");
+  NOREST(2, lt_numeric_eq, "=");
   /* Character */
-  ADD(1, FALSE, lt_char_code, "char-code");
+  NOREST(1, lt_char_code, "char-code");
   SIG("char-code", T(CHARACTER));
-  ADD(1, FALSE, lt_code_char, "code-char");
+  NOREST(1, lt_code_char, "code-char");
   SIG("code-char", T(FIXNUM));
   /* Exception */
-  ADD(1, FALSE, lt_exception_tag, "exception-tag");
+  NOREST(1, lt_exception_tag, "exception-tag");
   SIG("exception-tag", T(EXCEPTION));
-  ADD(1, FALSE, lt_signal_exception, "signal");
+  NOREST(1, lt_signal_exception, "signal");
   SIG("signal", T(STRING));
   /* Function */
-  ADD(1, FALSE, lt_eval, "eval");
-  ADD(1, FALSE, lt_expand_macro, "expand-macro");
-  ADD(1, FALSE, lt_function_arity, "function-arity");
-  ADD(1, FALSE, lt_function_cenv, "function-cenv");
-  ADD(1, FALSE, lt_function_name, "function-name");
-  ADD(2, FALSE, lt_set_function_name, "set-function-name!");
+  NOREST(1, lt_eval, "eval");
+  NOREST(1, lt_expand_macro, "expand-macro");
+  NOREST(1, lt_function_arity, "function-arity");
+  NOREST(1, lt_function_cenv, "function-cenv");
+  NOREST(1, lt_function_name, "function-name");
+  NOREST(2, lt_set_function_name, "set-function-name!");
   SIG("set-function-name!", T(FUNCTION), T(SYMBOL));
-  ADD(1, FALSE, lt_function_renv, "function-renv");
-  ADD(2, FALSE, lt_simple_apply, "simple-apply");
+  NOREST(1, lt_function_renv, "function-renv");
+  NOREST(2, lt_simple_apply, "simple-apply");
   /* Input File */
-  ADD(1, FALSE, lt_close_in, "close-in");
-  ADD(1, FALSE, lt_is_file_open, "file-open?");
-  ADD(1, FALSE, lt_load, "load");
-  ADD(1, FALSE, lt_load_file, "load-file");
-  ADD(1, FALSE, lt_open_in, "open-in");
-  ADD(1, FALSE, lt_read_char, "read-char");
-  ADD(1, FALSE, lt_read_line, "read-line");
-  ADD(1, FALSE, lt_read_from_string, "read-from-string");
+  NOREST(1, lt_close_in, "close-in");
+  NOREST(1, lt_is_file_open, "file-open?");
+  NOREST(1, lt_load, "load");
+  NOREST(1, lt_load_file, "load-file");
+  NOREST(1, lt_open_in, "open-in");
+  NOREST(1, lt_read_char, "read-char");
+  NOREST(1, lt_read_line, "read-line");
+  NOREST(1, lt_read_from_string, "read-from-string");
   /* List */
   ADD(1, TRUE, lt_append, "append");
-  ADD(2, FALSE, lt_is_tag_list, "is-tag-list?");
-  ADD(2, FALSE, make_pair, "cons");
-  ADD(1, FALSE, lt_head, "head");
+  NOREST(2, lt_is_tag_list, "is-tag-list?");
+  NOREST(2, make_pair, "cons");
+  NOREST(1, lt_head, "head");
   ADD(1, TRUE, lt_list, "list");
-  ADD(1, FALSE, lt_list_last, "list-last");
+  NOREST(1, lt_list_last, "list-last");
   SIG("list-last", T(PAIR));
-  ADD(1, FALSE, lt_list_length, "list-length");
-  ADD(1, FALSE, lt_list_nreverse, "list-reverse!");
-  ADD(1, FALSE, lt_list_reverse, "list-reverse");
-  ADD(2, FALSE, lt_nth, "nth");
-  ADD(2, FALSE, lt_nthtail, "nth-tail");
-  ADD(2, FALSE, lt_set_head, "set-head");
-  ADD(2, FALSE, lt_set_tail, "set-tail");
-  ADD(1, FALSE, lt_tail, "tail");
+  NOREST(1, lt_list_length, "list-length");
+  NOREST(1, lt_list_nreverse, "list-reverse!");
+  NOREST(1, lt_list_reverse, "list-reverse");
+  NOREST(2, lt_nth, "nth");
+  NOREST(2, lt_nthtail, "nth-tail");
+  NOREST(2, lt_set_head, "set-head");
+  NOREST(2, lt_set_tail, "set-tail");
+  NOREST(1, lt_tail, "tail");
   /* Output File */
-  ADD(1, FALSE, lt_open_in, "open-in");
-  ADD(1, FALSE, lt_open_out, "open-out");
-  ADD(2, FALSE, lt_write_char, "write-char");
-  ADD(2, FALSE, lt_write_line, "write-line");
-  ADD(2, FALSE, lt_write_object, "write-object");
-  ADD(2, FALSE, lt_write_string, "write-string");
+  NOREST(1, lt_open_in, "open-in");
+  NOREST(1, lt_open_out, "open-out");
+  NOREST(2, lt_write_char, "write-char");
+  NOREST(2, lt_write_line, "write-line");
+  NOREST(2, lt_write_object, "write-object");
+  NOREST(2, lt_write_string, "write-string");
   /* Package */
-  ADD(1, FALSE, lt_in_package, "in-package");
-  ADD(1, FALSE, lt_package_name, "package-name");
+  NOREST(1, lt_in_package, "in-package");
+  NOREST(1, lt_package_name, "package-name");
   /* String */
-  ADD(2, FALSE, lt_char_at, "char-at");
-  ADD(1, FALSE, lt_string_length, "string-length");
-  ADD(3, FALSE, lt_string_set, "string-set");
+  NOREST(2, lt_char_at, "char-at");
+  NOREST(1, lt_string_length, "string-length");
+  NOREST(3, lt_string_set, "string-set");
   /* Symbol */
-  ADD(0, FALSE, lt_gensym, "gensym");
-  ADD(1, FALSE, lt_intern, "string->symbol");
-  ADD(1, FALSE, lt_is_bound, "bound?");
-  ADD(1, FALSE, lt_is_fbound, "fbound?");
-  ADD(2, FALSE, lt_set_symbol_macro, "set-symbol-macro!");
-  ADD(2, FALSE, lt_set_symbol_value, "set-symbol-value!");
-  ADD(1, FALSE, lt_symbol_macro, "symbol-macro");
-  ADD(1, FALSE, lt_symbol_name, "symbol-name");
-  ADD(1, FALSE, lt_symbol_package, "symbol-package");
-  ADD(1, FALSE, lt_symbol_value, "symbol-value");
+  NOREST(0, lt_gensym, "gensym");
+  NOREST(1, lt_intern, "string->symbol");
+  NOREST(1, lt_is_bound, "bound?");
+  NOREST(1, lt_is_fbound, "fbound?");
+  NOREST(2, lt_set_symbol_macro, "set-symbol-macro!");
+  NOREST(2, lt_set_symbol_value, "set-symbol-value!");
+  NOREST(1, lt_symbol_macro, "symbol-macro");
+  NOREST(1, lt_symbol_name, "symbol-name");
+  NOREST(1, lt_symbol_package, "symbol-package");
+  NOREST(1, lt_symbol_value, "symbol-value");
   /* Type */
-  ADD(1, FALSE, lt_find_type, "find-type");
+  NOREST(1, lt_find_type, "find-type");
   SIG("find-type", T(SYMBOL));
-  ADD(1, FALSE, lt_type_name, "type-name");
+  NOREST(1, lt_type_name, "type-name");
   SIG("type-name", T(TYPE));
   /* Vector */
-  ADD(1, FALSE, lt_list_to_vector, "list->vector");
-  ADD(1, FALSE, lt_vector_pop, "vector-pop");
-  ADD(2, FALSE, lt_vector_push, "vector-push");
-  ADD(2, FALSE, lt_vector_push_extend, "vector-push-extend");
-  ADD(2, FALSE, lt_vector_ref, "vector-ref");
-  ADD(3, FALSE, lt_vector_set, "vector-set!");
-  ADD(1, FALSE, lt_vector_top, "vector-top");
-  ADD(1, FALSE, lt_vector_to_list, "vector->list");
+  NOREST(1, lt_list_to_vector, "list->vector");
+  NOREST(1, lt_vector_pop, "vector-pop");
+  NOREST(2, lt_vector_push, "vector-push");
+  NOREST(2, lt_vector_push_extend, "vector-push-extend");
+  NOREST(2, lt_vector_ref, "vector-ref");
+  NOREST(3, lt_vector_set, "vector-set!");
+  NOREST(1, lt_vector_top, "vector-top");
+  NOREST(1, lt_vector_to_list, "vector->list");
   /* General */
-  ADD(1, FALSE, lt_is_constant, "is-constant?");
-  ADD(2, FALSE, lt_eq, "eq?");
-  ADD(2, FALSE, lt_eql, "eql?");
-  ADD(2, FALSE, lt_equal, "equal?");
-  ADD(2, FALSE, lt_is_kind_of, "of-type?");
-  ADD(0, FALSE, lt_object_size, "object-size");
-  ADD(1, FALSE, lt_type_of, "type-of");
-  ADD(0, FALSE, lt_switch_debug, "switch-debug");
-  ADD(0, FALSE, lt_switch_exception_check, "switch-exception-check");
-  ADD(0, FALSE, lt_switch_type_check, "switch-type-check");
+  NOREST(1, lt_is_constant, "is-constant?");
+  NOREST(2, lt_eq, "eq?");
+  NOREST(2, lt_eql, "eql?");
+  NOREST(2, lt_equal, "equal?");
+  NOREST(2, lt_is_kind_of, "of-type?");
+  NOREST(0, lt_object_size, "object-size");
+  NOREST(1, lt_type_of, "type-of");
+  NOREST(0, lt_switch_debug, "switch-debug");
+  NOREST(0, lt_switch_exception_check, "switch-exception-check");
+  NOREST(0, lt_switch_type_check, "switch-type-check");
 }
 
 void init_primitive_opcode(void) {
