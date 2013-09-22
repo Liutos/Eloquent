@@ -8,6 +8,7 @@
 #ifndef TYPE_H_
 #define TYPE_H_
 
+#include <stdint.h>
 #include <stdio.h>
 
 typedef unsigned int (*hash_fn_t)(void *);
@@ -208,8 +209,8 @@ struct string_builder_t {
 #define FALSE 0
 #define TRUE 1
 
-#define character_value(x) (((int)x) >> CHAR_BITS)
-#define fixnum_value(x) (((int)(x)) >> FIXNUM_BITS)
+#define character_value(x) (((intptr_t)x) >> CHAR_BITS)
+#define fixnum_value(x) (((intptr_t)(x)) >> FIXNUM_BITS)
 
 /* Hash Table */
 #define sl_key(x) ((x)->key)

@@ -6,6 +6,7 @@
  */
 #include <assert.h>
 #include <stdarg.h>
+#include <stdint.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -62,15 +63,15 @@ struct lisp_object_t lt_types[VECTOR + 1] = {
 
 /* Type predicate */
 int ischar(lt *object) {
-  return ((int)object & CHAR_MASK) == CHAR_TAG;
+  return ((intptr_t)object & CHAR_MASK) == CHAR_TAG;
 }
 
 int isfixnum(lt *object) {
-  return ((int)object & FIXNUM_MASK) == FIXNUM_TAG;
+  return ((intptr_t)object & FIXNUM_MASK) == FIXNUM_TAG;
 }
 
 int is_pointer(lt *object) {
-  return ((int)object & POINTER_MASK) == POINTER_TAG;
+  return ((intptr_t)object & POINTER_MASK) == POINTER_TAG;
 }
 
 int is_of_type(lisp_object_t *object, enum TYPE type) {
@@ -97,11 +98,11 @@ mktype_pred(istype, TYPE)
 mktype_pred(isvector, VECTOR)
 
 int is_immediate(lt *object) {
-  return ((int)object & IMMEDIATE_MASK) == IMMEDIATE_TAG;
+  return ((intptr_t)object & IMMEDIATE_MASK) == IMMEDIATE_TAG;
 }
 
 int is_tag_immediate(lt *object, int origin) {
-  return is_immediate(object) && ((int)object >> IMMEDIATE_BITS) == origin;
+  return is_immediate(object) && ((intptr_t)object >> IMMEDIATE_BITS) == origin;
 }
 
 #define mkim_pred(func_name, origin)		      \
@@ -232,7 +233,7 @@ lisp_object_t *make_object(enum TYPE type) {
 }
 
 #define MAKE_IMMEDIATE(origin) \
-  ((lt *)(((int)origin << IMMEDIATE_BITS) | IMMEDIATE_TAG))
+  ((lt *)(((intptr_t)origin << IMMEDIATE_BITS) | IMMEDIATE_TAG))
 
 #define mksingle_type(func_name, origin)    \
   lt *func_name(void) {             \
@@ -247,7 +248,7 @@ mksingle_type(make_undef, UNDEF_ORIGIN)
 mksingle_type(make_close, CLOSE_ORIGIN)
 
 lisp_object_t *make_character(char value) {
-  return (lt *)((((int)value) << CHAR_BITS) | CHAR_TAG);
+  return (lt *)((((intptr_t)value) << CHAR_BITS) | CHAR_TAG);
 }
 
 lt *make_fixnum(int value) {
