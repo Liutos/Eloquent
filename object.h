@@ -111,6 +111,7 @@ extern lt *make_fn_inst(lt *);
 
 extern hash_table_t *make_symbol_table(void);
 extern lt *find_or_create_symbol(char *, lt *);
+extern lt *ensure_package(char *);
 // Simple wrappers for some C functions
 extern lt *lt_package_name(lt *);
 extern lt *search_package(char *, lt *);

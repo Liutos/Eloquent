@@ -1349,6 +1349,8 @@ void init_prims(void) {
 
 #define T(tag) (&lt_types[tag])
 
+  package = ensure_package("233");
+
   lisp_object_t *func;
   /* Arithmetic operations */
   NOREST(1, lt_nt_level, "nt-level");
@@ -1465,6 +1467,8 @@ void init_prims(void) {
   NOREST(0, lt_switch_debug, "switch-debug");
   NOREST(0, lt_switch_exception_check, "switch-exception-check");
   NOREST(0, lt_switch_type_check, "switch-type-check");
+
+  package = ensure_package("233-user");
 }
 
 void init_primitive_opcode(void) {
