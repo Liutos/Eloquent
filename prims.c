@@ -748,6 +748,11 @@ lt *lt_in_package(lt *name) {
     return signal_exception("Undefined package with the name");
 }
 
+lt *lt_make_package(lt *name) {
+  lt *pkg = ensure_package(string_value(name));
+  return pkg;
+}
+
 /* NOTE: String */
 lisp_object_t *lt_char_at(lisp_object_t *string, lisp_object_t *index) {
   assert(isstring(string) && isfixnum(index));
@@ -1426,6 +1431,7 @@ void init_prims(void) {
   NOREST(2, lt_write_string, "write-string");
   /* Package */
   NOREST(1, lt_in_package, "in-package");
+  NOREST(1, lt_make_package, "make-package");
   NOREST(1, lt_package_name, "package-name");
   /* String */
   NOREST(2, lt_char_at, "char-at");
