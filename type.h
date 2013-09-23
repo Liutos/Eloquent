@@ -137,10 +137,6 @@ struct lisp_object_t {
       char *value;
     } input_string;
     struct {
-      lt *environment;
-      lt *procedure;
-    } macro;
-    struct {
       enum OPCODE_TYPE name;
       char *op;
       lt *oprands;
@@ -242,8 +238,6 @@ struct string_builder_t {
 #define input_string_index(x) ((x)->u.input_string.index)
 #define input_string_linum(x) ((x)->u.input_string.linum)
 #define input_string_value(x) ((x)->u.input_string.value)
-#define macro_procedure(x) ((x)->u.macro.procedure)
-#define macro_environment(x) ((x)->u.macro.environment)
 #define opcode_name(x) ((x)->u.opcode.name)
 #define opcode_op(x) ((x)->u.opcode.op)
 #define opcode_oprands(x) ((x)->u.opcode.oprands)

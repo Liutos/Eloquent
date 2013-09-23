@@ -19,6 +19,7 @@
 #include "utilities.h"
 #include "vm.h"
 
+// Register a primitive function
 #define ADD(arity, restp, function_name, Lisp_name)                     \
   do {                                                                  \
     lt *func =                                                          \
@@ -26,6 +27,7 @@
     symbol_value(S(Lisp_name)) = func;                                  \
   } while (0)
 
+// Register the primitive functions without rest parameter
 #define NOREST(arity, function_name, Lisp_name) ADD(arity, FALSE, function_name, Lisp_name)
 
 #define SIG(Lisp_name, ...) \
@@ -419,6 +421,7 @@ lt *compress_args(lt *args, int nrequired) {
   return lt_list_nreverse(new_args);
 }
 
+// (a b ...) => ((quote a) (quote b) ...)
 lt *quote_each_args(lt *args) {
   if (isnull(args))
     return make_empty_list();
@@ -429,10 +432,7 @@ lt *quote_each_args(lt *args) {
 }
 
 lt *macro_fn(lt *macro_name) {
-  if (!isundef(symbol_macro(macro_name)))
-    return symbol_macro(macro_name);
-  else
-    return macro_procedure(symbol_value(macro_name));
+  return symbol_macro(macro_name);
 }
 
 lt *lt_expand_macro(lt *form) {
@@ -692,6 +692,7 @@ lisp_object_t *lt_numeric_eq(lisp_object_t *n, lisp_object_t *m) {
     return booleanize(float_value(n) == float_value(m));
 }
 
+// The following function doesn't use in any C code
 void init_prim_arithmetic(void) {
   /* Arithmetic operations */
   NOREST(1, lt_nt_level, "nt-level");
