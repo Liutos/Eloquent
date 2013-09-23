@@ -33,6 +33,7 @@ lisp_object_t *symbol_list;
 lisp_object_t *the_undef;
 
 struct lisp_object_t lt_types[VECTOR + 1];
+struct lisp_object_t lt_codes[CONS + 1];
 
 extern int is_pointer(lt *);
 extern int isenvironment(lt *);

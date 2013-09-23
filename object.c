@@ -61,6 +61,30 @@ struct lisp_object_t lt_types[VECTOR + 1] = {
     DEFTYPE(VECTOR, "vector"),
 };
 
+#define DEFCODE(name, op) {.type=OPCODE, .u={.opcode={name, op}}}
+
+struct lisp_object_t lt_codes[CONS + 1] = {
+    DEFCODE(ARGS, "ARGS"),
+    DEFCODE(ARGSD, "ARGSD"),
+    DEFCODE(CALL, "CALL"),
+    DEFCODE(CATCH, "CATCH"),
+    DEFCODE(CHECKEX, "CHECKEX"),
+    DEFCODE(CHKTYPE, "CHKTYPE"),
+    DEFCODE(CONST, "CONST"),
+    DEFCODE(FN, "FN"),
+    DEFCODE(GSET, "GSET"),
+    DEFCODE(GVAR, "GVAR"),
+    DEFCODE(FJUMP, "FJUMP"),
+    DEFCODE(JUMP, "JUMP"),
+    DEFCODE(LSET, "LSET"),
+    DEFCODE(LVAR, "LVAR"),
+    DEFCODE(POP, "POP"),
+    DEFCODE(PRIM, "PRIM"),
+    DEFCODE(RETURN, "RETURN"),
+    DEFCODE(NO, "NO"),
+    DEFCODE(CONS, "CONS"),
+};
+
 /* Type predicate */
 int ischar(lt *object) {
   return ((intptr_t)object & CHAR_MASK) == CHAR_TAG;

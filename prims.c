@@ -121,67 +121,12 @@ void writef(lt *dest, const char *format, ...) {
 }
 
 void write_opcode(lt *opcode, lt *dest) {
-  switch (opcode_type(opcode)) {
-    case ARGS: 
-    	writef(dest, "#<ARGS %d>", op_args_arity(opcode)); 
-    	break;
-    case ARGSD:
-      writef(dest, "#<ARGSD %d>", op_argsd_arity(opcode));
-      break;
-    case CALL: 
-    	writef(dest, "#<CALL %d>", op_call_arity(opcode)); 
-    	break;
-    case CATCH:
-      write_raw_string("#<CATCH>", dest);
-      break;
-    case CHECKEX:
-      write_raw_string("#<CHECKEX>", dest);
-      break;
-    case CHKTYPE:
-      writef(dest, "#<CHKTYPE %d %? %d>", op_chktype_pos(opcode), op_chktype_type(opcode), op_chktype_nargs(opcode));
-      break;
-    case CONST: 
-    	writef(dest, "#<CONST %?>", op_const_value(opcode)); 
-    	break;
-    case FJUMP: 
-    	writef(dest, "#<FJUMP %?>", op_fjump_label(opcode)); 
-    	break;
-    case FN: 
-    	writef(dest, "#<FN %?>", op_fn_func(opcode)); 
-    	break;
-    case GSET: 
-    	writef(dest, "#<GSET %S>", op_gset_var(opcode)); 
-    	break;
-    case GVAR: 
-    	writef(dest, "#<GVAR %S>", op_gvar_var(opcode)); 
-    	break;
-    case JUMP: 
-    	writef(dest, "#<JUMP %?>", op_jump_label(opcode)); 
-    	break;
-    case LSET:
-      writef(dest, "#<LSET %d %d %S>",
-             op_lset_i(opcode), op_lset_j(opcode), op_lset_var(opcode));
-      break;
-    case LVAR:
-      writef(dest, "#<LVAR %d %d %S>",
-             op_lvar_i(opcode), op_lvar_j(opcode), op_lvar_var(opcode));
-      break;
-    case POP: 
-    	write_raw_string("#<POP>", dest); 
-    	break;
-    case PRIM: 
-    	writef(dest, "#<PRIM %d>", op_prim_nargs(opcode)); 
-    	break;
-    case RETURN: 
-    	write_raw_string("#<RETURN>", dest); 
-    	break;
-    case CONS:
-      write_raw_string("#<CONS>", dest);
-      break;
-    default :
-      printf("Unknown opcode\n");
-      exit(1);
+  write_raw_string("#<", dest);
+  write_raw_string(opcode_op(&lt_codes[opcode_name(opcode)]), dest);
+  for (int i = 0; i < vector_length(opcode_oprands(opcode)); i++) {
+    writef(dest, " %?", vector_value(opcode_oprands(opcode))[i]);
   }
+  write_raw_char('>', dest);
 }
 
 void write_compiled_function(lt *function, int indent, lt *dest) {
