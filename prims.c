@@ -657,7 +657,6 @@ lisp_object_t *lt_code_char(lisp_object_t *code) {
 }
 
 void init_prim_char(void) {
-  /* Character */
   NOREST(1, lt_char_code, "char-code");
   SIG("char-code", T(CHARACTER));
   NOREST(1, lt_code_char, "code-char");
@@ -700,7 +699,6 @@ lt *lt_write_object(lt *object, lt *dest) {
 }
 
 void init_prim_output_file(void) {
-  /* Output File */
   NOREST(1, lt_open_in, "open-in");
   NOREST(1, lt_open_out, "open-out");
   NOREST(2, lt_write_char, "write-char");
@@ -720,12 +718,10 @@ lt *lt_in_package(lt *name) {
 }
 
 lt *lt_make_package(lt *name) {
-  lt *pkg = ensure_package(string_value(name));
-  return pkg;
+  return ensure_package(string_value(name));
 }
 
 void init_prim_package(void) {
-  /* Package */
   NOREST(1, lt_in_package, "in-package");
   NOREST(1, lt_make_package, "make-package");
   NOREST(1, lt_package_name, "package-name");
@@ -752,23 +748,22 @@ lt *lt_string_set(lt *string, lt *index, lt *new_char) {
 }
 
 void init_prim_string(void) {
-  /* String */
   NOREST(2, lt_char_at, "char-at");
   NOREST(1, lt_string_length, "string-length");
   NOREST(3, lt_string_set, "string-set");
 }
 
 /* Symbol */
-lisp_object_t *lt_intern(lisp_object_t *name) {
-  assert(isstring(name));
-  return S(string_value(name));
-}
-
 lt *lt_gensym(void) {
   static char sym[256];
   int n = sprintf(sym, "G%d", fixnum_value(gensym_counter));
   gensym_counter = make_fixnum(fixnum_value(gensym_counter) + 1);
   return S(strndup(sym, n));
+}
+
+lt *lt_intern(lt *name) {
+  assert(isstring(name));
+  return S(string_value(name));
 }
 
 lt *lt_is_bound(lt *symbol) {

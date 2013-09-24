@@ -52,6 +52,7 @@ struct lisp_object_t lt_types[VECTOR + 1] = {
     DEFTYPE(INPUT_FILE, "input-file"),
     DEFTYPE(OPCODE, "opcode"),
     DEFTYPE(OUTPUT_FILE, "output-file"),
+    DEFTYPE(PACKAGE, "package"),
     DEFTYPE(PAIR, "pair"),
     DEFTYPE(PRIMITIVE_FUNCTION, "primitive-function"),
     DEFTYPE(RETADDR, "retaddr"),

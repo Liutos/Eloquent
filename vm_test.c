@@ -17,10 +17,16 @@
 int main(int argc, char *argv[])
 {
   char *inputs[] = {
-      "(symbol-package 'foobar)",
-      "(package-name (symbol-package 'foobar))",
-      "(in-package \"233-user\")",
-      "(package-name (symbol-package 'foobar))",
+      "(eof? 1)",
+      "(fixnum? 1)",
+      "(fixnum? #\\a)",
+      "(float? 1)",
+      "(float? 1.0)",
+      "(float? \"abc\")",
+      "(function? +)",
+      "(primitive? +)",
+      "(primitive? fx+)",
+      "(function? fx+)",
   };
   init_global_variable();
   init_prims();

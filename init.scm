@@ -44,14 +44,23 @@
        '())))
 
 ; Type Predicates
+(define is-type? (x type)
+  (eq? type (type-name (type-of x))))
+
 (define eof? (x)
-  (eq? 'teof (type-name (type-of x))))
+  (is-type? x 'teof))
 
-(define fixnum? (n)
-  (eq? 'fixnum (type-name (type-of n))))
+(define fixnum? (x)
+  (is-type? x 'fixnum))
 
-(define float? (n)
-  (eq? 'float (type-name (type-of n))))
+(define float? (x)
+  (is-type? x 'float))
+
+(define function? (x)
+  (is-type? x 'function))
+
+(define primitive? (x)
+  (is-type? x 'primitive-function))
 
 ; List Operations
 (define first (list)
