@@ -603,6 +603,10 @@ lt *lt_type_name(lt *type) {
   return S(type_name(type));
 }
 
+lt *lt_vector_length(lt *vector) {
+  return make_fixnum(vector_length(vector));
+}
+
 void init_packages(void) {
   pkgs = make_empty_list();
   lt *lisp = ensure_package("233");

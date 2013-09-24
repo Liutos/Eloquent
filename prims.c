@@ -891,7 +891,7 @@ lt *lt_vector_push_extend(lt *vector, lt *x) {
 lisp_object_t *lt_vector_ref(lisp_object_t *vector, lisp_object_t *index) {
   assert(isvector(vector));
   assert(isfixnum(index));
-  if (vector_last(vector) <= fixnum_value(index))
+  if (vector_last(vector) < fixnum_value(index))
     return signal_exception("Out of index when referencing a vector element");
   return vector_value(vector)[fixnum_value(index)];
 }
@@ -907,12 +907,6 @@ lt *lt_vector_set(lt *vector, lt *index, lt *new_value) {
   return vector;
 }
 
-lt *lt_vector_top(lt *vector) {
-  assert(isvector(vector));
-  assert(vector_last(vector) > 0);
-  return vector_value(vector)[vector_last(vector)];
-}
-
 lt *lt_vector_to_list(lt *vector) {
   lt *lt_list_nreverse(lt *);
   int length = vector_length(vector);
@@ -924,14 +918,13 @@ lt *lt_vector_to_list(lt *vector) {
 }
 
 void init_prim_vector(void) {
-  /* Vector */
   NOREST(1, lt_list_to_vector, "list->vector");
+  NOREST(1, lt_vector_length, "vector-length");
   NOREST(1, lt_vector_pop, "vector-pop");
   NOREST(2, lt_vector_push, "vector-push");
   NOREST(2, lt_vector_push_extend, "vector-push-extend");
   NOREST(2, lt_vector_ref, "vector-ref");
   NOREST(3, lt_vector_set, "vector-set!");
-  NOREST(1, lt_vector_top, "vector-top");
   NOREST(1, lt_vector_to_list, "vector->list");
 }
 

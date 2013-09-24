@@ -73,6 +73,9 @@
 (define symbol? (x)
   (is-type? x 'symbol))
 
+(define vector? (x)
+  (is-type? x 'vector))
+
 ; List Operations
 (define first (list)
   (head list))
@@ -109,6 +112,10 @@
   (and2 (bound? x)
         (or2 (function? (symbol-value x))
              (primitive? (symbol-value x)))))
+
+; Vector
+(define vector-last (x)
+  (vector-ref x (- (vector-length x) 1)))
 
 ; Arithmetic Operations
 (defmacro define-bin-arith (name lop hop)

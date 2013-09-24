@@ -58,6 +58,7 @@ int main(int argc, char *argv[])
       "(remove \"a\" '(\"a\" 1 2 \"a\"))",
       "(try-catch (/ 1 0) (ERROR (e) -1))",
       "(+ 1 (+ 2 (try-catch (/ 1 0) (ERROR (e) 3))))",
+      "(vector-last [1 2 3])",
   };
   init_global_variable();
   init_prims();

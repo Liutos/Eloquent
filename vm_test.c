@@ -34,6 +34,7 @@ int main(int argc, char *argv[])
       "(fbound? 1)",
       "(fbound? '+)",
       "(fbound? 'fbound?)",
+      "(vector-length [1 2 3])",
   };
   init_global_variable();
   init_prims();

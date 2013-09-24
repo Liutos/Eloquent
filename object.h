@@ -123,6 +123,7 @@ extern lt *lt_symbol_package(lt *);
 extern lt *lt_exception_tag(lt *);
 extern lt *lt_make_input_string(lt *);
 extern lt *lt_type_name(lt *);
+extern lt *lt_vector_length(lt *);
 
 extern void init_global_variable(void);
 
