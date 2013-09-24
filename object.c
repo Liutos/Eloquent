@@ -495,6 +495,19 @@ lt *make_fn_inst(lt *prim) {
   return make_pair(mkopcode(primitive_opcode(prim), "", 0), the_empty_list);
 }
 
+// Function/Primitive
+lt *lt_function_cenv(lt *f) {
+  return function_cenv(f);
+}
+
+lt *lt_function_name(lt *f) {
+  return function_name(f);
+}
+
+lt *lt_function_renv(lt *f) {
+  return function_renv(f);
+}
+
 // Package
 lt *lt_package_name(lt *pkg) {
   return package_name(pkg);

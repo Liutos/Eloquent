@@ -118,6 +118,9 @@
 ;; /
 (define-bin-arith bin/ fx/ fp/)
 
+;; =
+(define-bin-arith = fx= fp=)
+
 (define / (n . ns)
   (cond ((null? ns) (bin/ 1 n))
         (else (bin/ n (reduce ns bin*)))))

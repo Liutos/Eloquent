@@ -436,21 +436,9 @@ lt *lt_function_arity(lt *function) {
     return lt_list_length(function_args(function));
 }
 
-lt *lt_function_cenv(lt *f) {
-  return function_cenv(f);
-}
-
-lt *lt_function_name(lt *f) {
-  return function_name(f);
-}
-
 lt *lt_set_function_name(lt *f, lt *name) {
   function_name(f) = name;
   return f;
-}
-
-lt *lt_function_renv(lt *f) {
-  return function_renv(f);
 }
 
 lt *lt_load(lt *path) {
@@ -468,15 +456,14 @@ lt *lt_load(lt *path) {
 }
 
 void init_prim_function(void) {
-  /* Function */
   NOREST(1, lt_eval, "eval");
   NOREST(1, lt_expand_macro, "expand-macro");
   NOREST(1, lt_function_arity, "function-arity");
   NOREST(1, lt_function_cenv, "function-cenv");
   NOREST(1, lt_function_name, "function-name");
+  NOREST(1, lt_function_renv, "function-renv");
   NOREST(2, lt_set_function_name, "set-function-name!");
   SIG("set-function-name!", T(FUNCTION), T(SYMBOL));
-  NOREST(1, lt_function_renv, "function-renv");
   NOREST(2, lt_simple_apply, "simple-apply");
 }
 
@@ -533,7 +520,6 @@ lt *lt_read_line(lt *in_port) {
 }
 
 void init_prim_input_file(void) {
-  /* Input File */
   NOREST(1, lt_close_in, "close-in");
   NOREST(1, lt_is_file_open, "file-open?");
   NOREST(1, lt_load, "load");
@@ -639,26 +625,24 @@ lisp_object_t *lt_numeric_eq(lisp_object_t *n, lisp_object_t *m) {
 
 // The following function doesn't use in any C code
 void init_prim_arithmetic(void) {
-  /* Arithmetic operations */
-  NOREST(1, lt_nt_level, "nt-level");
   /* For Fixnum */
+  NOREST(1, lt_fx2fp, "fx->fp");
   NOREST(2, lt_fx_add, "fx+");
-  NOREST(2, lt_fx_sub, "fx-");
-  NOREST(2, lt_fx_mul, "fx*");
   NOREST(2, lt_fx_div, "fx/");
   NOREST(2, lt_fx_eq, "fx=");
-  NOREST(1, lt_fx2fp, "fx->fp");
+  NOREST(2, lt_fx_mul, "fx*");
+  NOREST(2, lt_fx_sub, "fx-");
+  NOREST(2, lt_mod, "mod");
   /* For Floating-Point Number */
   NOREST(2, lt_fp_add, "fp+");
-  NOREST(2, lt_fp_sub, "fp-");
-  NOREST(2, lt_fp_mul, "fp*");
   NOREST(2, lt_fp_div, "fp/");
   NOREST(2, lt_fp_eq, "fp=");
+  NOREST(2, lt_fp_mul, "fp*");
+  NOREST(2, lt_fp_sub, "fp-");
   NOREST(3, lt_nt_convert, "nt-convert");
+  NOREST(1, lt_nt_level, "nt-level");
   /* Generic */
   NOREST(2, lt_gt, ">");
-  NOREST(2, lt_mod, "mod");
-  NOREST(2, lt_numeric_eq, "=");
 }
 
 /* Character */
