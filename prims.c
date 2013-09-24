@@ -771,17 +771,6 @@ lt *lt_is_bound(lt *symbol) {
   return booleanize(!isundef(symbol_value(symbol)));
 }
 
-lt *lt_is_fbound(lt *symbol) {
-  assert(issymbol(symbol));
-  if (isundef(symbol_value(symbol)))
-    return make_false();
-  lt *value = symbol_value(symbol);
-  if (isprimitive(value) || isfunction(value))
-    return make_true();
-  else
-    return make_false();
-}
-
 lt *lt_set_symbol_macro(lt *symbol, lt *macro_fn) {
   symbol_macro(symbol) = macro_fn;
   return symbol;
@@ -811,7 +800,7 @@ void init_prim_symbol(void) {
   NOREST(0, lt_gensym, "gensym");
   NOREST(1, lt_intern, "string->symbol");
   NOREST(1, lt_is_bound, "bound?");
-  NOREST(1, lt_is_fbound, "fbound?");
+  SIG("bound?", T(SYMBOL));
   NOREST(2, lt_set_symbol_macro, "set-symbol-macro!");
   NOREST(2, lt_set_symbol_value, "set-symbol-value!");
   NOREST(1, lt_symbol_macro, "symbol-macro");

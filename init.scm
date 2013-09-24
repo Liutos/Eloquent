@@ -29,6 +29,14 @@
           (lambda ,args ,@proc))
          ,@body))))
 
+; OR2
+(defmacro or2 (e1 e2)
+  (let ((tmp (gensym)))
+    `(let ((,tmp ,e1))
+       (if ,tmp
+           ,tmp
+           ,e2))))
+
 ; WHILE
 (defmacro while (test . body)
   (let ((start (gensym))
@@ -62,6 +70,9 @@
 (define primitive? (x)
   (is-type? x 'primitive-function))
 
+(define symbol? (x)
+  (is-type? x 'symbol))
+
 ; List Operations
 (define first (list)
   (head list))
@@ -92,6 +103,12 @@
         ((null? (rest list)) (first list))
         (else
          (fn (first list) (reduce (rest list) fn)))))
+
+; Symbol
+(define fbound? (x)
+  (and2 (bound? x)
+        (or2 (function? (symbol-value x))
+             (primitive? (symbol-value x)))))
 
 ; Arithmetic Operations
 (defmacro define-bin-arith (name lop hop)

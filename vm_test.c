@@ -27,6 +27,13 @@ int main(int argc, char *argv[])
       "(primitive? +)",
       "(primitive? fx+)",
       "(function? fx+)",
+      "(or2 #t #t)",
+      "(or2 #t #f)",
+      "(or2 #f #t)",
+      "(or2 #f #f)",
+      "(fbound? 1)",
+      "(fbound? '+)",
+      "(fbound? 'fbound?)",
   };
   init_global_variable();
   init_prims();
