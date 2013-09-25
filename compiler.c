@@ -442,11 +442,11 @@ lisp_object_t *compile_object(lisp_object_t *object, lisp_object_t *env) {
     lisp_object_t *args = pair_tail(object);
     lisp_object_t *fn = pair_head(object);
     lt *op = compile_object(fn, env);
+    lt *nargs = make_fixnum(pair_length(args));
     if (is_single_gvar(op) && isundef(symbol_value(fn)))
       writef(standard_error, "Warning: Function named %S is undefined.\n", fn);
     /* Generating different instruction when calling primitive and anything else */
     if (is_primitive_fun_name(fn, env)) {
-      lt *nargs = lt_list_length(args);
       if (!is_argc_satisfy(fixnum_value(nargs), fn))
         return compiler_error("The number of arguments passed to primitive function is wrong");
       args = compile_args(args, env);
@@ -468,7 +468,7 @@ lisp_object_t *compile_object(lisp_object_t *object, lisp_object_t *env) {
     } else
       return seq(compile_args(args, env),
                  op,
-                 gen(CALL, lt_list_length(args)),
+                 gen(CALL, nargs),
                  (is_check_exception? gen(CHECKEX): the_empty_list));
   }
   writef(standard_out, "Impossible --- Unable to compile %?\n", object);

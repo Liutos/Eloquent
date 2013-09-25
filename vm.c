@@ -102,8 +102,8 @@ lt *type_error(lt *index, lt *pred) {
 lt *comp2run_env(lt *comp_env, lt *next) {
   lt *pars = environment_bindings(comp_env);
   assert(ispair(pars) || isnull(pars));
-  lt *len = lt_list_length(pars);
-  return make_environment(make_vector(fixnum_value(len)), next);
+  int len = pair_length(pars);
+  return make_environment(make_vector(len), next);
 }
 
 lisp_object_t *run_by_llam(lisp_object_t *code_vector) {
@@ -251,7 +251,7 @@ lisp_object_t *run_by_llam(lisp_object_t *code_vector) {
       case FN: {
         lisp_object_t *func = op_fn_func(ins);
         lt *cenv = function_cenv(func);
-        func = make_function(cenv, the_empty_list, function_code(func), env);
+        func = make_function(cenv, function_args(func), function_code(func), env);
         lt_vector_push(stack, func);
       }
         break;

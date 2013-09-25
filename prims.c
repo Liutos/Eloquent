@@ -433,7 +433,7 @@ lt *lt_function_arity(lt *function) {
   if (isprimitive(function))
     return make_fixnum(primitive_arity(function));
   else
-    return lt_list_length(function_args(function));
+    return make_fixnum(pair_length(function_args(function)));
 }
 
 lt *lt_set_function_name(lt *f, lt *name) {
@@ -939,19 +939,6 @@ lt *lt_list_last(lt *list) {
   }
 }
 
-lt *lt_list_length(lt *list) {
-  if (isnull(list))
-    return make_fixnum(0);
-  int length = 0;
-  while (!isnull(list)) {
-    if (!ispair(list))
-      return signal_exception("Argument is not a proper list.");
-    length++;
-    list = pair_tail(list);
-  }
-  return make_fixnum(length);
-}
-
 lt *lt_list_nreverse(lt *list) {
   if (isnull(list))
     return the_empty_list;
@@ -1055,7 +1042,6 @@ void init_prim_list(void) {
   ADD(1, TRUE, lt_list, "list");
   NOREST(1, lt_list_last, "list-last");
   SIG("list-last", T(PAIR));
-  NOREST(1, lt_list_length, "list-length");
   NOREST(1, lt_list_nreverse, "list-reverse!");
   NOREST(1, lt_list_reverse, "list-reverse");
   NOREST(2, lt_nth, "nth");
