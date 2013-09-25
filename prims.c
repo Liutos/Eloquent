@@ -331,7 +331,6 @@ lt *lt_signal_exception(lt *message) {
 }
 
 void init_prim_exception(void) {
-  /* Exception */
   NOREST(1, lt_exception_tag, "exception-tag");
   SIG("exception-tag", T(EXCEPTION));
   NOREST(1, lt_signal_exception, "signal");
@@ -796,7 +795,6 @@ lisp_object_t *lt_symbol_value(lisp_object_t *symbol) {
 }
 
 void init_prim_symbol(void) {
-  /* Symbol */
   NOREST(0, lt_gensym, "gensym");
   NOREST(1, lt_intern, "string->symbol");
   NOREST(1, lt_is_bound, "bound?");
@@ -833,7 +831,6 @@ lisp_object_t *lt_list_to_vector(lisp_object_t *list) {
 }
 
 lt *lt_vector_equal(lt *v1, lt *v2) {
-  lt *lt_equal(lt *, lt *);
   if (v1 == v2) return the_true;
   if (vector_length(v1) != vector_length(v2))
     return the_false;
@@ -908,7 +905,6 @@ lt *lt_vector_set(lt *vector, lt *index, lt *new_value) {
 }
 
 lt *lt_vector_to_list(lt *vector) {
-  lt *lt_list_nreverse(lt *);
   int length = vector_length(vector);
   lt *list = make_empty_list();
   for (int i = 0; i < length; i++) {
@@ -962,7 +958,6 @@ lisp_object_t *lt_head(lisp_object_t *pair) {
 }
 
 lt *lt_list_equal(lt *l1, lt *l2) {
-  lt *lt_equal(lt *, lt *);
   if (l1 == l2)
     return the_true;
   while (!isnull(l1) && !isnull(l2)) {
