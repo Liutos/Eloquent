@@ -177,6 +177,12 @@
       n
     (gcd m (mod n m))))
 
+; List
+(define nth (lst n)
+  (if (= n 0)
+      (first lst)
+    (nth (rest lst) (- n 1))))
+
 ; I/O
 ;; Output
 (define print (x)

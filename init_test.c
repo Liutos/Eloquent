@@ -67,6 +67,8 @@ int main(int argc, char *argv[])
       "(list)",
       "(list 1)",
       "(list 1 2 3 4)",
+      "(nth '(1 2 3) 0)",
+      "(nth '(1 2 3) 1)",
   };
   init_global_variable();
   init_prims();
