@@ -64,6 +64,9 @@ int main(int argc, char *argv[])
       "(append '() '(1 2 3))",
       "(append '(1 2 3) '())",
       "(append '(1 2) '(3))",
+      "(list)",
+      "(list 1)",
+      "(list 1 2 3 4)",
   };
   init_global_variable();
   init_prims();

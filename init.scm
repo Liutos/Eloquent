@@ -92,6 +92,9 @@
         (#t (cons (first l1)
                   (append (rest l1) l2)))))
 
+(define list xs
+  xs)
+
 (define map (list fn)
   (if (null? list)
       '()
