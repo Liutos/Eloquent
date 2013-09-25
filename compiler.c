@@ -212,11 +212,6 @@ lisp_object_t *compile_args(lisp_object_t *args, lisp_object_t *env) {
   }
 }
 
-int is_no_value_return(lt *inseq) {
-  lt *ins = lt_list_last(inseq);
-  return opcode_type(ins) == RETURN;
-}
-
 lisp_object_t *compile_begin(lisp_object_t *exps, lisp_object_t *env) {
   if (isnull(exps))
     return gen(CONST, the_empty_list);
@@ -224,7 +219,7 @@ lisp_object_t *compile_begin(lisp_object_t *exps, lisp_object_t *env) {
     return compile_object(first(exps), env);
   else {
     lisp_object_t *st = compile_object(first(exps), env);
-    lisp_object_t *nd = is_no_value_return(st) ? the_empty_list: gen(POP);
+    lt *nd = gen(POP);
     lisp_object_t *rd = compile_begin(pair_tail(exps), env);
     return seq(st, nd, rd);
   }

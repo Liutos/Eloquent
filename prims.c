@@ -929,15 +929,6 @@ void init_prim_vector(void) {
 }
 
 /* List */
-lt *lt_list_last(lt *list) {
-  tco:
-  if (isnull(pair_tail(list)))
-    return pair_head(list);
-  else {
-    list = pair_tail(list);
-    goto tco;
-  }
-}
 
 lt *lt_list_nreverse(lt *list) {
   if (isnull(list))
@@ -1040,8 +1031,6 @@ void init_prim_list(void) {
   NOREST(2, make_pair, "cons");
   NOREST(1, lt_head, "head");
   ADD(1, TRUE, lt_list, "list");
-  NOREST(1, lt_list_last, "list-last");
-  SIG("list-last", T(PAIR));
   NOREST(1, lt_list_nreverse, "list-reverse!");
   NOREST(1, lt_list_reverse, "list-reverse");
   NOREST(2, lt_nth, "nth");
