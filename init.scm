@@ -183,6 +183,11 @@
       (first lst)
     (nth (rest lst) (- n 1))))
 
+(define nthtail (lst n)
+  (if (= n 0)
+      lst
+    (nthtail (rest lst) (- n 1))))
+
 ; I/O
 ;; Output
 (define print (x)

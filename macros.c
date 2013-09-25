@@ -168,7 +168,7 @@ lt *handler_var(lt *handler) {
 }
 
 lt *handler_action(lt *handler) {
-  return lt_nthtail(handler, make_fixnum(2));
+  return lt_raw_nthtail(handler, 2);
 }
 
 lt *make_single_let(lt *var, lt *val, lt *action) {

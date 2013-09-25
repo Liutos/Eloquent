@@ -977,12 +977,6 @@ lt *lt_list_equal(lt *l1, lt *l2) {
     return the_true;
 }
 
-lisp_object_t *lt_nthtail(lisp_object_t *list, lisp_object_t *n) {
-  assert(ispair(list) && isfixnum(n));
-  int n2 = fixnum_value(n);
-  return lt_raw_nthtail(list, n2);
-}
-
 lisp_object_t *lt_set_head(lisp_object_t *pair, lisp_object_t *new_head) {
   assert(ispair(pair));
   pair_head(pair) = new_head;
@@ -1005,7 +999,6 @@ void init_prim_list(void) {
   NOREST(1, lt_head, "head");
   NOREST(1, lt_list_nreverse, "list-reverse!");
   NOREST(1, lt_list_reverse, "list-reverse");
-  NOREST(2, lt_nthtail, "nth-tail");
   NOREST(2, lt_set_head, "set-head");
   NOREST(2, lt_set_tail, "set-tail");
   NOREST(1, lt_tail, "tail");
