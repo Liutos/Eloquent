@@ -61,6 +61,9 @@ int main(int argc, char *argv[])
       "(vector-last [1 2 3])",
       "(function-arity fx+)",
       "(function-arity bin+)",
+      "(append '() '(1 2 3))",
+      "(append '(1 2 3) '())",
+      "(append '(1 2) '(3))",
   };
   init_global_variable();
   init_prims();

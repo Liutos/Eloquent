@@ -929,7 +929,6 @@ void init_prim_vector(void) {
 }
 
 /* List */
-
 lt *lt_list_nreverse(lt *list) {
   if (isnull(list))
     return the_empty_list;
@@ -955,12 +954,6 @@ lt *lt_list_reverse(lt *list) {
     return list;
   else
     return append2(lt_list_reverse(pair_tail(list)), list1(pair_head(list)));
-}
-
-lt *lt_append(lt *lists) {
-  if (isnull(lists))
-    return make_empty_list();
-  return append2(pair_head(lists), lt_append(pair_tail(lists)));
 }
 
 lisp_object_t *lt_head(lisp_object_t *pair) {
@@ -1025,8 +1018,6 @@ lisp_object_t *lt_tail(lisp_object_t *pair) {
 }
 
 void init_prim_list(void) {
-  /* List */
-  ADD(1, TRUE, lt_append, "append");
   NOREST(2, lt_is_tag_list, "is-tag-list?");
   NOREST(2, make_pair, "cons");
   NOREST(1, lt_head, "head");

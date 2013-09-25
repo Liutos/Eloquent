@@ -86,6 +86,12 @@
 (define rest (list)
   (tail list))
 
+(define append (l1 l2)
+  (cond ((null? l1) l2)
+        ((null? l2) l1)
+        (#t (cons (first l1)
+                  (append (rest l1) l2)))))
+
 (define map (list fn)
   (if (null? list)
       '()
