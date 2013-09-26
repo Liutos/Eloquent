@@ -21,8 +21,12 @@ int is_check_exception;
 int is_check_type;
 lt *gensym_counter;
 lt *null_env;
+/* Package */
 lt *package;
+lt *pkg_lisp;
+lt *pkg_user;
 lt *pkgs;
+
 lt *standard_error;
 lt *standard_in;
 lt *standard_out;
@@ -609,13 +613,13 @@ lt *lt_vector_length(lt *vector) {
 
 void init_packages(void) {
   pkgs = make_empty_list();
-  lt *lisp = ensure_package("233");
+  pkg_lisp = ensure_package("Lisp");
 //  (defpackage :233-user
 //    (:use :233))
-  lt *user = ensure_package("233-user");
-  use_package_in(lisp, user);
+  pkg_user = ensure_package("User");
+  use_package_in(pkg_lisp, pkg_user);
 // Set the current package
-  package = user;
+  package = pkg_user;
 }
 
 void init_global_variable(void) {

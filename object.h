@@ -24,8 +24,12 @@ lt *gensym_counter;
 lisp_object_t *null_env;
 lisp_object_t *the_empty_list;
 lt *the_eof;
-lt *pkgs;
+/* Package */
 lt *package;
+lt *pkg_lisp;
+lt *pkg_user;
+lt *pkgs;
+
 lt *standard_error;
 lisp_object_t *standard_in;
 lisp_object_t *standard_out;
@@ -145,6 +149,7 @@ extern void init_global_variable(void);
 #define POINTER_MASK 3
 #define POINTER_TAG 0
 
+#define LISP(name) find_or_create_symbol(name, pkg_lisp)
 #define S(name) (find_or_create_symbol(name, package))
 
 #endif

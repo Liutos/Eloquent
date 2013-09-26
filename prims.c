@@ -24,7 +24,7 @@
   do {                                                                  \
     lt *func =                                                          \
         make_primitive(arity, (void *)function_name, Lisp_name, restp); \
-    symbol_value(S(Lisp_name)) = func;                                  \
+    symbol_value(LISP(Lisp_name)) = func;                                  \
   } while (0)
 
 // Register the primitive functions without rest parameter
