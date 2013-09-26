@@ -16,8 +16,21 @@
 int debug;
 int is_check_exception;
 int is_check_type;
+/* Symbol */
+lt *the_begin_symbol;
+lt *the_catch_symbol;
+lt *the_dot_symbol;
+lt *the_goto_symbol;
+lt *the_if_symbol;
+lt *the_lambda_symbol;
+lt *the_quasiquote_symbol;
+lt *the_quote_symbol;
+lt *the_set_symbol;
+lt *the_splicing_symbol;
+lt *the_tagbody_symbol;
+lt *the_unquote_symbol;
+
 lt *the_argv;
-lisp_object_t *the_dot_symbol;
 lisp_object_t *the_false;
 lisp_object_t *the_true;
 lt *gensym_counter;

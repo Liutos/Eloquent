@@ -31,8 +31,21 @@ lt *standard_error;
 lt *standard_in;
 lt *standard_out;
 lt *symbol_list;
-lt *the_argv;
+/* Symbol */
+lt *the_begin_symbol;
+lt *the_catch_symbol;
 lt *the_dot_symbol;
+lt *the_goto_symbol;
+lt *the_if_symbol;
+lt *the_lambda_symbol;
+lt *the_quasiquote_symbol;
+lt *the_quote_symbol;
+lt *the_set_symbol;
+lt *the_splicing_symbol;
+lt *the_tagbody_symbol;
+lt *the_unquote_symbol;
+
+lt *the_argv;
 lt *the_empty_list;
 lt *the_eof;
 lt *the_false;
@@ -653,5 +666,16 @@ void init_global_variable(void) {
   symbol_value(S("*standard-input*")) = standard_in;
 
   /* Symbol initialization */
-  the_dot_symbol = S(".");
+  the_begin_symbol = LISP("begin");
+  the_catch_symbol = LISP("catch");
+  the_dot_symbol = LISP(".");
+  the_goto_symbol = LISP("goto");
+  the_if_symbol = LISP("if");
+  the_lambda_symbol = LISP("lambda");
+  the_quasiquote_symbol = LISP("quasiquote");
+  the_quote_symbol = LISP("quote");
+  the_set_symbol = LISP("set");
+  the_splicing_symbol = LISP("unquote-splicing");
+  the_tagbody_symbol = LISP("tagbody");
+  the_unquote_symbol = LISP("unquote");
 }
