@@ -760,9 +760,9 @@ lt *lt_gensym(void) {
   return S(strndup(sym, n));
 }
 
-lt *lt_intern(lt *name) {
-  assert(isstring(name));
-  return S(string_value(name));
+lt *lt_intern(lt *name, lt *pkg_name) {
+  lt *pkg = ensure_package(string_value(pkg_name));
+  return find_or_create_symbol(string_value(name), pkg);
 }
 
 lt *lt_is_bound(lt *symbol) {
@@ -796,7 +796,7 @@ lisp_object_t *lt_symbol_value(lisp_object_t *symbol) {
 
 void init_prim_symbol(void) {
   NOREST(0, lt_gensym, "gensym");
-  NOREST(1, lt_intern, "string->symbol");
+  NOREST(2, lt_intern, "intern");
   NOREST(1, lt_is_bound, "bound?");
   SIG("bound?", T(SYMBOL));
   NOREST(2, lt_set_symbol_macro, "set-symbol-macro!");

@@ -48,7 +48,7 @@ extern F1(lt_string_length);
 extern F3(lt_string_set);
 /* Symbol */
 extern F0(lt_gensym);
-extern F1(lt_intern);
+extern F2(lt_intern);
 extern F1(lt_symbol_name);
 extern F1(lt_symbol_value);
 /* Vector */
