@@ -212,3 +212,6 @@
                 n
               (aux file (+ n 1))))))
     (aux file 0)))
+
+; Start
+(in-package "User")

@@ -35,6 +35,7 @@ int main(int argc, char *argv[])
       "(fbound? '+)",
       "(fbound? 'fbound?)",
       "(vector-length [1 2 3])",
+      "(symbol-package 'bin+)",
   };
   init_global_variable();
   init_prims();

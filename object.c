@@ -632,7 +632,7 @@ void init_packages(void) {
   pkg_user = ensure_package("User");
   use_package_in(pkg_lisp, pkg_user);
 // Set the current package
-  package = pkg_user;
+  package = pkg_lisp;
 }
 
 void init_global_variable(void) {
