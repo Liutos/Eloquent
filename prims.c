@@ -41,7 +41,7 @@
 
 #define OR(...) make_pair(S("or"), raw_list(__VA_ARGS__, NULL))
 
-#define T(tag) (&lt_types[tag])
+#define T(tag) type_ref(tag)
 
 /* Writer */
 void write_raw_char(char c, lt *dest_port) {
@@ -125,7 +125,7 @@ void writef(lt *dest, const char *format, ...) {
 
 void write_opcode(lt *opcode, lt *dest) {
   write_raw_string("#<", dest);
-  write_raw_string(opcode_op(&lt_codes[opcode_name(opcode)]), dest);
+  write_raw_string(opcode_op(opcode_ref(opcode_name(opcode))), dest);
   for (int i = 0; i < vector_length(opcode_oprands(opcode)); i++) {
     writef(dest, " %?", vector_value(opcode_oprands(opcode))[i]);
   }
@@ -1057,16 +1057,6 @@ lt *lt_equal(lt *x, lt *y) {
   return the_false;
 }
 
-lt *lt_find_type(lt *name) {
-  assert(issymbol(name));
-  for (int i = 0; i < sizeof(lt_types) / sizeof(struct lisp_object_t); i++) {
-    if (strcmp(lt_types[i].u.type.name, symbol_name(name)) == 0)
-      return &lt_types[i];
-  }
-  fprintf(stderr, "Unknown type name %s\n", symbol_name(name));
-  exit(1);
-}
-
 lt *lt_is_constant(lt *object) {
   if (is_tag_list(object, S("quote")))
     return make_true();
@@ -1080,7 +1070,7 @@ lt *lt_object_size(void) {
 }
 
 lisp_object_t *lt_type_of(lisp_object_t *object) {
-  return &lt_types[type_of(object)];
+  return type_ref(type_of(object));
 }
 
 lt *lt_is_kind_of(lt *object, lt *type) {
@@ -1117,8 +1107,6 @@ lt *lt_type_name(lt *type) {
 
 void init_prim_general(void) {
   /* Type */
-  NOREST(1, lt_find_type, "find-type");
-  SIG("find-type", T(SYMBOL));
   NOREST(1, lt_type_name, "type-name");
   SIG("type-name", T(TYPE));
   /* General */

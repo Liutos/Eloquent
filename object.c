@@ -56,7 +56,7 @@ lt *the_undef;
 
 #define DEFTYPE(tag, name) {.type=TYPE, .u={.type={tag, name}}}
 
-struct lisp_object_t lt_types[VECTOR + 1] = {
+struct lisp_object_t lt_types[] = {
     DEFTYPE(BOOL, "bool"),
     DEFTYPE(CHARACTER, "character"),
     DEFTYPE(EMPTY_LIST, "empty-list"),
@@ -83,7 +83,7 @@ struct lisp_object_t lt_types[VECTOR + 1] = {
 
 #define DEFCODE(name, op) {.type=OPCODE, .u={.opcode={name, op}}}
 
-struct lisp_object_t lt_codes[CONS + 1] = {
+struct lisp_object_t lt_codes[] = {
     DEFCODE(ARGS, "ARGS"),
     DEFCODE(ARGSD, "ARGSD"),
     DEFCODE(CALL, "CALL"),
@@ -515,8 +515,12 @@ lt *make_fn_inst(lt *prim) {
   return make_pair(mkopcode(primitive_opcode(prim), "", 0), the_empty_list);
 }
 
-// Function/Primitive
-// Package
+/* Opcode */
+lt *opcode_ref(enum OPCODE_TYPE opcode) {
+  return &lt_codes[opcode];
+}
+
+/* Package */
 lt *search_package(char *name, lt *packages) {
   while (ispair(packages)) {
     lt *pkg = pair_head(packages);
@@ -592,6 +596,11 @@ lt *find_or_create_symbol(char *name, lt *package) {
   lt *sym = make_symbol(name, package);
   set_ht((void *)name, (void *)sym, package_symbol_table(package));
   return sym;
+}
+
+/* Type */
+lt *type_ref(enum TYPE type) {
+  return &lt_types[type];
 }
 
 void init_packages(void) {

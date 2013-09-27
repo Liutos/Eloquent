@@ -49,9 +49,6 @@ lisp_object_t *standard_out;
 lisp_object_t *symbol_list;
 lisp_object_t *the_undef;
 
-struct lisp_object_t lt_types[VECTOR + 1];
-struct lisp_object_t lt_codes[CONS + 1];
-
 extern int is_pointer(lt *);
 extern int isenvironment(lt *);
 extern int isexception(lt *);
@@ -127,10 +124,12 @@ extern lt *make_op_return(void);
 extern lt *make_op_catch(void);
 extern lt *make_fn_inst(lt *);
 
+extern lt *opcode_ref(enum OPCODE_TYPE);
 extern hash_table_t *make_symbol_table(void);
 extern lt *find_or_create_symbol(char *, lt *);
 extern lt *ensure_package(char *);
 extern lt *search_package(char *, lt *);
+extern lt *type_ref(enum TYPE);
 
 extern void init_global_variable(void);
 
