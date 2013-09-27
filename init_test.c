@@ -72,6 +72,9 @@ int main(int argc, char *argv[])
       "(nthtail '(1 2 3) 0)",
       "(nthtail '(1 2 3) 1)",
       "(symbol-package (intern \"foobar\" \"Lisp\"))",
+      "(reverse '())",
+      "(reverse '(1))",
+      "(reverse '(1 2 3))",
   };
   init_global_variable();
   init_prims();

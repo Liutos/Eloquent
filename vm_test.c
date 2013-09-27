@@ -36,6 +36,7 @@ int main(int argc, char *argv[])
       "(fbound? 'fbound?)",
       "(vector-length [1 2 3])",
       "(symbol-package 'bin+)",
+      "(reverse '(1 2 3))",
   };
   init_global_variable();
   init_prims();

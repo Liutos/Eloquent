@@ -974,13 +974,16 @@ lt *lt_list_nreverse(lt *list) {
   return rhead;
 }
 
-lt *lt_list_reverse(lt *list) {
-  if (isnull(list))
-    return the_empty_list;
-  if (isnull(pair_tail(list)))
-    return list;
-  else
-    return append2(lt_list_reverse(pair_tail(list)), list1(pair_head(list)));
+lt *raw_list(lt *e0, ...) {
+  va_list ap;
+  va_start(ap, e0);
+  e0 = list1(e0);
+  lt *next = va_arg(ap, lt *);
+  while (next != NULL) {
+    e0 = make_pair(next, e0);
+    next = va_arg(ap, lt *);
+  }
+  return lt_list_nreverse(e0);
 }
 
 lisp_object_t *lt_head(lisp_object_t *pair) {
@@ -1024,7 +1027,6 @@ void init_prim_list(void) {
   NOREST(2, make_pair, "cons");
   NOREST(1, lt_head, "head");
   NOREST(1, lt_list_nreverse, "list-reverse!");
-  NOREST(1, lt_list_reverse, "list-reverse");
   NOREST(2, lt_set_head, "set-head");
   NOREST(2, lt_set_tail, "set-tail");
   NOREST(1, lt_tail, "tail");

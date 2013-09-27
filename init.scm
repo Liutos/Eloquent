@@ -101,6 +101,13 @@
     (cons (fn (first list))
           (map (rest list) fn))))
 
+(define reduce (list fn)
+  (cond ((null? list)
+         (signal "Parameter `list' can't be an empty list."))
+        ((null? (rest list)) (first list))
+        (else
+         (fn (first list) (reduce (rest list) fn)))))
+
 (define remove (x list)
   (cond ((null? list) '())
         ((eql? x (first list))
@@ -109,12 +116,12 @@
          (cons (first list)
                (remove x (rest list))))))
 
-(define reduce (list fn)
-  (cond ((null? list)
-         (signal "Parameter `list' can't be an empty list."))
-        ((null? (rest list)) (first list))
-        (else
-         (fn (first list) (reduce (rest list) fn)))))
+(define reverse (lst)
+  (cond ((null? lst) '())
+        ((null? (tail lst)) lst)
+        (else 
+         (append (reverse (tail lst))
+                 `(,(head lst))))))
 
 ; Symbol
 (define fbound? (x)
