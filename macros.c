@@ -24,7 +24,7 @@ lt *cond_actions(lt *clause) {
 }
 
 int is_else_clause(lt *clause) {
-  return is_tag_list(clause, S("else"));
+  return is_tag_list(clause, LISP("else"));
 }
 
 lt *seq_to_exp(lt *seq) {
@@ -33,7 +33,7 @@ lt *seq_to_exp(lt *seq) {
   else if (isnull(pair_tail(seq)))
     return pair_head(seq);
   else
-    return make_pair(S("begin"), seq);
+    return make_pair(the_begin_symbol, seq);
 }
 
 lt *lt_cond_macro(lt *clauses) {
@@ -51,7 +51,7 @@ lt *lt_cond_macro(lt *clauses) {
       }
     } else {
       return
-          make_pair(S("if"),
+          make_pair(the_if_symbol,
               list3(cond_pred(first),
                     seq_to_exp(cond_actions(first)),
                     lt_cond_macro(rest)));
@@ -64,7 +64,7 @@ lt *lt_let_macro(lt *bindings, lt *body) {
   lt *pars= make_empty_list();
   lt *args= make_empty_list();
   if (isnull(bindings))
-    return make_pair(S("begin"), body);
+    return make_pair(the_begin_symbol, body);
   while (ispair(bindings)) {
     lt *bd = pair_head(bindings);
     pars = make_pair(pair_head(bd), pars);
@@ -73,7 +73,7 @@ lt *lt_let_macro(lt *bindings, lt *body) {
   }
   pars = lt_list_nreverse(pars);
   args = lt_list_nreverse(args);
-  lt *lambda = make_pair(S("lambda"), make_pair(pars, body));
+  lt *lambda = make_pair(the_lambda_symbol, make_pair(pars, body));
   return make_pair(lambda, args);
 }
 
@@ -118,12 +118,12 @@ lt *lt_pset_macro(lt *kvs) {
   while (!isnull(ks)) {
     lt *var = pair_head(ks);
     lt *name = pair_head(ns);
-    sets = make_pair(list3(S("set!"), var, name), sets);
+    sets = make_pair(list3(the_set_symbol, var, name), sets);
     ks = pair_tail(ks);
     ns = pair_tail(ns);
   }
   sets = lt_list_nreverse(sets);
-  lt *result = make_pair(S("let"), make_pair(bd, sets));
+  lt *result = make_pair(LISP("let"), make_pair(bd, sets));
   return result;
 }
 
@@ -133,36 +133,36 @@ lt *quasiq(lt *x) {
     if (!isfalse(lt_is_constant(x)))
       return x;
     else
-      return list2(S("quote"), x);
+      return list2(the_quote_symbol, x);
   }
-  if (is_tag_list(x, S("unquote"))) {
+  if (is_tag_list(x, the_unquote_symbol)) {
     assert(!isnull(pair_tail(x)));
     assert(isnull(pair_tail(pair_tail(x))));
     return second(x);
   }
-  if (is_tag_list(x, S("quasiquote"))) {
+  if (is_tag_list(x, the_quasiquote_symbol)) {
     assert(!isnull(pair_tail(x)));
     assert(isnull(pair_tail(pair_tail(x))));
     return quasiq(quasiq(second(x)));
   }
-  if (is_tag_list(pair_head(x), S("unquote-splicing"))) {
+  if (is_tag_list(pair_head(x), the_splicing_symbol)) {
     if (isnull(pair_tail(x)))
       return second(pair_head(x));
     else
       return
-          list3(S("append"),
+          list3(LISP("append"),
                 second(pair_head(x)),
                 quasiq(pair_tail(x)));
   }
   if (ispair(x))
-    return list3(S("cons"), quasiq(pair_head(x)), quasiq(pair_tail(x)));
+    return list3(LISP("cons"), quasiq(pair_head(x)), quasiq(pair_tail(x)));
   writef(standard_out, "Unknown case of quasiquote %?\n", x);
   exit(1);
 }
 
 /* try-catch */
 lt *handler_tag(lt *handler) {
-  return list2(S("quote"), pair_head(handler));
+  return list2(the_quote_symbol, pair_head(handler));
 }
 
 lt *handler_var(lt *handler) {
@@ -175,7 +175,7 @@ lt *handler_action(lt *handler) {
 
 lt *make_single_let(lt *var, lt *val, lt *action) {
   lt *bindings = list1(list2(var, val));
-  return make_pair(S("let"), make_pair(bindings, action));
+  return make_pair(LISP("let"), make_pair(bindings, action));
 }
 
 lt *handler2if(lt *ex, lt *handlers) {
@@ -184,28 +184,19 @@ lt *handler2if(lt *ex, lt *handlers) {
   else {
     lt *handler = pair_head(handlers);
     lt *rest = pair_tail(handlers);
-    lt *pred = list3(S("eql?"), list2(S("exception-tag"), ex), handler_tag(handler));
+    lt *pred = list3(LISP("eql?"), list2(LISP("exception-tag"), ex), handler_tag(handler));
     lt *tp = make_single_let(handler_var(handler), ex, handler_action(handler));
-    return make_pair(S("if"), list3(pred, tp, handler2if(ex, rest)));
+    return make_pair(LISP("if"), list3(pred, tp, handler2if(ex, rest)));
   }
-}
-
-// This implementation of try-catch based on `var' sepcial form is deprecated
-lt *deprecated_try_catch_macro(lt *form, lt *handlers) {
-  lt *tmp = lt_gensym();
-  lt *handler_forms = handler2if(tmp, handlers);
-  lt *val = list3(S("var"), tmp, form);
-  lt *catch = list1(S("catch"));
-  return list4(S("begin"), catch, val, handler_forms);
 }
 
 lt *try_catch_macro(lt *form, lt *handlers) {
   lt *tmp = lt_gensym();
   lt *handler_forms = handler2if(tmp, handlers);
   lt *bd = list2(tmp, form);
-  lt *catch = list1(S("catch"));
-  lt *lf = make_pair(S("let"), list2(list1(bd), handler_forms));
-  return list3(S("begin"), catch, lf);
+  lt *catch = list1(the_catch_symbol);
+  lt *lf = make_pair(LISP("let"), list2(list1(bd), handler_forms));
+  return list3(the_begin_symbol, catch, lf);
 }
 
 void init_macros(void) {
@@ -213,7 +204,7 @@ void init_macros(void) {
 #define DM(arity, restp, func_name, Lisp_name) \
   do { \
     func = make_primitive(arity, func_name, Lisp_name, restp); \
-    symbol_macro(S(Lisp_name)) = func; \
+    symbol_macro(LISP(Lisp_name)) = func; \
   } while(0)
 
   DM(1, TRUE, lt_cond_macro, "cond");
