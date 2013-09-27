@@ -1,10 +1,10 @@
 /*
  * utilities.c
  *
- * Defines the utility functions only depends on the operations provided by object.c and type.h
- *
  *  Created on: 2013年7月20日
  *      Author: liutos
+ *
+ * This file contains definition of all utilities
  */
 #include <assert.h>
 #include <stdarg.h>

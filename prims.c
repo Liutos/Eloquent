@@ -3,6 +3,8 @@
  *
  *  Created on: 2013年7月18日
  *      Author: liutos
+ *
+ * This file contains the definition of all primitive functions
  */
 #include <assert.h>
 #include <ctype.h>
@@ -10,6 +12,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+
 #include <gc/gc.h>
 
 #include "compiler.h"
@@ -326,6 +329,10 @@ lt *lt_raw_nthtail(lt *list, int n) {
 }
 
 /* Exception */
+lt *lt_exception_tag(lt *exception) {
+  return exception_tag(exception);
+}
+
 lt *lt_signal_exception(lt *message) {
   return signal_exception(string_value(message));
 }
@@ -438,6 +445,18 @@ lt *lt_function_arity(lt *function) {
 lt *lt_set_function_name(lt *f, lt *name) {
   function_name(f) = name;
   return f;
+}
+
+lt *lt_function_cenv(lt *f) {
+  return function_cenv(f);
+}
+
+lt *lt_function_name(lt *f) {
+  return function_name(f);
+}
+
+lt *lt_function_renv(lt *f) {
+  return function_renv(f);
 }
 
 lt *lt_load(lt *path) {
@@ -720,6 +739,10 @@ lt *lt_make_package(lt *name) {
   return ensure_package(string_value(name));
 }
 
+lt *lt_package_name(lt *pkg) {
+  return package_name(pkg);
+}
+
 void init_prim_package(void) {
   NOREST(1, lt_in_package, "in-package");
   NOREST(1, lt_make_package, "make-package");
@@ -789,6 +812,10 @@ lisp_object_t *lt_symbol_name(lisp_object_t *symbol) {
   return make_string(strdup(symbol_name(symbol)));
 }
 
+lt *lt_symbol_package(lt *symbol) {
+  return symbol_package(symbol);
+}
+
 lisp_object_t *lt_symbol_value(lisp_object_t *symbol) {
   assert(issymbol(symbol));
   return symbol_value(symbol);
@@ -847,6 +874,10 @@ lisp_object_t *lt_vector_last_nth(lisp_object_t *vector, lisp_object_t *n) {
   assert(vector_last(vector) >= fixnum_value(n));
   int index = vector_last(vector) - fixnum_value(n);
   return vector_value(vector)[index];
+}
+
+lt *lt_vector_length(lt *vector) {
+  return make_fixnum(vector_length(vector));
 }
 
 lisp_object_t *lt_vector_pop(lisp_object_t *vector) {
@@ -1076,6 +1107,10 @@ lt *lt_switch_type_check(void) {
   else
     is_check_type = TRUE;
   return booleanize(is_check_type);
+}
+
+lt *lt_type_name(lt *type) {
+  return LISP(type_name(type));
 }
 
 void init_prim_general(void) {

@@ -130,17 +130,7 @@ extern lt *make_fn_inst(lt *);
 extern hash_table_t *make_symbol_table(void);
 extern lt *find_or_create_symbol(char *, lt *);
 extern lt *ensure_package(char *);
-// Simple wrappers for some C functions
-extern lt *lt_function_cenv(lt *);
-extern lt *lt_function_name(lt *);
-extern lt *lt_function_renv(lt *);
-extern lt *lt_package_name(lt *);
 extern lt *search_package(char *, lt *);
-extern lt *lt_symbol_package(lt *);
-extern lt *lt_exception_tag(lt *);
-extern lt *lt_make_input_string(lt *);
-extern lt *lt_type_name(lt *);
-extern lt *lt_vector_length(lt *);
 
 extern void init_global_variable(void);
 

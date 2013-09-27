@@ -3,6 +3,8 @@
  *
  *  Created on: 2013年7月26日
  *      Author: liutos
+ *
+ * This file contains the definition of all predefined macros
  */
 #include <assert.h>
 #include <stdlib.h>

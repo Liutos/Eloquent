@@ -3,6 +3,8 @@
  *
  *  Created on: 2013年7月18日
  *      Author: liutos
+ *
+ * This file contains the constructor of all Lisp data types
  */
 #include <assert.h>
 #include <stdarg.h>
@@ -514,23 +516,7 @@ lt *make_fn_inst(lt *prim) {
 }
 
 // Function/Primitive
-lt *lt_function_cenv(lt *f) {
-  return function_cenv(f);
-}
-
-lt *lt_function_name(lt *f) {
-  return function_name(f);
-}
-
-lt *lt_function_renv(lt *f) {
-  return function_renv(f);
-}
-
 // Package
-lt *lt_package_name(lt *pkg) {
-  return package_name(pkg);
-}
-
 lt *search_package(char *name, lt *packages) {
   while (ispair(packages)) {
     lt *pkg = pair_head(packages);
@@ -606,22 +592,6 @@ lt *find_or_create_symbol(char *name, lt *package) {
   lt *sym = make_symbol(name, package);
   set_ht((void *)name, (void *)sym, package_symbol_table(package));
   return sym;
-}
-
-lt *lt_symbol_package(lt *symbol) {
-  return symbol_package(symbol);
-}
-
-lt *lt_exception_tag(lt *exception) {
-  return exception_tag(exception);
-}
-
-lt *lt_type_name(lt *type) {
-  return S(type_name(type));
-}
-
-lt *lt_vector_length(lt *vector) {
-  return make_fixnum(vector_length(vector));
 }
 
 void init_packages(void) {

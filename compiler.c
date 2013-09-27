@@ -3,6 +3,8 @@
  *
  *  Created on: 2013年7月18日
  *      Author: liutos
+ *
+ * This file contains the definition of the compiler
  */
 #include <assert.h>
 #include <stdarg.h>
