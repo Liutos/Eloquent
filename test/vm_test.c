@@ -17,26 +17,7 @@
 int main(int argc, char *argv[])
 {
   char *inputs[] = {
-      "(eof? 1)",
-      "(fixnum? 1)",
-      "(fixnum? #\\a)",
-      "(float? 1)",
-      "(float? 1.0)",
-      "(float? \"abc\")",
-      "(function? +)",
-      "(primitive? +)",
-      "(primitive? fx+)",
-      "(function? fx+)",
-      "(or2 #t #t)",
-      "(or2 #t #f)",
-      "(or2 #f #t)",
-      "(or2 #f #f)",
-      "(fbound? 1)",
-      "(fbound? '+)",
-      "(fbound? 'fbound?)",
-      "(vector-length [1 2 3])",
-      "(symbol-package 'bin+)",
-      "(reverse '(1 2 3))",
+      "(apply fx+ '(1 2))",
   };
   init_global_variable();
   init_prims();

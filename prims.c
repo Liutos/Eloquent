@@ -456,6 +456,7 @@ void init_prim_function(void) {
   NOREST(1, lt_function_renv, "function-renv");
   NOREST(2, lt_set_function_name, "set-function-name!");
   SIG("set-function-name!", T(FUNCTION), T(SYMBOL));
+  NOREST(2, lt_simple_apply, "apply");
 }
 
 /* Input Port */
