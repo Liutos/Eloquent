@@ -352,8 +352,18 @@ lt *lt_eval(lt *form) {
 lt *lt_simple_apply(lt *function, lt *args) {
   assert(isprimitive(function) || isfunction(function));
   assert(ispair(args) || isnull(args));
-  lt *expr = make_pair(function, args);
-  return run_by_llam(compile_to_bytecode(expr));
+  lt *arity = make_fixnum(pair_length(args));
+  lt *code = the_empty_list;
+  while (ispair(args)) {
+    lt *arg = pair_head(args);
+    code = make_pair(make_op_const(arg), code);
+    args = pair_tail(args);
+  }
+  code = make_pair(make_op_const(function), code);
+  code = make_pair(make_op_call(arity), code);
+  code = lt_list_nreverse(code);
+  code = assemble(code);
+  return run_by_llam(code);
 }
 
 lt *compress_args(lt *args, int nrequired) {
@@ -391,8 +401,7 @@ lt *lt_expand_macro(lt *form) {
     lt *op = pair_head(form);
     lt *proc = macro_fn(op);
     assert(isprimitive(proc) || isfunction(proc));
-    lt *result;
-    result = lt_simple_apply(proc, quote_each_args(pair_tail(form)));
+    lt *result = lt_simple_apply(proc, pair_tail(form));
     return lt_expand_macro(result);
   } else
       return form;
@@ -447,7 +456,6 @@ void init_prim_function(void) {
   NOREST(1, lt_function_renv, "function-renv");
   NOREST(2, lt_set_function_name, "set-function-name!");
   SIG("set-function-name!", T(FUNCTION), T(SYMBOL));
-  NOREST(2, lt_simple_apply, "simple-apply");
 }
 
 /* Input Port */
