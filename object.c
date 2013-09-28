@@ -104,7 +104,12 @@ struct lisp_object_t lt_codes[] = {
     DEFCODE(POP, "POP"),
     DEFCODE(PRIM, "PRIM"),
     DEFCODE(RETURN, "RETURN"),
+//    Opcodes for some primitive functions
+    DEFCODE(ADDI, "ADDI"),
     DEFCODE(CONS, "CONS"),
+    DEFCODE(DIVI, "DIVI"),
+    DEFCODE(MULI, "MULI"),
+    DEFCODE(SUBI, "SUBI"),
 };
 
 /* Type predicate */

@@ -1396,7 +1396,11 @@ void init_primitive_opcode(void) {
     set_op4prim(func, opcode); \
   } while (0)
 
+  ADDOP("fx+", ADDI);
   ADDOP("cons", CONS);
+  ADDOP("fx/", DIVI);
+  ADDOP("fx*", MULI);
+  ADDOP("fx-", SUBI);
 }
 
 void load_init_file(void) {

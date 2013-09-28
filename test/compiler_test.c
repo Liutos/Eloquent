@@ -17,6 +17,10 @@ int main(int argc, char *argv[])
 {
   char *inputs[] = {
       "(cons 1 2)",
+      "(fx+ 1 2)",
+      "(fx- 1 2)",
+      "(fx* 1 2)",
+      "(fx/ 1 2)",
   };
   init_global_variable();
   init_prims();

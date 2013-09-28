@@ -21,13 +21,24 @@ extern void write_raw_string(char *, lt *);
 extern void writef(lt *, const char *, ...);
 
 /* Arithmetic */
-extern F2(lt_add);
-extern F2(lt_div);
-extern F2(lt_gt);
+extern F1(lt_nt_level);
+/** Fixnum **/
+extern F1(lt_fx2fp);
+extern F2(lt_fx_add);
+extern F2(lt_fx_div);
+extern F2(lt_fx_eq);
+extern F2(lt_fx_mul);
+extern F2(lt_fx_sub);
 extern F2(lt_mod);
-extern F2(lt_mul);
+/** Flonum **/
+extern F2(lt_fp_add);
+extern F2(lt_fp_div);
+extern F2(lt_fp_eq);
+extern F2(lt_fp_mul);
+extern F2(lt_fp_sub);
+extern F3(lt_nt_convert);
+extern F2(lt_gt);
 extern F2(lt_numeric_eq);
-extern F2(lt_sub);
 /* Character */
 extern F1(lt_char_code);
 extern F1(lt_code_char);

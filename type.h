@@ -80,7 +80,11 @@ enum OPCODE_TYPE {
   PRIM,
   RETURN,
 //  Primitive Function Instructions
+  ADDI,
   CONS,
+  DIVI,
+  MULI,
+  SUBI,
 };
 
 /* General Hash Table Definition */
