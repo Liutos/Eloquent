@@ -80,7 +80,6 @@ enum OPCODE_TYPE {
   PRIM,
   RETURN,
 //  Primitive Function Instructions
-  NO,
   CONS,
 };
 
@@ -160,7 +159,6 @@ struct lisp_object_t {
       char *Lisp_name;
       void *C_function;
       lt *signature;
-      enum OPCODE_TYPE opcode;
     } primitive;
     struct {
 //      pc: The index of instructions executed before entering the instructions of callee
@@ -255,7 +253,6 @@ struct string_builder_t {
 #define primitive_func(x) ((x)->u.primitive.C_function)
 #define primitive_signature(x) ((x)->u.primitive.signature)
 #define primitive_restp(x) ((x)->u.primitive.restp)
-#define primitive_opcode(x) ((x)->u.primitive.opcode)
 #define retaddr_code(x) ((x)->u.retaddr.code)
 #define retaddr_env(x) ((x)->u.retaddr.env)
 #define retaddr_fn(x) ((x)->u.retaddr.fn)

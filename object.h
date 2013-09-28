@@ -16,6 +16,8 @@
 int debug;
 int is_check_exception;
 int is_check_type;
+/* Opcode */
+hash_table_t *prim2op_map;
 /* Symbol */
 lt *the_begin_symbol;
 lt *the_catch_symbol;
@@ -125,6 +127,8 @@ extern lt *make_op_catch(void);
 extern lt *make_fn_inst(lt *);
 
 extern lt *opcode_ref(enum OPCODE_TYPE);
+extern lt *search_op4prim(lt *);
+extern void set_op4prim(lt *, enum OPCODE_TYPE);
 extern hash_table_t *make_symbol_table(void);
 extern lt *find_or_create_symbol(char *, lt *);
 extern lt *ensure_package(char *);

@@ -1390,9 +1390,13 @@ void init_prims(void) {
 }
 
 void init_primitive_opcode(void) {
-  lt *func;
-  func = symbol_value(S("cons"));
-  primitive_opcode(func) = CONS;
+#define ADDOP(Lisp_name, opcode) \
+  do { \
+    lt *func = symbol_value(LISP(Lisp_name)); \
+    set_op4prim(func, opcode); \
+  } while (0)
+
+  ADDOP("cons", CONS);
 }
 
 void load_init_file(void) {

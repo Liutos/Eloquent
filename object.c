@@ -24,6 +24,8 @@ int is_check_exception;
 int is_check_type;
 lt *gensym_counter;
 lt *null_env;
+/* Opcode */
+hash_table_t *prim2op_map;
 /* Package */
 lt *package;
 lt *pkg_lisp;
@@ -102,7 +104,6 @@ struct lisp_object_t lt_codes[] = {
     DEFCODE(POP, "POP"),
     DEFCODE(PRIM, "PRIM"),
     DEFCODE(RETURN, "RETURN"),
-    DEFCODE(NO, "NO"),
     DEFCODE(CONS, "CONS"),
 };
 
@@ -180,10 +181,6 @@ int isnull_env(lt *obj) {
 
 int isnumber(lisp_object_t *object) {
   return isfixnum(object) || isfloat(object);
-}
-
-int isopcode_fn(lt *prim) {
-  return isprimitive(prim) && primitive_opcode(prim) != NO;
 }
 
 int type_of(lisp_object_t *x) {
@@ -311,7 +308,6 @@ lisp_object_t *make_primitive(int arity, void *C_function, char *Lisp_name, int 
   primitive_restp(p) = restp;
   primitive_Lisp_name(p) = Lisp_name;
   primitive_signature(p) = make_empty_list();
-  primitive_opcode(p) = NO;
   return p;
 }
 
@@ -451,13 +447,42 @@ lt *make_op_catch(void) {
   return mkopcode(CATCH, "CATCH", 0);
 }
 
-lt *make_fn_inst(lt *prim) {
-  return make_pair(mkopcode(primitive_opcode(prim), "", 0), the_empty_list);
-}
-
 /* Opcode */
 lt *opcode_ref(enum OPCODE_TYPE opcode) {
   return &lt_codes[opcode];
+}
+
+int prim_comp_fn(void *p1, void *p2) {
+  return p1 - p2;
+}
+
+unsigned int prim_hash_fn(void *prim) {
+  return (unsigned int)prim;
+}
+
+hash_table_t *make_prim2op_map(void) {
+  return make_hash_table(31, prim_hash_fn, prim_comp_fn);
+}
+
+lt *search_op4prim(lt *prim) {
+  assert(isprimitive(prim));
+  return search_ht(prim, prim2op_map);
+}
+
+void set_op4prim(lt *prim, enum OPCODE_TYPE opcode) {
+  set_ht(prim, opcode_ref(opcode), prim2op_map);
+}
+
+int isopcode_fn(lt *prim) {
+  assert(isprimitive(prim));
+  return search_op4prim(prim) != NULL;
+}
+
+lt *make_fn_inst(lt *prim) {
+  assert(isprimitive(prim));
+  lt *opcode = search_op4prim(prim);
+  assert(opcode != NULL);
+  return make_pair(mkopcode(opcode_name(opcode), opcode_op(opcode), 0), the_empty_list);
 }
 
 /* Package */
@@ -574,6 +599,7 @@ void init_global_variable(void) {
   symbol_list = the_empty_list;
   the_undef = make_undef();
 
+  prim2op_map = make_prim2op_map();
 //  Packages initialization
   init_packages();
 
