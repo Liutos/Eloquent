@@ -392,42 +392,7 @@ lt *lt_expand_macro(lt *form) {
     lt *proc = macro_fn(op);
     assert(isprimitive(proc) || isfunction(proc));
     lt *result;
-//      TODO: Combine the two cases of function type
-    if (isprimitive(proc)) {
-      lt *args = pair_tail(form);
-      if (primitive_restp(proc))
-        args = compress_args(args, primitive_arity(proc) - 1);
-      switch (primitive_arity(proc)) {
-        case 0:
-          result = ((f0) primitive_func(proc))();
-          break;
-        case 1: {
-          lt *arg1 = lt_raw_nth(args, 0);
-          result = ((f1) primitive_func(proc))(arg1);
-        }
-          break;
-        case 2: {
-          lt *arg1 = lt_raw_nth(args, 0);
-          lt *arg2 = lt_raw_nth(args, 1);
-          result = ((f2) primitive_func(proc))(arg1, arg2);
-        }
-          break;
-        case 3: {
-          lt *arg1 = lt_raw_nth(args, 0);
-          lt *arg2 = lt_raw_nth(args, 1);
-          lt *arg3 = lt_raw_nth(args, 2);
-          result = ((f3)primitive_func(proc))(arg1, arg2, arg3);
-        }
-          break;
-        default:
-          printf("Macro with arity %d is unsupported yet.\n",
-          primitive_arity(proc));
-          exit(1);
-      }
-    } else {
-      lt *args = pair_tail(form);
-      result = lt_simple_apply(proc, quote_each_args(args));
-    }
+    result = lt_simple_apply(proc, quote_each_args(pair_tail(form)));
     return lt_expand_macro(result);
   } else
       return form;
