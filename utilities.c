@@ -128,6 +128,12 @@ void sb_add_char(string_builder_t *sb, char c) {
   sb->index++;
 }
 
+string_builder_t *make_sbc(char c) {
+  string_builder_t *sb = make_str_builder();
+  sb_add_char(sb, c);
+  return sb;
+}
+
 lt *signal_exception(char *message) {
   return make_exception(message, TRUE, S("ERROR"), the_empty_list);
 }

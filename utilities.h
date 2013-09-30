@@ -38,6 +38,7 @@ extern lt *raw_list(lt *, ...);
 extern lt *reader_error(char *, ...);
 extern void sb_add_char(string_builder_t *, char);
 extern char *sb2string(string_builder_t *);
+extern string_builder_t *make_sbc(char);
 extern lt *signal_exception(char *);
 extern lt *signal_typerr(char *);
 
