@@ -521,24 +521,6 @@ void init_prim_input_file(void) {
   NOREST(1, lt_read_line, "read-line");
 }
 
-lt *lt_list_nreverse(lt *list) {
-  if (isnull(list))
-    return the_empty_list;
-  if (isnull(pair_tail(list)))
-    return list;
-  lt *rhead = the_empty_list;
-  lt *rest = list;
-  while (!isnull(rest)) {
-    if (!ispair(rest))
-      return signal_exception("Argument is not a proper list.");
-    lt *tmp = pair_tail(rest);
-    pair_tail(rest) = rhead;
-    rhead = rest;
-    rest = tmp;
-  }
-  return rhead;
-}
-
 /* Arithmetic Operations */
 lt *lt_nt_level(lt *n) {
   if (isfixnum(n))

@@ -62,6 +62,8 @@ lt *the_sub;
 lt *the_mul;
 lt *the_div;
 
+#define DEFTYPE(tag, name) {.type=TYPE, .u={.type={tag, name}}}
+
 struct lisp_object_t lt_types[] = {
     DEFTYPE(BOOL, "bool"),
     DEFTYPE(CHARACTER, "character"),
