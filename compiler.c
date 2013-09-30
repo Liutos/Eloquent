@@ -394,6 +394,36 @@ int is_single_gvar(lt *seq) {
   return isnull(pair_tail(seq)) && opcode_type(pair_head(seq)) == GVAR;
 }
 
+lt *compile_checkex(void) {
+  return is_check_exception? gen(CHECKEX): the_empty_list;
+}
+
+lt *compile_app(lt *proc, lt *args, lt *env) {
+  lt *nargs = make_fixnum(pair_length(args));
+  lt *op = compile_object(proc, env);
+  args = compile_args(args, env);
+  if (is_signaled(args))
+    return args;
+  if (is_primitive_fun_name(proc, env)) {
+    lt *prim = symbol_value(proc);
+    if (isopcode_fn(prim))
+      return seq(args,
+          compile_type_check(prim, nargs),
+          make_fn_inst(prim),
+          compile_checkex());
+    else
+      return seq(args,
+          compile_type_check(prim, nargs),
+          op,
+          gen(PRIM, nargs),
+          compile_checkex());
+  } else
+    return seq(args,
+        op,
+        gen(CALL, nargs),
+        compile_checkex());
+}
+
 lisp_object_t *compile_object(lisp_object_t *object, lisp_object_t *env) {
   if (issymbol(object))
     return gen_var(object, env);
@@ -436,37 +466,9 @@ lisp_object_t *compile_object(lisp_object_t *object, lisp_object_t *env) {
     return compile_tagbody(pair_tail(object), env);
   }
   if (ispair(object)) {
-    lisp_object_t *args = pair_tail(object);
+    lt *args = pair_tail(object);
     lisp_object_t *fn = pair_head(object);
-    lt *op = compile_object(fn, env);
-    lt *nargs = make_fixnum(pair_length(args));
-    if (is_single_gvar(op) && isundef(symbol_value(fn)))
-      writef(standard_error, "Warning: Function named %S is undefined.\n", fn);
-    /* Generating different instruction when calling primitive and anything else */
-    if (is_primitive_fun_name(fn, env)) {
-      if (!is_argc_satisfy(fixnum_value(nargs), fn))
-        return compiler_error("The number of arguments passed to primitive function is wrong");
-      args = compile_args(args, env);
-      if (is_signaled(args))
-        return args;
-      if (isopcode_fn(symbol_value(fn))) {
-        lt *prim = symbol_value(fn);
-        return seq(args,
-            compile_type_check(prim, nargs),
-            make_fn_inst(prim),
-            (is_check_exception? gen(CHECKEX): the_empty_list));
-      } else {
-        return seq(args,
-            compile_type_check(symbol_value(fn), nargs),
-            op,
-            gen(PRIM, nargs),
-            (is_check_exception? gen(CHECKEX): the_empty_list));
-      }
-    } else
-      return seq(compile_args(args, env),
-                 op,
-                 gen(CALL, nargs),
-                 (is_check_exception? gen(CHECKEX): the_empty_list));
+    return compile_app(fn, args, env);
   }
   writef(standard_out, "Impossible --- Unable to compile %?\n", object);
   exit(1);
