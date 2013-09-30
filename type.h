@@ -11,10 +11,8 @@
 #include <stdint.h>
 #include <stdio.h>
 
-typedef unsigned int (*hash_fn_t)(void *);
-typedef int (*comp_fn_t)(void *, void *);
-typedef struct ht_slot_t ht_slot_t;
-typedef struct hash_table_t hash_table_t;
+#include "hash_table.h"
+
 typedef struct lisp_object_t lisp_object_t;
 typedef lisp_object_t lt;
 typedef lt *(*f0)(void);
@@ -85,24 +83,6 @@ enum OPCODE_TYPE {
   DIVI,
   MULI,
   SUBI,
-};
-
-/* General Hash Table Definition */
-struct ht_slot_t {
-  void *key;
-  void *value;
-  ht_slot_t *next;
-};
-
-// slots: An array for storing key-values
-// length: Length of slots
-// hash_fn: Pointer to function for generating hash value used as index in slots
-// comp_fn: Pointer to function for comparing two keys when their hash value is equal
-struct hash_table_t {
-  ht_slot_t **slots;
-  int length;
-  hash_fn_t hash_fn;
-  comp_fn_t comp_fn;
 };
 
 struct lisp_object_t {
