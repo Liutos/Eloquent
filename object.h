@@ -13,13 +13,39 @@
 #include "type.h"
 
 /* OBJECT_H_ */
-lisp_object_t *the_dot_symbol;
+int debug;
+int is_check_exception;
+int is_check_type;
+/* Opcode */
+hash_table_t *prim2op_map;
+/* Symbol */
+lt *the_begin_symbol;
+lt *the_catch_symbol;
+lt *the_dot_symbol;
+lt *the_goto_symbol;
+lt *the_if_symbol;
+lt *the_lambda_symbol;
+lt *the_quasiquote_symbol;
+lt *the_quote_symbol;
+lt *the_set_symbol;
+lt *the_splicing_symbol;
+lt *the_tagbody_symbol;
+lt *the_unquote_symbol;
+
+lt *the_argv;
 lisp_object_t *the_false;
 lisp_object_t *the_true;
 lt *gensym_counter;
 lisp_object_t *null_env;
 lisp_object_t *the_empty_list;
-lt *object_pool;                        /* An array contains lt. */
+lt *the_eof;
+/* Package */
+lt *package;
+lt *pkg_lisp;
+lt *pkg_user;
+lt *pkgs;
+
+lt *standard_error;
 lisp_object_t *standard_in;
 lisp_object_t *standard_out;
 lisp_object_t *symbol_list;
@@ -30,20 +56,19 @@ lt *the_sub;
 lt *the_mul;
 lt *the_div;
 
-extern void *checked_malloc(size_t);
-
 extern int is_pointer(lt *);
+extern int isenvironment(lt *);
 extern int isexception(lt *);
 extern int isfloat(lt *);
 extern int isfunction(lt *);
 extern int isinput_file(lt *);
-extern int ismacro(lt *);
 extern int isopcode(lt *);
 extern int isoutput_file(lt *);
 extern int ispair(lt *);
 extern int isprimitive(lt *);
 extern int isstring(lt *);
 extern int issymbol(lt *);
+extern int istype(lt *);
 extern int isvector(lt *);
 extern int ischar(lt *);
 extern int isfixnum(lt *);
@@ -56,8 +81,13 @@ extern int isundef(lt *);
 extern int isclose(lt *);
 extern int isboolean(lt *);
 extern int is_signaled(lt *);
+extern int isnull_env(lt *);
 extern int isnumber(lt *);
+extern int isopcode_fn(lt *);
 extern int type_of(lt *);
+// Hash Table
+extern hash_table_t *make_hash_table(int, hash_fn_t, comp_fn_t);
+// Constructors
 extern lt *make_false(void);
 extern lt *make_true(void);
 extern lt *make_empty_list(void);
@@ -66,22 +96,26 @@ extern lt *make_undef(void);
 extern lt *make_close(void);
 extern lt *make_character(char);
 extern lt *make_fixnum(int);
-extern lt *make_exception(char *, int);
+extern lt *make_environment(lt *, lt *);
+extern lt *make_exception(char *, int, lt *, lt *backtrace);
 extern lt *make_float(float);
-extern lt *make_function(lt *env, lt *args, lt *code);
+extern lt *make_function(lt *cenv, lt *args, lt *code, lt *renv);
 extern lt *make_input_file(FILE *);
-extern lt *make_macro(lt *, lt *);
 extern lt *make_output_file(FILE *);
+extern lt *make_package(lt *, hash_table_t *);
 extern lt *make_pair(lt *, lt *);
 extern lt *make_primitive(int, void *, char *, int);
-extern lt *make_retaddr(lt *code, lt *env, int pc, int throw_flag);
+extern lt *make_retaddr(lt *code, lt *env, lt *fn, int pc, int throw_flag, int sp);
 extern string_builder_t *make_str_builder(void);
 extern lt *make_string(char *);
-extern lt *make_symbol(char *);
+extern lt *make_symbol(char *, lt *);
+extern lt *make_type(enum TYPE, char *);
 extern lt *make_vector(int);
 extern lt *make_op_args(lt *);
 extern lt *make_op_argsd(lt *);
 extern lt *make_op_call(lt *);
+extern lt *make_op_checkex(void);
+extern lt *make_op_chktype(lt *, lt *, lt *);
 extern lt *make_op_const(lt *);
 extern lt *make_op_decl(lt *);
 extern lt *make_op_fjump(lt *);
@@ -91,12 +125,21 @@ extern lt *make_op_gvar(lt *);
 extern lt *make_op_jump(lt *);
 extern lt *make_op_lset(lt *i, lt *j, lt *symbol);
 extern lt *make_op_lvar(lt *i, lt *j, lt *symbol);
-extern lt *make_op_macro(lt *);
 extern lt *make_op_pop(void);
 extern lt *make_op_prim(lt *);
 extern lt *make_op_return(void);
-extern lt *make_op_catch();
-extern lt *find_or_create_symbol(char *);
+extern lt *make_op_catch(void);
+extern lt *make_fn_inst(lt *);
+
+extern lt *opcode_ref(enum OPCODE_TYPE);
+extern lt *search_op4prim(lt *);
+extern void set_op4prim(lt *, enum OPCODE_TYPE);
+extern hash_table_t *make_symbol_table(void);
+extern lt *find_or_create_symbol(char *, lt *);
+extern lt *ensure_package(char *);
+extern lt *search_package(char *, lt *);
+extern lt *type_ref(enum TYPE);
+
 extern void init_global_variable(void);
 
 /* tagging system
@@ -117,6 +160,7 @@ extern void init_global_variable(void);
 #define POINTER_MASK 3
 #define POINTER_TAG 0
 
-#define S(name) (find_or_create_symbol(name))
+#define LISP(name) find_or_create_symbol(name, pkg_lisp)
+#define S(name) (find_or_create_symbol(name, package))
 
 #endif

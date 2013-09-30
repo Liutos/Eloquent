@@ -3,6 +3,8 @@
  *
  *  Created on: 2013年7月18日
  *      Author: liutos
+ *
+ * This file contains the definition of the compiler
  */
 #include <assert.h>
 #include <stdarg.h>
@@ -36,7 +38,6 @@ lt *get_offset(lt *label, lt *labels) {
     labels = pair_tail(labels);
   }
   fprintf(stdout, "Impossible!!! %s not found!\n", symbol_name(label));
-//  write_expr("labels", last_labels);
   writef(standard_out, "labels => %?\n", last_labels);
   exit(1);
 }
@@ -82,11 +83,6 @@ lt *asm_second_pass(lt *code, lt *length, lt *labels) {
         ins = change_addr(ins, labels);
       if (opcode_name(ins) == FN)
         function_code(op_fn_func(ins)) = assemble(function_code(op_fn_func(ins)));
-      if (opcode_name(ins) == MACROFN) {
-        lt *func = op_macro_func(ins);
-        assert(isfunction(func));
-        function_code(func) = assemble(function_code(func));
-      }
       vector_value(code_vector)[index] = ins;
       vector_last(code_vector)++;
       index++;
@@ -124,14 +120,19 @@ lisp_object_t *gen(enum TYPE opcode, ...) {
     case CATCH:
       ins = make_op_catch();
       break;
+    case CHECKEX:
+      ins = make_op_checkex();
+      break;
+    case CHKTYPE: {
+      lt *position = va_arg(ap, lt *);
+      lt *type = va_arg(ap, lt *);
+      lt *nargs = va_arg(ap, lt *);
+      ins = make_op_chktype(position, type, nargs);
+    }
+      break;
     case CONST: {
       lisp_object_t *value = va_arg(ap, lisp_object_t *);
       ins = make_op_const(value);
-    }
-      break;
-    case DECL: {
-      lt *symbol = va_arg(ap, lt *);
-      ins = make_op_decl(symbol);
     }
       break;
     case FJUMP: {
@@ -167,9 +168,6 @@ lisp_object_t *gen(enum TYPE opcode, ...) {
       ins = make_op_lvar(i, j, symbol);
     }
       break;
-    case MACROFN:
-      ins = make_op_macro(va_arg(ap, lt *));
-      break;
     case POP:
       ins = make_op_pop();
       break;
@@ -199,12 +197,21 @@ int islength1(lisp_object_t *list) {
   return isnull(pair_tail(list));
 }
 
+// The order of arguments pushed onto operand stack is the same as the order of
+// formal parameters list scanned from left to right. Therefore, the left most
+// argument would be pushed to operand stack first.
+// The order of arguments on the operand stack from top to bottom, is opposite
+// to the order of arguments in environment binding from left to right.
 lisp_object_t *compile_args(lisp_object_t *args, lisp_object_t *env) {
   if (isnull(args))
     return the_empty_list;
-  else
-    return append2(compile_object(pair_head(args), env),
-                      compile_args(pair_tail(args), env));
+  else {
+    lt *arg = compile_object(pair_head(args), env);
+    if (is_signaled(arg))
+      return arg;
+    else
+      return append2(arg, compile_args(pair_tail(args), env));
+  }
 }
 
 lisp_object_t *compile_begin(lisp_object_t *exps, lisp_object_t *env) {
@@ -214,7 +221,7 @@ lisp_object_t *compile_begin(lisp_object_t *exps, lisp_object_t *env) {
     return compile_object(first(exps), env);
   else {
     lisp_object_t *st = compile_object(first(exps), env);
-    lisp_object_t *nd = gen(POP);
+    lt *nd = gen(POP);
     lisp_object_t *rd = compile_begin(pair_tail(exps), env);
     return seq(st, nd, rd);
   }
@@ -243,14 +250,13 @@ lt *make_proper_args(lt *args) {
 }
 
 lt *compile_lambda(lt *args, lt *body, lt *env) {
-//  assert(is_all_symbol(args));
-//  lisp_object_t *len = lt_list_length(args);
   lt *arg_ins = gen_args(args, 0);
+  env = make_environment(make_proper_args(args), env);
   lisp_object_t *code =
       seq(arg_ins,
-          compile_begin(body, make_pair(make_proper_args(args), env)),
-          gen(RETURN));
-  lisp_object_t *func = make_function(env, args, code);
+          compile_begin(body, env),
+          gen(RETURN, the_false));
+  lisp_object_t *func = make_function(env, args, code, null_env);
   return func;
 }
 
@@ -259,7 +265,7 @@ lisp_object_t *make_label(void) {
   static char buffer[256];
   int i = sprintf(buffer, "L%d", label_count);
   label_count++;
-  return find_or_create_symbol(strndup(buffer, i));
+  return S(strndup(buffer, i));
 }
 
 lt *compile_if(lt *pred, lt *then, lt *else_part, lt *env) {
@@ -296,14 +302,15 @@ lisp_object_t *is_var_in_frame(lisp_object_t *var, lisp_object_t *bindings) {
 
 lisp_object_t *is_var_in_env(lisp_object_t *symbol, lisp_object_t *env) {
   assert(issymbol(symbol));
+  assert(isenvironment(env) || isnull_env(env));
   int i = 0;
-  while (env != null_env) {
-    lisp_object_t *bindings = pair_head(env);
+  while (!isnull_env(env)) {
+    lt *bindings = environment_bindings(env);
     assert(isnull(bindings) || ispair(bindings) || isvector(bindings));
     lisp_object_t *j = is_var_in_frame(symbol, bindings);
     if (j != NULL)
       return make_pair(make_fixnum(i), j);
-    env = pair_tail(env);
+    env = environment_next(env);
     i++;
   }
   return NULL;
@@ -321,6 +328,7 @@ lisp_object_t *gen_set(lisp_object_t *symbol, lisp_object_t *env) {
 }
 
 lisp_object_t *gen_var(lisp_object_t *symbol, lisp_object_t *env) {
+  assert(isenvironment(env) || isnull_env(env));
   lisp_object_t *co = is_var_in_env(symbol, env);
   if (co == NULL)
     return gen(GVAR, symbol);
@@ -331,77 +339,143 @@ lisp_object_t *gen_var(lisp_object_t *symbol, lisp_object_t *env) {
   }
 }
 
-int is_primitive_fun(lt *variable) {
+int is_primitive_fun_name(lt *variable, lt *env) {
+  if (issymbol(variable) && is_var_in_env(variable, env))
+    return FALSE;
   return issymbol(variable) &&
       is_symbol_bound(variable) &&
       isprimitive(symbol_value(variable));
 }
 
-void add_local_var(lt *var, lt *env) {
-  if (env == null_env)
-    return;
-  assert(ispair(pair_head(env)) || isnull(pair_head(env)));
-  if (ispair(pair_head(env))) {
-    lt *c = list1(var);
-    pair_head(env) = seq(pair_head(env), c);
-  } else {
-    pair_head(env) = list1(var);
+lt *compile_type_check(lt *prim, lt *nargs) {
+  lt *sig = primitive_signature(prim);
+  assert(ispair(sig) || isnull(sig));
+  lt *seq = make_empty_list();
+  int i = 0;
+  while (!isnull(sig)) {
+    lt *pred = pair_head(sig);
+    seq = append2(gen(CHKTYPE, make_fixnum(i), pred, nargs), seq);
+    sig = pair_tail(sig);
+    i++;
+  }
+  return seq;
+}
+
+int is_argc_satisfy(int argc, lt *prim_name) {
+  lt *fn = symbol_value(prim_name);
+  assert(isprimitive(fn));
+  int arity = primitive_arity(fn);
+  if (primitive_restp(fn)) {
+    arity--;
+    return argc >= arity;
+  } else
+    return argc == arity;
+}
+
+lt *compiler_error(char *message) {
+  return make_exception(message, TRUE, S("COMPILER-ERROR"), the_empty_list);
+}
+
+lt *compile_tagbody(lt *forms, lt *env) {
+  if (isnull(forms))
+    return make_empty_list();
+  else {
+    lt *form = pair_head(forms);
+    if (issymbol(form))
+      return seq(list1(form), compile_tagbody(pair_tail(forms), env));
+    else {
+      lt *part1 = compile_object(form, env);
+      return seq(part1, compile_tagbody(pair_tail(forms), env));
+    }
   }
 }
 
-/* TODO: The support for built-in macros. */
-/* TODO: The support for tail call optimization. */
-pub lisp_object_t *compile_object(lisp_object_t *object, lisp_object_t *env) {
+int is_single_gvar(lt *seq) {
+  return isnull(pair_tail(seq)) && opcode_type(pair_head(seq)) == GVAR;
+}
+
+lisp_object_t *compile_object(lisp_object_t *object, lisp_object_t *env) {
   if (issymbol(object))
     return gen_var(object, env);
   if (!ispair(object))
     return gen(CONST, object);
   if (is_macro_form(object))
     return compile_object(lt_expand_macro(object), env);
-  if (is_tag_list(object, S("quote")))
+  if (is_quote_form(object)) {
+    if (pair_length(object) != 2)
+      return compiler_error("There must and be only one argument of a quote form");
     return gen(CONST, second(object));
-  if (is_tag_list(object, S("begin")))
+  }
+  if (is_begin_form(object))
     return compile_begin(pair_tail(object), env);
-  if (is_tag_list(object, S("set!"))) {
+  if (is_set_form(object)) {
+    if (pair_length(object) != 3)
+      return compiler_error("There must and be only two arguments of a set! form");
+    if (!issymbol(second(object)))
+      return compiler_error("The variable as the first variable must be of type symbol");
     lisp_object_t *value = compile_object(third(object), env);
     lisp_object_t *set = gen_set(second(object), env);
     return seq(value, set);
   }
-  if (is_tag_list(object, S("if"))) {
+  if (is_if_form(object)) {
+    int len = pair_length(object);
+    if (!(3 <= len && len <= 4))
+      return compiler_error("The number of arguments of a if form must between 3 and 4");
     lisp_object_t *pred = second(object);
     lisp_object_t *then = third(object);
     lisp_object_t *else_part = fourth(object);
     return compile_if(pred, then, else_part, env);
   }
-  if (is_tag_list(object, S("lambda")))
+  if (is_lambda_form(object))
     return gen(FN, compile_lambda(second(object), pair_tail(pair_tail(object)), env));
-  if (is_tag_list(object, S("macro"))) {
-    lt *proc = compile_lambda(second(object), pair_tail(pair_tail(object)), env);
-    return gen(MACROFN, proc);
-  }
-  if (is_tag_list(object, S("catch")))
+  if (is_catch_form(object))
     return gen(CATCH);
-  if (is_tag_list(object, S("declare"))) {
-    add_local_var(second(object), env);
-    return gen(DECL, second(object));
+  if (is_goto_form(object))
+    return gen(JUMP, second(object));
+  if (is_tagbody_form(object)) {
+    return compile_tagbody(pair_tail(object), env);
   }
   if (ispair(object)) {
     lisp_object_t *args = pair_tail(object);
     lisp_object_t *fn = pair_head(object);
+    lt *op = compile_object(fn, env);
+    lt *nargs = make_fixnum(pair_length(args));
+    if (is_single_gvar(op) && isundef(symbol_value(fn)))
+      writef(standard_error, "Warning: Function named %S is undefined.\n", fn);
     /* Generating different instruction when calling primitive and anything else */
-    if (is_primitive_fun(fn))
+    if (is_primitive_fun_name(fn, env)) {
+      if (!is_argc_satisfy(fixnum_value(nargs), fn))
+        return compiler_error("The number of arguments passed to primitive function is wrong");
+      args = compile_args(args, env);
+      if (is_signaled(args))
+        return args;
+      if (isopcode_fn(symbol_value(fn))) {
+        lt *prim = symbol_value(fn);
+        return seq(args,
+            compile_type_check(prim, nargs),
+            make_fn_inst(prim),
+            (is_check_exception? gen(CHECKEX): the_empty_list));
+      } else {
+        return seq(args,
+            compile_type_check(symbol_value(fn), nargs),
+            op,
+            gen(PRIM, nargs),
+            (is_check_exception? gen(CHECKEX): the_empty_list));
+      }
+    } else
       return seq(compile_args(args, env),
-                 compile_object(fn, env),
-                 gen(PRIM, lt_list_length(args)));
-    else
-      return seq(compile_args(args, env),
-                 compile_object(fn, env),
-                 gen(CALL, lt_list_length(args)));
+                 op,
+                 gen(CALL, nargs),
+                 (is_check_exception? gen(CHECKEX): the_empty_list));
   }
   writef(standard_out, "Impossible --- Unable to compile %?\n", object);
   exit(1);
 }
 
 lt *compile_to_bytecode(lt *form) {
-  return assemble(compile_object(form, null_env));
+  lt *x = compile_object(form, null_env);
+  if (is_signaled(x))
+    return x;
+  else
+    return assemble(x);
 }

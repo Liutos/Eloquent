@@ -3,25 +3,56 @@
  *
  *  Created on: 2013年7月18日
  *      Author: liutos
+ *
+ * This file contains the constructor of all Lisp data types
  */
 #include <assert.h>
 #include <stdarg.h>
+#include <stdint.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 
+#include <gc/gc.h>
+
+#include "hash_table.h"
 #include "object.h"
 #include "type.h"
 
-lt *free_objects;
+int debug;
+int is_check_exception;
+int is_check_type;
 lt *gensym_counter;
 lt *null_env;
-lt *object_pool;
+/* Opcode */
+hash_table_t *prim2op_map;
+/* Package */
+lt *package;
+lt *pkg_lisp;
+lt *pkg_user;
+lt *pkgs;
+
+lt *standard_error;
 lt *standard_in;
 lt *standard_out;
 lt *symbol_list;
+/* Symbol */
+lt *the_begin_symbol;
+lt *the_catch_symbol;
 lt *the_dot_symbol;
+lt *the_goto_symbol;
+lt *the_if_symbol;
+lt *the_lambda_symbol;
+lt *the_quasiquote_symbol;
+lt *the_quote_symbol;
+lt *the_set_symbol;
+lt *the_splicing_symbol;
+lt *the_tagbody_symbol;
+lt *the_unquote_symbol;
+
+lt *the_argv;
 lt *the_empty_list;
+lt *the_eof;
 lt *the_false;
 lt *the_true;
 lt *the_undef;
@@ -31,19 +62,70 @@ lt *the_sub;
 lt *the_mul;
 lt *the_div;
 
-#define OBJECT_INIT_COUNT 2000
+struct lisp_object_t lt_types[] = {
+    DEFTYPE(BOOL, "bool"),
+    DEFTYPE(CHARACTER, "character"),
+    DEFTYPE(EMPTY_LIST, "empty-list"),
+    DEFTYPE(FIXNUM, "fixnum"),
+    DEFTYPE(TCLOSE, "tclose"),
+    DEFTYPE(TEOF, "teof"),
+    DEFTYPE(TUNDEF, "tundef"),
+    DEFTYPE(ENVIRONMENT, "environment"),
+    DEFTYPE(EXCEPTION, "exception"),
+    DEFTYPE(FUNCTION, "function"),
+    DEFTYPE(FLOAT, "float"),
+    DEFTYPE(INPUT_FILE, "input-file"),
+    DEFTYPE(OPCODE, "opcode"),
+    DEFTYPE(OUTPUT_FILE, "output-file"),
+    DEFTYPE(PACKAGE, "package"),
+    DEFTYPE(PAIR, "pair"),
+    DEFTYPE(PRIMITIVE_FUNCTION, "primitive-function"),
+    DEFTYPE(RETADDR, "retaddr"),
+    DEFTYPE(STRING, "string"),
+    DEFTYPE(SYMBOL, "symbol"),
+    DEFTYPE(TYPE, "type"),
+    DEFTYPE(VECTOR, "vector"),
+};
+
+#define DEFCODE(name, op) {.type=OPCODE, .u={.opcode={name, op}}}
+
+struct lisp_object_t lt_codes[] = {
+    DEFCODE(ARGS, "ARGS"),
+    DEFCODE(ARGSD, "ARGSD"),
+    DEFCODE(CALL, "CALL"),
+    DEFCODE(CATCH, "CATCH"),
+    DEFCODE(CHECKEX, "CHECKEX"),
+    DEFCODE(CHKTYPE, "CHKTYPE"),
+    DEFCODE(CONST, "CONST"),
+    DEFCODE(FN, "FN"),
+    DEFCODE(GSET, "GSET"),
+    DEFCODE(GVAR, "GVAR"),
+    DEFCODE(FJUMP, "FJUMP"),
+    DEFCODE(JUMP, "JUMP"),
+    DEFCODE(LSET, "LSET"),
+    DEFCODE(LVAR, "LVAR"),
+    DEFCODE(POP, "POP"),
+    DEFCODE(PRIM, "PRIM"),
+    DEFCODE(RETURN, "RETURN"),
+//    Opcodes for some primitive functions
+    DEFCODE(ADDI, "ADDI"),
+    DEFCODE(CONS, "CONS"),
+    DEFCODE(DIVI, "DIVI"),
+    DEFCODE(MULI, "MULI"),
+    DEFCODE(SUBI, "SUBI"),
+};
 
 /* Type predicate */
 int ischar(lt *object) {
-  return ((int)object & CHAR_MASK) == CHAR_TAG;
+  return ((intptr_t)object & CHAR_MASK) == CHAR_TAG;
 }
 
 int isfixnum(lt *object) {
-  return ((int)object & FIXNUM_MASK) == FIXNUM_TAG;
+  return ((intptr_t)object & FIXNUM_MASK) == FIXNUM_TAG;
 }
 
 int is_pointer(lt *object) {
-  return ((int)object & POINTER_MASK) == POINTER_TAG;
+  return ((intptr_t)object & POINTER_MASK) == POINTER_TAG;
 }
 
 int is_of_type(lisp_object_t *object, enum TYPE type) {
@@ -55,25 +137,26 @@ int is_of_type(lisp_object_t *object, enum TYPE type) {
     return is_of_type(object, type);            \
   }
 
+mktype_pred(isenvironment, ENVIRONMENT)
 mktype_pred(isexception, EXCEPTION)
 mktype_pred(isfloat, FLOAT)
 mktype_pred(isfunction, FUNCTION)
 mktype_pred(isinput_file, INPUT_FILE)
-mktype_pred(ismacro, MACRO)
 mktype_pred(isoutput_file, OUTPUT_FILE)
 mktype_pred(isopcode, OPCODE)
 mktype_pred(ispair, PAIR)
 mktype_pred(isprimitive, PRIMITIVE_FUNCTION)
 mktype_pred(isstring, STRING)
 mktype_pred(issymbol, SYMBOL)
+mktype_pred(istype, TYPE)
 mktype_pred(isvector, VECTOR)
 
 int is_immediate(lt *object) {
-  return ((int)object & IMMEDIATE_MASK) == IMMEDIATE_TAG;
+  return ((intptr_t)object & IMMEDIATE_MASK) == IMMEDIATE_TAG;
 }
 
 int is_tag_immediate(lt *object, int origin) {
-  return is_immediate(object) && ((int)object >> IMMEDIATE_BITS) == origin;
+  return is_immediate(object) && ((intptr_t)object >> IMMEDIATE_BITS) == origin;
 }
 
 #define mkim_pred(func_name, origin)		      \
@@ -100,6 +183,10 @@ int isdot(lisp_object_t *object) {
   return object == the_dot_symbol;
 }
 
+int isnull_env(lt *obj) {
+  return obj == null_env;
+}
+
 int isnumber(lisp_object_t *object) {
   return isfixnum(object) || isfloat(object);
 }
@@ -123,85 +210,9 @@ int type_of(lisp_object_t *x) {
   return x->type;
 }
 
-void init_object_pool(void) {
-  static int flag = 0;
-  if (flag == 1) return;
-  flag = 1;
-  object_pool = calloc(OBJECT_INIT_COUNT, sizeof(lt));
-  for (int i = 0; i < OBJECT_INIT_COUNT - 1; i++)
-    object_pool[i].next = &object_pool[i + 1];
-  object_pool[OBJECT_INIT_COUNT - 1].next = NULL;
-  free_objects = &object_pool[0];
-}
-
-void mark_lt_object(lt *object) {
-	if (!is_pointer(object) || object == NULL)
-		return;
-	if (object->gc_mark_flag == TRUE)
-		return;
-	object->gc_mark_flag = TRUE;
-	switch (type_of(object)) {
-	case FUNCTION:
-		mark_lt_object(function_args(object));
-		mark_lt_object(function_code(object));
-		mark_lt_object(function_env(object));
-		break;
-	case OPCODE:
-		mark_lt_object(opcode_oprands(object));
-		break;
-	case PAIR:
-		mark_lt_object(pair_head(object));
-		mark_lt_object(pair_tail(object));
-		break;
-	case SYMBOL:
-		mark_lt_object(symbol_value(object));
-		break;
-	case VECTOR:
-		for (int i = 0; i <= vector_last(object); i++)
-			mark_lt_object(vector_value(object)[i]);
-		break;
-	default :;
-	}
-}
-
-void mark_all(void) {
-	mark_lt_object(symbol_list);
-}
-
-void sweep_all(void) {
-	for (int i = 0; i < OBJECT_INIT_COUNT; i++) {
-		lt *obj = &object_pool[i];
-		if (obj->use_flag == TRUE && obj->gc_mark_flag == FALSE) {
-			obj->use_flag = FALSE;
-			obj->next = free_objects;
-			free_objects = obj;
-		} else
-			obj->gc_mark_flag = FALSE;
-	}
-}
-
-void trigger_gc(void) {
-	mark_all();
-	sweep_all();
-}
-
 /* Constructor functions */
 lt *allocate_object(void) {
-  if (free_objects == NULL) {
-    printf("Pool is full, program terminated.\n");
-    exit(1);
-  }
-  lt *obj = free_objects;
-  free_objects = free_objects->next;
-  obj->gc_mark_flag = FALSE;
-  obj->use_flag = TRUE;
-  return obj;
-}
-
-void *checked_malloc(size_t size) {
-  void *p = malloc(size);
-  assert(p != NULL);
-  return p;
+  return GC_MALLOC(sizeof(struct lisp_object_t));
 }
 
 lisp_object_t *make_object(enum TYPE type) {
@@ -211,7 +222,7 @@ lisp_object_t *make_object(enum TYPE type) {
 }
 
 #define MAKE_IMMEDIATE(origin) \
-  ((lt *)(((int)origin << IMMEDIATE_BITS) | IMMEDIATE_TAG))
+  ((lt *)(((intptr_t)origin << IMMEDIATE_BITS) | IMMEDIATE_TAG))
 
 #define mksingle_type(func_name, origin)    \
   lt *func_name(void) {             \
@@ -226,17 +237,26 @@ mksingle_type(make_undef, UNDEF_ORIGIN)
 mksingle_type(make_close, CLOSE_ORIGIN)
 
 lisp_object_t *make_character(char value) {
-  return (lt *)((((int)value) << CHAR_BITS) | CHAR_TAG);
+  return (lt *)((((intptr_t)value) << CHAR_BITS) | CHAR_TAG);
 }
 
 lt *make_fixnum(int value) {
   return (lt *)((value << FIXNUM_BITS) | FIXNUM_TAG);
 }
 
-lt *make_exception(char *message, int signal_flag) {
+lt *make_environment(lt *bindings, lt *next) {
+  lt *env = make_object(ENVIRONMENT);
+  environment_bindings(env) = bindings;
+  environment_next(env) = next;
+  return env;
+}
+
+lt *make_exception(char *message, int signal_flag, lt *tag, lt *backtrace) {
   lt *ex = make_object(EXCEPTION);
   exception_msg(ex) = message;
   exception_flag(ex) = signal_flag;
+  exception_backtrace(ex) = backtrace;
+  exception_tag(ex) = tag;
   return ex;
 }
 
@@ -246,11 +266,13 @@ lisp_object_t *make_float(float value) {
   return flt_num;
 }
 
-lt *make_function(lt *env, lt *args, lt *code) {
+lt *make_function(lt *cenv, lt *args, lt *code, lt *renv) {
   lt *func = make_object(FUNCTION);
-  function_env(func) = env;
+  function_cenv(func) = cenv;
   function_args(func) = args;
   function_code(func) = code;
+  function_name(func) = the_undef;
+  function_renv(func) = renv;
   return func;
 }
 
@@ -263,13 +285,6 @@ lisp_object_t *make_input_file(FILE *file) {
   return inf;
 }
 
-lt *make_macro(lt *procedure, lt *environment) {
-  lt *obj = make_object(MACRO);
-  macro_procedure(obj) = procedure;
-  macro_environment(obj) = environment;
-  return obj;
-}
-
 lisp_object_t *make_output_file(FILE *file) {
   lisp_object_t *outf = make_object(OUTPUT_FILE);
   output_file_file(outf) = file;
@@ -277,6 +292,14 @@ lisp_object_t *make_output_file(FILE *file) {
   output_file_colnum(outf) = 0;
   output_file_openp(outf) = TRUE;
   return outf;
+}
+
+lt *make_package(lt *name, hash_table_t *symbol_table) {
+  lt *obj = make_object(PACKAGE);
+  package_name(obj) = name;
+  package_symbol_table(obj) = symbol_table;
+  package_used_packages(obj) = the_empty_list;
+  return obj;
 }
 
 lisp_object_t *make_pair(lisp_object_t *head, lisp_object_t *tail) {
@@ -292,44 +315,56 @@ lisp_object_t *make_primitive(int arity, void *C_function, char *Lisp_name, int 
   primitive_func(p) = C_function;
   primitive_restp(p) = restp;
   primitive_Lisp_name(p) = Lisp_name;
+  primitive_signature(p) = make_empty_list();
   return p;
 }
 
-lt *make_retaddr(lt *code, lt *env, int pc, int throw_flag) {
+lt *make_retaddr(lt *code, lt *env, lt *fn, int pc, int throw_flag, int sp) {
   lt *retaddr = make_object(RETADDR);
   retaddr_code(retaddr) = code;
   retaddr_env(retaddr) = env;
+  retaddr_fn(retaddr) = fn;
   retaddr_pc(retaddr) = pc;
   retaddr_throw_flag(retaddr) = throw_flag;
+  retaddr_sp(retaddr) = sp;
   return retaddr;
 }
 
 string_builder_t *make_str_builder(void) {
-  string_builder_t *sb = malloc(sizeof(*sb));
+  string_builder_t *sb = GC_MALLOC(sizeof(*sb));
   sb->length = 20;
-  sb->string = malloc(sb->length * sizeof(char));
+  sb->string = GC_MALLOC(sb->length * sizeof(char));
   sb->index = 0;
   return sb;
 }
 
 lisp_object_t *make_string(char *value) {
   lisp_object_t *string = make_object(STRING);
-  string->u.string.value = value;
+  string_value(string) = value;
   return string;
 }
 
-lisp_object_t *make_symbol(char *name) {
+lisp_object_t *make_symbol(char *name, lt *package) {
   lisp_object_t *symbol = make_object(SYMBOL);
-  symbol->u.symbol.name = name;
+  symbol_name(symbol) = name;
+  symbol_macro(symbol) = the_undef;
+  symbol_package(symbol) = package;
   symbol_value(symbol) = the_undef;
   return symbol;
+}
+
+lt *make_type(enum TYPE type, char *name) {
+  lt *t = make_object(TYPE);
+  type_tag(t) = type;
+  type_name(t) = name;
+  return t;
 }
 
 lisp_object_t *make_vector(int length) {
   lisp_object_t *vector = make_object(VECTOR);
   vector_last(vector) = -1;
   vector_length(vector) = length;
-  vector_value(vector) = checked_malloc(length * sizeof(lisp_object_t *));
+  vector_value(vector) = GC_MALLOC(length * sizeof(lisp_object_t *));
   return vector;
 }
 
@@ -364,12 +399,16 @@ lisp_object_t *make_op_call(lisp_object_t *arity) {
   return mkopcode(CALL, "CALL", 1, arity);
 }
 
-lisp_object_t *make_op_const(lisp_object_t *value) {
-  return mkopcode(CONST, "CONST", 1, value);
+lt *make_op_checkex(void) {
+  return mkopcode(CHECKEX, "CHECKEX", 0);
 }
 
-lt *make_op_decl(lt *symbol) {
-  return mkopcode(DECL, "DECL", 1, symbol);
+lt *make_op_chktype(lt *position, lt *target_type, lt *nargs) {
+  return mkopcode(CHKTYPE, "CHKTYPE", 3, position, target_type, nargs);
+}
+
+lisp_object_t *make_op_const(lisp_object_t *value) {
+  return mkopcode(CONST, "CONST", 1, value);
 }
 
 lisp_object_t *make_op_fjump(lisp_object_t *label) {
@@ -400,10 +439,6 @@ lt *make_op_lvar(lt *i, lt *j, lt *symbol) {
   return mkopcode(LVAR, "LVAR", 3, i, j, symbol);
 }
 
-lt *make_op_macro(lt *func) {
-	return mkopcode(MACROFN, "MACROFN", 1, func);
-}
-
 lisp_object_t *make_op_pop(void) {
   return mkopcode(POP, "POP", 0);
 }
@@ -420,43 +455,185 @@ lt *make_op_catch(void) {
   return mkopcode(CATCH, "CATCH", 0);
 }
 
-/* TODO: Use a hash table for storing symbols. */
-lisp_object_t *find_or_create_symbol(char *name) {
-  lisp_object_t *tmp_sym_list = symbol_list;
-  while (ispair(tmp_sym_list)) {
-    lisp_object_t *sym = pair_head(tmp_sym_list);
-    char *key = symbol_name(sym);
-    if (strcmp(key, name) == 0)
-      return sym;
-    tmp_sym_list = pair_tail(tmp_sym_list);
+/* Opcode */
+lt *opcode_ref(enum OPCODE_TYPE opcode) {
+  return &lt_codes[opcode];
+}
+
+int prim_comp_fn(void *p1, void *p2) {
+  return p1 - p2;
+}
+
+unsigned int prim_hash_fn(void *prim) {
+  return (unsigned int)prim;
+}
+
+hash_table_t *make_prim2op_map(void) {
+  return make_hash_table(31, prim_hash_fn, prim_comp_fn);
+}
+
+lt *search_op4prim(lt *prim) {
+  assert(isprimitive(prim));
+  return search_ht(prim, prim2op_map);
+}
+
+void set_op4prim(lt *prim, enum OPCODE_TYPE opcode) {
+  set_ht(prim, opcode_ref(opcode), prim2op_map);
+}
+
+int isopcode_fn(lt *prim) {
+  assert(isprimitive(prim));
+  return search_op4prim(prim) != NULL;
+}
+
+lt *make_fn_inst(lt *prim) {
+  assert(isprimitive(prim));
+  lt *opcode = search_op4prim(prim);
+  assert(opcode != NULL);
+  return make_pair(mkopcode(opcode_name(opcode), opcode_op(opcode), 0), the_empty_list);
+}
+
+/* Package */
+lt *search_package(char *name, lt *packages) {
+  while (ispair(packages)) {
+    lt *pkg = pair_head(packages);
+    if (strcmp(string_value(package_name(pkg)), name) == 0)
+      return pkg;
+    packages = pair_tail(packages);
   }
-  lisp_object_t *sym = make_symbol(name);
-  symbol_list = make_pair(sym, symbol_list);
+  return NULL;
+}
+
+lt *ensure_package(char *name) {
+  lt *result = search_package(name, pkgs);
+  if (result)
+    return result;
+  lt *pkg = make_package(make_string(name), make_symbol_table());
+  pkgs = make_pair(pkg, pkgs);
+  symbol_value(find_or_create_symbol("*package*", pkg)) = pkg;
+  return pkg;
+}
+
+void use_package_in(lt *used, lt *pkg) {
+  package_used_packages(pkg) =
+      make_pair(used, package_used_packages(pkg));
+}
+
+/* Symbol */
+// The following algorithm comes from http://bbs.csdn.net/topics/350030230
+unsigned int symbol_hash_fn(void *symbol) {
+  char *name = (char *)symbol;
+  int seed = 131;
+  unsigned int hash = 0;
+  while (*name != '\0') {
+    hash = hash * seed + *name;
+    name++;
+  }
+  return hash & 0x7FFFFFFF;
+}
+
+int symbol_comp_fn(void *s1, void *s2) {
+  char *n1 = (char *)s1;
+  char *n2 = (char *)s2;
+  return strcmp(n1, n2);
+}
+
+hash_table_t *make_symbol_table(void) {
+  return make_hash_table(31, symbol_hash_fn, symbol_comp_fn);
+}
+
+// Search the symbol with `name' in `symbol_table'
+lt *search_symbol_table(char *name, hash_table_t *symbol_table) {
+  return search_ht((void *)name, symbol_table);
+}
+
+lt *find_symbol(char *name, lt *package) {
+  lt *sym = search_symbol_table(name, package_symbol_table(package));
+  if (sym)
+    return sym;
+  lt *useds = package_used_packages(package);
+  while (ispair(useds)) {
+    lt *pkg = pair_head(useds);
+    sym = search_symbol_table(name, package_symbol_table(pkg));
+    if (sym)
+      return sym;
+    useds = pair_tail(useds);
+  }
+  return NULL;
+}
+
+lt *find_or_create_symbol(char *name, lt *package) {
+  lt *result = find_symbol(name, package);
+  if (result)
+    return result;
+  lt *sym = make_symbol(name, package);
+  set_ht((void *)name, (void *)sym, package_symbol_table(package));
   return sym;
 }
 
+/* Type */
+lt *type_ref(enum TYPE type) {
+  return &lt_types[type];
+}
+
+void init_packages(void) {
+  pkgs = make_empty_list();
+  pkg_lisp = ensure_package("Lisp");
+//  (defpackage :233-user
+//    (:use :233))
+  pkg_user = ensure_package("User");
+  use_package_in(pkg_lisp, pkg_user);
+// Set the current package
+  package = pkg_lisp;
+}
+
 void init_global_variable(void) {
-  init_object_pool();
   /* Initialize global variables */
+  debug = FALSE;
+  is_check_exception = TRUE;
+  is_check_type = TRUE;
+
+  the_argv = make_vector(0);
   the_false = make_false();
   the_true = make_true();
   the_empty_list = make_empty_list();
+  the_eof = make_eof();
   gensym_counter = make_fixnum(0);
-  null_env = the_empty_list;
+  null_env = make_environment(the_empty_list, NULL);
+  environment_next(null_env) = null_env;
+  standard_error = make_output_file(stderr);
   standard_in = make_input_file(stdin);
   standard_out = make_output_file(stdout);
   symbol_list = the_empty_list;
   the_undef = make_undef();
 
-  the_add = S("+");
-  the_sub = S("-");
-  the_mul = S("*");
-  the_div = S("/");
+  the_add = LISP("+");
+  the_sub = LISP("-");
+  the_mul = LISP("*");
+  the_div = LISP("/");
 
+  prim2op_map = make_prim2op_map();
+//  Packages initialization
+  init_packages();
+
+// Global variables initialization
+  symbol_value(S("*ARGV*")) = the_argv;
   symbol_value(S("*gensym-counter*")) = gensym_counter;
+  symbol_value(S("*standard-error*")) = standard_error;
   symbol_value(S("*standard-output*")) = standard_out;
   symbol_value(S("*standard-input*")) = standard_in;
 
   /* Symbol initialization */
-  the_dot_symbol = S(".");
+  the_begin_symbol = LISP("begin");
+  the_catch_symbol = LISP("catch");
+  the_dot_symbol = LISP(".");
+  the_goto_symbol = LISP("goto");
+  the_if_symbol = LISP("if");
+  the_lambda_symbol = LISP("lambda");
+  the_quasiquote_symbol = LISP("quasiquote");
+  the_quote_symbol = LISP("quote");
+  the_set_symbol = LISP("set");
+  the_splicing_symbol = LISP("unquote-splicing");
+  the_tagbody_symbol = LISP("tagbody");
+  the_unquote_symbol = LISP("unquote");
 }

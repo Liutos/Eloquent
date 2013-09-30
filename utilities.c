@@ -1,15 +1,17 @@
 /*
  * utilities.c
  *
- * Defines the utility functions only depends on the operations provided by object.c and type.h
- *
  *  Created on: 2013年7月20日
  *      Author: liutos
+ *
+ * This file contains definition of all utilities
  */
 #include <assert.h>
 #include <stdarg.h>
 #include <stdlib.h>
 #include <string.h>
+
+#include <gc/gc.h>
 
 #include "object.h"
 #include "type.h"
@@ -35,12 +37,28 @@ int is_macro_form(lt *form) {
   if (!issymbol(pair_head(form)))
     return FALSE;
   lt *symbol = pair_head(form);
-  return is_symbol_bound(symbol) && ismacro(symbol_value(symbol));
+  if (isfunction(symbol_macro(symbol)) || isprimitive(symbol_macro(symbol)))
+    return TRUE;
+  return FALSE;
 }
 
 int is_tag_list(lisp_object_t *object, lisp_object_t *tag) {
   return ispair(object) && (pair_head(object) == tag);
 }
+
+#define deform_pred(func_name, symbol_name) \
+  int func_name(lt *form) { \
+    return is_tag_list(form, S(symbol_name)); \
+  }
+
+deform_pred(is_begin_form, "begin")
+deform_pred(is_catch_form, "catch")
+deform_pred(is_goto_form, "goto")
+deform_pred(is_if_form, "if")
+deform_pred(is_lambda_form, "lambda")
+deform_pred(is_quote_form, "quote")
+deform_pred(is_set_form, "set!")
+deform_pred(is_tagbody_form, "tagbody")
 
 lt *list1(lt *element) {
   return make_pair(element, make_empty_list());
@@ -52,6 +70,10 @@ lt *list2(lt *e1, lt *e2) {
 
 lt *list3(lt *e1, lt *e2, lt *e3) {
   return make_pair(e1, list2(e2, e3));
+}
+
+lt *list4(lt *e1, lt *e2, lt *e3, lt *e4) {
+  return make_pair(e1, list3(e2, e3, e4));
 }
 
 lt *append2(lt *l1, lt *l2) {
@@ -89,7 +111,7 @@ lisp_object_t *reader_error(char *format, ...) {
   va_list ap;
   va_start(ap, format);
   vsprintf(msg, format, ap);
-  return make_exception(strdup(msg), TRUE);
+  return make_exception(strdup(msg), TRUE, S("READER-ERROR"), the_empty_list);
 }
 
 char *sb2string(string_builder_t *sb) {
@@ -100,14 +122,14 @@ char *sb2string(string_builder_t *sb) {
 void sb_add_char(string_builder_t *sb, char c) {
   if (sb->index >= sb->length) {
     sb->length += 20;
-    sb->string = realloc(sb->string, sb->length * sizeof(char));
+    sb->string = GC_realloc(sb->string, sb->length * sizeof(char));
   }
   sb->string[sb->index] = c;
   sb->index++;
 }
 
 lt *signal_exception(char *message) {
-  return make_exception(message, TRUE);
+  return make_exception(message, TRUE, S("ERROR"), the_empty_list);
 }
 
 lt *signal_typerr(char *type_name) {
