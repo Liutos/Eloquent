@@ -280,7 +280,7 @@ lt *compile_if(lt *pred, lt *then, lt *else_part, lt *env) {
 }
 
 lisp_object_t *is_var_in_frame(lisp_object_t *var, lisp_object_t *bindings) {
-  assert(isnull(bindings) || ispair(bindings) || isvector(bindings));
+  assert(isnull(bindings) || ispair(bindings));
   if (ispair(bindings)) {
     int j = 0;
     while (!isnull(bindings)) {
@@ -288,13 +288,6 @@ lisp_object_t *is_var_in_frame(lisp_object_t *var, lisp_object_t *bindings) {
         return make_fixnum(j);
       bindings = pair_tail(bindings);
       j++;
-    }
-  }
-  if (isvector(bindings)) {
-    printf("Searching %s in vector...\n", symbol_name(var));
-    for (int j = 0; j < vector_length(bindings); j++) {
-      if (!isfalse(lt_eq(var, vector_value(bindings)[j])))
-        return make_fixnum(j);
     }
   }
   return NULL;
