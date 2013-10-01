@@ -95,7 +95,7 @@ int is_type_satisfy(lt *arg, lt *pred) {
 lt *type_error(lt *index, lt *pred) {
   char msg[256];
   FILE *buf = fmemopen(msg, sizeof(msg), "w");
-  lt *file = make_output_file(buf);
+  lt *file = make_output_port(buf);
   writef(file, "The argument at index %d is not satisfy with predicate %?", index, pred);
   lt_close_out(file);
   return make_exception(strdup(msg), TRUE, S("TYPE-ERROR"), the_empty_list);
@@ -186,7 +186,7 @@ lisp_object_t *run_by_llam(lisp_object_t *code_vector) {
         if (!isfunction(func)) {
           char msg[1000];
           FILE *fp = fmemopen(msg, sizeof(msg), "w");
-          lt *file = make_output_file(fp);
+          lt *file = make_output_port(fp);
           writef(file, "The object %? at the first place is not a function", func);
           lt_close_out(file);
           return signal_exception(msg);

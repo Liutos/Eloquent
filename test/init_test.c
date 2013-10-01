@@ -75,6 +75,8 @@ int main(int argc, char *argv[])
       "(reverse '())",
       "(reverse '(1))",
       "(reverse '(1 2 3))",
+      "(write-line \"Hello 233-Lisp!\")",
+      "(string-length \"abc\")",
   };
   init_global_variable();
   init_prims();

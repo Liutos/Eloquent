@@ -123,6 +123,11 @@
          (append (reverse (tail lst))
                  `(,(head lst))))))
 
+; String
+(define write-line (str)
+  (write-string str *standard-output*)
+  (write-char #\newline *standard-output*))
+
 ; Symbol
 (define fbound? (x)
   (and2 (bound? x)

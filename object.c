@@ -71,9 +71,9 @@ struct lisp_object_t lt_types[] = {
     DEFTYPE(EXCEPTION, "exception"),
     DEFTYPE(FUNCTION, "function"),
     DEFTYPE(FLOAT, "float"),
-    DEFTYPE(INPUT_FILE, "input-file"),
+    DEFTYPE(INPUT_PORT, "input-file"),
     DEFTYPE(OPCODE, "opcode"),
-    DEFTYPE(OUTPUT_FILE, "output-file"),
+    DEFTYPE(OUTPUT_PORT, "output-file"),
     DEFTYPE(PACKAGE, "package"),
     DEFTYPE(PAIR, "pair"),
     DEFTYPE(PRIMITIVE_FUNCTION, "primitive-function"),
@@ -138,8 +138,8 @@ mktype_pred(isenvironment, ENVIRONMENT)
 mktype_pred(isexception, EXCEPTION)
 mktype_pred(isfloat, FLOAT)
 mktype_pred(isfunction, FUNCTION)
-mktype_pred(isinput_file, INPUT_FILE)
-mktype_pred(isoutput_file, OUTPUT_FILE)
+mktype_pred(isinput_port, INPUT_PORT)
+mktype_pred(isoutput_port, OUTPUT_PORT)
 mktype_pred(isopcode, OPCODE)
 mktype_pred(ispair, PAIR)
 mktype_pred(isprimitive, PRIMITIVE_FUNCTION)
@@ -273,22 +273,32 @@ lt *make_function(lt *cenv, lt *args, lt *code, lt *renv) {
   return func;
 }
 
-lisp_object_t *make_input_file(FILE *file) {
-  lisp_object_t *inf = make_object(INPUT_FILE);
-  input_file_file(inf) = file;
-  input_file_linum(inf) = 1;
-  input_file_colnum(inf) = 0;
-  input_file_openp(inf) = TRUE;
+lt *make_input_port(FILE *stream) {
+  lt *inf = make_object(INPUT_PORT);
+  input_port_stream(inf) = stream;
+  input_port_linum(inf) = 1;
+  input_port_colnum(inf) = 0;
+  input_port_openp(inf) = TRUE;
   return inf;
 }
 
-lisp_object_t *make_output_file(FILE *file) {
-  lisp_object_t *outf = make_object(OUTPUT_FILE);
-  output_file_file(outf) = file;
-  output_file_linum(outf) = 1;
-  output_file_colnum(outf) = 0;
-  output_file_openp(outf) = TRUE;
+lt *make_input_string_port(char *str) {
+  FILE *stream = fmemopen(str, strlen(str), "r");
+  return make_input_port(stream);
+}
+
+lt *make_output_port(FILE *stream) {
+  lt *outf = make_object(OUTPUT_PORT);
+  output_port_stream(outf) = stream;
+  output_port_linum(outf) = 1;
+  output_port_colnum(outf) = 0;
+  output_port_openp(outf) = TRUE;
   return outf;
+}
+
+lt *make_output_string_port(char *str) {
+  FILE *stream = fmemopen(str, strlen(str), "w");
+  return make_output_port(stream);
 }
 
 lt *make_package(lt *name, hash_table_t *symbol_table) {
@@ -335,8 +345,9 @@ string_builder_t *make_str_builder(void) {
   return sb;
 }
 
-lisp_object_t *make_string(char *value) {
-  lisp_object_t *string = make_object(STRING);
+lt *make_string(char *value) {
+  lt *string = make_object(STRING);
+  string_length(string) = strlen(value);
   string_value(string) = value;
   return string;
 }
@@ -598,9 +609,9 @@ void init_global_variable(void) {
   gensym_counter = make_fixnum(0);
   null_env = make_environment(the_empty_list, NULL);
   environment_next(null_env) = null_env;
-  standard_error = make_output_file(stderr);
-  standard_in = make_input_file(stdin);
-  standard_out = make_output_file(stdout);
+  standard_error = make_output_port(stderr);
+  standard_in = make_input_port(stdin);
+  standard_out = make_output_port(stdout);
   symbol_list = the_empty_list;
   the_undef = make_undef();
 
