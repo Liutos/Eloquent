@@ -729,9 +729,9 @@ lisp_object_t *lt_char_at(lisp_object_t *string, lisp_object_t *index) {
   return make_character(string_value(string)[fixnum_value(index)]);
 }
 
-lisp_object_t *lt_string_length(lisp_object_t *string) {
-  assert(isstring(string));
-  return make_fixnum(strlen(string_value(string)));
+lt *lt_string_length(lt *str) {
+  assert(isstring(str));
+  return make_fixnum(string_length(str));
 }
 
 lt *lt_string_set(lt *string, lt *index, lt *new_char) {
@@ -745,7 +745,7 @@ lt *lt_string_set(lt *string, lt *index, lt *new_char) {
 void init_prim_string(void) {
   NOREST(2, lt_char_at, "char-at");
   NOREST(1, lt_string_length, "string-length");
-  NOREST(3, lt_string_set, "string-set");
+  NOREST(3, lt_string_set, "string-set!");
 }
 
 /* Symbol */

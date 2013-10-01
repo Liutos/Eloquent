@@ -345,8 +345,9 @@ string_builder_t *make_str_builder(void) {
   return sb;
 }
 
-lisp_object_t *make_string(char *value) {
-  lisp_object_t *string = make_object(STRING);
+lt *make_string(char *value) {
+  lt *string = make_object(STRING);
+  string_length(string) = strlen(value);
   string_value(string) = value;
   return string;
 }
