@@ -45,13 +45,13 @@
 
 /* Writer */
 void write_raw_char(char c, lt *dest_port) {
-  FILE *fp = output_file_file(dest_port);
+  FILE *fp = output_port_stream(dest_port);
   fputc(c, fp);
   if (c == '\n') {
-    output_file_linum(dest_port)++;
-    output_file_colnum(dest_port) = 0;
+    output_port_linum(dest_port)++;
+    output_port_colnum(dest_port) = 0;
   } else
-    output_file_colnum(dest_port)++;
+    output_port_colnum(dest_port)++;
 }
 
 void write_n_spaces(int n, lt *dest) {
@@ -90,18 +90,18 @@ void writef(lt *dest, const char *format, ...) {
           write_raw_string(string_value(arg), dest);
           break;
         case 'p':
-          nch = fprintf(output_file_file(dest), "%p", arg);
-          output_file_colnum(dest) += nch;
+          nch = fprintf(output_port_stream(dest), "%p", arg);
+          output_port_colnum(dest) += nch;
           break;
         case 'f':
           assert(isfloat(arg));
-          nch = fprintf(output_file_file(dest), "%f", float_value(arg));
-          output_file_colnum(dest) += nch;
+          nch = fprintf(output_port_stream(dest), "%f", float_value(arg));
+          output_port_colnum(dest) += nch;
           break;
         case 'd':
           assert(isfixnum(arg));
-          nch = fprintf(output_file_file(dest), "%d", fixnum_value(arg));
-          output_file_colnum(dest) += nch;
+          nch = fprintf(output_port_stream(dest), "%d", fixnum_value(arg));
+          output_port_colnum(dest) += nch;
           break;
         case '?':
           write_object(arg, dest);
@@ -149,7 +149,7 @@ void write_compiled_function(lt *function, int indent, lt *dest) {
     int rest_width = 8 - strlen(opcode_op(ins));
     write_n_spaces(rest_width, dest);
     if (opcode_name(ins) == FN) {
-      write_compiled_function(op_fn_func(ins), output_file_colnum(dest), dest);
+      write_compiled_function(op_fn_func(ins), output_port_colnum(dest), dest);
     } else {
       for (int j = 0; j < vector_length(opcode_oprands(ins)); j++) {
         write_object(vector_value(opcode_oprands(ins))[j], dest);
@@ -216,14 +216,14 @@ void write_object(lt *x, lt *output_file) {
     	writef(output_file, "%f", x);
     	break;
     case FUNCTION: {
-      int indent = output_file_colnum(output_file);
+      int indent = output_port_colnum(output_file);
       write_compiled_function(x, indent, output_file);
     }
       break;
-    case INPUT_FILE:
+    case INPUT_PORT:
     	writef(output_file, "#<INPUT-FILE %p>", x);
     	break;
-    case OUTPUT_FILE:
+    case OUTPUT_PORT:
     	writef(output_file, "#<OUTPUT-FILE %p>", x);
     	break;
     case PACKAGE:
@@ -296,8 +296,8 @@ void write_object(lt *x, lt *output_file) {
 
 int get_char(lt *input) {
   assert(isinput_file(input));
-  FILE *in = input_file_file(input);
-  input_file_colnum(input)++;
+  FILE *in = input_port_stream(input);
+  input_port_colnum(input)++;
   return getc(in);
 }
 
@@ -462,17 +462,17 @@ void init_prim_function(void) {
 /* Input Port */
 lt *lt_close_in(lt *file) {
   assert(isinput_file(file));
-  fclose(input_file_file(file));
-  input_file_openp(file) = TRUE;
+  fclose(input_port_stream(file));
+  input_port_openp(file) = FALSE;
   return make_true();
 }
 
 lt *lt_is_file_open(lt *file) {
   assert(isinput_file(file) || isoutput_file(file));
   if (isinput_file(file))
-    return booleanize(input_file_openp(file));
+    return booleanize(input_port_openp(file));
   else
-    return booleanize(output_file_openp(file));
+    return booleanize(output_port_openp(file));
 }
 
 lt *lt_load_file(lt *file) {
@@ -488,7 +488,7 @@ lt *lt_load_file(lt *file) {
 lt *lt_open_in(lt *path) {
   assert(isstring(path));
   FILE *fp = fopen(string_value(path), "r");
-  return make_input_file(fp);
+  return make_input_port(fp);
 }
 
 lt *lt_read_char(lt *in_port) {
@@ -658,15 +658,15 @@ void init_prim_char(void) {
 /* Output File */
 lt *lt_close_out(lt *file) {
   assert(isoutput_file(file));
-  fclose(output_file_file(file));
-  output_file_openp(file) = FALSE;
+  fclose(output_port_stream(file));
+  output_port_openp(file) = FALSE;
   return make_true();
 }
 
 lt *lt_open_out(lt *path) {
   assert(isstring(path));
   FILE *fp = fopen(string_value(path), "w");
-  return make_output_file(fp);
+  return make_output_port(fp);
 }
 
 lt *lt_write_char(lt *c, lt *dest) {
@@ -1099,7 +1099,7 @@ void init_prim_general(void) {
 /* NOTE: Reader */
 int peek_char(lisp_object_t *input) {
   assert(isinput_file(input));
-  FILE *in = input_file_file(input);
+  FILE *in = input_port_stream(input);
   int c = getc(in);
   ungetc(c, in);
   return c;
@@ -1107,8 +1107,8 @@ int peek_char(lisp_object_t *input) {
 
 void unget_char(int c, lisp_object_t *input) {
   assert(isinput_file(input));
-  ungetc(c, input_file_file(input));
-  input_file_colnum(input)--;
+  ungetc(c, input_port_stream(input));
+  input_port_colnum(input)--;
 }
 
 int isdelimiter(int c) {
@@ -1263,7 +1263,7 @@ lisp_object_t *read_object(lisp_object_t *input_file) {
     case EOF:
     	return make_eof();
     case '\n': case '\r': case '\t':
-    	input_file_linum(input_file)++;
+    	input_port_linum(input_file)++;
     	return read_object(input_file);
     case ' ':
     	return read_object(input_file);
@@ -1292,7 +1292,8 @@ lisp_object_t *read_object(lisp_object_t *input_file) {
           	goto bool_error_label;
         default : {
         	bool_error_label:
-          return reader_error("Unexpected character '%c' after '#', at line %d, column %d", c, input_file_linum(input_file), input_file_colnum(input_file));
+          return reader_error("Unexpected character '%c' after '#', at line %d, column %d",
+              c, input_port_linum(input_file), input_port_colnum(input_file));
         }
       }
       break;
@@ -1334,7 +1335,7 @@ lisp_object_t *read_object(lisp_object_t *input_file) {
 
 lisp_object_t *read_object_from_string(char *text) {
   FILE *file = fmemopen(text, strlen(text), "r");
-  lt *inf = make_input_file(file);
+  lt *inf = make_input_port(file);
   lt *obj = read_object(inf);
   return obj;
 }
@@ -1384,7 +1385,7 @@ void load_init_file(void) {
     fprintf(stderr, "INFO: No initialization file.\n");
     return;
   }
-  lt *file = make_input_file(fp);
+  lt *file = make_input_port(fp);
   lt_load_file(file);
 }
 

@@ -46,9 +46,9 @@ enum TYPE {
   EXCEPTION,
   FUNCTION,
   FLOAT,
-  INPUT_FILE,
+  INPUT_PORT,
   OPCODE,
-  OUTPUT_FILE,
+  OUTPUT_PORT,
   PACKAGE,
   PAIR,
   PRIMITIVE_FUNCTION,
@@ -112,10 +112,6 @@ struct lisp_object_t {
       lt *name;
     } function;
     struct {
-      int colnum, linum, openp;
-      FILE *file;
-    } input_file;
-    struct {
       int colnum, index, linum;
       char *value;
     } input_string;
@@ -125,10 +121,6 @@ struct lisp_object_t {
       lt *oprands;
     } opcode;
     struct {
-      int colnum, linum, openp;
-      FILE *file;
-    } output_file;
-    struct {
       lt *name;
       hash_table_t *symbol_table;
       lt *used_packages;
@@ -137,6 +129,10 @@ struct lisp_object_t {
       lt *head;
       lt *tail;
     } pair;
+    struct {
+      int colnum, linum, openp;
+      FILE *stream;
+    } port;
     struct {
       int arity;
       int restp;
@@ -212,21 +208,17 @@ struct string_builder_t {
 #define function_renv(x) ((x)->u.function.renv)
 #define function_code(x) ((x)->u.function.code)
 #define function_name(x) ((x)->u.function.name)
-#define input_file_colnum(x) ((x)->u.input_file.colnum)
-#define input_file_file(x) ((x)->u.input_file.file)
-#define input_file_linum(x) ((x)->u.input_file.linum)
-#define input_file_openp(x) ((x)->u.input_file.openp)
-#define input_string_colnum(x) ((x)->u.input_string.colnum)
-#define input_string_index(x) ((x)->u.input_string.index)
-#define input_string_linum(x) ((x)->u.input_string.linum)
-#define input_string_value(x) ((x)->u.input_string.value)
+#define input_port_colnum(x) ((x)->u.port.colnum)
+#define input_port_stream(x) ((x)->u.port.stream)
+#define input_port_linum(x) ((x)->u.port.linum)
+#define input_port_openp(x) ((x)->u.port.openp)
 #define opcode_name(x) ((x)->u.opcode.name)
 #define opcode_op(x) ((x)->u.opcode.op)
 #define opcode_oprands(x) ((x)->u.opcode.oprands)
-#define output_file_colnum(x) ((x)->u.output_file.colnum)
-#define output_file_file(x) ((x)->u.output_file.file)
-#define output_file_linum(x) ((x)->u.output_file.linum)
-#define output_file_openp(x) ((x)->u.output_file.openp)
+#define output_port_colnum(x) ((x)->u.port.colnum)
+#define output_port_stream(x) ((x)->u.port.stream)
+#define output_port_linum(x) ((x)->u.port.linum)
+#define output_port_openp(x) ((x)->u.port.openp)
 #define package_name(x) ((x)->u.package.name)
 #define package_symbol_table(x) ((x)->u.package.symbol_table)
 #define package_used_packages(x) ((x)->u.package.used_packages)
