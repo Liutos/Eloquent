@@ -138,8 +138,8 @@ mktype_pred(isenvironment, ENVIRONMENT)
 mktype_pred(isexception, EXCEPTION)
 mktype_pred(isfloat, FLOAT)
 mktype_pred(isfunction, FUNCTION)
-mktype_pred(isinput_file, INPUT_PORT)
-mktype_pred(isoutput_file, OUTPUT_PORT)
+mktype_pred(isinput_port, INPUT_PORT)
+mktype_pred(isoutput_port, OUTPUT_PORT)
 mktype_pred(isopcode, OPCODE)
 mktype_pred(ispair, PAIR)
 mktype_pred(isprimitive, PRIMITIVE_FUNCTION)
@@ -282,6 +282,11 @@ lt *make_input_port(FILE *stream) {
   return inf;
 }
 
+lt *make_input_string_port(char *str) {
+  FILE *stream = fmemopen(str, strlen(str), "r");
+  return make_input_port(stream);
+}
+
 lt *make_output_port(FILE *stream) {
   lt *outf = make_object(OUTPUT_PORT);
   output_port_stream(outf) = stream;
@@ -289,6 +294,11 @@ lt *make_output_port(FILE *stream) {
   output_port_colnum(outf) = 0;
   output_port_openp(outf) = TRUE;
   return outf;
+}
+
+lt *make_output_string_port(char *str) {
+  FILE *stream = fmemopen(str, strlen(str), "w");
+  return make_output_port(stream);
 }
 
 lt *make_package(lt *name, hash_table_t *symbol_table) {

@@ -295,7 +295,7 @@ void write_object(lt *x, lt *output_file) {
 }
 
 int get_char(lt *input) {
-  assert(isinput_file(input));
+  assert(isinput_port(input));
   FILE *in = input_port_stream(input);
   input_port_colnum(input)++;
   return getc(in);
@@ -461,28 +461,33 @@ void init_prim_function(void) {
 
 /* Input Port */
 lt *lt_close_in(lt *file) {
-  assert(isinput_file(file));
+  assert(isinput_port(file));
   fclose(input_port_stream(file));
   input_port_openp(file) = FALSE;
   return make_true();
 }
 
 lt *lt_is_file_open(lt *file) {
-  assert(isinput_file(file) || isoutput_file(file));
-  if (isinput_file(file))
+  assert(isinput_port(file) || isoutput_port(file));
+  if (isinput_port(file))
     return booleanize(input_port_openp(file));
   else
     return booleanize(output_port_openp(file));
 }
 
 lt *lt_load_file(lt *file) {
-  assert(isinput_file(file));
+  assert(isinput_port(file));
   lt *expr = read_object(file);
   while (!iseof(expr)) {
     lt_eval(expr);
     expr = read_object(file);
   }
   return make_true();
+}
+
+lt *lt_make_input_string_port(lt *str) {
+  char *c_str = string_value(str);
+  return make_input_string_port(c_str);
 }
 
 lt *lt_open_in(lt *path) {
@@ -492,16 +497,16 @@ lt *lt_open_in(lt *path) {
 }
 
 lt *lt_read_char(lt *in_port) {
-  assert(isinput_file(in_port));
+  assert(isinput_port(in_port));
   int c = get_char(in_port);
-  if (c == -1)
+  if (c == EOF)
     return the_eof;
   else
     return make_character(c);
 }
 
 lt *lt_read_line(lt *in_port) {
-  assert(isinput_file(in_port));
+  assert(isinput_port(in_port));
   string_builder_t *sb = make_str_builder();
   int c = get_char(in_port);
   while (c != EOF && c != '\n') {
@@ -511,11 +516,12 @@ lt *lt_read_line(lt *in_port) {
   return make_string(sb2string(sb));
 }
 
-void init_prim_input_file(void) {
+void init_prim_input_port(void) {
   NOREST(1, lt_close_in, "close-in");
   NOREST(1, lt_is_file_open, "file-open?");
   NOREST(1, lt_load, "load");
   NOREST(1, lt_load_file, "load-file");
+  NOREST(1, lt_make_input_string_port, "make-input-string-port");
   NOREST(1, lt_open_in, "open-in");
   NOREST(1, lt_read_char, "read-char");
   NOREST(1, lt_read_line, "read-line");
@@ -657,7 +663,7 @@ void init_prim_char(void) {
 
 /* Output File */
 lt *lt_close_out(lt *file) {
-  assert(isoutput_file(file));
+  assert(isoutput_port(file));
   fclose(output_port_stream(file));
   output_port_openp(file) = FALSE;
   return make_true();
@@ -690,7 +696,7 @@ lt *lt_write_object(lt *object, lt *dest) {
   return the_true;
 }
 
-void init_prim_output_file(void) {
+void init_prim_output_port(void) {
   NOREST(1, lt_open_in, "open-in");
   NOREST(1, lt_open_out, "open-out");
   NOREST(2, lt_write_char, "write-char");
@@ -1096,9 +1102,9 @@ void init_prim_general(void) {
   NOREST(0, lt_switch_type_check, "switch-type-check");
 }
 
-/* NOTE: Reader */
+/* Reader */
 int peek_char(lisp_object_t *input) {
-  assert(isinput_file(input));
+  assert(isinput_port(input));
   FILE *in = input_port_stream(input);
   int c = getc(in);
   ungetc(c, in);
@@ -1106,7 +1112,7 @@ int peek_char(lisp_object_t *input) {
 }
 
 void unget_char(int c, lisp_object_t *input) {
-  assert(isinput_file(input));
+  assert(isinput_port(input));
   ungetc(c, input_port_stream(input));
   input_port_colnum(input)--;
 }
@@ -1354,9 +1360,9 @@ void init_prims(void) {
   init_prim_exception();
   init_prim_function();
   init_prim_general();
-  init_prim_input_file();
+  init_prim_input_port();
   init_prim_list();
-  init_prim_output_file();
+  init_prim_output_port();
   init_prim_package();
   init_prim_reader();
   init_prim_string();
