@@ -685,12 +685,6 @@ lt *lt_write_string(lt *str, lt *dest) {
   return str;
 }
 
-lt *lt_write_line(lt *str, lt *dest) {
-  lt_write_string(str, dest);
-  write_raw_char('\n', dest);
-  return str;
-}
-
 lt *lt_write_object(lt *object, lt *dest) {
   write_object(object, dest);
   return the_true;
@@ -700,7 +694,6 @@ void init_prim_output_port(void) {
   NOREST(1, lt_open_in, "open-in");
   NOREST(1, lt_open_out, "open-out");
   NOREST(2, lt_write_char, "write-char");
-  NOREST(2, lt_write_line, "write-line");
   NOREST(2, lt_write_object, "write-object");
   NOREST(2, lt_write_string, "write-string");
 }
