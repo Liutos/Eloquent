@@ -16,7 +16,7 @@
 int main(int argc, char *argv[])
 {
   char *inputs[] = {
-      "(symbol-macro 'define)",
+      "(let ((a 1) (b 2) (c 3)) (+ a b c))",
   };
   init_global_variable();
   init_prims();

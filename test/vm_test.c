@@ -17,7 +17,8 @@
 int main(int argc, char *argv[])
 {
   char *inputs[] = {
-      "(let ((a 1)) (set! a 2) a)",
+      "(expand-macro '(flet ((aux (x) (fx+ x 1))) (aux 2)))",
+      "(wc (open-in \"init.scm\"))",
   };
   init_global_variable();
   init_prims();

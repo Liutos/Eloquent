@@ -290,7 +290,8 @@ lisp_object_t *run_by_llam(lisp_object_t *code_vector) {
         lt *bindings = environment_bindings(env);
         for (int i = fixnum_value(op_moveargs_count(ins)) - 1; i >= 0; i--) {
           lt *val = lt_vector_pop(stack);
-          lt_vector_push(bindings, val);
+          vector_value(bindings)[i] = val;
+          vector_last(bindings)++;
         }
       }
         break;
