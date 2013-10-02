@@ -17,8 +17,8 @@
 int main(int argc, char *argv[])
 {
   char *inputs[] = {
-      "(apply fx+ '(1 2))",
-      "(read-char (make-input-string-port \"Hello, world!\"))",
+      "(expand-macro '(flet ((aux (x) (fx+ x 1))) (aux 2)))",
+      "(wc (open-in \"init.scm\"))",
   };
   init_global_variable();
   init_prims();

@@ -56,6 +56,7 @@ deform_pred(is_catch_form, "catch")
 deform_pred(is_goto_form, "goto")
 deform_pred(is_if_form, "if")
 deform_pred(is_lambda_form, "lambda")
+deform_pred(is_let_form, "let")
 deform_pred(is_quote_form, "quote")
 deform_pred(is_set_form, "set!")
 deform_pred(is_tagbody_form, "tagbody")
@@ -136,4 +137,37 @@ lt *signal_typerr(char *type_name) {
   char msg[256];
   sprintf(msg, "Argument is not of type %s", type_name);
   return signal_exception(strdup(msg));
+}
+
+/* Special Forms */
+lt *let_bindings(lt *form) {
+  return pair_head(pair_tail(form));
+}
+
+lt *let_body(lt *form) {
+  return pair_tail(pair_tail(form));
+}
+
+lt *let_vals(lt *bindings) {
+  lt *lt_list_nreverse(lt *);
+  lt *vals = the_empty_list;
+  while (!isnull(bindings)) {
+    lt *binding = pair_head(bindings);
+    vals = make_pair(pair_head(pair_tail(binding)), vals);
+    bindings = pair_tail(bindings);
+  }
+  vals = lt_list_nreverse(vals);
+  return vals;
+}
+
+lt *let_vars(lt *bindings) {
+  lt *lt_list_nreverse(lt *);
+  lt *vars = the_empty_list;
+  while (!isnull(bindings)) {
+    lt *binding = pair_head(bindings);
+    vars = make_pair(pair_head(binding), vars);
+    bindings = pair_tail(bindings);
+  }
+  vars = lt_list_nreverse(vars);
+  return vars;
 }

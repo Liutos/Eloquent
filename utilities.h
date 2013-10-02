@@ -21,6 +21,7 @@ extern int is_catch_form(lt *);
 extern int is_goto_form(lt *);
 extern int is_if_form(lt *);
 extern int is_lambda_form(lt *);
+extern int is_let_form(lt *);
 extern int is_quote_form(lt *);
 extern int is_set_form(lt *);
 extern int is_tagbody_form(lt *);
@@ -40,5 +41,12 @@ extern void sb_add_char(string_builder_t *, char);
 extern char *sb2string(string_builder_t *);
 extern lt *signal_exception(char *);
 extern lt *signal_typerr(char *);
+
+/* Special Forms */
+/** LET **/
+extern lt *let_bindings(lt *);
+extern lt *let_body(lt *);
+extern lt *let_vals(lt *);
+extern lt *let_vars(lt *);
 
 #endif /* UTILITIES_H_ */

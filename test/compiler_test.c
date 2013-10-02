@@ -16,18 +16,14 @@
 int main(int argc, char *argv[])
 {
   char *inputs[] = {
-      "(cons 1 2)",
-      "(fx+ 1 2)",
-      "(fx- 1 2)",
-      "(fx* 1 2)",
-      "(fx/ 1 2)",
+      "(let ((a 1) (b 2) (c 3)) (+ a b c))",
   };
   init_global_variable();
   init_prims();
   init_primitive_opcode();
   init_compiled_prims();
   init_macros();
-//  load_init_file();
+  load_init_file();
   for (int i = 0; i < sizeof(inputs) / sizeof(char *); i++) {
     write_raw_string(">> ", standard_out);
     write_raw_string(inputs[i], standard_out);

@@ -145,8 +145,6 @@ lisp_object_t *run_by_llam(lisp_object_t *code_vector) {
           vector_value(args)[i] = arg;
           vector_last(args)++;
         }
-        lt *ret = pair_head(return_stack);
-        retaddr_sp(ret) = vector_last(stack);
       }
         break;
       case ARGSD: {
@@ -168,8 +166,8 @@ lisp_object_t *run_by_llam(lisp_object_t *code_vector) {
           lt *arg = lt_vector_pop(stack);
           vector_value(args)[i] = arg;
         }
-        lt *ret = pair_head(return_stack);
-        retaddr_sp(ret) = vector_last(stack);
+//        lt *ret = pair_head(return_stack);
+//        retaddr_sp(ret) = vector_last(stack);
       }
         break;
       case CALL: {
@@ -220,12 +218,10 @@ lisp_object_t *run_by_llam(lisp_object_t *code_vector) {
           lt *fn = retaddr_fn(ret);
           exception_backtrace(ex) = make_pair(fn, exception_backtrace(ex));
           return_stack = pair_tail(return_stack);
-          vector_last(stack) = retaddr_sp(ret);
           code = retaddr_code(ret);
           env = retaddr_env(ret);
           pc = retaddr_pc(ret);
           throw_exception = retaddr_throw_flag(ret);
-          vector_last(stack) = retaddr_sp(ret);
           lt_vector_push(stack, ex);
         }
         break;
@@ -241,6 +237,11 @@ lisp_object_t *run_by_llam(lisp_object_t *code_vector) {
         break;
       case CONST:
         lt_vector_push(stack, op_const_value(ins));
+        break;
+      case EXTENV: {
+        lt *length = op_extenv_count(ins);
+        env = make_environment(make_vector(fixnum_value(length)), env);
+      }
         break;
       case FJUMP:
         if (isfalse(lt_vector_pop(stack)))
@@ -285,8 +286,20 @@ lisp_object_t *run_by_llam(lisp_object_t *code_vector) {
         lt_vector_push(stack, value);
       }
         break;
+      case MOVEARGS: {
+        lt *bindings = environment_bindings(env);
+        for (int i = fixnum_value(op_moveargs_count(ins)) - 1; i >= 0; i--) {
+          lt *val = lt_vector_pop(stack);
+          vector_value(bindings)[i] = val;
+          vector_last(bindings)++;
+        }
+      }
+        break;
       case POP:
         lt_vector_pop(stack);
+        break;
+      case POPENV:
+        env = environment_next(env);
         break;
 			call_primitive:
       case PRIM: {
@@ -338,10 +351,6 @@ lisp_object_t *run_by_llam(lisp_object_t *code_vector) {
             exit(1);
         }
         move_stack();
-        if (!isnull(return_stack)) {
-          lt *ret = pair_head(return_stack);
-          retaddr_sp(ret) = vector_last(stack);
-        }
         lt_vector_push(stack, val);
 //        When the primitive function's execution is finished, they will put the return
 //        value at the top of stack. If this return value is a signaled exception, and the

@@ -59,24 +59,6 @@ lt *lt_cond_macro(lt *clauses) {
   }
 }
 
-/* let */
-lt *lt_let_macro(lt *bindings, lt *body) {
-  lt *pars= make_empty_list();
-  lt *args= make_empty_list();
-  if (isnull(bindings))
-    return make_pair(the_begin_symbol, body);
-  while (ispair(bindings)) {
-    lt *bd = pair_head(bindings);
-    pars = make_pair(pair_head(bd), pars);
-    args = make_pair(second(bd), args);
-    bindings = pair_tail(bindings);
-  }
-  pars = lt_list_nreverse(pars);
-  args = lt_list_nreverse(args);
-  lt *lambda = make_pair(the_lambda_symbol, make_pair(pars, body));
-  return make_pair(lambda, args);
-}
-
 /* pset! */
 lt *get_ks(lt *kvs) {
   if (isnull(kvs))
@@ -208,7 +190,6 @@ void init_macros(void) {
   } while(0)
 
   DM(1, TRUE, lt_cond_macro, "cond");
-  DM(2, TRUE, lt_let_macro, "let");
   DM(2, TRUE, try_catch_macro, "try-catch");
   DM(1, TRUE, lt_pset_macro, "pset!");
   DM(1, FALSE, quasiq, "quasiquote");

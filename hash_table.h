@@ -35,4 +35,13 @@ extern hash_table_t *make_hash_table(int, hash_fn_t, comp_fn_t);
 extern void *search_ht(void *, hash_table_t *);
 extern void set_ht(void *, void *, hash_table_t *);
 
+/* Hash Table */
+#define sl_key(x) ((x)->key)
+#define sl_value(x) ((x)->value)
+#define sl_next(x) ((x)->next)
+#define ht_slots(x) ((x)->slots)
+#define ht_length(x) ((x)->length)
+#define ht_hash_fn(x) ((x)->hash_fn)
+#define ht_comp_fn(x) ((x)->comp_fn)
+
 #endif /* HASH_TABLE_H_ */
