@@ -17,8 +17,7 @@
 int main(int argc, char *argv[])
 {
   char *inputs[] = {
-      "(apply fx+ '(1 2))",
-      "(read-char (make-input-string-port \"Hello, world!\"))",
+      "(let ((a 1)) (set! a 2) a)",
   };
   init_global_variable();
   init_prims();

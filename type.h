@@ -67,6 +67,7 @@ enum OPCODE_TYPE {
   CHECKEX,
   CHKTYPE,
   CONST,
+  EXTENV,
   FN,
   GSET,
   GVAR,
@@ -74,7 +75,9 @@ enum OPCODE_TYPE {
   JUMP,
   LSET,
   LVAR,
+  MOVEARGS,
   POP,
+  POPENV,
   PRIM,
   RETURN,
 //  Primitive Function Instructions
@@ -142,14 +145,13 @@ struct lisp_object_t {
     } primitive;
     struct {
 //      pc: The index of instructions executed before entering the instructions of callee
-//      sp: The index of the element on argument stack before entering the callee
 //      throw_flag: Indicates whether the current callee should throws the exception or not
 //      code: The bytecode instructions of the last caller
 //      env: The environment of the last caller
 //      fn: The current callee. Use for two purposes
 //          1. Use for constructing function calling chain when throwing exception
 //          2. Stores the function to be used when modify its code pointer in the `yield' form
-      int pc, sp, throw_flag;
+      int pc, throw_flag;
       lt *code;
       lt *env;
       lt *fn;
@@ -185,15 +187,6 @@ struct string_builder_t {
 
 #define character_value(x) (((intptr_t)x) >> CHAR_BITS)
 #define fixnum_value(x) (((intptr_t)(x)) >> FIXNUM_BITS)
-
-/* Hash Table */
-#define sl_key(x) ((x)->key)
-#define sl_value(x) ((x)->value)
-#define sl_next(x) ((x)->next)
-#define ht_slots(x) ((x)->slots)
-#define ht_length(x) ((x)->length)
-#define ht_hash_fn(x) ((x)->hash_fn)
-#define ht_comp_fn(x) ((x)->comp_fn)
 
 /* Accessor macros */
 #define environment_bindings(x) ((x)->u.environment.bindings)
@@ -234,7 +227,6 @@ struct string_builder_t {
 #define retaddr_fn(x) ((x)->u.retaddr.fn)
 #define retaddr_pc(x) ((x)->u.retaddr.pc)
 #define retaddr_throw_flag(x) ((x)->u.retaddr.throw_flag)
-#define retaddr_sp(x) ((x)->u.retaddr.sp)
 #define string_length(x) ((x)->u.string.length)
 #define string_value(x) ((x)->u.string.value)
 #define symbol_name(x) ((x)->u.symbol.name)
@@ -260,6 +252,7 @@ struct string_builder_t {
 #define op_chktype_type(x) oparg2(x)
 #define op_chktype_nargs(x) oparg3(x)
 #define op_const_value(x) oparg1(x)
+#define op_extenv_count(x) oparg1(x)
 #define op_fjump_label(x) oparg1(x)
 #define op_fn_func(x) oparg1(x)
 #define op_gset_var(x) oparg1(x)
@@ -271,6 +264,7 @@ struct string_builder_t {
 #define op_lvar_i(x) oparg1(x)
 #define op_lvar_j(x) oparg2(x)
 #define op_lvar_var(x) oparg3(x)
+#define op_moveargs_count(x) oparg1(x)
 #define op_prim_nargs(x) oparg1(x)
 
 #endif /* TYPE_H_ */

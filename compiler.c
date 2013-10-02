@@ -135,6 +135,11 @@ lisp_object_t *gen(enum TYPE opcode, ...) {
       ins = make_op_const(value);
     }
       break;
+    case EXTENV: {
+      lt *count = va_arg(ap, lt *);
+      ins = make_op_extenv(count);
+    }
+      break;
     case FJUMP: {
       lisp_object_t *label = va_arg(ap, lisp_object_t *);
       ins = make_op_fjump(label);
@@ -168,8 +173,16 @@ lisp_object_t *gen(enum TYPE opcode, ...) {
       ins = make_op_lvar(i, j, symbol);
     }
       break;
+    case MOVEARGS: {
+      lt *count = va_arg(ap, lt *);
+      ins = make_op_moveargs(count);
+    }
+      break;
     case POP:
       ins = make_op_pop();
+      break;
+    case POPENV:
+      ins = make_op_popenv();
       break;
     case PRIM:
       ins = make_op_prim(va_arg(ap, lisp_object_t *));
@@ -417,6 +430,25 @@ lt *compile_app(lt *proc, lt *args, lt *env) {
         compile_checkex());
 }
 
+lt *compile_let_bindings(lt *vals, lt *env) {
+  return compile_args(vals, env);
+}
+
+lt *compile_let(lt *form, lt *env) {
+  lt *bindings = let_bindings(form);
+  lt *body = let_body(form);
+  lt *vars = let_vars(bindings);
+  lt *vals = let_vals(bindings);
+  lt *count = make_fixnum(pair_length(vars));
+  env = make_environment(vars, env);
+  return seq(gen(EXTENV, count),
+      compile_let_bindings(vals, env),
+//      gen(ARGS, count),
+      gen(MOVEARGS, count),
+      compile_begin(body, env),
+      gen(POPENV));
+}
+
 lisp_object_t *compile_object(lisp_object_t *object, lisp_object_t *env) {
   if (issymbol(object))
     return gen_var(object, env);
@@ -424,6 +456,8 @@ lisp_object_t *compile_object(lisp_object_t *object, lisp_object_t *env) {
     return gen(CONST, object);
   if (is_macro_form(object))
     return compile_object(lt_expand_macro(object), env);
+  if (is_let_form(object))
+    return compile_let(object, env);
   if (is_quote_form(object)) {
     if (pair_length(object) != 2)
       return compiler_error("There must and be only one argument of a quote form");

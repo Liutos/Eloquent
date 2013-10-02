@@ -94,6 +94,7 @@ struct lisp_object_t lt_codes[] = {
     DEFCODE(CHECKEX, "CHECKEX"),
     DEFCODE(CHKTYPE, "CHKTYPE"),
     DEFCODE(CONST, "CONST"),
+    DEFCODE(EXTENV, "EXTENV"),
     DEFCODE(FN, "FN"),
     DEFCODE(GSET, "GSET"),
     DEFCODE(GVAR, "GVAR"),
@@ -101,7 +102,9 @@ struct lisp_object_t lt_codes[] = {
     DEFCODE(JUMP, "JUMP"),
     DEFCODE(LSET, "LSET"),
     DEFCODE(LVAR, "LVAR"),
+    DEFCODE(MOVEARGS, "MOVEARGS"),
     DEFCODE(POP, "POP"),
+    DEFCODE(POPENV, "POPENV"),
     DEFCODE(PRIM, "PRIM"),
     DEFCODE(RETURN, "RETURN"),
 //    Opcodes for some primitive functions
@@ -333,7 +336,6 @@ lt *make_retaddr(lt *code, lt *env, lt *fn, int pc, int throw_flag, int sp) {
   retaddr_fn(retaddr) = fn;
   retaddr_pc(retaddr) = pc;
   retaddr_throw_flag(retaddr) = throw_flag;
-  retaddr_sp(retaddr) = sp;
   return retaddr;
 }
 
@@ -419,6 +421,10 @@ lisp_object_t *make_op_const(lisp_object_t *value) {
   return mkopcode(CONST, "CONST", 1, value);
 }
 
+lt *make_op_extenv(lt *count) {
+  return mkopcode(EXTENV, "EXTENV", 1, count);
+}
+
 lisp_object_t *make_op_fjump(lisp_object_t *label) {
   return mkopcode(FJUMP, "FJUMP", 1, label);
 }
@@ -447,8 +453,16 @@ lt *make_op_lvar(lt *i, lt *j, lt *symbol) {
   return mkopcode(LVAR, "LVAR", 3, i, j, symbol);
 }
 
+lt *make_op_moveargs(lt *count) {
+  return mkopcode(MOVEARGS, "MOVEARGS", 1, count);
+}
+
 lisp_object_t *make_op_pop(void) {
   return mkopcode(POP, "POP", 0);
+}
+
+lt *make_op_popenv(void) {
+  return mkopcode(POPENV, "POPENV", 0);
 }
 
 lisp_object_t *make_op_prim(lisp_object_t *nargs) {
