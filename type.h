@@ -115,10 +115,6 @@ struct lisp_object_t {
       lt *name;
     } function;
     struct {
-      int colnum, index, linum;
-      char *value;
-    } input_string;
-    struct {
       enum OPCODE_TYPE name;
       char *op;
       lt *oprands;
