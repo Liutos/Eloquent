@@ -85,35 +85,35 @@ struct lisp_object_t lt_types[] = {
     DEFTYPE(VECTOR, "vector"),
 };
 
-#define DEFCODE(name, op) {.type=OPCODE, .u={.opcode={name, op}}}
+#define DEFCODE(name) {.type=OPCODE, .u={.opcode={name, #name}}}
 
 struct lisp_object_t lt_codes[] = {
-    DEFCODE(CALL, "CALL"),
-    DEFCODE(CATCH, "CATCH"),
-    DEFCODE(CHECKEX, "CHECKEX"),
-    DEFCODE(CHKARITY, "CHKARITY"),
-    DEFCODE(CHKTYPE, "CHKTYPE"),
-    DEFCODE(CONST, "CONST"),
-    DEFCODE(EXTENV, "EXTENV"),
-    DEFCODE(FN, "FN"),
-    DEFCODE(GSET, "GSET"),
-    DEFCODE(GVAR, "GVAR"),
-    DEFCODE(FJUMP, "FJUMP"),
-    DEFCODE(JUMP, "JUMP"),
-    DEFCODE(LSET, "LSET"),
-    DEFCODE(LVAR, "LVAR"),
-    DEFCODE(MOVEARGS, "MOVEARGS"),
-    DEFCODE(POP, "POP"),
-    DEFCODE(POPENV, "POPENV"),
-    DEFCODE(PRIM, "PRIM"),
-    DEFCODE(RESTARGS, "RESTARGS"),
-    DEFCODE(RETURN, "RETURN"),
+    DEFCODE(CALL),
+    DEFCODE(CATCH),
+    DEFCODE(CHECKEX),
+    DEFCODE(CHKARITY),
+    DEFCODE(CHKTYPE),
+    DEFCODE(CONST),
+    DEFCODE(EXTENV),
+    DEFCODE(FN),
+    DEFCODE(GSET),
+    DEFCODE(GVAR),
+    DEFCODE(FJUMP),
+    DEFCODE(JUMP),
+    DEFCODE(LSET),
+    DEFCODE(LVAR),
+    DEFCODE(MOVEARGS),
+    DEFCODE(POP),
+    DEFCODE(POPENV),
+    DEFCODE(PRIM),
+    DEFCODE(RESTARGS),
+    DEFCODE(RETURN),
 //    Opcodes for some primitive functions
-    DEFCODE(ADDI, "ADDI"),
-    DEFCODE(CONS, "CONS"),
-    DEFCODE(DIVI, "DIVI"),
-    DEFCODE(MULI, "MULI"),
-    DEFCODE(SUBI, "SUBI"),
+    DEFCODE(ADDI),
+    DEFCODE(CONS),
+    DEFCODE(DIVI),
+    DEFCODE(MULI),
+    DEFCODE(SUBI),
 };
 
 /* Type predicate */
@@ -388,94 +388,94 @@ lt *make_opcode(enum OPCODE_TYPE name, char *op, lt *oprands) {
   return obj;
 }
 
-lt *mkopcode(enum OPCODE_TYPE name, char *op, int arity, ...) {
+lt *mkopcode(enum OPCODE_TYPE name, int arity, ...) {
   lt *oprands = make_vector(arity);
   va_list ap;
   va_start(ap, arity);
   for (int i = 0; i < arity; i++)
     vector_value(oprands)[i] = va_arg(ap, lt *);
   vector_last(oprands) = arity - 1;
-  return make_opcode(name, op, oprands);
+  return make_opcode(name, opcode_op(opcode_ref(name)), oprands);
 }
 
 lisp_object_t *make_op_call(lisp_object_t *arity) {
-  return mkopcode(CALL, "CALL", 1, arity);
+  return mkopcode(CALL, 1, arity);
 }
 
 lt *make_op_checkex(void) {
-  return mkopcode(CHECKEX, "CHECKEX", 0);
+  return mkopcode(CHECKEX, 0);
 }
 
 lt *make_op_chkarity(lt *arity) {
-  return mkopcode(CHKARITY, "CHKARITY", 1, arity);
+  return mkopcode(CHKARITY, 1, arity);
 }
 
 lt *make_op_chktype(lt *position, lt *target_type, lt *nargs) {
-  return mkopcode(CHKTYPE, "CHKTYPE", 3, position, target_type, nargs);
+  return mkopcode(CHKTYPE, 3, position, target_type, nargs);
 }
 
 lisp_object_t *make_op_const(lisp_object_t *value) {
-  return mkopcode(CONST, "CONST", 1, value);
+  return mkopcode(CONST, 1, value);
 }
 
 lt *make_op_extenv(lt *count) {
-  return mkopcode(EXTENV, "EXTENV", 1, count);
+  return mkopcode(EXTENV, 1, count);
 }
 
 lisp_object_t *make_op_fjump(lisp_object_t *label) {
-  return mkopcode(FJUMP, "FJUMP", 1, label);
+  return mkopcode(FJUMP, 1, label);
 }
 
 lisp_object_t *make_op_fn(lisp_object_t *func) {
-  return mkopcode(FN, "FN", 1, func);
+  return mkopcode(FN, 1, func);
 }
 
 lisp_object_t *make_op_gset(lisp_object_t *symbol) {
-  return mkopcode(GSET, "GSET", 1, symbol);
+  return mkopcode(GSET, 1, symbol);
 }
 
 lisp_object_t *make_op_gvar(lisp_object_t *symbol) {
-  return mkopcode(GVAR, "GVAR", 1, symbol);
+  return mkopcode(GVAR, 1, symbol);
 }
 
 lisp_object_t *make_op_jump(lisp_object_t *label) {
-  return mkopcode(JUMP, "JUMP", 1, label);
+  return mkopcode(JUMP, 1, label);
 }
 
 lt *make_op_lset(lt *i, lt *j, lt *symbol) {
-  return mkopcode(LSET, "LSET", 3, i, j, symbol);
+  return mkopcode(LSET, 3, i, j, symbol);
 }
 
 lt *make_op_lvar(lt *i, lt *j, lt *symbol) {
-  return mkopcode(LVAR, "LVAR", 3, i, j, symbol);
+  return mkopcode(LVAR, 3, i, j, symbol);
 }
 
 lt *make_op_moveargs(lt *count) {
-  return mkopcode(MOVEARGS, "MOVEARGS", 1, count);
+  return mkopcode(MOVEARGS, 1, count);
 }
 
 lisp_object_t *make_op_pop(void) {
-  return mkopcode(POP, "POP", 0);
+  return mkopcode(POP, 0);
 }
 
 lt *make_op_popenv(void) {
-  return mkopcode(POPENV, "POPENV", 0);
+  return mkopcode(POPENV, 0);
 }
 
 lisp_object_t *make_op_prim(lisp_object_t *nargs) {
-  return mkopcode(PRIM, "PRIM", 1, nargs);
+  return mkopcode(PRIM, 1, nargs);
 }
 
 lisp_object_t *make_op_return() {
-  return mkopcode(RETURN, "RETURN", 0);
+  return mkopcode(RETURN, 0);
 }
 
 lt *make_op_restargs(lt *count) {
-  return mkopcode(RESTARGS, "RESTARGS", 1, count);
+  return mkopcode(RESTARGS, 1, count);
 }
 
 lt *make_op_catch(void) {
-  return mkopcode(CATCH, "CATCH", 0);
+  return mkopcode(CATCH, 0);
 }
 
 /* Opcode */
@@ -513,7 +513,7 @@ lt *make_fn_inst(lt *prim) {
   assert(isprimitive(prim));
   lt *opcode = search_op4prim(prim);
   assert(opcode != NULL);
-  return make_pair(mkopcode(opcode_name(opcode), opcode_op(opcode), 0), the_empty_list);
+  return make_pair(mkopcode(opcode_name(opcode), 0), the_empty_list);
 }
 
 /* Package */
