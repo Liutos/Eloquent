@@ -187,6 +187,9 @@ lisp_object_t *gen(enum TYPE opcode, ...) {
     case PRIM:
       ins = make_op_prim(va_arg(ap, lisp_object_t *));
       break;
+    case RESTARGS:
+      ins = make_op_restargs(va_arg(ap, lt *));
+      break;
     case RETURN:
       ins = make_op_return();
       break;
@@ -244,7 +247,9 @@ lt *gen_args(lt *args, int nrequired) {
   if (isnull(args))
     return gen(ARGS, make_fixnum(nrequired));
   else if (issymbol(args)) {
-    return gen(ARGSD, make_fixnum(nrequired));
+//    return gen(ARGSD, make_fixnum(nrequired));
+    return seq(gen(RESTARGS, make_fixnum(nrequired)),
+        gen(ARGS, make_fixnum(nrequired + 1)));
   } else if (ispair(args) && issymbol(pair_head(args))) {
     return gen_args(pair_tail(args), nrequired + 1);
   } else {

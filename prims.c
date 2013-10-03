@@ -146,7 +146,7 @@ void write_compiled_function(lt *function, int indent, lt *dest) {
     } else
       write_raw_string("    ", dest);
     write_raw_string(opcode_op(ins), dest);
-    int rest_width = 8 - strlen(opcode_op(ins));
+    int rest_width = opcode_max_length + 1 - strlen(opcode_op(ins));
     write_n_spaces(rest_width, dest);
     if (opcode_name(ins) == FN) {
       write_compiled_function(op_fn_func(ins), output_port_colnum(dest), dest);

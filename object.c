@@ -25,6 +25,7 @@ int is_check_type;
 lt *gensym_counter;
 lt *null_env;
 /* Opcode */
+int opcode_max_length;
 hash_table_t *prim2op_map;
 /* Package */
 lt *package;
@@ -106,6 +107,7 @@ struct lisp_object_t lt_codes[] = {
     DEFCODE(POP, "POP"),
     DEFCODE(POPENV, "POPENV"),
     DEFCODE(PRIM, "PRIM"),
+    DEFCODE(RESTARGS, "RESTARGS"),
     DEFCODE(RETURN, "RETURN"),
 //    Opcodes for some primitive functions
     DEFCODE(ADDI, "ADDI"),
@@ -473,6 +475,10 @@ lisp_object_t *make_op_return() {
   return mkopcode(RETURN, "RETURN", 0);
 }
 
+lt *make_op_restargs(lt *count) {
+  return mkopcode(RESTARGS, "RESTARGS", 1, count);
+}
+
 lt *make_op_catch(void) {
   return mkopcode(CATCH, "CATCH", 0);
 }
@@ -598,6 +604,16 @@ lt *type_ref(enum TYPE type) {
   return &lt_types[type];
 }
 
+void init_opcode_length(void) {
+  int max = 0;
+  for (int i = 0; i < sizeof(lt_codes) / sizeof(*lt_codes); i++) {
+    lt *opcode = &lt_codes[i];
+    if (strlen(opcode_op(opcode)) > max)
+      max = strlen(opcode_op(opcode));
+  }
+  opcode_max_length = max;
+}
+
 void init_packages(void) {
   pkgs = make_empty_list();
   pkg_lisp = ensure_package("Lisp");
@@ -630,6 +646,7 @@ void init_global_variable(void) {
   the_undef = make_undef();
 
   prim2op_map = make_prim2op_map();
+  init_opcode_length();
 //  Packages initialization
   init_packages();
 

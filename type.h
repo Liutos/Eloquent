@@ -79,6 +79,7 @@ enum OPCODE_TYPE {
   POP,
   POPENV,
   PRIM,
+  RESTARGS,
   RETURN,
 //  Primitive Function Instructions
   ADDI,
@@ -266,5 +267,7 @@ struct string_builder_t {
 #define op_lvar_var(x) oparg3(x)
 #define op_moveargs_count(x) oparg1(x)
 #define op_prim_nargs(x) oparg1(x)
+// The number of required parameters.
+#define op_restargs_count(x) oparg1(x)
 
 #endif /* TYPE_H_ */

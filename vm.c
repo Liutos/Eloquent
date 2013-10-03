@@ -119,6 +119,7 @@ lisp_object_t *run_by_llam(lisp_object_t *code_vector) {
   lt *stack = make_vector(50);
 
   assert(isvector(code_vector));
+//  The number of arguments passed.
   int nargs = 0;
   int pc = 0;
   int throw_exception = TRUE;
@@ -133,11 +134,14 @@ lisp_object_t *run_by_llam(lisp_object_t *code_vector) {
     switch (opcode_type(ins)) {
       case ARGS: {
 //        Check the number of arguments passed
-        lt *argc = op_args_arity(ins);
-        if (fixnum_value(argc) > nargs)
-          return signal_exception("Too few arguments passed");
-        else if (fixnum_value(argc) < nargs)
-          return signal_exception("Too many arguments passed");
+//        lt *argc = op_args_arity(ins);
+//        if (fixnum_value(argc) > nargs) {
+//          printf("nargs is %d\n", nargs);
+//          return signal_exception("Too few arguments passed");
+//        } else if (fixnum_value(argc) < nargs) {
+//          printf("nargs is %d\n", nargs);
+//          return signal_exception("Too many arguments passed");
+//        }
 
         lt *args = environment_bindings(env);
         for (int i = fixnum_value(op_args_arity(ins)) - 1; i >= 0; i--) {
@@ -359,6 +363,15 @@ lisp_object_t *run_by_llam(lisp_object_t *code_vector) {
 //        return value, should be left at the top of stack, as the return value, and it
 //        will be used by the expandsion code of `try-with' block, in other word, CATCH
 //        by the language.
+      }
+        break;
+      case RESTARGS: {
+        lt *rest = the_empty_list;
+        for (int i = nargs - fixnum_value(op_restargs_count(ins)); i > 0; i--) {
+          lt *arg = lt_vector_pop(stack);
+          rest = make_pair(arg, rest);
+        }
+        lt_vector_push(stack, rest);
       }
         break;
       case RETURN: {

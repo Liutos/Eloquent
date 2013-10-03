@@ -17,6 +17,7 @@ int debug;
 int is_check_exception;
 int is_check_type;
 /* Opcode */
+int opcode_max_length;
 hash_table_t *prim2op_map;
 /* Symbol */
 lt *the_begin_symbol;
@@ -126,6 +127,7 @@ extern lt *make_op_moveargs(lt *);
 extern lt *make_op_pop(void);
 extern lt *make_op_popenv(void);
 extern lt *make_op_prim(lt *);
+extern lt *make_op_restargs(lt *);
 extern lt *make_op_return(void);
 extern lt *make_op_catch(void);
 extern lt *make_fn_inst(lt *);
