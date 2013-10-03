@@ -80,7 +80,6 @@ int main(int argc, char *argv[])
   };
   init_global_variable();
   init_prims();
-  init_compiled_prims();
   init_macros();
   char *load_expr = "(load \"init.scm\")";
   lt *expr = read_object_from_string(strdup(load_expr));

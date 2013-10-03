@@ -60,11 +60,10 @@ enum TYPE {
 };
 
 enum OPCODE_TYPE {
-  ARGS,
-  ARGSD,
   CALL,
   CATCH,
   CHECKEX,
+  CHKARITY,
   CHKTYPE,
   CONST,
   EXTENV,
@@ -79,6 +78,7 @@ enum OPCODE_TYPE {
   POP,
   POPENV,
   PRIM,
+  RESTARGS,
   RETURN,
 //  Primitive Function Instructions
   ADDI,
@@ -245,9 +245,8 @@ struct string_builder_t {
 #define oparg1(x) opargn(x, 0)
 #define oparg2(x) opargn(x, 1)
 #define oparg3(x) opargn(x, 2)
-#define op_argsd_arity(x) oparg1(x)
-#define op_args_arity(x) oparg1(x)
 #define op_call_arity(x) oparg1(x)
+#define op_chkarity_arity(x) oparg1(x)
 #define op_chktype_pos(x) oparg1(x)
 #define op_chktype_type(x) oparg2(x)
 #define op_chktype_nargs(x) oparg3(x)
@@ -266,5 +265,7 @@ struct string_builder_t {
 #define op_lvar_var(x) oparg3(x)
 #define op_moveargs_count(x) oparg1(x)
 #define op_prim_nargs(x) oparg1(x)
+// The number of required parameters.
+#define op_restargs_count(x) oparg1(x)
 
 #endif /* TYPE_H_ */

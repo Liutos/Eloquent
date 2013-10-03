@@ -17,6 +17,7 @@ int debug;
 int is_check_exception;
 int is_check_type;
 /* Opcode */
+int opcode_max_length;
 hash_table_t *prim2op_map;
 /* Symbol */
 lt *the_begin_symbol;
@@ -108,10 +109,9 @@ extern lt *make_string(char *);
 extern lt *make_symbol(char *, lt *);
 extern lt *make_type(enum TYPE, char *);
 extern lt *make_vector(int);
-extern lt *make_op_args(lt *);
-extern lt *make_op_argsd(lt *);
 extern lt *make_op_call(lt *);
 extern lt *make_op_checkex(void);
+extern lt *make_op_chkarity(lt *);
 extern lt *make_op_chktype(lt *, lt *, lt *);
 extern lt *make_op_const(lt *);
 extern lt *make_op_extenv(lt *);
@@ -126,6 +126,7 @@ extern lt *make_op_moveargs(lt *);
 extern lt *make_op_pop(void);
 extern lt *make_op_popenv(void);
 extern lt *make_op_prim(lt *);
+extern lt *make_op_restargs(lt *);
 extern lt *make_op_return(void);
 extern lt *make_op_catch(void);
 extern lt *make_fn_inst(lt *);

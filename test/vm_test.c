@@ -17,13 +17,16 @@
 int main(int argc, char *argv[])
 {
   char *inputs[] = {
-      "(expand-macro '(flet ((aux (x) (fx+ x 1))) (aux 2)))",
-      "(wc (open-in \"init.scm\"))",
+      "((lambda (x . y) (cons x y)) 1 2 3)",
+      "((lambda (x . y) (cons x y)) 1)",
+      "((lambda (x . y) (cons x y)) 1 2)",
+      "((lambda (x . y) (cons x y)))",
+      "((lambda (x) x) 1 2)",
+      "((lambda (x y)) 1)",
   };
   init_global_variable();
   init_prims();
   init_primitive_opcode();
-  init_compiled_prims();
   init_macros();
   load_init_file();
   for (int i = 0; i < sizeof(inputs) / sizeof(char *); i++) {

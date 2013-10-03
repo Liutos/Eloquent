@@ -25,6 +25,7 @@ int is_check_type;
 lt *gensym_counter;
 lt *null_env;
 /* Opcode */
+int opcode_max_length;
 hash_table_t *prim2op_map;
 /* Package */
 lt *package;
@@ -87,11 +88,10 @@ struct lisp_object_t lt_types[] = {
 #define DEFCODE(name, op) {.type=OPCODE, .u={.opcode={name, op}}}
 
 struct lisp_object_t lt_codes[] = {
-    DEFCODE(ARGS, "ARGS"),
-    DEFCODE(ARGSD, "ARGSD"),
     DEFCODE(CALL, "CALL"),
     DEFCODE(CATCH, "CATCH"),
     DEFCODE(CHECKEX, "CHECKEX"),
+    DEFCODE(CHKARITY, "CHKARITY"),
     DEFCODE(CHKTYPE, "CHKTYPE"),
     DEFCODE(CONST, "CONST"),
     DEFCODE(EXTENV, "EXTENV"),
@@ -106,6 +106,7 @@ struct lisp_object_t lt_codes[] = {
     DEFCODE(POP, "POP"),
     DEFCODE(POPENV, "POPENV"),
     DEFCODE(PRIM, "PRIM"),
+    DEFCODE(RESTARGS, "RESTARGS"),
     DEFCODE(RETURN, "RETURN"),
 //    Opcodes for some primitive functions
     DEFCODE(ADDI, "ADDI"),
@@ -397,20 +398,16 @@ lt *mkopcode(enum OPCODE_TYPE name, char *op, int arity, ...) {
   return make_opcode(name, op, oprands);
 }
 
-lt *make_op_argsd(lt *length) {
-  return mkopcode(ARGSD, "ARGSD", 1, length);
-}
-
-lisp_object_t *make_op_args(lisp_object_t *length) {
-  return mkopcode(ARGS, "ARGS", 1, length);
-}
-
 lisp_object_t *make_op_call(lisp_object_t *arity) {
   return mkopcode(CALL, "CALL", 1, arity);
 }
 
 lt *make_op_checkex(void) {
   return mkopcode(CHECKEX, "CHECKEX", 0);
+}
+
+lt *make_op_chkarity(lt *arity) {
+  return mkopcode(CHKARITY, "CHKARITY", 1, arity);
 }
 
 lt *make_op_chktype(lt *position, lt *target_type, lt *nargs) {
@@ -471,6 +468,10 @@ lisp_object_t *make_op_prim(lisp_object_t *nargs) {
 
 lisp_object_t *make_op_return() {
   return mkopcode(RETURN, "RETURN", 0);
+}
+
+lt *make_op_restargs(lt *count) {
+  return mkopcode(RESTARGS, "RESTARGS", 1, count);
 }
 
 lt *make_op_catch(void) {
@@ -598,6 +599,16 @@ lt *type_ref(enum TYPE type) {
   return &lt_types[type];
 }
 
+void init_opcode_length(void) {
+  int max = 0;
+  for (int i = 0; i < sizeof(lt_codes) / sizeof(*lt_codes); i++) {
+    lt *opcode = &lt_codes[i];
+    if (strlen(opcode_op(opcode)) > max)
+      max = strlen(opcode_op(opcode));
+  }
+  opcode_max_length = max;
+}
+
 void init_packages(void) {
   pkgs = make_empty_list();
   pkg_lisp = ensure_package("Lisp");
@@ -630,6 +641,7 @@ void init_global_variable(void) {
   the_undef = make_undef();
 
   prim2op_map = make_prim2op_map();
+  init_opcode_length();
 //  Packages initialization
   init_packages();
 

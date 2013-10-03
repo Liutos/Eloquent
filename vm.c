@@ -119,6 +119,7 @@ lisp_object_t *run_by_llam(lisp_object_t *code_vector) {
   lt *stack = make_vector(50);
 
   assert(isvector(code_vector));
+//  The number of arguments passed.
   int nargs = 0;
   int pc = 0;
   int throw_exception = TRUE;
@@ -131,45 +132,6 @@ lisp_object_t *run_by_llam(lisp_object_t *code_vector) {
     if (debug)
       writef(standard_out, "ins is %?\n", ins);
     switch (opcode_type(ins)) {
-      case ARGS: {
-//        Check the number of arguments passed
-        lt *argc = op_args_arity(ins);
-        if (fixnum_value(argc) > nargs)
-          return signal_exception("Too few arguments passed");
-        else if (fixnum_value(argc) < nargs)
-          return signal_exception("Too many arguments passed");
-
-        lt *args = environment_bindings(env);
-        for (int i = fixnum_value(op_args_arity(ins)) - 1; i >= 0; i--) {
-          lisp_object_t *arg = lt_vector_pop(stack);
-          vector_value(args)[i] = arg;
-          vector_last(args)++;
-        }
-      }
-        break;
-      case ARGSD: {
-        int req = fixnum_value(op_argsd_arity(ins));
-        if (nargs < req)
-          return signal_exception("Too few arguments passed");
-//        Assume the arity of subprogram is N, then the last nargs - N elements
-//        belongs to the last parameter of this subprogram. Therefore, collects
-//        this nargs - N elements into a list as one argument, and collects
-//        all the remaining arguments into one array.
-        lt *rest = make_empty_list();
-        for (int i = 0; i < nargs - fixnum_value(op_argsd_arity(ins)); i++) {
-          lt *arg = lt_vector_pop(stack);
-          rest = make_pair(arg, rest);
-        }
-        lt_vector_push(stack, rest);
-        lt *args = environment_bindings(env);
-        for (int i = fixnum_value(op_argsd_arity(ins)); i >= 0; i--) {
-          lt *arg = lt_vector_pop(stack);
-          vector_value(args)[i] = arg;
-        }
-//        lt *ret = pair_head(return_stack);
-//        retaddr_sp(ret) = vector_last(stack);
-      }
-        break;
       case CALL: {
         lisp_object_t *func = lt_vector_pop(stack);
         if (isprimitive(func)) {
@@ -224,6 +186,14 @@ lisp_object_t *run_by_llam(lisp_object_t *code_vector) {
           throw_exception = retaddr_throw_flag(ret);
           lt_vector_push(stack, ex);
         }
+        break;
+      case CHKARITY: {
+        int arity = fixnum_value(op_chkarity_arity(ins));
+        if (arity > nargs)
+          return signal_exception("Too few arguments passed");
+        if (arity < nargs)
+          return signal_exception("Too many arguments passed");
+      }
         break;
       case CHKTYPE: {
         lt *index = op_chktype_pos(ins);
@@ -359,6 +329,16 @@ lisp_object_t *run_by_llam(lisp_object_t *code_vector) {
 //        return value, should be left at the top of stack, as the return value, and it
 //        will be used by the expandsion code of `try-with' block, in other word, CATCH
 //        by the language.
+      }
+        break;
+      case RESTARGS: {
+        lt *rest = the_empty_list;
+        while (nargs > fixnum_value(op_restargs_count(ins))) {
+          lt *arg = lt_vector_pop(stack);
+          rest = make_pair(arg, rest);
+          nargs--;
+        }
+        lt_vector_push(stack, rest);
       }
         break;
       case RETURN: {
