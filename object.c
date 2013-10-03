@@ -58,34 +58,34 @@ lt *the_false;
 lt *the_true;
 lt *the_undef;
 
-#define DEFTYPE(tag, name) {.type=TYPE, .u={.type={tag, name}}}
+#define DEFTYPE(tag, name) {.type=LT_TYPE, .u={.type={tag, name}}}
 
 struct lisp_object_t lt_types[] = {
-    DEFTYPE(BOOL, "bool"),
-    DEFTYPE(CHARACTER, "character"),
-    DEFTYPE(EMPTY_LIST, "empty-list"),
-    DEFTYPE(FIXNUM, "fixnum"),
-    DEFTYPE(TCLOSE, "tclose"),
-    DEFTYPE(TEOF, "teof"),
-    DEFTYPE(TUNDEF, "tundef"),
-    DEFTYPE(ENVIRONMENT, "environment"),
-    DEFTYPE(EXCEPTION, "exception"),
-    DEFTYPE(FUNCTION, "function"),
-    DEFTYPE(FLOAT, "float"),
-    DEFTYPE(INPUT_PORT, "input-file"),
-    DEFTYPE(OPCODE, "opcode"),
-    DEFTYPE(OUTPUT_PORT, "output-file"),
-    DEFTYPE(PACKAGE, "package"),
-    DEFTYPE(PAIR, "pair"),
-    DEFTYPE(PRIMITIVE_FUNCTION, "primitive-function"),
-    DEFTYPE(RETADDR, "retaddr"),
-    DEFTYPE(STRING, "string"),
-    DEFTYPE(SYMBOL, "symbol"),
-    DEFTYPE(TYPE, "type"),
-    DEFTYPE(VECTOR, "vector"),
+    DEFTYPE(LT_BOOL, "bool"),
+    DEFTYPE(LT_CHARACTER, "character"),
+    DEFTYPE(LT_EMPTY_LIST, "empty-list"),
+    DEFTYPE(LT_FIXNUM, "fixnum"),
+    DEFTYPE(LT_TCLOSE, "tclose"),
+    DEFTYPE(LT_TEOF, "teof"),
+    DEFTYPE(LT_TUNDEF, "tundef"),
+    DEFTYPE(LT_ENVIRONMENT, "environment"),
+    DEFTYPE(LT_EXCEPTION, "exception"),
+    DEFTYPE(LT_FUNCTION, "function"),
+    DEFTYPE(LT_FLOAT, "float"),
+    DEFTYPE(LT_INPUT_PORT, "input-file"),
+    DEFTYPE(LT_OPCODE, "opcode"),
+    DEFTYPE(LT_OUTPUT_PORT, "output-file"),
+    DEFTYPE(LT_PACKAGE, "package"),
+    DEFTYPE(LT_PAIR, "pair"),
+    DEFTYPE(LT_PRIMITIVE, "primitive-function"),
+    DEFTYPE(LT_RETADDR, "retaddr"),
+    DEFTYPE(LT_STRING, "string"),
+    DEFTYPE(LT_SYMBOL, "symbol"),
+    DEFTYPE(LT_TYPE, "type"),
+    DEFTYPE(LT_VECTOR, "vector"),
 };
 
-#define DEFCODE(name) {.type=OPCODE, .u={.opcode={name, #name}}}
+#define DEFCODE(name) {.type=LT_OPCODE, .u={.opcode={name, #name}}}
 
 struct lisp_object_t lt_codes[] = {
     DEFCODE(CALL),
@@ -138,19 +138,19 @@ int is_of_type(lisp_object_t *object, enum TYPE type) {
     return is_of_type(object, type);            \
   }
 
-mktype_pred(isenvironment, ENVIRONMENT)
-mktype_pred(isexception, EXCEPTION)
-mktype_pred(isfloat, FLOAT)
-mktype_pred(isfunction, FUNCTION)
-mktype_pred(isinput_port, INPUT_PORT)
-mktype_pred(isoutput_port, OUTPUT_PORT)
-mktype_pred(isopcode, OPCODE)
-mktype_pred(ispair, PAIR)
-mktype_pred(isprimitive, PRIMITIVE_FUNCTION)
-mktype_pred(isstring, STRING)
-mktype_pred(issymbol, SYMBOL)
-mktype_pred(istype, TYPE)
-mktype_pred(isvector, VECTOR)
+mktype_pred(isenvironment, LT_ENVIRONMENT)
+mktype_pred(isexception, LT_EXCEPTION)
+mktype_pred(isfloat, LT_FLOAT)
+mktype_pred(isfunction, LT_FUNCTION)
+mktype_pred(isinput_port, LT_INPUT_PORT)
+mktype_pred(isoutput_port, LT_OUTPUT_PORT)
+mktype_pred(isopcode, LT_OPCODE)
+mktype_pred(ispair, LT_PAIR)
+mktype_pred(isprimitive, LT_PRIMITIVE)
+mktype_pred(isstring, LT_STRING)
+mktype_pred(issymbol, LT_SYMBOL)
+mktype_pred(istype, LT_TYPE)
+mktype_pred(isvector, LT_VECTOR)
 
 int is_immediate(lt *object) {
   return ((intptr_t)object & IMMEDIATE_MASK) == IMMEDIATE_TAG;
@@ -194,19 +194,19 @@ int isnumber(lisp_object_t *object) {
 
 int type_of(lisp_object_t *x) {
   if (isboolean(x))
-    return BOOL;
+    return LT_BOOL;
   if (ischar(x))
-    return CHARACTER;
+    return LT_CHARACTER;
   if (isnull(x))
-    return EMPTY_LIST;
+    return LT_EMPTY_LIST;
   if (isfixnum(x))
-    return FIXNUM;
+    return LT_FIXNUM;
   if (isclose(x))
-    return TCLOSE;
+    return LT_TCLOSE;
   if (iseof(x))
-    return TEOF;
+    return LT_TEOF;
   if (isundef(x))
-    return TUNDEF;
+    return LT_TUNDEF;
   assert(is_pointer(x));
   return x->type;
 }
@@ -246,14 +246,14 @@ lt *make_fixnum(int value) {
 }
 
 lt *make_environment(lt *bindings, lt *next) {
-  lt *env = make_object(ENVIRONMENT);
+  lt *env = make_object(LT_ENVIRONMENT);
   environment_bindings(env) = bindings;
   environment_next(env) = next;
   return env;
 }
 
 lt *make_exception(char *message, int signal_flag, lt *tag, lt *backtrace) {
-  lt *ex = make_object(EXCEPTION);
+  lt *ex = make_object(LT_EXCEPTION);
   exception_msg(ex) = message;
   exception_flag(ex) = signal_flag;
   exception_backtrace(ex) = backtrace;
@@ -262,13 +262,13 @@ lt *make_exception(char *message, int signal_flag, lt *tag, lt *backtrace) {
 }
 
 lisp_object_t *make_float(float value) {
-  lisp_object_t *flt_num = make_object(FLOAT);
+  lisp_object_t *flt_num = make_object(LT_FLOAT);
   float_value(flt_num) = value;
   return flt_num;
 }
 
 lt *make_function(lt *cenv, lt *args, lt *code, lt *renv) {
-  lt *func = make_object(FUNCTION);
+  lt *func = make_object(LT_FUNCTION);
   function_cenv(func) = cenv;
   function_args(func) = args;
   function_code(func) = code;
@@ -278,7 +278,7 @@ lt *make_function(lt *cenv, lt *args, lt *code, lt *renv) {
 }
 
 lt *make_input_port(FILE *stream) {
-  lt *inf = make_object(INPUT_PORT);
+  lt *inf = make_object(LT_INPUT_PORT);
   input_port_stream(inf) = stream;
   input_port_linum(inf) = 1;
   input_port_colnum(inf) = 0;
@@ -292,7 +292,7 @@ lt *make_input_string_port(char *str) {
 }
 
 lt *make_output_port(FILE *stream) {
-  lt *outf = make_object(OUTPUT_PORT);
+  lt *outf = make_object(LT_OUTPUT_PORT);
   output_port_stream(outf) = stream;
   output_port_linum(outf) = 1;
   output_port_colnum(outf) = 0;
@@ -306,7 +306,7 @@ lt *make_output_string_port(char *str) {
 }
 
 lt *make_package(lt *name, hash_table_t *symbol_table) {
-  lt *obj = make_object(PACKAGE);
+  lt *obj = make_object(LT_PACKAGE);
   package_name(obj) = name;
   package_symbol_table(obj) = symbol_table;
   package_used_packages(obj) = the_empty_list;
@@ -314,14 +314,14 @@ lt *make_package(lt *name, hash_table_t *symbol_table) {
 }
 
 lisp_object_t *make_pair(lisp_object_t *head, lisp_object_t *tail) {
-  lisp_object_t *pair = make_object(PAIR);
+  lisp_object_t *pair = make_object(LT_PAIR);
   pair_head(pair) = head;
   pair_tail(pair) = tail;
   return pair;
 }
 
 lisp_object_t *make_primitive(int arity, void *C_function, char *Lisp_name, int restp) {
-  lisp_object_t *p = make_object(PRIMITIVE_FUNCTION);
+  lisp_object_t *p = make_object(LT_PRIMITIVE);
   primitive_arity(p) = arity;
   primitive_func(p) = C_function;
   primitive_restp(p) = restp;
@@ -331,7 +331,7 @@ lisp_object_t *make_primitive(int arity, void *C_function, char *Lisp_name, int 
 }
 
 lt *make_retaddr(lt *code, lt *env, lt *fn, int pc, int throw_flag, int sp) {
-  lt *retaddr = make_object(RETADDR);
+  lt *retaddr = make_object(LT_RETADDR);
   retaddr_code(retaddr) = code;
   retaddr_env(retaddr) = env;
   retaddr_fn(retaddr) = fn;
@@ -349,14 +349,14 @@ string_builder_t *make_str_builder(void) {
 }
 
 lt *make_string(char *value) {
-  lt *string = make_object(STRING);
+  lt *string = make_object(LT_STRING);
   string_length(string) = strlen(value);
   string_value(string) = value;
   return string;
 }
 
 lisp_object_t *make_symbol(char *name, lt *package) {
-  lisp_object_t *symbol = make_object(SYMBOL);
+  lisp_object_t *symbol = make_object(LT_SYMBOL);
   symbol_name(symbol) = name;
   symbol_macro(symbol) = the_undef;
   symbol_package(symbol) = package;
@@ -365,14 +365,14 @@ lisp_object_t *make_symbol(char *name, lt *package) {
 }
 
 lt *make_type(enum TYPE type, char *name) {
-  lt *t = make_object(TYPE);
+  lt *t = make_object(LT_TYPE);
   type_tag(t) = type;
   type_name(t) = name;
   return t;
 }
 
 lisp_object_t *make_vector(int length) {
-  lisp_object_t *vector = make_object(VECTOR);
+  lisp_object_t *vector = make_object(LT_VECTOR);
   vector_last(vector) = -1;
   vector_length(vector) = length;
   vector_value(vector) = GC_MALLOC(length * sizeof(lisp_object_t *));
@@ -381,7 +381,7 @@ lisp_object_t *make_vector(int length) {
 
 /* Opcode constructor functions */
 lt *make_opcode(enum OPCODE_TYPE name, char *op, lt *oprands) {
-  lt *obj = make_object(OPCODE);
+  lt *obj = make_object(LT_OPCODE);
   opcode_name(obj) = name;
   opcode_op(obj) = op;
   opcode_oprands(obj) = oprands;

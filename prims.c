@@ -167,13 +167,13 @@ void write_compiled_function(lt *function, int indent, lt *dest) {
 void write_object(lt *x, lt *output_file) {
   assert(x != NULL);
   switch(type_of(x)) {
-    case BOOL:
+    case LT_BOOL:
       if (is_true_object(x))
         write_raw_string("#t", output_file);
       else
         write_raw_string("#f", output_file);
       break;
-    case CHARACTER: {
+    case LT_CHARACTER: {
       int c = character_value(x);
       switch (c) {
         case ' ':
@@ -187,13 +187,13 @@ void write_object(lt *x, lt *output_file) {
       }
     }
       break;
-    case EMPTY_LIST:
+    case LT_EMPTY_LIST:
     	write_raw_string("()", output_file);
     	break;
-    case ENVIRONMENT:
+    case LT_ENVIRONMENT:
       writef(output_file, "#<ENVIRONMENT %? %p>", environment_bindings(x), x);
       break;
-    case EXCEPTION: {
+    case LT_EXCEPTION: {
       writef(output_file, "%S: ", exception_tag(x));
       writef(output_file, "%s\n", make_string(exception_msg(x)));
       lt *backtrace = exception_backtrace(x);
@@ -209,27 +209,27 @@ void write_object(lt *x, lt *output_file) {
       }
     }
       break;
-    case FIXNUM:
+    case LT_FIXNUM:
     	writef(output_file, "%d", x);
     	break;
-    case FLOAT:
+    case LT_FLOAT:
     	writef(output_file, "%f", x);
     	break;
-    case FUNCTION: {
+    case LT_FUNCTION: {
       int indent = output_port_colnum(output_file);
       write_compiled_function(x, indent, output_file);
     }
       break;
-    case INPUT_PORT:
+    case LT_INPUT_PORT:
     	writef(output_file, "#<INPUT-FILE %p>", x);
     	break;
-    case OUTPUT_PORT:
+    case LT_OUTPUT_PORT:
     	writef(output_file, "#<OUTPUT-FILE %p>", x);
     	break;
-    case PACKAGE:
+    case LT_PACKAGE:
       writef(output_file, "#<PACKAGE name: %s>", package_name(x));
       break;
-    case PAIR:
+    case LT_PAIR:
       write_raw_string("(", output_file);
       write_object(pair_head(x), output_file);
       for (x = pair_tail(x); ispair(x); x = pair_tail(x)) {
@@ -242,15 +242,15 @@ void write_object(lt *x, lt *output_file) {
       }
       write_raw_string(")", output_file);
       break;
-    case PRIMITIVE_FUNCTION:
+    case LT_PRIMITIVE:
       write_raw_string("#<PRIMITIVE-FUNCTION ", output_file);
       write_raw_string(primitive_Lisp_name(x), output_file);
       writef(output_file, " %p>", x);
       break;
-    case RETADDR:
+    case LT_RETADDR:
       writef(output_file, "#<RETADDR %p pc: %d>", x, make_fixnum(retaddr_pc(x)));
       break;
-    case STRING: {
+    case LT_STRING: {
       char *value = string_value(x);
       write_raw_string("\"", output_file);
       for (int i = 0; value[i] != '\0'; i++) {
@@ -262,21 +262,21 @@ void write_object(lt *x, lt *output_file) {
       write_raw_string("\"", output_file);
     }
       break;
-    case SYMBOL:
+    case LT_SYMBOL:
     	write_raw_string(symbol_name(x), output_file);
     	break;
-    case TEOF:
+    case LT_TEOF:
     	write_raw_string("#<EOF>", output_file);
     	break;
-    case TUNDEF:
+    case LT_TUNDEF:
       write_raw_string("#<UNDEF>", output_file);
       break;
-    case TYPE:
+    case LT_TYPE:
       write_raw_string("#<TYPE ", output_file);
       write_raw_string(type_name(x), output_file);
       write_raw_char('>', output_file);
       break;
-    case VECTOR: {
+    case LT_VECTOR: {
       lisp_object_t **vector = vector_value(x);
       write_raw_string("[", output_file);
       for (int i = 0; i <= vector_last(x); i++) {
@@ -287,7 +287,7 @@ void write_object(lt *x, lt *output_file) {
       write_raw_string("]", output_file);
     }
       break;
-    case OPCODE: write_opcode(x, output_file); break;
+    case LT_OPCODE: write_opcode(x, output_file); break;
     default :
       fprintf(stdout, "invalid object with type %d", type_of(x));
       exit(1);
@@ -339,9 +339,9 @@ lt *lt_signal_exception(lt *message) {
 
 void init_prim_exception(void) {
   NOREST(1, lt_exception_tag, "exception-tag");
-  SIG("exception-tag", T(EXCEPTION));
+  SIG("exception-tag", T(LT_EXCEPTION));
   NOREST(1, lt_signal_exception, "signal");
-  SIG("signal", T(STRING));
+  SIG("signal", T(LT_STRING));
 }
 
 /* Function */
@@ -455,7 +455,7 @@ void init_prim_function(void) {
   NOREST(1, lt_function_name, "function-name");
   NOREST(1, lt_function_renv, "function-renv");
   NOREST(2, lt_set_function_name, "set-function-name!");
-  SIG("set-function-name!", T(FUNCTION), T(SYMBOL));
+  SIG("set-function-name!", T(LT_FUNCTION), T(LT_SYMBOL));
   NOREST(2, lt_simple_apply, "apply");
 }
 
@@ -656,9 +656,9 @@ lisp_object_t *lt_code_char(lisp_object_t *code) {
 
 void init_prim_char(void) {
   NOREST(1, lt_char_code, "char-code");
-  SIG("char-code", T(CHARACTER));
+  SIG("char-code", T(LT_CHARACTER));
   NOREST(1, lt_code_char, "code-char");
-  SIG("code-char", T(FIXNUM));
+  SIG("code-char", T(LT_FIXNUM));
 }
 
 /* Output File */
@@ -798,7 +798,7 @@ void init_prim_symbol(void) {
   NOREST(0, lt_gensym, "gensym");
   NOREST(2, lt_intern, "intern");
   NOREST(1, lt_is_bound, "bound?");
-  SIG("bound?", T(SYMBOL));
+  SIG("bound?", T(LT_SYMBOL));
   NOREST(2, lt_set_symbol_macro, "set-symbol-macro!");
   NOREST(2, lt_set_symbol_value, "set-symbol-value!");
   NOREST(1, lt_symbol_macro, "symbol-macro");
@@ -1081,7 +1081,7 @@ lt *lt_type_name(lt *type) {
 void init_prim_general(void) {
   /* Type */
   NOREST(1, lt_type_name, "type-name");
-  SIG("type-name", T(TYPE));
+  SIG("type-name", T(LT_TYPE));
   /* General */
   NOREST(1, lt_is_constant, "is-constant?");
   NOREST(2, lt_eq, "eq?");
