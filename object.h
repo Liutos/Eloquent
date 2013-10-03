@@ -109,8 +109,6 @@ extern lt *make_string(char *);
 extern lt *make_symbol(char *, lt *);
 extern lt *make_type(enum TYPE, char *);
 extern lt *make_vector(int);
-extern lt *make_op_args(lt *);
-extern lt *make_op_argsd(lt *);
 extern lt *make_op_call(lt *);
 extern lt *make_op_checkex(void);
 extern lt *make_op_chkarity(lt *);

@@ -106,14 +106,6 @@ lisp_object_t *gen(enum TYPE opcode, ...) {
   va_start(ap, opcode);
   lisp_object_t *ins;
   switch (opcode) {
-    case ARGSD:
-      ins = make_op_argsd(va_arg(ap, lt *));
-      break;
-    case ARGS: {
-      lisp_object_t *length = va_arg(ap, lisp_object_t *);
-      ins = make_op_args(length);
-    }
-      break;
     case CALL:
       ins = make_op_call(va_arg(ap, lisp_object_t *));
       break;
@@ -247,11 +239,11 @@ lisp_object_t *compile_begin(lisp_object_t *exps, lisp_object_t *env) {
 lt *gen_args(lt *args, int nrequired) {
   if (isnull(args))
     return seq(gen(CHKARITY, make_fixnum(nrequired)),
-        gen(ARGS, make_fixnum(nrequired)));
+        gen(MOVEARGS, make_fixnum(nrequired)));
   else if (issymbol(args)) {
     return seq(gen(RESTARGS, make_fixnum(nrequired)),
         gen(CHKARITY, make_fixnum(nrequired)),
-        gen(ARGS, make_fixnum(nrequired + 1)));
+        gen(MOVEARGS, make_fixnum(nrequired + 1)));
   } else if (ispair(args) && issymbol(pair_head(args))) {
     return gen_args(pair_tail(args), nrequired + 1);
   } else {

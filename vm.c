@@ -132,36 +132,6 @@ lisp_object_t *run_by_llam(lisp_object_t *code_vector) {
     if (debug)
       writef(standard_out, "ins is %?\n", ins);
     switch (opcode_type(ins)) {
-      case ARGS: {
-        lt *args = environment_bindings(env);
-        for (int i = fixnum_value(op_args_arity(ins)) - 1; i >= 0; i--) {
-          lisp_object_t *arg = lt_vector_pop(stack);
-          vector_value(args)[i] = arg;
-          vector_last(args)++;
-        }
-      }
-        break;
-      case ARGSD: {
-        int req = fixnum_value(op_argsd_arity(ins));
-        if (nargs < req)
-          return signal_exception("Too few arguments passed");
-//        Assume the arity of subprogram is N, then the last nargs - N elements
-//        belongs to the last parameter of this subprogram. Therefore, collects
-//        this nargs - N elements into a list as one argument, and collects
-//        all the remaining arguments into one array.
-        lt *rest = make_empty_list();
-        for (int i = 0; i < nargs - fixnum_value(op_argsd_arity(ins)); i++) {
-          lt *arg = lt_vector_pop(stack);
-          rest = make_pair(arg, rest);
-        }
-        lt_vector_push(stack, rest);
-        lt *args = environment_bindings(env);
-        for (int i = fixnum_value(op_argsd_arity(ins)); i >= 0; i--) {
-          lt *arg = lt_vector_pop(stack);
-          vector_value(args)[i] = arg;
-        }
-      }
-        break;
       case CALL: {
         lisp_object_t *func = lt_vector_pop(stack);
         if (isprimitive(func)) {

@@ -88,8 +88,6 @@ struct lisp_object_t lt_types[] = {
 #define DEFCODE(name, op) {.type=OPCODE, .u={.opcode={name, op}}}
 
 struct lisp_object_t lt_codes[] = {
-    DEFCODE(ARGS, "ARGS"),
-    DEFCODE(ARGSD, "ARGSD"),
     DEFCODE(CALL, "CALL"),
     DEFCODE(CATCH, "CATCH"),
     DEFCODE(CHECKEX, "CHECKEX"),
@@ -398,14 +396,6 @@ lt *mkopcode(enum OPCODE_TYPE name, char *op, int arity, ...) {
     vector_value(oprands)[i] = va_arg(ap, lt *);
   vector_last(oprands) = arity - 1;
   return make_opcode(name, op, oprands);
-}
-
-lt *make_op_argsd(lt *length) {
-  return mkopcode(ARGSD, "ARGSD", 1, length);
-}
-
-lisp_object_t *make_op_args(lisp_object_t *length) {
-  return mkopcode(ARGS, "ARGS", 1, length);
 }
 
 lisp_object_t *make_op_call(lisp_object_t *arity) {
