@@ -1387,10 +1387,3 @@ void load_init_file(void) {
   lt *file = make_input_port(fp);
   lt_load_file(file);
 }
-
-void init_compiled_prims(void) {
-//  lt *code = seq(gen(ARGS, make_fixnum(1)), gen(LVAR, make_fixnum(0), make_fixnum(0), S("x")), gen(RETURN));
-//  code = assemble(code);
-//  lt *func = make_function(null_env, raw_list(S("x")), code, null_env);
-//  symbol_value(S("identity")) = func;
-}
