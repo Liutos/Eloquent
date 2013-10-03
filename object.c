@@ -93,6 +93,7 @@ struct lisp_object_t lt_codes[] = {
     DEFCODE(CALL, "CALL"),
     DEFCODE(CATCH, "CATCH"),
     DEFCODE(CHECKEX, "CHECKEX"),
+    DEFCODE(CHKARITY, "CHKARITY"),
     DEFCODE(CHKTYPE, "CHKTYPE"),
     DEFCODE(CONST, "CONST"),
     DEFCODE(EXTENV, "EXTENV"),
@@ -413,6 +414,10 @@ lisp_object_t *make_op_call(lisp_object_t *arity) {
 
 lt *make_op_checkex(void) {
   return mkopcode(CHECKEX, "CHECKEX", 0);
+}
+
+lt *make_op_chkarity(lt *arity) {
+  return mkopcode(CHKARITY, "CHKARITY", 1, arity);
 }
 
 lt *make_op_chktype(lt *position, lt *target_type, lt *nargs) {

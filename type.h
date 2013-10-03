@@ -65,6 +65,7 @@ enum OPCODE_TYPE {
   CALL,
   CATCH,
   CHECKEX,
+  CHKARITY,
   CHKTYPE,
   CONST,
   EXTENV,
@@ -249,6 +250,7 @@ struct string_builder_t {
 #define op_argsd_arity(x) oparg1(x)
 #define op_args_arity(x) oparg1(x)
 #define op_call_arity(x) oparg1(x)
+#define op_chkarity_arity(x) oparg1(x)
 #define op_chktype_pos(x) oparg1(x)
 #define op_chktype_type(x) oparg2(x)
 #define op_chktype_nargs(x) oparg3(x)

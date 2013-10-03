@@ -133,16 +133,6 @@ lisp_object_t *run_by_llam(lisp_object_t *code_vector) {
       writef(standard_out, "ins is %?\n", ins);
     switch (opcode_type(ins)) {
       case ARGS: {
-//        Check the number of arguments passed
-//        lt *argc = op_args_arity(ins);
-//        if (fixnum_value(argc) > nargs) {
-//          printf("nargs is %d\n", nargs);
-//          return signal_exception("Too few arguments passed");
-//        } else if (fixnum_value(argc) < nargs) {
-//          printf("nargs is %d\n", nargs);
-//          return signal_exception("Too many arguments passed");
-//        }
-
         lt *args = environment_bindings(env);
         for (int i = fixnum_value(op_args_arity(ins)) - 1; i >= 0; i--) {
           lisp_object_t *arg = lt_vector_pop(stack);
@@ -170,8 +160,6 @@ lisp_object_t *run_by_llam(lisp_object_t *code_vector) {
           lt *arg = lt_vector_pop(stack);
           vector_value(args)[i] = arg;
         }
-//        lt *ret = pair_head(return_stack);
-//        retaddr_sp(ret) = vector_last(stack);
       }
         break;
       case CALL: {
@@ -228,6 +216,14 @@ lisp_object_t *run_by_llam(lisp_object_t *code_vector) {
           throw_exception = retaddr_throw_flag(ret);
           lt_vector_push(stack, ex);
         }
+        break;
+      case CHKARITY: {
+        int arity = fixnum_value(op_chkarity_arity(ins));
+        if (arity > nargs)
+          return signal_exception("Too few arguments passed");
+        if (arity < nargs)
+          return signal_exception("Too many arguments passed");
+      }
         break;
       case CHKTYPE: {
         lt *index = op_chktype_pos(ins);
@@ -367,9 +363,10 @@ lisp_object_t *run_by_llam(lisp_object_t *code_vector) {
         break;
       case RESTARGS: {
         lt *rest = the_empty_list;
-        for (int i = nargs - fixnum_value(op_restargs_count(ins)); i > 0; i--) {
+        while (nargs > fixnum_value(op_restargs_count(ins))) {
           lt *arg = lt_vector_pop(stack);
           rest = make_pair(arg, rest);
+          nargs--;
         }
         lt_vector_push(stack, rest);
       }
