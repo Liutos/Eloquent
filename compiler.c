@@ -78,7 +78,7 @@ lt *asm_second_pass(lt *code, lt *length, lt *labels) {
   while (!isnull(code)) {
     lisp_object_t *ins = pair_head(code);
     if (!is_label(ins)) {
-      assert(isopcode(ins));
+      assert(is_lt_opcode(ins));
       if (is_addr_op(ins))
         ins = change_addr(ins, labels);
       if (opcode_name(ins) == FN)
@@ -93,7 +93,7 @@ lt *asm_second_pass(lt *code, lt *length, lt *labels) {
 }
 
 lisp_object_t *assemble(lisp_object_t *code) {
-  assert(ispair(code));
+  assert(is_lt_pair(code));
   lisp_object_t *ll = asm_first_pass(code);
   lisp_object_t *length = pair_head(ll);
   lisp_object_t *labels = pair_tail(ll);
@@ -195,7 +195,7 @@ lisp_object_t *gen(enum TYPE opcode, ...) {
 
 int is_all_symbol(lisp_object_t *list) {
   while (!isnull(list)) {
-    if (!issymbol(pair_head(list)))
+    if (!is_lt_symbol(pair_head(list)))
       return FALSE;
     list = pair_tail(list);
   }
@@ -240,11 +240,11 @@ lt *gen_args(lt *args, int nrequired) {
   if (isnull(args))
     return seq(gen(CHKARITY, make_fixnum(nrequired)),
         gen(MOVEARGS, make_fixnum(nrequired)));
-  else if (issymbol(args)) {
+  else if (is_lt_symbol(args)) {
     return seq(gen(RESTARGS, make_fixnum(nrequired)),
         gen(CHKARITY, make_fixnum(nrequired)),
         gen(MOVEARGS, make_fixnum(nrequired + 1)));
-  } else if (ispair(args) && issymbol(pair_head(args))) {
+  } else if (is_lt_pair(args) && is_lt_symbol(pair_head(args))) {
     return gen_args(pair_tail(args), nrequired + 1);
   } else {
     printf("Illegal argument list");
@@ -255,7 +255,7 @@ lt *gen_args(lt *args, int nrequired) {
 lt *make_proper_args(lt *args) {
   if (isnull(args))
     return make_empty_list();
-  else if (!ispair(args))
+  else if (!is_lt_pair(args))
     return list1(args);
   else
     return make_pair(pair_head(args), make_proper_args(pair_tail(args)));
@@ -292,8 +292,8 @@ lt *compile_if(lt *pred, lt *then, lt *else_part, lt *env) {
 }
 
 lisp_object_t *is_var_in_frame(lisp_object_t *var, lisp_object_t *bindings) {
-  assert(isnull(bindings) || ispair(bindings));
-  if (ispair(bindings)) {
+  assert(isnull(bindings) || is_lt_pair(bindings));
+  if (is_lt_pair(bindings)) {
     int j = 0;
     while (!isnull(bindings)) {
       if (!isfalse(lt_eq(var, pair_head(bindings))))
@@ -306,12 +306,12 @@ lisp_object_t *is_var_in_frame(lisp_object_t *var, lisp_object_t *bindings) {
 }
 
 lisp_object_t *is_var_in_env(lisp_object_t *symbol, lisp_object_t *env) {
-  assert(issymbol(symbol));
-  assert(isenvironment(env) || isnull_env(env));
+  assert(is_lt_symbol(symbol));
+  assert(is_lt_environment(env) || isnull_env(env));
   int i = 0;
   while (!isnull_env(env)) {
     lt *bindings = environment_bindings(env);
-    assert(isnull(bindings) || ispair(bindings) || isvector(bindings));
+    assert(isnull(bindings) || is_lt_pair(bindings) || is_lt_vector(bindings));
     lisp_object_t *j = is_var_in_frame(symbol, bindings);
     if (j != NULL)
       return make_pair(make_fixnum(i), j);
@@ -333,7 +333,7 @@ lisp_object_t *gen_set(lisp_object_t *symbol, lisp_object_t *env) {
 }
 
 lisp_object_t *gen_var(lisp_object_t *symbol, lisp_object_t *env) {
-  assert(isenvironment(env) || isnull_env(env));
+  assert(is_lt_environment(env) || isnull_env(env));
   lisp_object_t *co = is_var_in_env(symbol, env);
   if (co == NULL)
     return gen(GVAR, symbol);
@@ -345,16 +345,16 @@ lisp_object_t *gen_var(lisp_object_t *symbol, lisp_object_t *env) {
 }
 
 int is_primitive_fun_name(lt *variable, lt *env) {
-  if (issymbol(variable) && is_var_in_env(variable, env))
+  if (is_lt_symbol(variable) && is_var_in_env(variable, env))
     return FALSE;
-  return issymbol(variable) &&
+  return is_lt_symbol(variable) &&
       is_symbol_bound(variable) &&
-      isprimitive(symbol_value(variable));
+      is_lt_primitive(symbol_value(variable));
 }
 
 lt *compile_type_check(lt *prim, lt *nargs) {
   lt *sig = primitive_signature(prim);
-  assert(ispair(sig) || isnull(sig));
+  assert(is_lt_pair(sig) || isnull(sig));
   lt *seq = make_empty_list();
   int i = 0;
   while (!isnull(sig)) {
@@ -368,7 +368,7 @@ lt *compile_type_check(lt *prim, lt *nargs) {
 
 int is_argc_satisfy(int argc, lt *prim_name) {
   lt *fn = symbol_value(prim_name);
-  assert(isprimitive(fn));
+  assert(is_lt_primitive(fn));
   int arity = primitive_arity(fn);
   if (primitive_restp(fn)) {
     arity--;
@@ -386,7 +386,7 @@ lt *compile_tagbody(lt *forms, lt *env) {
     return make_empty_list();
   else {
     lt *form = pair_head(forms);
-    if (issymbol(form))
+    if (is_lt_symbol(form))
       return seq(list1(form), compile_tagbody(pair_tail(forms), env));
     else {
       lt *part1 = compile_object(form, env);
@@ -449,9 +449,9 @@ lt *compile_let(lt *form, lt *env) {
 }
 
 lisp_object_t *compile_object(lisp_object_t *object, lisp_object_t *env) {
-  if (issymbol(object))
+  if (is_lt_symbol(object))
     return gen_var(object, env);
-  if (!ispair(object))
+  if (!is_lt_pair(object))
     return gen(CONST, object);
   if (is_macro_form(object))
     return compile_object(lt_expand_macro(object), env);
@@ -467,7 +467,7 @@ lisp_object_t *compile_object(lisp_object_t *object, lisp_object_t *env) {
   if (is_set_form(object)) {
     if (pair_length(object) != 3)
       return compiler_error("There must and be only two arguments of a set! form");
-    if (!issymbol(second(object)))
+    if (!is_lt_symbol(second(object)))
       return compiler_error("The variable as the first variable must be of type symbol");
     lisp_object_t *value = compile_object(third(object), env);
     lisp_object_t *set = gen_set(second(object), env);
@@ -491,7 +491,7 @@ lisp_object_t *compile_object(lisp_object_t *object, lisp_object_t *env) {
   if (is_tagbody_form(object)) {
     return compile_tagbody(pair_tail(object), env);
   }
-  if (ispair(object)) {
+  if (is_lt_pair(object)) {
     lt *args = pair_tail(object);
     lisp_object_t *fn = pair_head(object);
     return compile_app(fn, args, env);

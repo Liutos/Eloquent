@@ -138,19 +138,19 @@ int is_of_type(lisp_object_t *object, enum TYPE type) {
     return is_of_type(object, type);            \
   }
 
-mktype_pred(isenvironment, LT_ENVIRONMENT)
-mktype_pred(isexception, LT_EXCEPTION)
-mktype_pred(isfloat, LT_FLOAT)
-mktype_pred(isfunction, LT_FUNCTION)
-mktype_pred(isinput_port, LT_INPUT_PORT)
-mktype_pred(isoutput_port, LT_OUTPUT_PORT)
-mktype_pred(isopcode, LT_OPCODE)
-mktype_pred(ispair, LT_PAIR)
-mktype_pred(isprimitive, LT_PRIMITIVE)
-mktype_pred(isstring, LT_STRING)
-mktype_pred(issymbol, LT_SYMBOL)
-mktype_pred(istype, LT_TYPE)
-mktype_pred(isvector, LT_VECTOR)
+mktype_pred(is_lt_environment, LT_ENVIRONMENT)
+mktype_pred(is_lt_exception, LT_EXCEPTION)
+mktype_pred(is_lt_float, LT_FLOAT)
+mktype_pred(is_lt_function, LT_FUNCTION)
+mktype_pred(is_lt_input_port, LT_INPUT_PORT)
+mktype_pred(is_lt_output_port, LT_OUTPUT_PORT)
+mktype_pred(is_lt_opcode, LT_OPCODE)
+mktype_pred(is_lt_pair, LT_PAIR)
+mktype_pred(is_lt_primitive, LT_PRIMITIVE)
+mktype_pred(is_lt_string, LT_STRING)
+mktype_pred(is_lt_symbol, LT_SYMBOL)
+mktype_pred(is_lt_type, LT_TYPE)
+mktype_pred(is_lt_vector, LT_VECTOR)
 
 int is_immediate(lt *object) {
   return ((intptr_t)object & IMMEDIATE_MASK) == IMMEDIATE_TAG;
@@ -177,7 +177,7 @@ int isboolean(lisp_object_t *object) {
 }
 
 int is_signaled(lisp_object_t *object) {
-  return isexception(object) && exception_flag(object) == TRUE;
+  return is_lt_exception(object) && exception_flag(object) == TRUE;
 }
 
 int isdot(lisp_object_t *object) {
@@ -189,7 +189,7 @@ int isnull_env(lt *obj) {
 }
 
 int isnumber(lisp_object_t *object) {
-  return isfixnum(object) || isfloat(object);
+  return isfixnum(object) || is_lt_float(object);
 }
 
 int type_of(lisp_object_t *x) {
@@ -496,7 +496,7 @@ hash_table_t *make_prim2op_map(void) {
 }
 
 lt *search_op4prim(lt *prim) {
-  assert(isprimitive(prim));
+  assert(is_lt_primitive(prim));
   return search_ht(prim, prim2op_map);
 }
 
@@ -505,12 +505,12 @@ void set_op4prim(lt *prim, enum OPCODE_TYPE opcode) {
 }
 
 int isopcode_fn(lt *prim) {
-  assert(isprimitive(prim));
+  assert(is_lt_primitive(prim));
   return search_op4prim(prim) != NULL;
 }
 
 lt *make_fn_inst(lt *prim) {
-  assert(isprimitive(prim));
+  assert(is_lt_primitive(prim));
   lt *opcode = search_op4prim(prim);
   assert(opcode != NULL);
   return make_pair(mkopcode(opcode_name(opcode), 0), the_empty_list);
@@ -518,7 +518,7 @@ lt *make_fn_inst(lt *prim) {
 
 /* Package */
 lt *search_package(char *name, lt *packages) {
-  while (ispair(packages)) {
+  while (is_lt_pair(packages)) {
     lt *pkg = pair_head(packages);
     if (strcmp(string_value(package_name(pkg)), name) == 0)
       return pkg;
@@ -575,7 +575,7 @@ lt *find_symbol(char *name, lt *package) {
   if (sym)
     return sym;
   lt *useds = package_used_packages(package);
-  while (ispair(useds)) {
+  while (is_lt_pair(useds)) {
     lt *pkg = pair_head(useds);
     sym = search_symbol_table(name, package_symbol_table(pkg));
     if (sym)

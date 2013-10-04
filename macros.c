@@ -111,7 +111,7 @@ lt *lt_pset_macro(lt *kvs) {
 
 /* quasiquote */
 lt *quasiq(lt *x) {
-  if (!ispair(x)) {
+  if (!is_lt_pair(x)) {
     if (!isfalse(lt_is_constant(x)))
       return x;
     else
@@ -136,7 +136,7 @@ lt *quasiq(lt *x) {
                 second(pair_head(x)),
                 quasiq(pair_tail(x)));
   }
-  if (ispair(x))
+  if (is_lt_pair(x))
     return list3(LISP("cons"), quasiq(pair_head(x)), quasiq(pair_tail(x)));
   writef(standard_out, "Unknown case of quasiquote %?\n", x);
   exit(1);

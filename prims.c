@@ -86,7 +86,7 @@ void writef(lt *dest, const char *format, ...) {
           write_raw_char(character_value(arg), dest);
           break;
         case 's':
-          assert(isstring(arg));
+          assert(is_lt_string(arg));
           write_raw_string(string_value(arg), dest);
           break;
         case 'p':
@@ -94,7 +94,7 @@ void writef(lt *dest, const char *format, ...) {
           output_port_colnum(dest) += nch;
           break;
         case 'f':
-          assert(isfloat(arg));
+          assert(is_lt_float(arg));
           nch = fprintf(output_port_stream(dest), "%f", float_value(arg));
           output_port_colnum(dest) += nch;
           break;
@@ -107,7 +107,7 @@ void writef(lt *dest, const char *format, ...) {
           write_object(arg, dest);
           break;
         case 'S':
-          assert(issymbol(arg));
+          assert(is_lt_symbol(arg));
           write_object(arg, dest);
           break;
         case '%':
@@ -134,7 +134,7 @@ void write_opcode(lt *opcode, lt *dest) {
 
 void write_compiled_function(lt *function, int indent, lt *dest) {
   writef(dest, "#<COMPILED-FUNCTION %p name: %?\n", function, function_name(function));
-  assert(isvector(function_code(function)));
+  assert(is_lt_vector(function_code(function)));
   for (int i = 0; i < vector_length(function_code(function)); i++) {
     lt *ins = vector_value(function_code(function))[i];
     write_n_spaces(indent, dest);
@@ -199,7 +199,7 @@ void write_object(lt *x, lt *output_file) {
       lt *backtrace = exception_backtrace(x);
       while (!isnull(backtrace)) {
         lt *fn = pair_head(backtrace);
-        if (isfunction(fn))
+        if (is_lt_function(fn))
           writef(output_file, "%?", function_name(pair_head(backtrace)));
         else
           write_raw_string(primitive_Lisp_name(fn), output_file);
@@ -232,7 +232,7 @@ void write_object(lt *x, lt *output_file) {
     case LT_PAIR:
       write_raw_string("(", output_file);
       write_object(pair_head(x), output_file);
-      for (x = pair_tail(x); ispair(x); x = pair_tail(x)) {
+      for (x = pair_tail(x); is_lt_pair(x); x = pair_tail(x)) {
         write_raw_string(" ", output_file);
         write_object(pair_head(x), output_file);
       }
@@ -295,17 +295,17 @@ void write_object(lt *x, lt *output_file) {
 }
 
 int get_char(lt *input) {
-  assert(isinput_port(input));
+  assert(is_lt_input_port(input));
   FILE *in = input_port_stream(input);
   input_port_colnum(input)++;
   return getc(in);
 }
 
 lt *lt_raw_nth(lt *list, int n) {
-  assert(ispair(list));
+  assert(is_lt_pair(list));
   for (int i = 0; i < n; i++) {
     list = pair_tail(list);
-    if (!ispair(list)) {
+    if (!is_lt_pair(list)) {
       char msg[256];
       sprintf(msg, "This list is too short for indexing %d", n);
       return signal_exception(strdup(msg));
@@ -315,10 +315,10 @@ lt *lt_raw_nth(lt *list, int n) {
 }
 
 lt *lt_raw_nthtail(lt *list, int n) {
-  assert(ispair(list));
+  assert(is_lt_pair(list));
   int n2 = n;
   while (n2 > 0) {
-    if (!ispair(list)) {
+    if (!is_lt_pair(list)) {
       fprintf(stdout, "This list is too short for index %d\n", n);
       exit(1);
     }
@@ -350,11 +350,11 @@ lt *lt_eval(lt *form) {
 }
 
 lt *lt_simple_apply(lt *function, lt *args) {
-  assert(isprimitive(function) || isfunction(function));
-  assert(ispair(args) || isnull(args));
+  assert(is_lt_primitive(function) || is_lt_function(function));
+  assert(is_lt_pair(args) || isnull(args));
   lt *arity = make_fixnum(pair_length(args));
   lt *code = the_empty_list;
-  while (ispair(args)) {
+  while (is_lt_pair(args)) {
     lt *arg = pair_head(args);
     code = make_pair(make_op_const(arg), code);
     args = pair_tail(args);
@@ -374,7 +374,7 @@ lt *compress_args(lt *args, int nrequired) {
     args = pair_tail(args);
   }
   lt *rest = make_empty_list();
-  while (ispair(args)) {
+  while (is_lt_pair(args)) {
     rest = make_pair(pair_head(args), rest);
     args = pair_tail(args);
   }
@@ -400,7 +400,7 @@ lt *lt_expand_macro(lt *form) {
   if (is_macro_form(form)) {
     lt *op = pair_head(form);
     lt *proc = macro_fn(op);
-    assert(isprimitive(proc) || isfunction(proc));
+    assert(is_lt_primitive(proc) || is_lt_function(proc));
     lt *result = lt_simple_apply(proc, pair_tail(form));
     return lt_expand_macro(result);
   } else
@@ -409,8 +409,8 @@ lt *lt_expand_macro(lt *form) {
 
 lt *lt_function_arity(lt *function) {
   lt *lt_list_length(lt *);
-  assert(isprimitive(function) || isfunction(function));
-  if (isprimitive(function))
+  assert(is_lt_primitive(function) || is_lt_function(function));
+  if (is_lt_primitive(function))
     return make_fixnum(primitive_arity(function));
   else
     return make_fixnum(pair_length(function_args(function)));
@@ -436,7 +436,7 @@ lt *lt_function_renv(lt *f) {
 lt *lt_load(lt *path) {
   lt *lt_close_in(lt *);
   lt *lt_open_in(lt *);
-  assert(isstring(path));
+  assert(is_lt_string(path));
   lt *file = lt_open_in(path);
   lt *expr = read_object(file);
   while (!iseof(expr)) {
@@ -461,22 +461,22 @@ void init_prim_function(void) {
 
 /* Input Port */
 lt *lt_close_in(lt *file) {
-  assert(isinput_port(file));
+  assert(is_lt_input_port(file));
   fclose(input_port_stream(file));
   input_port_openp(file) = FALSE;
   return make_true();
 }
 
 lt *lt_is_file_open(lt *file) {
-  assert(isinput_port(file) || isoutput_port(file));
-  if (isinput_port(file))
+  assert(is_lt_input_port(file) || is_lt_output_port(file));
+  if (is_lt_input_port(file))
     return booleanize(input_port_openp(file));
   else
     return booleanize(output_port_openp(file));
 }
 
 lt *lt_load_file(lt *file) {
-  assert(isinput_port(file));
+  assert(is_lt_input_port(file));
   lt *expr = read_object(file);
   while (!iseof(expr)) {
     lt_eval(expr);
@@ -491,13 +491,13 @@ lt *lt_make_input_string_port(lt *str) {
 }
 
 lt *lt_open_in(lt *path) {
-  assert(isstring(path));
+  assert(is_lt_string(path));
   FILE *fp = fopen(string_value(path), "r");
   return make_input_port(fp);
 }
 
 lt *lt_read_char(lt *in_port) {
-  assert(isinput_port(in_port));
+  assert(is_lt_input_port(in_port));
   int c = get_char(in_port);
   if (c == EOF)
     return the_eof;
@@ -506,7 +506,7 @@ lt *lt_read_char(lt *in_port) {
 }
 
 lt *lt_read_line(lt *in_port) {
-  assert(isinput_port(in_port));
+  assert(is_lt_input_port(in_port));
   string_builder_t *sb = make_str_builder();
   int c = get_char(in_port);
   while (c != EOF && c != '\n') {
@@ -596,9 +596,9 @@ lisp_object_t *lt_gt(lisp_object_t *n, lisp_object_t *m) {
   assert(isnumber(n) && isnumber(m));
   if (isfixnum(n) && isfixnum(m))
     return booleanize(fixnum_value(n) > fixnum_value(m));
-  if (isfixnum(n) && isfloat(m))
+  if (isfixnum(n) && is_lt_float(m))
     return booleanize(fixnum_value(n) > float_value(m));
-  if (isfloat(n) && isfixnum(m))
+  if (is_lt_float(n) && isfixnum(m))
     return booleanize(float_value(n) > fixnum_value(m));
   else
     return booleanize(float_value(n) > float_value(m));
@@ -613,9 +613,9 @@ lisp_object_t *lt_numeric_eq(lisp_object_t *n, lisp_object_t *m) {
   assert(isnumber(n) && isnumber(m));
   if (isfixnum(n) && isfixnum(m))
     return booleanize(fixnum_value(n) == fixnum_value(m));
-  if (isfixnum(n) && isfloat(m))
+  if (isfixnum(n) && is_lt_float(m))
     return booleanize(fixnum_value(n) == float_value(m));
-  if (isfloat(n) && isfixnum(m))
+  if (is_lt_float(n) && isfixnum(m))
     return booleanize(float_value(n) == fixnum_value(m));
   else
     return booleanize(float_value(n) == float_value(m));
@@ -663,14 +663,14 @@ void init_prim_char(void) {
 
 /* Output File */
 lt *lt_close_out(lt *file) {
-  assert(isoutput_port(file));
+  assert(is_lt_output_port(file));
   fclose(output_port_stream(file));
   output_port_openp(file) = FALSE;
   return make_true();
 }
 
 lt *lt_open_out(lt *path) {
-  assert(isstring(path));
+  assert(is_lt_string(path));
   FILE *fp = fopen(string_value(path), "w");
   return make_output_port(fp);
 }
@@ -724,18 +724,18 @@ void init_prim_package(void) {
 
 /* String */
 lisp_object_t *lt_char_at(lisp_object_t *string, lisp_object_t *index) {
-  assert(isstring(string) && isfixnum(index));
+  assert(is_lt_string(string) && isfixnum(index));
   assert(strlen(string_value(string)) > fixnum_value(index));
   return make_character(string_value(string)[fixnum_value(index)]);
 }
 
 lt *lt_string_length(lt *str) {
-  assert(isstring(str));
+  assert(is_lt_string(str));
   return make_fixnum(string_length(str));
 }
 
 lt *lt_string_set(lt *string, lt *index, lt *new_char) {
-  assert(isstring(string));
+  assert(is_lt_string(string));
   assert(isfixnum(index));
   assert(ischar(new_char));
   string_value(string)[fixnum_value(index)] = character_value(new_char);
@@ -762,7 +762,7 @@ lt *lt_intern(lt *name, lt *pkg_name) {
 }
 
 lt *lt_is_bound(lt *symbol) {
-  assert(issymbol(symbol));
+  assert(is_lt_symbol(symbol));
   return booleanize(!isundef(symbol_value(symbol)));
 }
 
@@ -781,7 +781,7 @@ lt *lt_symbol_macro(lt *symbol) {
 }
 
 lisp_object_t *lt_symbol_name(lisp_object_t *symbol) {
-  assert(issymbol(symbol));
+  assert(is_lt_symbol(symbol));
   return make_string(strdup(symbol_name(symbol)));
 }
 
@@ -790,7 +790,7 @@ lt *lt_symbol_package(lt *symbol) {
 }
 
 lisp_object_t *lt_symbol_value(lisp_object_t *symbol) {
-  assert(issymbol(symbol));
+  assert(is_lt_symbol(symbol));
   return symbol_value(symbol);
 }
 
@@ -809,17 +809,17 @@ void init_prim_symbol(void) {
 
 /* Vector */
 lisp_object_t *lt_is_vector_empty(lisp_object_t *vector) {
-  assert(isvector(vector));
+  assert(is_lt_vector(vector));
   return booleanize(vector_last(vector) <= -1);
 }
 
 lisp_object_t *lt_is_vector_full(lisp_object_t *vector) {
-  assert(isvector(vector));
+  assert(is_lt_vector(vector));
   return booleanize(vector_last(vector) >= vector_length(vector) - 1);
 }
 
 lisp_object_t *lt_list_to_vector(lisp_object_t *list) {
-  assert(ispair(list) || isnull(list));
+  assert(is_lt_pair(list) || isnull(list));
   int len = pair_length(list);
   lisp_object_t *vector = make_vector(len);
   for (int i = 0; i < len; i++) {
@@ -842,7 +842,7 @@ lt *lt_vector_equal(lt *v1, lt *v2) {
 }
 
 lisp_object_t *lt_vector_last_nth(lisp_object_t *vector, lisp_object_t *n) {
-  assert(isvector(vector) && isfixnum(n));
+  assert(is_lt_vector(vector) && isfixnum(n));
   assert(isfalse(lt_is_vector_empty(vector)));
   assert(vector_last(vector) >= fixnum_value(n));
   int index = vector_last(vector) - fixnum_value(n);
@@ -854,7 +854,7 @@ lt *lt_vector_length(lt *vector) {
 }
 
 lisp_object_t *lt_vector_pop(lisp_object_t *vector) {
-  assert(isvector(vector));
+  assert(is_lt_vector(vector));
   if (!isfalse(lt_is_vector_empty(vector))) {
     fprintf(stdout, "The vector is empty\n");
     exit(1);
@@ -864,7 +864,7 @@ lisp_object_t *lt_vector_pop(lisp_object_t *vector) {
 }
 
 lisp_object_t *lt_vector_push(lisp_object_t *vector, lisp_object_t *object) {
-  assert(isvector(vector));
+  assert(is_lt_vector(vector));
   if (!isfalse(lt_is_vector_full(vector))) {
     fprintf(stdout, "The vector is full\n");
     exit(1);
@@ -890,7 +890,7 @@ lt *lt_vector_push_extend(lt *vector, lt *x) {
 }
 
 lisp_object_t *lt_vector_ref(lisp_object_t *vector, lisp_object_t *index) {
-  assert(isvector(vector));
+  assert(is_lt_vector(vector));
   assert(isfixnum(index));
   if (vector_last(vector) < fixnum_value(index))
     return signal_exception("Out of index when referencing a vector element");
@@ -898,7 +898,7 @@ lisp_object_t *lt_vector_ref(lisp_object_t *vector, lisp_object_t *index) {
 }
 
 lt *lt_vector_set(lt *vector, lt *index, lt *new_value) {
-  if (!isvector(vector))
+  if (!is_lt_vector(vector))
     return signal_typerr("VECTOR");
   if (!isfixnum(index))
     return signal_typerr("FIXNUM");
@@ -937,7 +937,7 @@ lt *lt_list_nreverse(lt *list) {
   lt *rhead = the_empty_list;
   lt *rest = list;
   while (!isnull(rest)) {
-    if (!ispair(rest))
+    if (!is_lt_pair(rest))
       return signal_exception("Argument is not a proper list.");
     lt *tmp = pair_tail(rest);
     pair_tail(rest) = rhead;
@@ -960,7 +960,7 @@ lt *raw_list(lt *e0, ...) {
 }
 
 lisp_object_t *lt_head(lisp_object_t *pair) {
-  assert(ispair(pair));
+  assert(is_lt_pair(pair));
   return pair_head(pair);
 }
 
@@ -980,19 +980,19 @@ lt *lt_list_equal(lt *l1, lt *l2) {
 }
 
 lisp_object_t *lt_set_head(lisp_object_t *pair, lisp_object_t *new_head) {
-  assert(ispair(pair));
+  assert(is_lt_pair(pair));
   pair_head(pair) = new_head;
   return pair;
 }
 
 lisp_object_t *lt_set_tail(lisp_object_t *pair, lisp_object_t *new_tail) {
-  assert(ispair(pair));
+  assert(is_lt_pair(pair));
   pair_tail(pair) = new_tail;
   return pair;
 }
 
 lisp_object_t *lt_tail(lisp_object_t *pair) {
-  assert(ispair(pair));
+  assert(is_lt_pair(pair));
   return pair_tail(pair);
 }
 
@@ -1023,9 +1023,9 @@ lt *lt_eql(lt *x, lt *y) {
 lt *lt_equal(lt *x, lt *y) {
   if (!isfalse(lt_eql(x, y)))
     return the_true;
-  if (ispair(x) && ispair(y))
+  if (is_lt_pair(x) && is_lt_pair(y))
     return lt_list_equal(x, y);
-  if (isvector(x) && isvector(y))
+  if (is_lt_vector(x) && is_lt_vector(y))
     return lt_vector_equal(x, y);
   return the_false;
 }
@@ -1033,7 +1033,7 @@ lt *lt_equal(lt *x, lt *y) {
 lt *lt_is_constant(lt *object) {
   if (is_tag_list(object, S("quote")))
     return make_true();
-  if (!ispair(object) && !issymbol(object))
+  if (!is_lt_pair(object) && !is_lt_symbol(object))
     return make_true();
   return make_false();
 }
@@ -1097,7 +1097,7 @@ void init_prim_general(void) {
 
 /* Reader */
 int peek_char(lisp_object_t *input) {
-  assert(isinput_port(input));
+  assert(is_lt_input_port(input));
   FILE *in = input_port_stream(input);
   int c = getc(in);
   ungetc(c, in);
@@ -1105,7 +1105,7 @@ int peek_char(lisp_object_t *input) {
 }
 
 void unget_char(int c, lisp_object_t *input) {
-  assert(isinput_port(input));
+  assert(is_lt_input_port(input));
   ungetc(c, input_port_stream(input));
   input_port_colnum(input)--;
 }
