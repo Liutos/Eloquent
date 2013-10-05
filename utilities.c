@@ -180,5 +180,12 @@ int count1(char byte) {
     count++;
     byte = byte << 1;
   }
-  return count;
+  return count == 0? 1: count;
+}
+
+lt *make_unicode_char(char c) {
+  char *data = GC_MALLOC(2 * sizeof(char));
+  data[0] = c;
+  data[1] = '\0';
+  return make_unicode(data);
 }

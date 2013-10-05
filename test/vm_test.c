@@ -17,7 +17,14 @@
 int main(int argc, char *argv[])
 {
   char *inputs[] = {
+      "#\\a",
+      "#\\space",
+      "(type-of #\\space)",
       "#\\汉",
+      "(type-of #\\汉)",
+      "(type-of #\\a)",
+      "(char-at \"abc\" 0)",
+      "(char-at \"汉字\" 0)",
   };
   init_global_variable();
   init_prims();

@@ -728,10 +728,17 @@ void init_prim_package(void) {
 }
 
 /* String */
-lisp_object_t *lt_char_at(lisp_object_t *string, lisp_object_t *index) {
+lt *lt_char_at(lt *string, lt *index) {
   assert(is_lt_string(string) && isfixnum(index));
-  assert(strlen(string_value(string)) > fixnum_value(index));
-  return make_character(string_value(string)[fixnum_value(index)]);
+  assert(string_length(string) > fixnum_value(index));
+  int k = 0;
+  for (int i = fixnum_value(index); i > 0; i--) {
+    int step = count1(string_value(string)[k]);
+    k += step;
+  }
+  int len = count1(string_value(string)[k]);
+  char *data = strndup(&string_value(string)[k], len);
+  return make_unicode(data);
 }
 
 lt *lt_string_length(lt *str) {
@@ -1162,7 +1169,7 @@ lisp_object_t *read_character(lisp_object_t *input_file) {
       tmp = expect_string("pace", input_file);
       if (is_signaled(tmp))
         return tmp;
-      return make_character(' ');
+      return make_unicode_char(' ');
     case 'n':
       c = peek_char(input_file);
       if (isdelimiter(c))
@@ -1170,17 +1177,9 @@ lisp_object_t *read_character(lisp_object_t *input_file) {
       tmp = expect_string("ewline", input_file);
       if (is_signaled(tmp))
         return tmp;
-      return make_character('\n');
-    default : {
-//      int c2 = peek_char(input_file);
-//      if (isdelimiter(c2))
-//        return make_character(c);
-//      else {
-//        fprintf(stdout, "Unexpected character '%c' after '%c'\n", c2, c);
-//        exit(1);
-//      }
+      return make_unicode_char('\n');
+    default :
       return read_unicode(c, input_file);
-    }
   }
 }
 

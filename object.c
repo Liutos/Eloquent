@@ -82,6 +82,7 @@ struct lisp_object_t lt_types[] = {
     DEFTYPE(LT_STRING, "string"),
     DEFTYPE(LT_SYMBOL, "symbol"),
     DEFTYPE(LT_TYPE, "type"),
+    DEFTYPE(LT_UNICODE, "unicode"),
     DEFTYPE(LT_VECTOR, "vector"),
 };
 
