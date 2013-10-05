@@ -56,6 +56,7 @@ enum TYPE {
   LT_STRING,
   LT_SYMBOL,
   LT_TYPE,
+  LT_UNICODE,
   LT_VECTOR,
 };
 
@@ -167,6 +168,9 @@ struct lisp_object_t {
       char *name;
     } type;
     struct {
+      char *data;
+    } unicode;
+    struct {
       int last, length;
       lt **value;
     } vector;
@@ -231,6 +235,7 @@ struct string_builder_t {
 #define symbol_value(x) ((x)->u.symbol.global_value)
 #define type_tag(x) ((x)->u.type.tag)
 #define type_name(x) ((x)->u.type.name)
+#define unicode_data(x) ((x)->u.unicode.data)
 #define vector_last(x) ((x)->u.vector.last)
 #define vector_length(x) (x->u.vector.length)
 #define vector_value(x) (x->u.vector.value)

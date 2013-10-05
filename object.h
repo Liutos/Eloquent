@@ -108,6 +108,7 @@ extern string_builder_t *make_str_builder(void);
 extern lt *make_string(char *);
 extern lt *make_symbol(char *, lt *);
 extern lt *make_type(enum TYPE, char *);
+extern lt *make_unicode(char *);
 extern lt *make_vector(int);
 extern lt *make_op_call(lt *);
 extern lt *make_op_checkex(void);

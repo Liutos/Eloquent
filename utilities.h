@@ -49,4 +49,7 @@ extern lt *let_body(lt *);
 extern lt *let_vals(lt *);
 extern lt *let_vars(lt *);
 
+/* UTF-8 */
+extern int count1(char);
+
 #endif /* UTILITIES_H_ */

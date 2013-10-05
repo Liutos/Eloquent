@@ -171,3 +171,14 @@ lt *let_vars(lt *bindings) {
   vars = lt_list_nreverse(vars);
   return vars;
 }
+
+/* UTF-8 */
+int count1(char byte) {
+#define MASK 0x8000
+  int count = 0;
+  while ((byte & MASK) == MASK) {
+    count++;
+    byte = byte << 1;
+  }
+  return count;
+}

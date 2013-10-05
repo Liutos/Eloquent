@@ -150,6 +150,7 @@ mktype_pred(is_lt_primitive, LT_PRIMITIVE)
 mktype_pred(is_lt_string, LT_STRING)
 mktype_pred(is_lt_symbol, LT_SYMBOL)
 mktype_pred(is_lt_type, LT_TYPE)
+mktype_pred(is_lt_unicode, LT_UNICODE)
 mktype_pred(is_lt_vector, LT_VECTOR)
 
 int is_immediate(lt *object) {
@@ -369,6 +370,12 @@ lt *make_type(enum TYPE type, char *name) {
   type_tag(t) = type;
   type_name(t) = name;
   return t;
+}
+
+lt *make_unicode(char *data) {
+  lt *obj = make_object(LT_UNICODE);
+  unicode_data(obj) = data;
+  return obj;
 }
 
 lisp_object_t *make_vector(int length) {

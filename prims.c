@@ -276,6 +276,11 @@ void write_object(lt *x, lt *output_file) {
       write_raw_string(type_name(x), output_file);
       write_raw_char('>', output_file);
       break;
+    case LT_UNICODE:
+      write_raw_string("#\\", output_file);
+      for (int i = 0; unicode_data(x)[i] != '\0'; i++)
+        write_raw_char(unicode_data(x)[i], output_file);
+      break;
     case LT_VECTOR: {
       lisp_object_t **vector = vector_value(x);
       write_raw_string("[", output_file);
@@ -1130,6 +1135,22 @@ lt *expect_string(char *target, lisp_object_t *input_file) {
   return the_empty_list;
 }
 
+char read_raw_byte(lt *iport) {
+  lt *c = lt_read_char(iport);
+  return character_value(c);
+}
+
+lt *read_unicode(char b1, lt *iport) {
+  int n1 = count1(b1);
+  char *data = GC_MALLOC((n1 + 1) * sizeof(char));
+  data[0] = b1;
+  data[n1] = '\0';
+  for (int i = 1; i < n1; i++) {
+    data[i] = read_raw_byte(iport);
+  }
+  return make_unicode(data);
+}
+
 lisp_object_t *read_character(lisp_object_t *input_file) {
   int c = get_char(input_file);
   lt *tmp;
@@ -1151,13 +1172,14 @@ lisp_object_t *read_character(lisp_object_t *input_file) {
         return tmp;
       return make_character('\n');
     default : {
-      int c2 = peek_char(input_file);
-      if (isdelimiter(c2))
-        return make_character(c);
-      else {
-        fprintf(stdout, "Unexpected character '%c' after '%c'\n", c2, c);
-        exit(1);
-      }
+//      int c2 = peek_char(input_file);
+//      if (isdelimiter(c2))
+//        return make_character(c);
+//      else {
+//        fprintf(stdout, "Unexpected character '%c' after '%c'\n", c2, c);
+//        exit(1);
+//      }
+      return read_unicode(c, input_file);
     }
   }
 }
