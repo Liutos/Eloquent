@@ -20,7 +20,6 @@ int main(int argc, char *argv[]) {
   lt *script_name = the_undef;
   init_global_variable();
   init_prims();
-  init_primitive_opcode();
   init_macros();
   load_init_file();
 

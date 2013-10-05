@@ -34,29 +34,29 @@ enum {
 /* TODO: Implements the arbitrary precision arithmetic numeric types. */
 enum TYPE {
   /* tagged-pointer */
-  BOOL,
-  CHARACTER,
-  EMPTY_LIST,
-  FIXNUM,
-  TCLOSE,
-  TEOF,
-  TUNDEF,
+  LT_BOOL,
+  LT_CHARACTER,
+  LT_EMPTY_LIST,
+  LT_FIXNUM,
+  LT_TCLOSE,
+  LT_TEOF,
+  LT_TUNDEF,
   /* tagged-union */
-  ENVIRONMENT,
-  EXCEPTION,
-  FUNCTION,
-  FLOAT,
-  INPUT_PORT,
-  OPCODE,
-  OUTPUT_PORT,
-  PACKAGE,
-  PAIR,
-  PRIMITIVE_FUNCTION,
-  RETADDR,
-  STRING,
-  SYMBOL,
-  TYPE,
-  VECTOR,
+  LT_ENVIRONMENT,
+  LT_EXCEPTION,
+  LT_FUNCTION,
+  LT_FLOAT,
+  LT_INPUT_PORT,
+  LT_OPCODE,
+  LT_OUTPUT_PORT,
+  LT_PACKAGE,
+  LT_PAIR,
+  LT_PRIMITIVE,
+  LT_RETADDR,
+  LT_STRING,
+  LT_SYMBOL,
+  LT_TYPE,
+  LT_VECTOR,
 };
 
 enum OPCODE_TYPE {
@@ -114,10 +114,6 @@ struct lisp_object_t {
       lt *args;
       lt *name;
     } function;
-    struct {
-      int colnum, index, linum;
-      char *value;
-    } input_string;
     struct {
       enum OPCODE_TYPE name;
       char *op;

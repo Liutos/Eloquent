@@ -24,7 +24,7 @@ lt *booleanize(int value) {
 }
 
 int is_label(lt *object) {
-  return issymbol(object);
+  return is_lt_symbol(object);
 }
 
 int is_symbol_bound(lt *symbol) {
@@ -32,18 +32,18 @@ int is_symbol_bound(lt *symbol) {
 }
 
 int is_macro_form(lt *form) {
-  if (!ispair(form))
+  if (!is_lt_pair(form))
     return FALSE;
-  if (!issymbol(pair_head(form)))
+  if (!is_lt_symbol(pair_head(form)))
     return FALSE;
   lt *symbol = pair_head(form);
-  if (isfunction(symbol_macro(symbol)) || isprimitive(symbol_macro(symbol)))
+  if (is_lt_function(symbol_macro(symbol)) || is_lt_primitive(symbol_macro(symbol)))
     return TRUE;
   return FALSE;
 }
 
 int is_tag_list(lisp_object_t *object, lisp_object_t *tag) {
-  return ispair(object) && (pair_head(object) == tag);
+  return is_lt_pair(object) && (pair_head(object) == tag);
 }
 
 #define deform_pred(func_name, symbol_name) \
@@ -100,7 +100,7 @@ int pair_length(lisp_object_t *pair) {
     return 0;
   int length = 0;
   while (!isnull(pair)) {
-    assert(ispair(pair));
+    assert(is_lt_pair(pair));
     length++;
     pair = pair_tail(pair);
   }

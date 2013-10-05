@@ -18,23 +18,23 @@
 void add_local_variable(lt *var, lt *env) {
   if (isnull_env(env))
     return;
-  assert(isvector(environment_bindings(env)));
+  assert(is_lt_vector(environment_bindings(env)));
   lt_vector_push_extend(environment_bindings(env), make_undef());
 }
 
 lt *walk_in_env(lt *env, int n) {
-  assert(isenvironment(env));
+  assert(is_lt_environment(env));
   while (n-- > 0)
     env = environment_next(env);
   return env;
 }
 
 lisp_object_t *find_in_frame(lisp_object_t *bindings, int j) {
-  assert(ispair(bindings) || isvector(bindings));
-  if (ispair(bindings)) {
+  assert(is_lt_pair(bindings) || is_lt_vector(bindings));
+  if (is_lt_pair(bindings)) {
     bindings = lt_raw_nthtail(bindings, j);
     return pair_head(bindings);
-  } else if (isvector(bindings)) {
+  } else if (is_lt_vector(bindings)) {
     return vector_value(bindings)[j];
   }
   fprintf(stdout, "Impossible!!! variable not found!\n");
@@ -42,23 +42,23 @@ lisp_object_t *find_in_frame(lisp_object_t *bindings, int j) {
 }
 
 lisp_object_t *locate_var(lisp_object_t *env, int i, int j) {
-  assert(isenvironment(env) || isnull_env(env));
+  assert(is_lt_environment(env) || isnull_env(env));
   env = walk_in_env(env, i);
   return find_in_frame(environment_bindings(env), j);
 }
 
 lisp_object_t *raw_vector_ref(lisp_object_t *vector, int index) {
-  assert(isvector(vector));
+  assert(is_lt_vector(vector));
   return vector_value(vector)[index];
 }
 
 void set_in_frame(lisp_object_t *bindings, int j, lisp_object_t *value) {
-  assert(ispair(bindings) || isvector(bindings));
-  if (ispair(bindings)) {
+  assert(is_lt_pair(bindings) || is_lt_vector(bindings));
+  if (is_lt_pair(bindings)) {
     bindings = lt_raw_nthtail(bindings, j);
     pair_head(bindings) = value;
     return;
-  } else if (isvector(bindings)) {
+  } else if (is_lt_vector(bindings)) {
     vector_value(bindings)[j] = value;
     return;
   }
@@ -74,11 +74,11 @@ void set_local_var(lisp_object_t *env, int i, int j, lisp_object_t *value) {
 int is_type_satisfy(lt *arg, lt *pred) {
   if (pred == S("object"))
     return TRUE;
-  else if (istype(pred))
+  else if (is_lt_type(pred))
     return !isfalse(lt_is_kind_of(arg, pred));
   else if (is_tag_list(pred, S("or"))) {
     lt *types = pair_tail(pred);
-    while (ispair(types)) {
+    while (is_lt_pair(types)) {
       lt *t = pair_head(types);
       if (is_type_satisfy(arg, t) == TRUE)
         return TRUE;
@@ -103,7 +103,7 @@ lt *type_error(lt *index, lt *pred) {
 
 lt *comp2run_env(lt *comp_env, lt *next) {
   lt *pars = environment_bindings(comp_env);
-  assert(ispair(pars) || isnull(pars));
+  assert(is_lt_pair(pars) || isnull(pars));
   int len = pair_length(pars);
   return make_environment(make_vector(len), next);
 }
@@ -118,7 +118,7 @@ lisp_object_t *run_by_llam(lisp_object_t *code_vector) {
 
   lt *stack = make_vector(50);
 
-  assert(isvector(code_vector));
+  assert(is_lt_vector(code_vector));
 //  The number of arguments passed.
   int nargs = 0;
   int pc = 0;
@@ -134,7 +134,7 @@ lisp_object_t *run_by_llam(lisp_object_t *code_vector) {
     switch (opcode_type(ins)) {
       case CALL: {
         lisp_object_t *func = lt_vector_pop(stack);
-        if (isprimitive(func)) {
+        if (is_lt_primitive(func)) {
 //        	This is possible because the first element of a application list
 //        	might be a compound expression, and this compound one will return
 //        	a primitive function object at run-time, but the compiler is unable
@@ -143,7 +143,7 @@ lisp_object_t *run_by_llam(lisp_object_t *code_vector) {
         	lt_vector_push(stack, func);
         	goto call_primitive;
         }
-        if (!isfunction(func)) {
+        if (!is_lt_function(func)) {
           char msg[1000];
           FILE *fp = fmemopen(msg, sizeof(msg), "w");
           lt *file = make_output_port(fp);
@@ -291,7 +291,7 @@ lisp_object_t *run_by_llam(lisp_object_t *code_vector) {
         }
 
         lisp_object_t *val = NULL;
-        assert(isprimitive(func));
+        assert(is_lt_primitive(func));
 //        Preprocess the arguments on the stack if the primitive function takes
 //        a rest flag.
         if (primitive_restp(func) == TRUE) {
