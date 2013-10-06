@@ -17,10 +17,12 @@
 int main(int argc, char *argv[])
 {
   char *inputs[] = {
-      "(type-of 1)",
-      "(type-of 1.1)",
-      "(type-of 0)",
-      "(type-of 9876543210123456789)",
+      "(bin+ 1 1)",
+      "(bin+ 1 1.1)",
+      "(bin+ 1 9876543210)",
+      "(bin- 1 1)",
+      "(bin- 1 1.1)",
+      "(bin- 1 9876543210)",
   };
   init_global_variable();
   init_prims();

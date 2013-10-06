@@ -55,6 +55,9 @@
 (define is-type? (x type)
   (eq? type (type-name (type-of x))))
 
+(define bignum? (x)
+  (is-type? x 'bignum))
+
 (define eof? (x)
   (is-type? x 'teof))
 
@@ -146,46 +149,49 @@
          (fx->bg n))
         (else (signal "Unknown convert rule."))))
 
-(defmacro define-bin-arith (name lop hop)
+(defmacro define-bin-arith (name fxop fpop bgop)
   (let ((n (gensym))
         (m (gensym)))
     `(define ,name (,n ,m)
-       (cond ((and2 (fixnum? ,n) (fixnum? ,m)) (,lop ,n ,m))
-             ((and2 (fixnum? ,n) (float? ,m)) (,hop (fx->fp ,n) ,m))
-             ((and2 (float? ,n) (fixnum? ,m)) (,hop ,n (fx->fp ,m)))
-             ((and2 (float? ,n) (float? ,m)) (,hop ,n ,m))
+       (cond ((and2 (fixnum? ,n) (fixnum? ,m)) (,fxop ,n ,m))
+             ((and2 (fixnum? ,n) (float? ,m)) (,fpop (fx->fp ,n) ,m))
+             ((and2 (fixnum? ,n) (bignum? ,m)) (,bgop (fx->bg ,n) ,m))
+             ((and2 (float? ,n) (fixnum? ,m)) (,fpop ,n (fx->fp ,m)))
+             ((and2 (float? ,n) (float? ,m)) (,fpop ,n ,m))
+             ((and2 (bignum? ,n) (fixnum? ,m)) (,bgop ,n (fx->bg ,m)))
+             ((and2 (bignum? ,n) (bignum? ,m)) (,bgop ,n ,m))
              (else (signal "The operation between these two types of arguments is not supported."))))))
 
 ;; +
-(define-bin-arith bin+ fx+ fp+)
+(define-bin-arith bin+ fx+ fp+ bg+)
 
 (define + ns
   (cond ((null? ns) 0)
         (else (reduce ns bin+))))
 
 ;; -
-(define-bin-arith bin- fx- fp-)
+(define-bin-arith bin- fx- fp- bg-)
 
 (define - (n . ns)
   (cond ((null? ns) (bin- 0 n))
         (else (bin- n (reduce ns bin+)))))
 
 ;; *
-(define-bin-arith bin* fx* fp*)
+(define-bin-arith bin* fx* fp* bg*)
 
 (define * ns
   (cond ((null? ns) 1)
         (else (reduce ns bin*))))
 
 ;; /
-(define-bin-arith bin/ fx/ fp/)
-
-;; =
-(define-bin-arith = fx= fp=)
+(define-bin-arith bin/ fx/ fp/ bg/)
 
 (define / (n . ns)
   (cond ((null? ns) (bin/ 1 n))
         (else (bin/ n (reduce ns bin*)))))
+
+;; =
+(define-bin-arith = fx= fp= bg=)
 
 (define < (n m)
   (cond ((> n m) #f)
