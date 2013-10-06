@@ -229,6 +229,9 @@ void write_object(lt *x, lt *output_file) {
     case LT_INPUT_PORT:
     	writef(output_file, "#<INPUT-FILE %p>", x);
     	break;
+    case LT_MPFLONUM:
+      mpf_out_str(output_port_stream(output_file), 10, 6, mpflonum_value(x));
+      break;
     case LT_OUTPUT_PORT:
     	writef(output_file, "#<OUTPUT-FILE %p>", x);
     	break;
@@ -1250,16 +1253,27 @@ lisp_object_t *read_character(lisp_object_t *input_file) {
   }
 }
 
-lisp_object_t *read_float(lisp_object_t *input_file, int integer) {
+lt *make_flonum(float value, char *lit) {
+  if (value < 0) {
+    mpf_t num;
+    mpf_init(num);
+    mpf_set_str(num, lit, 10);
+    return make_mpflonum(num);
+  } else
+    return make_float(value);
+}
+
+lisp_object_t *read_float(lisp_object_t *input_file, int integer, string_builder_t *sb) {
   int e = 1;
-  int sum = 0;
+  float sum = 0;
   int c = get_char(input_file);
   for (; isdigit(c); c = get_char(input_file)) {
     e *= 10;
     sum = sum * 10 + c - '0';
+    sb_add_char(sb, c);
   }
   unget_char(c, input_file);
-  return make_float(integer + sum * 1.0 / e);
+  return make_flonum(integer + sum / e, sb2string(sb));
 }
 
 lt *make_integer(int sign, int sum, char *lit) {
@@ -1283,7 +1297,7 @@ lt *read_fixnum(lt *input_file, int sign, char start) {
     sum = sum * 10 + c - '0';
   }
   if (c == '.') {
-    lt *num = read_float(input_file, sum);
+    lt *num = read_float(input_file, sum, sb);
     float_value(num) *= sign;
     return num;
   } else
