@@ -17,10 +17,7 @@
 int main(int argc, char *argv[])
 {
   char *inputs[] = {
-      "(set! n (nt-convert 1 'fixnum 'float))",
-      "(set! m (nt-convert 1 'fixnum 'bignum))",
-      "(type-of n)",
-      "(type-of m)",
+      "(write-line \"abc\")",
   };
   init_global_variable();
   init_prims();

@@ -284,8 +284,14 @@ void write_object(lt *x, lt *output_file) {
       break;
     case LT_UNICODE:
       write_raw_string("#\\", output_file);
-      for (int i = 0; unicode_data(x)[i] != '\0'; i++)
-        write_raw_char(unicode_data(x)[i], output_file);
+      if (unicode_data(x)[0] == ' ')
+        write_raw_string("space", output_file);
+      else if (unicode_data(x)[0] == '\n')
+        write_raw_string("newline", output_file);
+      else {
+        for (int i = 0; unicode_data(x)[i] != '\0'; i++)
+          write_raw_char(unicode_data(x)[i], output_file);
+      }
       break;
     case LT_VECTOR: {
       lisp_object_t **vector = vector_value(x);
@@ -740,7 +746,9 @@ lt *lt_open_out(lt *path) {
 }
 
 lt *lt_write_char(lt *c, lt *dest) {
-  write_raw_char(character_value(c), dest);
+  for (int i = 0; unicode_data(c)[i] != '\0'; i++) {
+    write_raw_char(unicode_data(c)[i], dest);
+  }
   return c;
 }
 

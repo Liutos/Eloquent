@@ -153,7 +153,8 @@
        (cond ((and2 (fixnum? ,n) (fixnum? ,m)) (,lop ,n ,m))
              ((and2 (fixnum? ,n) (float? ,m)) (,hop (fx->fp ,n) ,m))
              ((and2 (float? ,n) (fixnum? ,m)) (,hop ,n (fx->fp ,m)))
-             (else (,hop ,n ,m))))))
+             ((and2 (float? ,n) (float? ,m)) (,hop ,n ,m))
+             (else (signal "The operation between these two types of arguments is not supported."))))))
 
 ;; +
 (define-bin-arith bin+ fx+ fp+)
