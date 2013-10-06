@@ -17,7 +17,10 @@
 int main(int argc, char *argv[])
 {
   char *inputs[] = {
-      "(write-line \"abc\")",
+      "(type-of 1)",
+      "(type-of 1.1)",
+      "(type-of 0)",
+      "(type-of 9876543210123456789)",
   };
   init_global_variable();
   init_prims();

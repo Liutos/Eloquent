@@ -1262,19 +1262,33 @@ lisp_object_t *read_float(lisp_object_t *input_file, int integer) {
   return make_float(integer + sum * 1.0 / e);
 }
 
-lisp_object_t *read_fixnum(lisp_object_t *input_file, int sign, char start) {
+lt *make_integer(int sign, int sum, char *lit) {
+#define FIXNUM_MAX ((2 << 29) - 1)
+  if (sum > FIXNUM_MAX || sum < 0) {
+    mpz_t num;
+    mpz_init(num);
+    mpz_set_str(num, lit, 10);
+    return make_bignum(num);
+  } else
+    return make_fixnum(sum);
+}
+
+lt *read_fixnum(lt *input_file, int sign, char start) {
+  string_builder_t *sb = make_str_builder();
+  sb_add_char(sb, start);
   int sum = start - '0';
   int c = get_char(input_file);
   for (; isdigit(c); c = get_char(input_file)) {
+    sb_add_char(sb, c);
     sum = sum * 10 + c - '0';
   }
   if (c == '.') {
-    lt *flonum = read_float(input_file, sum);
-    float_value(flonum) = sign * float_value(flonum);
-    return flonum;
+    lt *num = read_float(input_file, sum);
+    float_value(num) *= sign;
+    return num;
   } else
     unget_char(c, input_file);
-  return make_fixnum(sign * sum);
+  return make_integer(sign, sum, sb2string(sb));
 }
 
 lisp_object_t *read_pair(lisp_object_t *input_file) {

@@ -49,6 +49,7 @@ enum TYPE {
   LT_FUNCTION,
   LT_FLOAT,
   LT_INPUT_PORT,
+  LT_MPFLONUM,
   LT_OPCODE,
   LT_OUTPUT_PORT,
   LT_PACKAGE,
@@ -120,6 +121,9 @@ struct lisp_object_t {
       lt *args;
       lt *name;
     } function;
+    struct {
+      mpf_t value;
+    } mpflonum;
     struct {
       enum OPCODE_TYPE name;
       char *op;
@@ -211,6 +215,7 @@ struct string_builder_t {
 #define input_port_stream(x) ((x)->u.port.stream)
 #define input_port_linum(x) ((x)->u.port.linum)
 #define input_port_openp(x) ((x)->u.port.openp)
+#define mpflonum_value(x) ((x)->u.mpflonum.value)
 #define opcode_name(x) ((x)->u.opcode.name)
 #define opcode_op(x) ((x)->u.opcode.op)
 #define opcode_oprands(x) ((x)->u.opcode.oprands)

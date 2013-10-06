@@ -102,6 +102,7 @@ extern lt *make_float(float);
 extern lt *make_function(lt *cenv, lt *args, lt *code, lt *renv);
 extern lt *make_input_port(FILE *);
 extern lt *make_input_string_port(char *);
+extern lt *make_mpflonum(mpf_t);
 extern lt *make_output_port(FILE *);
 extern lt *make_output_string_port(char *);
 extern lt *make_package(lt *, hash_table_t *);

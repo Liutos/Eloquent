@@ -302,6 +302,12 @@ lt *make_input_string_port(char *str) {
   return make_input_port(stream);
 }
 
+lt *make_mpflonum(mpf_t value) {
+  lt *obj = make_object(LT_MPFLONUM);
+  *mpflonum_value(obj) = *value;
+  return obj;
+}
+
 lt *make_output_port(FILE *stream) {
   lt *outf = make_object(LT_OUTPUT_PORT);
   output_port_stream(outf) = stream;
