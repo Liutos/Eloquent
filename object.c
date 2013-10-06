@@ -75,6 +75,7 @@ struct lisp_object_t lt_types[] = {
     DEFTYPE(LT_FUNCTION, "function"),
     DEFTYPE(LT_FLOAT, "float"),
     DEFTYPE(LT_INPUT_PORT, "input-file"),
+    DEFTYPE(LT_MPFLONUM, "mpflonum"),
     DEFTYPE(LT_OPCODE, "opcode"),
     DEFTYPE(LT_OUTPUT_PORT, "output-file"),
     DEFTYPE(LT_PACKAGE, "package"),
@@ -147,6 +148,7 @@ mktype_pred(is_lt_exception, LT_EXCEPTION)
 mktype_pred(is_lt_float, LT_FLOAT)
 mktype_pred(is_lt_function, LT_FUNCTION)
 mktype_pred(is_lt_input_port, LT_INPUT_PORT)
+mktype_pred(is_lt_mpflonum, LT_MPFLONUM)
 mktype_pred(is_lt_output_port, LT_OUTPUT_PORT)
 mktype_pred(is_lt_opcode, LT_OPCODE)
 mktype_pred(is_lt_pair, LT_PAIR)

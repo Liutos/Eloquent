@@ -590,6 +590,13 @@ lt *lt_bg_eq(lt *n, lt *m) {
   return booleanize(mpz_cmp(bignum_value(n), bignum_value(m)) == 0);
 }
 
+lt *lt_bg2mpf(lt *n) {
+  mpf_t num;
+  mpf_init(num);
+  mpf_set_z(num, bignum_value(n));
+  return make_mpflonum(num);
+}
+
 lt *lt_mkbg(lt *str) {
   mpz_t num;
   mpz_init(num);
@@ -631,6 +638,13 @@ lt *lt_fx2fp(lt *n) {
   return make_float(fixnum_value(n));
 }
 
+lt *lt_fx2mpf(lt *n) {
+  mpf_t num;
+  mpf_init(num);
+  mpf_set_si(num, fixnum_value(n));
+  return make_mpflonum(num);
+}
+
 /* Arithmetic Operations for Floating-Point Number */
 lt *lt_fp_add(lt *n, lt *m) {
   return make_float(float_value(n) + float_value(m));
@@ -652,6 +666,13 @@ lt *lt_fp_div(lt *n, lt *m) {
 
 lt *lt_fp_eq(lt *n, lt *m) {
   return booleanize(float_value(n) == float_value(m));
+}
+
+lt *lt_fp2mpf(lt *n) {
+  mpf_t num;
+  mpf_init(num);
+  mpf_set_d(num, float_value(n));
+  return make_mpflonum(num);
 }
 
 /** MPFLONUM **/
@@ -724,10 +745,12 @@ void init_prim_arithmetic(void) {
   NOREST(2, lt_bg_mul, "bg*");
   NOREST(2, lt_bg_div, "bg/");
   NOREST(2, lt_bg_eq, "bg=");
+  NOREST(1, lt_bg2mpf, "bg->mpf");
   NOREST(1, lt_mkbg, "make-bignum");
   /* For Fixnum */
   NOREST(1, lt_fx2bg, "fx->bg");
   NOREST(1, lt_fx2fp, "fx->fp");
+  NOREST(1, lt_fx2mpf, "fx->mpf");
   NOREST(2, lt_fx_add, "fx+");
   NOREST(2, lt_fx_div, "fx/");
   NOREST(2, lt_fx_eq, "fx=");
@@ -740,6 +763,7 @@ void init_prim_arithmetic(void) {
   NOREST(2, lt_fp_eq, "fp=");
   NOREST(2, lt_fp_mul, "fp*");
   NOREST(2, lt_fp_sub, "fp-");
+  NOREST(1, lt_fp2mpf, "fp->mpf");
   NOREST(1, lt_nt_level, "nt-level");
   /* MPFlonum */
   NOREST(2, lt_mpf_add, "mpf+");

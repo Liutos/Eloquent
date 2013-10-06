@@ -70,6 +70,9 @@
 (define function? (x)
   (is-type? x 'function))
 
+(define mpflonum? (x)
+  (is-type? x 'mpflonum))
+
 (define primitive? (x)
   (is-type? x 'primitive-function))
 
@@ -149,49 +152,58 @@
          (fx->bg n))
         (else (signal "Unknown convert rule."))))
 
-(defmacro define-bin-arith (name fxop fpop bgop)
+(defmacro define-bin-arith (name fxop fpop bgop mpfop)
   (let ((n (gensym))
         (m (gensym)))
     `(define ,name (,n ,m)
        (cond ((and2 (fixnum? ,n) (fixnum? ,m)) (,fxop ,n ,m))
              ((and2 (fixnum? ,n) (float? ,m)) (,fpop (fx->fp ,n) ,m))
              ((and2 (fixnum? ,n) (bignum? ,m)) (,bgop (fx->bg ,n) ,m))
-             ((and2 (float? ,n) (fixnum? ,m)) (,fpop ,n (fx->fp ,m)))
+             ((and2 (fixnum? ,n) (mpflonum? ,m)) (,mpfop (fx->mpf ,n) ,m))
+             ((and2 (float? ,n) (fixnum? ,m)) (,name ,m ,n))
              ((and2 (float? ,n) (float? ,m)) (,fpop ,n ,m))
-             ((and2 (bignum? ,n) (fixnum? ,m)) (,bgop ,n (fx->bg ,m)))
+             ((and2 (float? ,n) (bignum? ,m)) (,mpfop (fp->mpf ,n) (bg->mpf ,m)))
+             ((and2 (float? ,n) (mpflonum? ,m)) (,mpfop (fp->mpf ,n) ,m))
+             ((and2 (bignum? ,n) (fixnum? ,m)) (,name ,m ,n))
+             ((and2 (bignum? ,n) (float? ,m)) (,name ,m ,n))
              ((and2 (bignum? ,n) (bignum? ,m)) (,bgop ,n ,m))
+             ((and2 (bignum? ,n) (mpflonum? ,m)) (,mpfop (bg->mpf ,n) ,m))
+             ((and2 (mpflonum? ,n) (fixnum? ,m)) (,name ,m ,n))
+             ((and2 (mpflonum? ,n) (float? ,m)) (,name ,m ,n))
+             ((and2 (mpflonum? ,n) (bignum? ,m)) (,name ,m ,n))
+             ((and2 (mpflonum? ,n) (mpflonum? ,m)) (,mpfop ,n ,m))
              (else (signal "The operation between these two types of arguments is not supported."))))))
 
 ;; +
-(define-bin-arith bin+ fx+ fp+ bg+)
+(define-bin-arith bin+ fx+ fp+ bg+ mpf+)
 
 (define + ns
   (cond ((null? ns) 0)
         (else (reduce ns bin+))))
 
 ;; -
-(define-bin-arith bin- fx- fp- bg-)
+(define-bin-arith bin- fx- fp- bg- mpf-)
 
 (define - (n . ns)
   (cond ((null? ns) (bin- 0 n))
         (else (bin- n (reduce ns bin+)))))
 
 ;; *
-(define-bin-arith bin* fx* fp* bg*)
+(define-bin-arith bin* fx* fp* bg* mpf*)
 
 (define * ns
   (cond ((null? ns) 1)
         (else (reduce ns bin*))))
 
 ;; /
-(define-bin-arith bin/ fx/ fp/ bg/)
+(define-bin-arith bin/ fx/ fp/ bg/ mpf/)
 
 (define / (n . ns)
   (cond ((null? ns) (bin/ 1 n))
         (else (bin/ n (reduce ns bin*)))))
 
 ;; =
-(define-bin-arith = fx= fp= bg=)
+(define-bin-arith = fx= fp= bg= mpf=)
 
 (define < (n m)
   (cond ((> n m) #f)

@@ -61,6 +61,7 @@ extern int is_lt_exception(lt *);
 extern int is_lt_float(lt *);
 extern int is_lt_function(lt *);
 extern int is_lt_input_port(lt *);
+extern int is_lt_mpflonum(lt *);
 extern int is_lt_opcode(lt *);
 extern int is_lt_output_port(lt *);
 extern int is_lt_pair(lt *);
