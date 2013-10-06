@@ -25,6 +25,8 @@ int main(int argc, char *argv[])
       "(type-of #\\a)",
       "(char-at \"abc\" 0)",
       "(char-at \"汉字\" 0)",
+      "(char-code #\\汉)",
+      "(char-code #\\a)",
   };
   init_global_variable();
   init_prims();

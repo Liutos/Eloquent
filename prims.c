@@ -650,8 +650,13 @@ void init_prim_arithmetic(void) {
 
 /* Character */
 lisp_object_t *lt_char_code(lisp_object_t *c) {
-  assert(ischar(c));
-  return make_fixnum(character_value(c));
+  int len = strlen(unicode_data(c));
+  unsigned int code = 0;
+  while (len > 0) {
+    code = code * 256 + unicode_data(c)[len - 1];
+    len--;
+  }
+  return make_fixnum(code);
 }
 
 lisp_object_t *lt_code_char(lisp_object_t *code) {
@@ -661,7 +666,6 @@ lisp_object_t *lt_code_char(lisp_object_t *code) {
 
 void init_prim_char(void) {
   NOREST(1, lt_char_code, "char-code");
-  SIG("char-code", T(LT_CHARACTER));
   NOREST(1, lt_code_char, "code-char");
   SIG("code-char", T(LT_FIXNUM));
 }
