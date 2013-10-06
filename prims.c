@@ -654,6 +654,39 @@ lt *lt_fp_eq(lt *n, lt *m) {
   return booleanize(float_value(n) == float_value(m));
 }
 
+/** MPFLONUM **/
+lt *lt_mpf_add(lt *n, lt *m) {
+  mpf_t num;
+  mpf_init(num);
+  mpf_add(num, mpflonum_value(n), mpflonum_value(m));
+  return make_mpflonum(num);
+}
+
+lt *lt_mpf_sub(lt *n, lt *m) {
+  mpf_t num;
+  mpf_init(num);
+  mpf_sub(num, mpflonum_value(n), mpflonum_value(m));
+  return make_mpflonum(num);
+}
+
+lt *lt_mpf_mul(lt *n, lt *m) {
+  mpf_t num;
+  mpf_init(num);
+  mpf_mul(num, mpflonum_value(n), mpflonum_value(m));
+  return make_mpflonum(num);
+}
+
+lt *lt_mpf_div(lt *n, lt *m) {
+  mpf_t num;
+  mpf_init(num);
+  mpf_div(num, mpflonum_value(n), mpflonum_value(m));
+  return make_mpflonum(num);
+}
+
+lt *lt_mpf_eq(lt *n, lt *m) {
+  return booleanize(mpf_cmp(mpflonum_value(n), mpflonum_value(m)) == 0);
+}
+
 lisp_object_t *lt_gt(lisp_object_t *n, lisp_object_t *m) {
   assert(isnumber(n) && isnumber(m));
   if (isfixnum(n) && isfixnum(m))
@@ -708,6 +741,12 @@ void init_prim_arithmetic(void) {
   NOREST(2, lt_fp_mul, "fp*");
   NOREST(2, lt_fp_sub, "fp-");
   NOREST(1, lt_nt_level, "nt-level");
+  /* MPFlonum */
+  NOREST(2, lt_mpf_add, "mpf+");
+  NOREST(2, lt_mpf_sub, "mpf-");
+  NOREST(2, lt_mpf_mul, "mpf*");
+  NOREST(2, lt_mpf_div, "mpf/");
+  NOREST(2, lt_mpf_eq, "mpf=");
   /* Generic */
   NOREST(2, lt_gt, ">");
 }
