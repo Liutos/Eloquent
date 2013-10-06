@@ -14,6 +14,7 @@
 #include <string.h>
 
 #include <gc/gc.h>
+#include <gmp.h>
 
 #include "hash_table.h"
 #include "object.h"
@@ -68,6 +69,7 @@ struct lisp_object_t lt_types[] = {
     DEFTYPE(LT_TCLOSE, "tclose"),
     DEFTYPE(LT_TEOF, "teof"),
     DEFTYPE(LT_TUNDEF, "tundef"),
+    DEFTYPE(LT_BIGNUM, "bignum"),
     DEFTYPE(LT_ENVIRONMENT, "environment"),
     DEFTYPE(LT_EXCEPTION, "exception"),
     DEFTYPE(LT_FUNCTION, "function"),
@@ -245,6 +247,12 @@ lisp_object_t *make_character(char value) {
 
 lt *make_fixnum(int value) {
   return (lt *)((value << FIXNUM_BITS) | FIXNUM_TAG);
+}
+
+lt *make_bignum(mpz_t value) {
+  lt *obj = make_object(LT_BIGNUM);
+  *bignum_value(obj) = *value;
+  return obj;
 }
 
 lt *make_environment(lt *bindings, lt *next) {

@@ -17,16 +17,7 @@
 int main(int argc, char *argv[])
 {
   char *inputs[] = {
-      "#\\a",
-      "#\\space",
-      "(type-of #\\space)",
-      "#\\汉",
-      "(type-of #\\汉)",
-      "(type-of #\\a)",
-      "(char-at \"abc\" 0)",
-      "(char-at \"汉字\" 0)",
-      "(char-code #\\汉)",
-      "(char-code #\\a)",
+      "(make-bignum \"9876543210123456789\")",
   };
   init_global_variable();
   init_prims();

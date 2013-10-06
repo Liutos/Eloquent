@@ -11,6 +11,8 @@
 #include <stdint.h>
 #include <stdio.h>
 
+#include <gmp.h>
+
 #include "hash_table.h"
 
 typedef struct lisp_object_t lisp_object_t;
@@ -30,7 +32,6 @@ enum {
   UNDEF_ORIGIN,
 };
 
-/* TODO: The support for Unicode. */
 /* TODO: Implements the arbitrary precision arithmetic numeric types. */
 enum TYPE {
   /* tagged-pointer */
@@ -42,6 +43,7 @@ enum TYPE {
   LT_TEOF,
   LT_TUNDEF,
   /* tagged-union */
+  LT_BIGNUM,
   LT_ENVIRONMENT,
   LT_EXCEPTION,
   LT_FUNCTION,
@@ -92,6 +94,9 @@ enum OPCODE_TYPE {
 struct lisp_object_t {
   enum TYPE type;
   union {
+    struct {
+      mpz_t value;
+    } bignum;
     struct {
       lt *bindings;
       lt *next;
@@ -189,6 +194,7 @@ struct string_builder_t {
 #define fixnum_value(x) (((intptr_t)(x)) >> FIXNUM_BITS)
 
 /* Accessor macros */
+#define bignum_value(x) ((x)->u.bignum.value)
 #define environment_bindings(x) ((x)->u.environment.bindings)
 #define environment_next(x) ((x)->u.environment.next)
 #define exception_msg(x) ((x)->u.exception.message)

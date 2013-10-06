@@ -14,6 +14,7 @@
 #include <string.h>
 
 #include <gc/gc.h>
+#include <gmp.h>
 
 #include "compiler.h"
 #include "object.h"
@@ -167,6 +168,11 @@ void write_compiled_function(lt *function, int indent, lt *dest) {
 void write_object(lt *x, lt *output_file) {
   assert(x != NULL);
   switch(type_of(x)) {
+  case LT_BIGNUM: {
+    FILE *stream = output_port_stream(output_file);
+    mpz_out_str(stream, 10, bignum_value(x));
+  }
+    break;
     case LT_BOOL:
       if (is_true_object(x))
         write_raw_string("#t", output_file);
@@ -540,6 +546,46 @@ lt *lt_nt_level(lt *n) {
     return make_fixnum(1);
 }
 
+/** Bignum **/
+lt *lt_bg_add(lt *n, lt *m) {
+  mpz_t res;
+  mpz_init(res);
+  mpz_add(res, bignum_value(n), bignum_value(m));
+  return make_bignum(res);
+}
+
+lt *lt_bg_sub(lt *n, lt *m) {
+  mpz_t res;
+  mpz_init(res);
+  mpz_sub(res, bignum_value(n), bignum_value(m));
+  return make_bignum(res);
+}
+
+lt *lt_bg_mul(lt *n, lt *m) {
+  mpz_t res;
+  mpz_init(res);
+  mpz_mul(res, bignum_value(n), bignum_value(m));
+  return make_bignum(res);
+}
+
+lt *lt_bg_div(lt *n, lt *m) {
+  mpz_t res;
+  mpz_init(res);
+  mpz_div(res, bignum_value(n), bignum_value(m));
+  return make_bignum(res);
+}
+
+lt *lt_bg_eq(lt *n, lt *m) {
+  return booleanize(mpz_cmp(bignum_value(n), bignum_value(m)));
+}
+
+lt *lt_mkbg(lt *str) {
+  mpz_t num;
+  mpz_init(num);
+  mpz_set_str(num, string_value(str), 10);
+  return make_bignum(num);
+}
+
 /* Arithmetic Operations for Fixnum */
 lt *lt_fx_add(lt *n, lt *m) {
   return make_fixnum(fixnum_value(n) + fixnum_value(m));
@@ -628,6 +674,12 @@ lisp_object_t *lt_numeric_eq(lisp_object_t *n, lisp_object_t *m) {
 
 // The following function doesn't use in any C code
 void init_prim_arithmetic(void) {
+  /* Bignum */
+  NOREST(1, lt_bg_add, "bg+");
+  NOREST(1, lt_bg_sub, "bg-");
+  NOREST(1, lt_bg_mul, "bg*");
+  NOREST(1, lt_bg_div, "bg/");
+  NOREST(1, lt_mkbg, "make-bignum");
   /* For Fixnum */
   NOREST(1, lt_fx2fp, "fx->fp");
   NOREST(2, lt_fx_add, "fx+");

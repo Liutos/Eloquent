@@ -1,5 +1,5 @@
 CC=gcc
-CFLAGS=-Wall -g -std=c99 -D_GNU_SOURCE -lgc
+CFLAGS=-Wall -g -std=c99 -D_GNU_SOURCE -lgc -lgmp
 
 all: test_vm
 

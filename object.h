@@ -10,6 +10,8 @@
 
 #include <stdio.h>
 
+#include <gmp.h>
+
 #include "type.h"
 
 /* OBJECT_H_ */
@@ -92,6 +94,7 @@ extern lt *make_undef(void);
 extern lt *make_close(void);
 extern lt *make_character(char);
 extern lt *make_fixnum(int);
+extern lt *make_bignum(mpz_t);
 extern lt *make_environment(lt *, lt *);
 extern lt *make_exception(char *, int, lt *, lt *backtrace);
 extern lt *make_float(float);
