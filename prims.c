@@ -645,15 +645,6 @@ lt *lt_fp_eq(lt *n, lt *m) {
   return booleanize(float_value(n) == float_value(m));
 }
 
-lt *lt_nt_convert(lt *val, lt *origin, lt *target) {
-  if (origin == LISP("fixnum") && target == LISP("flonum"))
-    return lt_fx2fp(val);
-  if (origin == LISP("fixnum") && target == LISP("bignum"))
-    return lt_fx2bg(val);
-  else
-    return signal_exception("Unknown convert rules");
-}
-
 lisp_object_t *lt_gt(lisp_object_t *n, lisp_object_t *m) {
   assert(isnumber(n) && isnumber(m));
   if (isfixnum(n) && isfixnum(m))
@@ -707,7 +698,6 @@ void init_prim_arithmetic(void) {
   NOREST(2, lt_fp_eq, "fp=");
   NOREST(2, lt_fp_mul, "fp*");
   NOREST(2, lt_fp_sub, "fp-");
-  NOREST(3, lt_nt_convert, "nt-convert");
   NOREST(1, lt_nt_level, "nt-level");
   /* Generic */
   NOREST(2, lt_gt, ">");

@@ -17,20 +17,10 @@
 int main(int argc, char *argv[])
 {
   char *inputs[] = {
-      "(make-bignum \"9876543210123456789\")",
-      "(set! n (make-bignum \"1\"))",
-      "(set! m (make-bignum \"2\"))",
-      "(bg+ n m)",
-      "(bg- n m)",
-      "(bg* n m)",
-      "(bg/ n m)",
-      "(type-of n)",
-      "(fx->bg 1)",
-      "(set! n (nt-convert 1 'fixnum 'flonum))",
+      "(set! n (nt-convert 1 'fixnum 'float))",
       "(set! m (nt-convert 1 'fixnum 'bignum))",
       "(type-of n)",
       "(type-of m)",
-      "(bg= (make-bignum \"1\") (make-bignum \"1\"))",
   };
   init_global_variable();
   init_prims();

@@ -139,6 +139,13 @@
   (vector-ref x (- (vector-length x) 1)))
 
 ; Arithmetic Operations
+(define nt-convert (n src dest)
+  (cond ((and2 (eq? src 'fixnum) (eq? dest 'float))
+         (fx->fp n))
+        ((and2 (eq? src 'fixnum) (eq? dest 'bignum))
+         (fx->bg n))
+        (else (signal "Unknown convert rule."))))
+
 (defmacro define-bin-arith (name lop hop)
   (let ((n (gensym))
         (m (gensym)))
