@@ -55,6 +55,7 @@ lisp_object_t *symbol_list;
 lisp_object_t *the_undef;
 
 extern int is_pointer(lt *);
+extern int is_lt_bignum(lt *);
 extern int is_lt_environment(lt *);
 extern int is_lt_exception(lt *);
 extern int is_lt_float(lt *);

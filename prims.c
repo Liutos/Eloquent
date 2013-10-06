@@ -542,8 +542,10 @@ void init_prim_input_port(void) {
 lt *lt_nt_level(lt *n) {
   if (isfixnum(n))
     return make_fixnum(0);
-  else
+  if (is_lt_bignum(n))
     return make_fixnum(1);
+  else
+    return make_fixnum(2);
 }
 
 /** Bignum **/
@@ -576,7 +578,7 @@ lt *lt_bg_div(lt *n, lt *m) {
 }
 
 lt *lt_bg_eq(lt *n, lt *m) {
-  return booleanize(mpz_cmp(bignum_value(n), bignum_value(m)));
+  return booleanize(mpz_cmp(bignum_value(n), bignum_value(m)) == 0);
 }
 
 lt *lt_mkbg(lt *str) {
@@ -609,6 +611,13 @@ lt *lt_fx_eq(lt *n, lt *m) {
   return booleanize(fixnum_value(n) == fixnum_value(m));
 }
 
+lt *lt_fx2bg(lt *n) {
+  mpz_t num;
+  mpz_init(num);
+  mpz_set_si(num, fixnum_value(n));
+  return make_bignum(num);
+}
+
 lt *lt_fx2fp(lt *n) {
   return make_float(fixnum_value(n));
 }
@@ -637,8 +646,10 @@ lt *lt_fp_eq(lt *n, lt *m) {
 }
 
 lt *lt_nt_convert(lt *val, lt *origin, lt *target) {
-  if (origin == S("fixnum") && target == S("flonum"))
+  if (origin == LISP("fixnum") && target == LISP("flonum"))
     return lt_fx2fp(val);
+  if (origin == LISP("fixnum") && target == LISP("bignum"))
+    return lt_fx2bg(val);
   else
     return signal_exception("Unknown convert rules");
 }
@@ -675,12 +686,14 @@ lisp_object_t *lt_numeric_eq(lisp_object_t *n, lisp_object_t *m) {
 // The following function doesn't use in any C code
 void init_prim_arithmetic(void) {
   /* Bignum */
-  NOREST(1, lt_bg_add, "bg+");
-  NOREST(1, lt_bg_sub, "bg-");
-  NOREST(1, lt_bg_mul, "bg*");
-  NOREST(1, lt_bg_div, "bg/");
+  NOREST(2, lt_bg_add, "bg+");
+  NOREST(2, lt_bg_sub, "bg-");
+  NOREST(2, lt_bg_mul, "bg*");
+  NOREST(2, lt_bg_div, "bg/");
+  NOREST(2, lt_bg_eq, "bg=");
   NOREST(1, lt_mkbg, "make-bignum");
   /* For Fixnum */
+  NOREST(1, lt_fx2bg, "fx->bg");
   NOREST(1, lt_fx2fp, "fx->fp");
   NOREST(2, lt_fx_add, "fx+");
   NOREST(2, lt_fx_div, "fx/");

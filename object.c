@@ -141,6 +141,7 @@ int is_of_type(lisp_object_t *object, enum TYPE type) {
     return is_of_type(object, type);            \
   }
 
+mktype_pred(is_lt_bignum, LT_BIGNUM)
 mktype_pred(is_lt_environment, LT_ENVIRONMENT)
 mktype_pred(is_lt_exception, LT_EXCEPTION)
 mktype_pred(is_lt_float, LT_FLOAT)
