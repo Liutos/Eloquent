@@ -12,6 +12,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <strings.h>
 
 #include <gc/gc.h>
 #include <gmp.h>
@@ -1413,6 +1414,18 @@ lisp_object_t *read_string(lisp_object_t *input_file) {
   return reader_error("The string is too long");
 }
 
+char *unqualify_symbol(char *str, lt **pkg) {
+  char *pos1 = index(str, ':');
+  char *pos2 = rindex(str, ':');
+  if (!pos1 || !pos2 || pos2 - pos1 != 1 || pos2[1] == '\0') {
+    *pkg = NULL;
+    return str;
+  }
+  *pos1 = '\0';
+  *pkg = ensure_package(str);
+  return pos2 + 1;
+}
+
 lisp_object_t *read_symbol(char start, lisp_object_t *input_file) {
   string_builder_t *buffer = make_str_builder();
   sb_add_char(buffer, start);
@@ -1424,7 +1437,12 @@ lisp_object_t *read_symbol(char start, lisp_object_t *input_file) {
   }
   if (isdelimiter(c) && c != EOF)
     unget_char(c, input_file);
-  return S(sb2string(buffer));
+  lt *pkg = NULL;
+  char *name = unqualify_symbol(sb2string(buffer), &pkg);
+  if (pkg == NULL)
+    return S(name);
+  else
+    return find_or_create_symbol(name, pkg);
 }
 
 lisp_object_t *read_vector(lisp_object_t *input_file) {

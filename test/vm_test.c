@@ -17,12 +17,12 @@
 int main(int argc, char *argv[])
 {
   char *inputs[] = {
-      "(bin+ 1 1)",
-      "(bin+ 1 1.1)",
-      "(bin+ 1 9876543210)",
-      "(bin- 1 1)",
-      "(bin- 1 1.1)",
-      "(bin- 1 9876543210)",
+      "'EM::abc",
+      "'Lisp::fixnum",
+      "(symbol-package 'EM::abc)",
+      "(symbol-package 'Lisp::fixnum)",
+      "(symbol-package 'abc)",
+      "(symbol-package 'fixnum)",
   };
   init_global_variable();
   init_prims();
