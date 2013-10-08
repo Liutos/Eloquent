@@ -8,6 +8,7 @@
  */
 #include <assert.h>
 #include <ctype.h>
+#include <errno.h>
 #include <stdarg.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -1180,11 +1181,20 @@ void init_prim_list(void) {
 }
 
 /** OS **/
+lt *lt_cd(lt *dir) {
+  int res = chdir(string_value(dir));
+  if (res == 0)
+    return the_true;
+  else
+    return signal_exception(strerror(errno));
+}
+
 lt *lt_pwd(void) {
   return make_string(getcwd(NULL, 0));
 }
 
 void init_prim_os(void) {
+  PFN("cd", 1, lt_cd, pkg_os);
   PFN("pwd", 0, lt_pwd, pkg_os);
 }
 
