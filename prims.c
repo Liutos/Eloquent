@@ -13,6 +13,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <strings.h>
+#include <time.h>
 
 #include <gc/gc.h>
 #include <gmp.h>
@@ -23,6 +24,12 @@
 #include "type.h"
 #include "utilities.h"
 #include "vm.h"
+
+#define PFN(Lisp_name, arity, function, pkg) \
+  do { \
+    lt *func = make_primitive(arity, (void *)function, Lisp_name, FALSE); \
+    symbol_value(find_or_create_symbol(Lisp_name, pkg)) = func; \
+  } while (0)
 
 // Register a primitive function
 #define ADD(arity, restp, function_name, Lisp_name)                     \
@@ -280,6 +287,14 @@ void write_object(lt *x, lt *output_file) {
     	break;
     case LT_TUNDEF:
       write_raw_string("#<UNDEF>", output_file);
+      break;
+    case LT_TIME: {
+      char *str = asctime(time_value(x));
+      str[strlen(str) - 1] = '\0';
+      write_raw_string("#<TIME \"", output_file);
+      write_raw_string(str, output_file);
+      write_raw_string("\" >", output_file);
+    }
       break;
     case LT_TYPE:
       write_raw_string("#<TYPE ", output_file);
@@ -953,6 +968,18 @@ void init_prim_symbol(void) {
   NOREST(1, lt_symbol_value, "symbol-value");
 }
 
+/* Time */
+lt *lt_time(void) {
+  time_t t;
+  time(&t);
+  struct tm *value = localtime(&t);
+  return make_time(value);
+}
+
+void init_prim_time(void) {
+  PFN("get-time", 0, lt_time, pkg_time);
+}
+
 /* Vector */
 lisp_object_t *lt_is_vector_empty(lisp_object_t *vector) {
   assert(is_lt_vector(vector));
@@ -1557,6 +1584,7 @@ void init_prims(void) {
   init_prim_reader();
   init_prim_string();
   init_prim_symbol();
+  init_prim_time();
   init_prim_vector();
 }
 

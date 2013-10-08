@@ -17,12 +17,7 @@
 int main(int argc, char *argv[])
 {
   char *inputs[] = {
-      "'EM::abc",
-      "'Lisp::fixnum",
-      "(symbol-package 'EM::abc)",
-      "(symbol-package 'Lisp::fixnum)",
-      "(symbol-package 'abc)",
-      "(symbol-package 'fixnum)",
+      "(get-time)",
   };
   init_global_variable();
   init_prims();

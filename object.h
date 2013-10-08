@@ -9,6 +9,7 @@
 #define OBJECT_H_
 
 #include <stdio.h>
+#include <time.h>
 
 #include <gmp.h>
 
@@ -45,6 +46,7 @@ lt *the_eof;
 /* Package */
 lt *package;
 lt *pkg_lisp;
+lt *pkg_time;
 lt *pkg_user;
 lt *pkgs;
 
@@ -113,6 +115,7 @@ extern lt *make_retaddr(lt *code, lt *env, lt *fn, int pc, int throw_flag, int s
 extern string_builder_t *make_str_builder(void);
 extern lt *make_string(char *);
 extern lt *make_symbol(char *, lt *);
+extern lt *make_time(struct tm *);
 extern lt *make_type(enum TYPE, char *);
 extern lt *make_unicode(char *);
 extern lt *make_vector(int);

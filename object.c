@@ -31,6 +31,7 @@ hash_table_t *prim2op_map;
 /* Package */
 lt *package;
 lt *pkg_lisp;
+lt *pkg_time;
 lt *pkg_user;
 lt *pkgs;
 
@@ -84,6 +85,7 @@ struct lisp_object_t lt_types[] = {
     DEFTYPE(LT_RETADDR, "retaddr"),
     DEFTYPE(LT_STRING, "string"),
     DEFTYPE(LT_SYMBOL, "symbol"),
+    DEFTYPE(LT_TIME, "time"),
     DEFTYPE(LT_TYPE, "type"),
     DEFTYPE(LT_UNICODE, "unicode"),
     DEFTYPE(LT_VECTOR, "vector"),
@@ -383,6 +385,12 @@ lisp_object_t *make_symbol(char *name, lt *package) {
   return symbol;
 }
 
+lt *make_time(struct tm *value) {
+  lt *obj = make_object(LT_TIME);
+  time_value(obj) = value;
+  return obj;
+}
+
 lt *make_type(enum TYPE type, char *name) {
   lt *t = make_object(LT_TYPE);
   type_tag(t) = type;
@@ -637,10 +645,15 @@ void init_opcode_length(void) {
 void init_packages(void) {
   pkgs = make_empty_list();
   pkg_lisp = ensure_package("Lisp");
-//  (defpackage :233-user
-//    (:use :233))
+//  (defpackage "Time"
+//    (use "Lisp"))
+  pkg_time = ensure_package("Time");
+  use_package_in(pkg_lisp, pkg_time);
+//  (defpackage "User"
+//    (use "Lisp"))
   pkg_user = ensure_package("User");
   use_package_in(pkg_lisp, pkg_user);
+  use_package_in(pkg_time, pkg_user);
 // Set the current package
   package = pkg_lisp;
 }

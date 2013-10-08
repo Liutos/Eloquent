@@ -10,6 +10,7 @@
 
 #include <stdint.h>
 #include <stdio.h>
+#include <time.h>
 
 #include <gmp.h>
 
@@ -58,6 +59,7 @@ enum TYPE {
   LT_RETADDR,
   LT_STRING,
   LT_SYMBOL,
+  LT_TIME,
   LT_TYPE,
   LT_UNICODE,
   LT_VECTOR,
@@ -173,6 +175,9 @@ struct lisp_object_t {
       lt *package;
     } symbol;
     struct {
+      struct tm *value;
+    } time;
+    struct {
       enum TYPE tag;
       char *name;
     } type;
@@ -244,6 +249,7 @@ struct string_builder_t {
 #define symbol_macro(x) ((x)->u.symbol.macro)
 #define symbol_package(x) ((x)->u.symbol.package)
 #define symbol_value(x) ((x)->u.symbol.global_value)
+#define time_value(x) ((x)->u.time.value)
 #define type_tag(x) ((x)->u.type.tag)
 #define type_name(x) ((x)->u.type.name)
 #define unicode_data(x) ((x)->u.unicode.data)
