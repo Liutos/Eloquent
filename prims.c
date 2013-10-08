@@ -14,6 +14,7 @@
 #include <string.h>
 #include <strings.h>
 #include <time.h>
+#include <unistd.h>
 
 #include <gc/gc.h>
 #include <gmp.h>
@@ -1178,6 +1179,15 @@ void init_prim_list(void) {
   NOREST(1, lt_tail, "tail");
 }
 
+/** OS **/
+lt *lt_pwd(void) {
+  return make_string(getcwd(NULL, 0));
+}
+
+void init_prim_os(void) {
+  PFN("pwd", 0, lt_pwd, pkg_os);
+}
+
 /* General */
 lisp_object_t *lt_eq(lisp_object_t *x, lisp_object_t *y) {
   return booleanize(x == y);
@@ -1579,6 +1589,7 @@ void init_prims(void) {
   init_prim_general();
   init_prim_input_port();
   init_prim_list();
+  init_prim_os();
   init_prim_output_port();
   init_prim_package();
   init_prim_reader();

@@ -31,6 +31,7 @@ hash_table_t *prim2op_map;
 /* Package */
 lt *package;
 lt *pkg_lisp;
+lt *pkg_os;
 lt *pkg_time;
 lt *pkg_user;
 lt *pkgs;
@@ -645,6 +646,10 @@ void init_opcode_length(void) {
 void init_packages(void) {
   pkgs = make_empty_list();
   pkg_lisp = ensure_package("Lisp");
+//  (defpackage "OS"
+//    (use "Lisp"))
+  pkg_os = ensure_package("OS");
+  use_package_in(pkg_lisp, pkg_os);
 //  (defpackage "Time"
 //    (use "Lisp"))
   pkg_time = ensure_package("Time");
@@ -653,6 +658,7 @@ void init_packages(void) {
 //    (use "Lisp"))
   pkg_user = ensure_package("User");
   use_package_in(pkg_lisp, pkg_user);
+  use_package_in(pkg_os, pkg_user);
   use_package_in(pkg_time, pkg_user);
 // Set the current package
   package = pkg_lisp;

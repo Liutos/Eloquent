@@ -17,7 +17,7 @@
 int main(int argc, char *argv[])
 {
   char *inputs[] = {
-      "(get-time)",
+      "(pwd)",
   };
   init_global_variable();
   init_prims();

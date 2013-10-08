@@ -46,6 +46,7 @@ lt *the_eof;
 /* Package */
 lt *package;
 lt *pkg_lisp;
+lt *pkg_os;
 lt *pkg_time;
 lt *pkg_user;
 lt *pkgs;
