@@ -17,9 +17,7 @@
 int main(int argc, char *argv[])
 {
   char *inputs[] = {
-      "(file-exist? \"test_vm\")",
-      "(file-size-of \"test_vm\")",
-      "(get-home)",
+      "(each '(#\\a #\\b #\\c) (lambda (c) (write-char c *standard-output*)))",
   };
   init_global_variable();
   init_prims();

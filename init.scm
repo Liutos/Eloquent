@@ -101,6 +101,13 @@
 (define list xs
   xs)
 
+(define each (list fn)
+  (if (null? list)
+      '()
+    (begin
+      (fn (first list))
+      (each (rest list) fn))))
+
 (define map (list fn)
   (if (null? list)
       '()
