@@ -17,7 +17,8 @@
 int main(int argc, char *argv[])
 {
   char *inputs[] = {
-      "(each '(#\\a #\\b #\\c) (lambda (c) (write-char c *standard-output*)))",
+      "(dolist (i '(#\\a #\\b #\\c)) (write-char i *standard-output*) (write-char #\\newline *standard-output*))",
+      "(dotimes (i 3) (write-object i *standard-output*) (write-char #\\newline *standard-output*))",
   };
   init_global_variable();
   init_prims();

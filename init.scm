@@ -92,6 +92,9 @@
 (define rest (list)
   (tail list))
 
+(define second (list)
+  (first (tail list)))
+
 (define append (l1 l2)
   (cond ((null? l1) l2)
         ((null? l2) l1)
@@ -135,6 +138,12 @@
         (else 
          (append (reverse (tail lst))
                  `(,(head lst))))))
+
+;; DOLIST
+(defmacro dolist (decl . body)
+  (let ((var (first decl))
+        (list (second decl)))
+    `(each ,list (lambda (,var) ,@body))))
 
 ; String
 (define write-line (str)
@@ -221,6 +230,19 @@
   (if (= m 0)
       n
     (gcd m (mod n m))))
+
+;; DOTIMES
+(defmacro dotimes (decl . body)
+  (let ((var (first decl))
+        (num (second decl))
+        (aux (gensym)))
+    `(flet ((,aux (,var)
+              (if (< ,var ,num)
+                  (begin
+                    ,@body
+                    (,aux (+ ,var 1)))
+                '())))
+       (,aux 0))))
 
 ; List
 (define nth (lst n)
