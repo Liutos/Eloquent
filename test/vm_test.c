@@ -17,11 +17,9 @@
 int main(int argc, char *argv[])
 {
   char *inputs[] = {
-      "(pwd)",
-      "(cd \"/home/liutos/src\")",
-      "(pwd)",
-      "(cd \"/home/liutos/src/c/Eloquent/eloquent/Makefile\")",
-      "(pwd)",
+      "(file-exist? \"test_vm\")",
+      "(file-size-of \"test_vm\")",
+      "(get-home)",
   };
   init_global_variable();
   init_prims();

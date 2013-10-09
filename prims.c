@@ -9,11 +9,14 @@
 #include <assert.h>
 #include <ctype.h>
 #include <errno.h>
+#include <pwd.h>
 #include <stdarg.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 #include <strings.h>
+#include <sys/stat.h>
+#include <sys/types.h>
 #include <time.h>
 #include <unistd.h>
 
@@ -1189,12 +1192,33 @@ lt *lt_cd(lt *dir) {
     return signal_exception(strerror(errno));
 }
 
+lt *lt_file_size(lt *path) {
+  struct stat st;
+  stat(string_value(path), &st);
+  return make_fixnum(st.st_size);
+}
+
+lt *lt_get_home(void) {
+  struct passwd *pw = getpwuid(getuid());
+  return make_string(pw->pw_dir);
+}
+
+lt *lt_is_file_exist(lt *path) {
+  if (access(string_value(path), F_OK) == 0)
+    return the_true;
+  else
+    return the_false;
+}
+
 lt *lt_pwd(void) {
   return make_string(getcwd(NULL, 0));
 }
 
 void init_prim_os(void) {
   PFN("cd", 1, lt_cd, pkg_os);
+  PFN("file-size-of", 1, lt_file_size, pkg_os);
+  PFN("get-home", 0, lt_get_home, pkg_os);
+  PFN("file-exist?", 1, lt_is_file_exist, pkg_os);
   PFN("pwd", 0, lt_pwd, pkg_os);
 }
 
