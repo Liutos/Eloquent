@@ -115,6 +115,7 @@ extern lt *make_primitive(int, void *, char *, int);
 extern lt *make_retaddr(lt *code, lt *env, lt *fn, int pc, int throw_flag, int sp);
 extern string_builder_t *make_str_builder(void);
 extern lt *make_string(char *);
+extern lt *make_structure(lt *name, lt *fields);
 extern lt *make_symbol(char *, lt *);
 extern lt *make_time(struct tm *);
 extern lt *make_type(enum TYPE, char *);

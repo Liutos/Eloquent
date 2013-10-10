@@ -58,6 +58,7 @@ enum TYPE {
   LT_PRIMITIVE,
   LT_RETADDR,
   LT_STRING,
+  LT_STRUCT,
   LT_SYMBOL,
   LT_TIME,
   LT_TYPE,
@@ -169,6 +170,11 @@ struct lisp_object_t {
       char *value;
     } string;
     struct {
+      lt *name;
+      lt *fields;
+      lt *data;
+    } structure;
+    struct {
       char *name;
       lt *global_value;
       lt *macro;
@@ -245,6 +251,9 @@ struct string_builder_t {
 #define retaddr_throw_flag(x) ((x)->u.retaddr.throw_flag)
 #define string_length(x) ((x)->u.string.length)
 #define string_value(x) ((x)->u.string.value)
+#define structure_name(x) ((x)->u.structure.name)
+#define structure_fields(x) ((x)->u.structure.fields)
+#define structure_data(x) ((x)->u.structure.data)
 #define symbol_name(x) ((x)->u.symbol.name)
 #define symbol_macro(x) ((x)->u.symbol.macro)
 #define symbol_package(x) ((x)->u.symbol.package)

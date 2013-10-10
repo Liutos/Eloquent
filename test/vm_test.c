@@ -17,8 +17,7 @@
 int main(int argc, char *argv[])
 {
   char *inputs[] = {
-      "(dolist (i '(#\\a #\\b #\\c)) (write-char i *standard-output*) (write-char #\\newline *standard-output*))",
-      "(dotimes (i 3) (write-object i *standard-output*) (write-char #\\newline *standard-output*))",
+      "(make-structure 'pair '(car cdr))",
   };
   init_global_variable();
   init_prims();

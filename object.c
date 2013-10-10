@@ -82,9 +82,10 @@ struct lisp_object_t lt_types[] = {
     DEFTYPE(LT_OUTPUT_PORT, "output-file"),
     DEFTYPE(LT_PACKAGE, "package"),
     DEFTYPE(LT_PAIR, "pair"),
-    DEFTYPE(LT_PRIMITIVE, "primitive-function"),
+    DEFTYPE(LT_PRIMITIVE, "primitive"),
     DEFTYPE(LT_RETADDR, "retaddr"),
     DEFTYPE(LT_STRING, "string"),
+    DEFTYPE(LT_STRUCT, "structure"),
     DEFTYPE(LT_SYMBOL, "symbol"),
     DEFTYPE(LT_TIME, "time"),
     DEFTYPE(LT_TYPE, "type"),
@@ -375,6 +376,15 @@ lt *make_string(char *value) {
   string_length(string) = strlen(value);
   string_value(string) = value;
   return string;
+}
+
+lt *make_structure(lt *name, lt *fields) {
+  int pair_length(lt *);
+  lt *obj = make_object(LT_STRUCT);
+  structure_name(obj) = name;
+  structure_fields(obj) = fields;
+  structure_data(obj) = make_vector(pair_length(fields));
+  return obj;
 }
 
 lisp_object_t *make_symbol(char *name, lt *package) {

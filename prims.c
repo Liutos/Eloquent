@@ -284,6 +284,9 @@ void write_object(lt *x, lt *output_file) {
       write_raw_string("\"", output_file);
     }
       break;
+    case LT_STRUCT:
+      writef(output_file, "#<STRUCTURE name: %S>", structure_name(x));
+      break;
     case LT_SYMBOL:
     	write_raw_string(symbol_name(x), output_file);
     	break;
@@ -912,6 +915,11 @@ void init_prim_string(void) {
   NOREST(2, lt_char_at, "char-at");
   NOREST(1, lt_string_length, "string-length");
   NOREST(3, lt_string_set, "string-set!");
+}
+
+/* Structure */
+void init_prim_structure(void) {
+  PFN("make-structure", 2, make_structure, pkg_lisp);
 }
 
 /* Symbol */
@@ -1628,6 +1636,7 @@ void init_prims(void) {
   init_prim_package();
   init_prim_reader();
   init_prim_string();
+  init_prim_structure();
   init_prim_symbol();
   init_prim_time();
   init_prim_vector();

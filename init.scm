@@ -74,7 +74,7 @@
   (is-type? x 'mpflonum))
 
 (define primitive? (x)
-  (is-type? x 'primitive-function))
+  (is-type? x 'primitive))
 
 (define symbol? (x)
   (is-type? x 'symbol))
