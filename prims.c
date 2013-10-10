@@ -918,8 +918,44 @@ void init_prim_string(void) {
 }
 
 /* Structure */
+lt *lt_get_field(lt *field_name, lt *st) {
+  lt *fs = structure_fields(st);
+  int i = 0;
+  while (is_lt_pair(fs)) {
+    lt *field = pair_head(fs);
+    if (strcmp(symbol_name(field_name), symbol_name(field)) == 0)
+      break;
+    fs = pair_tail(fs);
+    i++;
+  }
+  if (!is_lt_pair(fs))
+    return signal_exception("Undefined field in structure");
+  else
+    return vector_value(structure_data(st))[i];
+}
+
+lt *lt_set_field(lt *field_name, lt *st, lt *value) {
+  lt *fs = structure_fields(st);
+  int i = 0;
+  while (is_lt_pair(fs)) {
+    lt *field = pair_head(fs);
+    if (strcmp(symbol_name(field_name), symbol_name(field)) == 0)
+      break;
+    fs = pair_tail(fs);
+    i++;
+  }
+  if (!is_lt_pair(fs))
+    return signal_exception("Undefined field in structure");
+  else {
+    vector_value(structure_data(st))[i] = value;
+    return the_true;
+  }
+}
+
 void init_prim_structure(void) {
+  PFN("get-field", 2, lt_get_field, pkg_lisp);
   PFN("make-structure", 2, make_structure, pkg_lisp);
+  PFN("set-field!", 3, lt_set_field, pkg_lisp);
 }
 
 /* Symbol */

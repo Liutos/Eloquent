@@ -17,7 +17,10 @@
 int main(int argc, char *argv[])
 {
   char *inputs[] = {
-      "(make-structure 'pair '(car cdr))",
+      "(set! st (make-structure 'pair '(car cdr)))",
+      "(set-field! 'car st 1)",
+      "(get-field 'car st)",
+      "(get-field 'cdr st)",
   };
   init_global_variable();
   init_prims();

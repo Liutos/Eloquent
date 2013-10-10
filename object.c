@@ -384,6 +384,8 @@ lt *make_structure(lt *name, lt *fields) {
   structure_name(obj) = name;
   structure_fields(obj) = fields;
   structure_data(obj) = make_vector(pair_length(fields));
+  for (int i = 0; i < vector_length(structure_data(obj)); i++)
+    vector_value(structure_data(obj))[i] = make_undef();
   return obj;
 }
 
