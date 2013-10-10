@@ -145,6 +145,10 @@
         (list (second decl)))
     `(each ,list (lambda (,var) ,@body))))
 
+; Structure
+(defmacro defstruct (name . fields)
+  `(make-structure ',name ',fields))
+
 ; String
 (define write-line (str)
   (write-string str *standard-output*)
