@@ -35,6 +35,9 @@ extern hash_table_t *make_hash_table(int, hash_fn_t, comp_fn_t);
 extern void *search_ht(void *, hash_table_t *);
 extern void set_ht(void *, void *, hash_table_t *);
 
+extern unsigned int string_hash_fn(void *);
+extern int string_comp_fn(void *, void *);
+
 /* Hash Table */
 #define sl_key(x) ((x)->key)
 #define sl_value(x) ((x)->value)

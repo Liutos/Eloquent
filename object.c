@@ -40,6 +40,8 @@ lt *standard_error;
 lt *standard_in;
 lt *standard_out;
 lt *symbol_list;
+/* Structure */
+hash_table_t *st_tbl;
 /* Symbol */
 lt *the_begin_symbol;
 lt *the_catch_symbol;
@@ -588,23 +590,35 @@ void use_package_in(lt *used, lt *pkg) {
       make_pair(used, package_used_packages(pkg));
 }
 
+/* Structure */
+unsigned int struct_hash_fn(void *struct_name) {
+  return string_hash_fn(struct_name);
+}
+
+int struct_comp_fn(void *s1, void *s2) {
+  return string_comp_fn(s1, s2);
+}
+
+lt *search_structure(char *struct_name) {
+  return search_ht(struct_name, st_tbl);
+}
+
+void set_structure(char *name, lt *structure) {
+  set_ht(name, structure, st_tbl);
+}
+
+hash_table_t *make_structures_table(void) {
+  return make_hash_table(31, struct_hash_fn, struct_comp_fn);
+}
+
 /* Symbol */
 // The following algorithm comes from http://bbs.csdn.net/topics/350030230
 unsigned int symbol_hash_fn(void *symbol) {
-  char *name = (char *)symbol;
-  int seed = 131;
-  unsigned int hash = 0;
-  while (*name != '\0') {
-    hash = hash * seed + *name;
-    name++;
-  }
-  return hash & 0x7FFFFFFF;
+  return string_hash_fn(symbol);
 }
 
 int symbol_comp_fn(void *s1, void *s2) {
-  char *n1 = (char *)s1;
-  char *n2 = (char *)s2;
-  return strcmp(n1, n2);
+  return string_comp_fn(s1, s2);
 }
 
 hash_table_t *make_symbol_table(void) {
@@ -676,6 +690,10 @@ void init_packages(void) {
   package = pkg_lisp;
 }
 
+void init_structures(void) {
+  st_tbl = make_structures_table();
+}
+
 void init_global_variable(void) {
   /* Initialize global variables */
   debug = FALSE;
@@ -700,6 +718,8 @@ void init_global_variable(void) {
   init_opcode_length();
 //  Packages initialization
   init_packages();
+//  Structures initialization
+  init_structures();
 
 // Global variables initialization
   symbol_value(S("*ARGV*")) = the_argv;

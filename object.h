@@ -146,8 +146,13 @@ extern lt *make_fn_inst(lt *);
 extern lt *opcode_ref(enum OPCODE_TYPE);
 extern lt *search_op4prim(lt *);
 extern void set_op4prim(lt *, enum OPCODE_TYPE);
+/* Structure */
+extern lt *search_structure(char *);
+extern void set_structure(char *, lt *);
+/* Symbol */
 extern hash_table_t *make_symbol_table(void);
 extern lt *find_or_create_symbol(char *, lt *);
+/* Package */
 extern lt *ensure_package(char *);
 extern lt *search_package(char *, lt *);
 extern lt *type_ref(enum TYPE);

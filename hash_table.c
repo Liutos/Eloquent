@@ -7,6 +7,7 @@
  * This file contains the definition of a general purpose hash table
  */
 #include <stdio.h>
+#include <string.h>
 
 #include <gc/gc.h>
 
@@ -71,4 +72,21 @@ void set_ht(void *key, void *value, hash_table_t *ht) {
     ht_slot_t *sl = make_slot(key, value, org);
     ht_slots(ht)[index] = sl;
   }
+}
+
+unsigned int string_hash_fn(void *string) {
+  char *name = (char *)string;
+  int seed = 131;
+  unsigned int hash = 0;
+  while (*name != '\0') {
+    hash = hash * seed + *name;
+    name++;
+  }
+  return hash & 0x7FFFFFFF;
+}
+
+int string_comp_fn(void *s1, void *s2) {
+  char *n1 = (char *)s1;
+  char *n2 = (char *)s2;
+  return strcmp(n1, n2);
 }
