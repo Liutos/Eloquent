@@ -33,7 +33,6 @@ enum {
   UNDEF_ORIGIN,
 };
 
-/* TODO: Implements the arbitrary precision arithmetic numeric types. */
 enum TYPE {
   /* tagged-pointer */
   LT_BOOL,

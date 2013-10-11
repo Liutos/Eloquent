@@ -17,7 +17,7 @@
 int main(int argc, char *argv[])
 {
   char *inputs[] = {
-      "(make-structure 'pair '(car cdr))",
+      "(defstruct pair car cdr)",
       "(set! a (make-instance 'pair))",
       "(set-field! 'car a 123)",
       "(get-field 'car a)",
