@@ -171,7 +171,6 @@ struct lisp_object_t {
     } string;
     struct {
       lt *name;
-      lt *fields;
       lt *data;
     } structure;
     struct {
@@ -252,7 +251,6 @@ struct string_builder_t {
 #define string_length(x) ((x)->u.string.length)
 #define string_value(x) ((x)->u.string.value)
 #define structure_name(x) ((x)->u.structure.name)
-#define structure_fields(x) ((x)->u.structure.fields)
 #define structure_data(x) ((x)->u.structure.data)
 #define symbol_name(x) ((x)->u.symbol.name)
 #define symbol_macro(x) ((x)->u.symbol.macro)

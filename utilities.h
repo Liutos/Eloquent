@@ -42,6 +42,9 @@ extern char *sb2string(string_builder_t *);
 extern lt *signal_exception(char *);
 extern lt *signal_typerr(char *);
 
+/* Structure */
+extern int compute_field_offset(char *, char *);
+
 /* Special Forms */
 /** LET **/
 extern lt *let_bindings(lt *);

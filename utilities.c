@@ -139,6 +139,20 @@ lt *signal_typerr(char *type_name) {
   return signal_exception(strdup(msg));
 }
 
+/* Structure */
+int compute_field_offset(char *field_name, char *st_name) {
+  lt *fs = search_structure(st_name);
+  int i = 0;
+  while (is_lt_pair(fs)) {
+    lt *field = pair_head(fs);
+    if (strcmp(symbol_name(field), field_name) == 0)
+      return i;
+    fs = pair_head(fs);
+    i++;
+  }
+  return -1;
+}
+
 /* Special Forms */
 lt *let_bindings(lt *form) {
   return pair_head(pair_tail(form));

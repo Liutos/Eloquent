@@ -22,6 +22,8 @@ int is_check_type;
 /* Opcode */
 int opcode_max_length;
 hash_table_t *prim2op_map;
+/* Structure */
+hash_table_t *st_tbl;
 /* Symbol */
 lt *the_begin_symbol;
 lt *the_catch_symbol;
@@ -115,7 +117,7 @@ extern lt *make_primitive(int, void *, char *, int);
 extern lt *make_retaddr(lt *code, lt *env, lt *fn, int pc, int throw_flag, int sp);
 extern string_builder_t *make_str_builder(void);
 extern lt *make_string(char *);
-extern lt *make_structure(lt *name, lt *fields);
+extern lt *make_structure(lt *name, int nfield);
 extern lt *make_symbol(char *, lt *);
 extern lt *make_time(struct tm *);
 extern lt *make_type(enum TYPE, char *);

@@ -41,6 +41,7 @@ lt *standard_in;
 lt *standard_out;
 lt *symbol_list;
 /* Structure */
+// The global variable `st_tbl' contains the mapping between `name of structure' and `fields of structure'
 hash_table_t *st_tbl;
 /* Symbol */
 lt *the_begin_symbol;
@@ -380,12 +381,11 @@ lt *make_string(char *value) {
   return string;
 }
 
-lt *make_structure(lt *name, lt *fields) {
+lt *make_structure(lt *name, int nfield) {
   int pair_length(lt *);
   lt *obj = make_object(LT_STRUCT);
   structure_name(obj) = name;
-  structure_fields(obj) = fields;
-  structure_data(obj) = make_vector(pair_length(fields));
+  structure_data(obj) = make_vector(nfield);
   for (int i = 0; i < vector_length(structure_data(obj)); i++)
     vector_value(structure_data(obj))[i] = make_undef();
   return obj;
@@ -603,8 +603,8 @@ lt *search_structure(char *struct_name) {
   return search_ht(struct_name, st_tbl);
 }
 
-void set_structure(char *name, lt *structure) {
-  set_ht(name, structure, st_tbl);
+void set_structure(char *name, lt *fields) {
+  set_ht(name, fields, st_tbl);
 }
 
 hash_table_t *make_structures_table(void) {

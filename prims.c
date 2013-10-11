@@ -285,7 +285,7 @@ void write_object(lt *x, lt *output_file) {
     }
       break;
     case LT_STRUCT:
-      writef(output_file, "#<STRUCTURE name: %S>", structure_name(x));
+      writef(output_file, "#<STRUCTURE %p name: %S>", x, structure_name(x));
       break;
     case LT_SYMBOL:
     	write_raw_string(symbol_name(x), output_file);
@@ -919,32 +919,29 @@ void init_prim_string(void) {
 
 /* Structure */
 lt *lt_get_field(lt *field_name, lt *st) {
-  lt *fs = structure_fields(st);
-  int i = 0;
-  while (is_lt_pair(fs)) {
-    lt *field = pair_head(fs);
-    if (strcmp(symbol_name(field_name), symbol_name(field)) == 0)
-      break;
-    fs = pair_tail(fs);
-    i++;
-  }
-  if (!is_lt_pair(fs))
+  char *st_name = symbol_name(structure_name(st));
+  int i = compute_field_offset(symbol_name(field_name), st_name);
+  if (i == -1)
     return signal_exception("Undefined field in structure");
   else
     return vector_value(structure_data(st))[i];
 }
 
+lt *lt_make_structure(lt *name, lt *fields) {
+  set_structure(symbol_name(name), fields);
+  return name;
+}
+
+lt *lt_mkstruct(lt *name) {
+  lt *fs = search_structure(symbol_name(name));
+  lt *st = make_structure(name, pair_length(fs));
+  return st;
+}
+
 lt *lt_set_field(lt *field_name, lt *st, lt *value) {
-  lt *fs = structure_fields(st);
-  int i = 0;
-  while (is_lt_pair(fs)) {
-    lt *field = pair_head(fs);
-    if (strcmp(symbol_name(field_name), symbol_name(field)) == 0)
-      break;
-    fs = pair_tail(fs);
-    i++;
-  }
-  if (!is_lt_pair(fs))
+  char *st_name = symbol_name(structure_name(st));
+  int i = compute_field_offset(symbol_name(field_name), st_name);
+  if (i == -1)
     return signal_exception("Undefined field in structure");
   else {
     vector_value(structure_data(st))[i] = value;
@@ -954,7 +951,8 @@ lt *lt_set_field(lt *field_name, lt *st, lt *value) {
 
 void init_prim_structure(void) {
   PFN("get-field", 2, lt_get_field, pkg_lisp);
-  PFN("make-structure", 2, make_structure, pkg_lisp);
+  PFN("make-structure", 2, lt_make_structure, pkg_lisp);
+  PFN("make-instance", 1, lt_mkstruct, pkg_lisp);
   PFN("set-field!", 3, lt_set_field, pkg_lisp);
 }
 
