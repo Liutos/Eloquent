@@ -13,6 +13,7 @@ Write your code and save them into a file, assume the file name is script.scm, y
 ## Dependencies
 
 * libgc-dev
+* libgmp-dev
 
 ## Building
 

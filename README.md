@@ -13,6 +13,7 @@ Eloquent 是一个233-Lisp的参考实现，后者是一门个人Lisp方言。
 ## 依赖
 
 * libgc-dev
+* libgmp-dev
 
 ## 构建
 
