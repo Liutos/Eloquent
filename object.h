@@ -75,7 +75,7 @@ extern int is_lt_string(lt *);
 extern int is_lt_symbol(lt *);
 extern int is_lt_type(lt *);
 extern int is_lt_vector(lt *);
-extern int ischar(lt *);
+extern int is_lt_byte(lt *);
 extern int isfixnum(lt *);
 extern int isdot(lt *);
 extern int iseof(lt *);
@@ -99,7 +99,7 @@ extern lt *make_empty_list(void);
 extern lt *make_eof(void);
 extern lt *make_undef(void);
 extern lt *make_close(void);
-extern lt *make_character(char);
+extern lt *make_byte(char);
 extern lt *make_fixnum(int);
 extern lt *make_bignum(mpz_t);
 extern lt *make_environment(lt *, lt *);
@@ -164,12 +164,12 @@ extern void init_global_variable(void);
 /* tagging system
  *   bits end in  00:  pointer
  *                01:  fixnum
- *              0110:  char
+ *              0110:  byte
  *              1110:  other immediate object (null_list, true, false, eof, undef, close)
  */
-#define CHAR_BITS 4
-#define CHAR_MASK 15
-#define CHAR_TAG 6
+#define BYTE_BITS 4
+#define BYTE_MASK 15
+#define BYTE_TAG 6
 #define FIXNUM_BITS 2
 #define FIXNUM_MASK 3
 #define FIXNUM_TAG 1

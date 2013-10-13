@@ -68,7 +68,7 @@ lt *the_undef;
 
 struct lisp_object_t lt_types[] = {
     DEFTYPE(LT_BOOL, "bool"),
-    DEFTYPE(LT_CHARACTER, "character"),
+    DEFTYPE(LT_BYTE, "byte"),
     DEFTYPE(LT_EMPTY_LIST, "empty-list"),
     DEFTYPE(LT_FIXNUM, "fixnum"),
     DEFTYPE(LT_TCLOSE, "tclose"),
@@ -128,8 +128,8 @@ struct lisp_object_t lt_codes[] = {
 };
 
 /* Type predicate */
-int ischar(lt *object) {
-  return ((intptr_t)object & CHAR_MASK) == CHAR_TAG;
+int is_lt_byte(lt *object) {
+  return ((intptr_t)object & BYTE_MASK) == BYTE_TAG;
 }
 
 int isfixnum(lt *object) {
@@ -209,8 +209,8 @@ int isnumber(lisp_object_t *object) {
 int type_of(lisp_object_t *x) {
   if (isboolean(x))
     return LT_BOOL;
-  if (ischar(x))
-    return LT_CHARACTER;
+  if (is_lt_byte(x))
+    return LT_BYTE;
   if (isnull(x))
     return LT_EMPTY_LIST;
   if (isfixnum(x))
@@ -251,8 +251,8 @@ mksingle_type(make_eof, EOF_ORIGIN)
 mksingle_type(make_undef, UNDEF_ORIGIN)
 mksingle_type(make_close, CLOSE_ORIGIN)
 
-lisp_object_t *make_character(char value) {
-  return (lt *)((((intptr_t)value) << CHAR_BITS) | CHAR_TAG);
+lisp_object_t *make_byte(char value) {
+  return (lt *)((((intptr_t)value) << BYTE_BITS) | BYTE_TAG);
 }
 
 lt *make_fixnum(int value) {
@@ -374,6 +374,7 @@ string_builder_t *make_str_builder(void) {
   return sb;
 }
 
+// FIXME: Computes the length of string correctly
 lt *make_string(char *value) {
   lt *string = make_object(LT_STRING);
   string_length(string) = strlen(value);

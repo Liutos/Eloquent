@@ -96,8 +96,8 @@ void writef(lt *dest, const char *format, ...) {
       arg = va_arg(ap, lisp_object_t *);
       switch (c) {
         case 'c':
-          assert(ischar(arg));
-          write_raw_char(character_value(arg), dest);
+          assert(is_lt_byte(arg));
+          write_raw_char(byte_value(arg), dest);
           break;
         case 's':
           assert(is_lt_string(arg));
@@ -192,18 +192,9 @@ void write_object(lt *x, lt *output_file) {
       else
         write_raw_string("#f", output_file);
       break;
-    case LT_CHARACTER: {
-      int c = character_value(x);
-      switch (c) {
-        case ' ':
-          write_raw_string("#\\space", output_file);
-          break;
-        case '\n':
-          write_raw_string("#\\newline", output_file);
-          break;
-        default :
-          writef(output_file, "#\\%c", x);
-      }
+    case LT_BYTE: {
+      int c = byte_value(x);
+      writef(output_file, "#<BYTE %d>", make_fixnum(c));
     }
       break;
     case LT_EMPTY_LIST:
@@ -546,7 +537,7 @@ lt *lt_read_char(lt *in_port) {
   if (c == EOF)
     return the_eof;
   else
-    return make_character(c);
+    return make_unicode_char(c);
 }
 
 lt *lt_read_line(lt *in_port) {
@@ -1274,8 +1265,6 @@ lt *lt_eql(lt *x, lt *y) {
     return the_true;
   if (isnumber(x) && isnumber(y))
     return lt_numeric_eq(x, y);
-  if (ischar(x) && ischar(y))
-    return booleanize(character_value(x) == character_value(y));
   return the_false;
 }
 
@@ -1391,7 +1380,7 @@ lt *expect_string(char *target, lisp_object_t *input_file) {
 
 char read_raw_byte(lt *iport) {
   lt *c = lt_read_char(iport);
-  return character_value(c);
+  return byte_value(c);
 }
 
 lt *read_unicode(char b1, lt *iport) {
@@ -1412,7 +1401,7 @@ lisp_object_t *read_character(lisp_object_t *input_file) {
     case 's':
       c = peek_char(input_file);
       if (isdelimiter(c))
-        return make_character('s');
+        return make_unicode_char('s');
       tmp = expect_string("pace", input_file);
       if (is_signaled(tmp))
         return tmp;
@@ -1420,7 +1409,7 @@ lisp_object_t *read_character(lisp_object_t *input_file) {
     case 'n':
       c = peek_char(input_file);
       if (isdelimiter(c))
-        return make_character('n');
+        return make_unicode_char('n');
       tmp = expect_string("ewline", input_file);
       if (is_signaled(tmp))
         return tmp;

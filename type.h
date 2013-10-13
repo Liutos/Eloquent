@@ -36,7 +36,7 @@ enum {
 enum TYPE {
   /* tagged-pointer */
   LT_BOOL,
-  LT_CHARACTER,
+  LT_BYTE,
   LT_EMPTY_LIST,
   LT_FIXNUM,
   LT_TCLOSE,
@@ -165,6 +165,7 @@ struct lisp_object_t {
       lt *fn;
     } retaddr;
     struct {
+//      FIXME: The `length' should be long enough for containing length bigger than fixnum
       int length;
       char *value;
     } string;
@@ -203,7 +204,7 @@ struct string_builder_t {
 #define FALSE 0
 #define TRUE 1
 
-#define character_value(x) (((intptr_t)x) >> CHAR_BITS)
+#define byte_value(x) (((intptr_t)x) >> BYTE_BITS)
 #define fixnum_value(x) (((intptr_t)(x)) >> FIXNUM_BITS)
 
 /* Accessor macros */
