@@ -117,6 +117,8 @@ lisp_object_t *run_by_llam(lisp_object_t *code_vector) {
 #define vlast(v, n) lt_vector_last_nth(v, make_fixnum(n))
 
   lt *stack = make_vector(50);
+  lt *arg1;
+  lt *arg2;
 
   assert(is_lt_vector(code_vector));
 //  The number of arguments passed.
@@ -355,35 +357,30 @@ lisp_object_t *run_by_llam(lisp_object_t *code_vector) {
         throw_exception = retaddr_throw_flag(retaddr);
       }
         break;
-      case ADDI: {
-        lt *arg2 = lt_vector_pop(stack);
-        lt *arg1 = lt_vector_pop(stack);
+      case ADDI:
+        arg2 = lt_vector_pop(stack);
+        arg1 = lt_vector_pop(stack);
         lt_vector_push(stack, lt_fx_add(arg1, arg2));
-      }
         break;
-      case CONS: {
-        lt *arg2 = lt_vector_pop(stack);
-        lt *arg1 = lt_vector_pop(stack);
+      case CONS:
+        arg2 = lt_vector_pop(stack);
+        arg1 = lt_vector_pop(stack);
         lt_vector_push(stack, make_pair(arg1, arg2));
-      }
         break;
-      case DIVI: {
-        lt *arg2 = lt_vector_pop(stack);
-        lt *arg1 = lt_vector_pop(stack);
+      case DIVI:
+        arg2 = lt_vector_pop(stack);
+        arg1 = lt_vector_pop(stack);
         lt_vector_push(stack, lt_fx_div(arg1, arg2));
-      }
         break;
-      case MULI: {
-        lt *arg2 = lt_vector_pop(stack);
-        lt *arg1 = lt_vector_pop(stack);
+      case MULI:
+        arg2 = lt_vector_pop(stack);
+        arg1 = lt_vector_pop(stack);
         lt_vector_push(stack, lt_fx_mul(arg1, arg2));
-      }
         break;
-      case SUBI: {
-        lt *arg2 = lt_vector_pop(stack);
-        lt *arg1 = lt_vector_pop(stack);
+      case SUBI:
+        arg2 = lt_vector_pop(stack);
+        arg1 = lt_vector_pop(stack);
         lt_vector_push(stack, lt_fx_sub(arg1, arg2));
-      }
         break;
       default :
         fprintf(stdout, "In run_by_llam --- Invalid opcode %d\n", type_of(ins));

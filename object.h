@@ -8,6 +8,7 @@
 #ifndef OBJECT_H_
 #define OBJECT_H_
 
+/* OBJECT_H_ */
 #include <stdio.h>
 #include <time.h>
 
@@ -15,7 +16,6 @@
 
 #include "type.h"
 
-/* OBJECT_H_ */
 int debug;
 int is_check_exception;
 int is_check_type;

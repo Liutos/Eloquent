@@ -803,7 +803,7 @@ lisp_object_t *lt_char_code(lisp_object_t *c) {
 
 lisp_object_t *lt_code_char(lisp_object_t *code) {
   assert(isfixnum(code));
-  return make_character(fixnum_value(code));
+  return make_byte(fixnum_value(code));
 }
 
 void init_prim_char(void) {
@@ -897,8 +897,8 @@ lt *lt_string_length(lt *str) {
 lt *lt_string_set(lt *string, lt *index, lt *new_char) {
   assert(is_lt_string(string));
   assert(isfixnum(index));
-  assert(ischar(new_char));
-  string_value(string)[fixnum_value(index)] = character_value(new_char);
+  assert(is_lt_byte(new_char));
+  string_value(string)[fixnum_value(index)] = byte_value(new_char);
   return string;
 }
 
