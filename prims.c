@@ -306,10 +306,9 @@ void write_object(lt *x, lt *output_file) {
         write_raw_string("space", output_file);
       else if (unicode_data(x)[0] == '\n')
         write_raw_string("newline", output_file);
-      else {
-        for (int i = 0; unicode_data(x)[i] != '\0'; i++)
+      else
+        for (int i = 0; i < count1(unicode_data(x)[0]); i++)
           write_raw_char(unicode_data(x)[i], output_file);
-      }
       break;
     case LT_VECTOR: {
       lisp_object_t **vector = vector_value(x);
@@ -885,7 +884,8 @@ lt *lt_char_at(lt *string, lt *index) {
     k += step;
   }
   int len = count1(string_value(string)[k]);
-  char *data = strndup(&string_value(string)[k], len);
+  char *data = GC_MALLOC(len * sizeof(char));
+  memcpy(data, string_value(string), len);
   return make_unicode(data);
 }
 
@@ -1379,15 +1379,13 @@ lt *expect_string(char *target, lisp_object_t *input_file) {
 }
 
 char read_raw_byte(lt *iport) {
-  lt *c = lt_read_char(iport);
-  return byte_value(c);
+  return getc(input_port_stream(iport));
 }
 
 lt *read_unicode(char b1, lt *iport) {
   int n1 = count1(b1);
-  char *data = GC_MALLOC((n1 + 1) * sizeof(char));
+  char *data = GC_MALLOC(n1 * sizeof(char));
   data[0] = b1;
-  data[n1] = '\0';
   for (int i = 1; i < n1; i++) {
     data[i] = read_raw_byte(iport);
   }

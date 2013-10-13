@@ -197,9 +197,9 @@ int count1(char byte) {
   return count == 0? 1: count;
 }
 
+// TODO: Pre-allocate the space for storing ASCII character instead of allocating everytime
 lt *make_unicode_char(char c) {
-  char *data = GC_MALLOC(2 * sizeof(char));
+  char *data = GC_MALLOC(1 * sizeof(char));
   data[0] = c;
-  data[1] = '\0';
   return make_unicode(data);
 }

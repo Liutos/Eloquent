@@ -17,10 +17,10 @@
 int main(int argc, char *argv[])
 {
   char *inputs[] = {
-      "(defstruct pair car cdr)",
-      "(set! a (make-instance 'pair))",
-      "(set-field! 'car a 123)",
-      "(get-field 'car a)",
+      "#\\a",
+      "#\\汉",
+      "(char-at \"abc\" 1)",
+      "(char-at \"汉字\" 0)",
   };
   init_global_variable();
   init_prims();
