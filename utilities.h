@@ -55,5 +55,8 @@ extern lt *let_vars(lt *);
 /* UTF-8 */
 extern int count1(char);
 extern lt *make_unicode_char(char);
+/* String */
+extern int C_string_count(char *);
+extern lt *wrap_C_string(char *);
 
 #endif /* UTILITIES_H_ */

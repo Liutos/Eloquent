@@ -12,13 +12,16 @@
 #include "object.h"
 #include "prims.h"
 #include "type.h"
+#include "utilities.h"
 #include "vm.h"
 
 int main(int argc, char *argv[])
 {
   char *inputs[] = {
-      "(expand-macro '(try-catch (fx/ 1 0) (Lisp::error (e) 0)))",
-      "(try-catch (fx/ 1 0) (error (e) 0))",
+      "(string-length \"Hello, world!\")",
+      "(string-length \"你好，世界\")",
+      "(char-at \"Hello, world!\" 0)",
+      "(char-at \"你好，世界\" 1)",
   };
   init_global_variable();
   init_prims();
@@ -26,7 +29,7 @@ int main(int argc, char *argv[])
   init_macros();
   load_init_file();
   for (int i = 0; i < sizeof(inputs) / sizeof(char *); i++) {
-    writef(standard_out, "%s >> %s\n", package_name(package), make_string(inputs[i]));
+    writef(standard_out, "%s >> %s\n", package_name(package), wrap_C_string(inputs[i]));
     lisp_object_t *expr = read_object_from_string(strdup(inputs[i]));
     expr = compile_to_bytecode(expr);
     if (!is_signaled(expr))

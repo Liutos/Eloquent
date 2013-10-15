@@ -29,7 +29,7 @@ int main(int argc, char *argv[]) {
       case 'l': {
         script_flag = TRUE;
         char *script = optarg;
-        script_name = make_string(script);
+        script_name = wrap_C_string(script);
       }
         break;
       default :
@@ -40,7 +40,7 @@ int main(int argc, char *argv[]) {
 
 //  Initializes the command line arguments array
   for (int i = 0; i < argc; i++) {
-    lt_vector_push_extend(the_argv, make_string(argv[i]));
+    lt_vector_push_extend(the_argv, wrap_C_string(argv[i]));
   }
 
   if (script_flag == TRUE) {

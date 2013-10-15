@@ -166,7 +166,8 @@ struct lisp_object_t {
     } retaddr;
     struct {
 //      FIXME: The `length' should be long enough for containing length bigger than fixnum
-      int length;
+//      The member `count' is the Unicode characters in the string.
+      int count, length;
       char *value;
     } string;
     struct {
@@ -248,6 +249,7 @@ struct string_builder_t {
 #define retaddr_fn(x) ((x)->u.retaddr.fn)
 #define retaddr_pc(x) ((x)->u.retaddr.pc)
 #define retaddr_throw_flag(x) ((x)->u.retaddr.throw_flag)
+#define string_count(x) ((x)->u.string.count)
 #define string_length(x) ((x)->u.string.length)
 #define string_value(x) ((x)->u.string.value)
 #define structure_name(x) ((x)->u.structure.name)

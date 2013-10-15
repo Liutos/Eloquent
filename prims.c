@@ -205,7 +205,7 @@ void write_object(lt *x, lt *output_file) {
       break;
     case LT_EXCEPTION: {
       writef(output_file, "%S: ", exception_tag(x));
-      writef(output_file, "%s\n", make_string(exception_msg(x)));
+      writef(output_file, "%s\n", wrap_C_string(exception_msg(x)));
       lt *backtrace = exception_backtrace(x);
       while (!isnull(backtrace)) {
         lt *fn = pair_head(backtrace);
@@ -547,7 +547,7 @@ lt *lt_read_line(lt *in_port) {
     sb_add_char(sb, c);
     c = get_char(in_port);
   }
-  return make_string(sb2string(sb));
+  return wrap_C_string(sb2string(sb));
 }
 
 void init_prim_input_port(void) {
@@ -885,13 +885,13 @@ lt *lt_char_at(lt *string, lt *index) {
   }
   int len = count1(string_value(string)[k]);
   char *data = GC_MALLOC(len * sizeof(char));
-  memcpy(data, string_value(string), len);
+  memcpy(data, string_value(string) + k, len);
   return make_unicode(data);
 }
 
 lt *lt_string_length(lt *str) {
   assert(is_lt_string(str));
-  return make_fixnum(string_length(str));
+  return make_fixnum(string_count(str));
 }
 
 lt *lt_string_set(lt *string, lt *index, lt *new_char) {
@@ -981,7 +981,7 @@ lt *lt_symbol_macro(lt *symbol) {
 
 lisp_object_t *lt_symbol_name(lisp_object_t *symbol) {
   assert(is_lt_symbol(symbol));
-  return make_string(strdup(symbol_name(symbol)));
+  return wrap_C_string(strdup(symbol_name(symbol)));
 }
 
 lt *lt_symbol_package(lt *symbol) {
@@ -1233,7 +1233,7 @@ lt *lt_file_size(lt *path) {
 
 lt *lt_get_home(void) {
   struct passwd *pw = getpwuid(getuid());
-  return make_string(pw->pw_dir);
+  return wrap_C_string(pw->pw_dir);
 }
 
 lt *lt_is_file_exist(lt *path) {
@@ -1244,7 +1244,7 @@ lt *lt_is_file_exist(lt *path) {
 }
 
 lt *lt_pwd(void) {
-  return make_string(getcwd(NULL, 0));
+  return wrap_C_string(getcwd(NULL, 0));
 }
 
 void init_prim_os(void) {
@@ -1502,7 +1502,7 @@ lisp_object_t *read_string(lisp_object_t *input_file) {
   for (;;) {
     int c = get_char(input_file);
     if (c == '"')
-      return make_string(sb2string(buffer));
+      return wrap_C_string(sb2string(buffer));
     if (c == '\\') {
       c = get_char(input_file);
       switch (c) { case 'n': c = '\n'; break; case 't': c = '\t'; break;}

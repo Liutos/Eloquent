@@ -381,8 +381,9 @@ string_builder_t *make_str_builder(void) {
 }
 
 // FIXME: Computes the length of string correctly
-lt *make_string(char *value) {
+lt *make_string(int count, char *value) {
   lt *string = make_object(LT_STRING);
+  string_count(string) = count;
   string_length(string) = strlen(value);
   string_value(string) = value;
   return string;
@@ -583,10 +584,11 @@ lt *search_package(char *name, lt *packages) {
 }
 
 lt *ensure_package(char *name) {
+  lt *wrap_C_string(char *);
   lt *result = search_package(name, pkgs);
   if (result)
     return result;
-  lt *pkg = make_package(make_string(name), make_symbol_table());
+  lt *pkg = make_package(wrap_C_string(name), make_symbol_table());
   pkgs = make_pair(pkg, pkgs);
   symbol_value(find_or_create_symbol("*package*", pkg)) = pkg;
   return pkg;

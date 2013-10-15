@@ -203,3 +203,18 @@ lt *make_unicode_char(char c) {
   data[0] = c;
   return make_unicode(data);
 }
+
+/* String */
+int C_string_count(char *str) {
+  int count = 0;
+  int i = 0;
+  while (str[i] != '\0') {
+    i += count1(str[i]);
+    count++;
+  }
+  return count;
+}
+
+lt *wrap_C_string(char *C_str) {
+  return make_string(C_string_count(C_str), C_str);
+}

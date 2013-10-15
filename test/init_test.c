@@ -85,7 +85,7 @@ int main(int argc, char *argv[])
   init_macros();
   char *load_expr = "(load \"init.scm\")";
   lt *expr = read_object_from_string(strdup(load_expr));
-  writef(standard_out, "%s\n", make_string(load_expr));
+  writef(standard_out, "%s\n", wrap_C_string(load_expr));
   expr = compile_to_bytecode(expr);
   if (!is_signaled(expr))
     expr = run_by_llam(expr);
@@ -94,7 +94,7 @@ int main(int argc, char *argv[])
   else
     writef(standard_out, "=> %?\n", expr);
   for (int i = 0; i < sizeof(inputs) / sizeof(char *); i++) {
-    writef(standard_out, ">> %s\n", make_string(inputs[i]));
+    writef(standard_out, ">> %s\n", wrap_C_string(inputs[i]));
     lisp_object_t *expr = read_object_from_string(strdup(inputs[i]));
     expr = compile_to_bytecode(expr);
     if (!is_signaled(expr))

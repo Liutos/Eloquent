@@ -34,7 +34,7 @@ init_test.o: test/init_test.c compiler.h macros.h object.h prims.h type.h vm.h
 repl_test.o: test/repl_test.c compiler.h macros.h object.h prims.h vm.h
 	$(CC) $(CFLAGS) -I. -c $< -o $@
 
-vm_test.o: test/vm_test.c compiler.h macros.h object.h prims.h type.h vm.h
+vm_test.o: test/vm_test.c compiler.h macros.h object.h prims.h type.h utilities.h vm.h
 	$(CC) $(CFLAGS) -I. -c $< -o $@
 
 # Test Executable
