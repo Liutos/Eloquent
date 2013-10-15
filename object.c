@@ -44,6 +44,7 @@ lt *symbol_list;
 // The global variable `st_tbl' contains the mapping between `name of structure' and `fields of structure'
 hash_table_t *st_tbl;
 /* Symbol */
+/** Special Forms **/
 lt *the_begin_symbol;
 lt *the_catch_symbol;
 lt *the_dot_symbol;
@@ -56,6 +57,11 @@ lt *the_set_symbol;
 lt *the_splicing_symbol;
 lt *the_tagbody_symbol;
 lt *the_unquote_symbol;
+/** Exceptions **/
+lt *the_compiler_error_symbol;
+lt *the_error_symbol;
+lt *the_reader_error_symbol;
+lt *the_type_error_symbol;
 
 lt *the_argv;
 lt *the_empty_list;
@@ -742,4 +748,9 @@ void init_global_variable(void) {
   the_splicing_symbol = LISP("unquote-splicing");
   the_tagbody_symbol = LISP("tagbody");
   the_unquote_symbol = LISP("unquote");
+  /* Exception tags initialization */
+  the_compiler_error_symbol = LISP("compiler-error");
+  the_error_symbol = LISP("error");
+  the_reader_error_symbol = LISP("reader-error");
+  the_type_error_symbol = LISP("type-error");
 }

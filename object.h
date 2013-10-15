@@ -25,6 +25,7 @@ hash_table_t *prim2op_map;
 /* Structure */
 hash_table_t *st_tbl;
 /* Symbol */
+/** Special Forms **/
 lt *the_begin_symbol;
 lt *the_catch_symbol;
 lt *the_dot_symbol;
@@ -37,6 +38,11 @@ lt *the_set_symbol;
 lt *the_splicing_symbol;
 lt *the_tagbody_symbol;
 lt *the_unquote_symbol;
+/** Exceptions **/
+lt *the_compiler_error_symbol;
+lt *the_error_symbol;
+lt *the_reader_error_symbol;
+lt *the_type_error_symbol;
 
 lt *the_argv;
 lisp_object_t *the_false;

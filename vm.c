@@ -98,7 +98,7 @@ lt *type_error(lt *index, lt *pred) {
   lt *file = make_output_port(buf);
   writef(file, "The argument at index %d is not satisfy with predicate %?", index, pred);
   lt_close_out(file);
-  return make_exception(strdup(msg), TRUE, S("TYPE-ERROR"), the_empty_list);
+  return make_exception(strdup(msg), TRUE, the_type_error_symbol, the_empty_list);
 }
 
 lt *comp2run_env(lt *comp_env, lt *next) {

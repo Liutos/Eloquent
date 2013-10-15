@@ -17,10 +17,8 @@
 int main(int argc, char *argv[])
 {
   char *inputs[] = {
-      "#\\a",
-      "#\\汉",
-      "(char-at \"abc\" 1)",
-      "(char-at \"汉字\" 0)",
+      "(expand-macro '(try-catch (fx/ 1 0) (Lisp::error (e) 0)))",
+      "(try-catch (fx/ 1 0) (error (e) 0))",
   };
   init_global_variable();
   init_prims();
