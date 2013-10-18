@@ -57,6 +57,7 @@ extern int count1(char);
 extern lt *make_unicode_char(char);
 extern uint32_t get_code_point(char *);
 /* String */
+extern char *C_string(lt *);
 extern int C_string_count(char *);
 extern lt *wrap_C_string(char *);
 

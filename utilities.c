@@ -247,6 +247,10 @@ int C_string_count(char *str) {
   return count;
 }
 
+char *C_string(lt *string) {
+  return string_value(string);
+}
+
 lt *wrap_C_string(char *C_str) {
   return make_string(C_string_count(C_str), C_str);
 }

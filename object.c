@@ -574,9 +574,10 @@ lt *make_fn_inst(lt *prim) {
 
 /* Package */
 lt *search_package(char *name, lt *packages) {
+  char *C_string(lt *);
   while (is_lt_pair(packages)) {
     lt *pkg = pair_head(packages);
-    if (strcmp(string_value(package_name(pkg)), name) == 0)
+    if (strcmp(C_string(package_name(pkg)), name) == 0)
       return pkg;
     packages = pair_tail(packages);
   }

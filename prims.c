@@ -101,7 +101,7 @@ void writef(lt *dest, const char *format, ...) {
           break;
         case 's':
           assert(is_lt_string(arg));
-          write_raw_string(string_value(arg), dest);
+          write_raw_string(C_string(arg), dest);
           break;
         case 'p':
           nch = fprintf(output_port_stream(dest), "%p", arg);
@@ -264,7 +264,7 @@ void write_object(lt *x, lt *output_file) {
       writef(output_file, "#<RETADDR %p pc: %d>", x, make_fixnum(retaddr_pc(x)));
       break;
     case LT_STRING: {
-      char *value = string_value(x);
+      char *value = C_string(x);
       write_raw_string("\"", output_file);
       for (int i = 0; value[i] != '\0'; i++) {
         if (value[i] == '"')
@@ -368,7 +368,7 @@ lt *lt_exception_tag(lt *exception) {
 }
 
 lt *lt_signal_exception(lt *message) {
-  return signal_exception(string_value(message));
+  return signal_exception(C_string(message));
 }
 
 void init_prim_exception(void) {
@@ -520,13 +520,13 @@ lt *lt_load_file(lt *file) {
 }
 
 lt *lt_make_input_string_port(lt *str) {
-  char *c_str = string_value(str);
+  char *c_str = C_string(str);
   return make_input_string_port(c_str);
 }
 
 lt *lt_open_in(lt *path) {
   assert(is_lt_string(path));
-  FILE *fp = fopen(string_value(path), "r");
+  FILE *fp = fopen(C_string(path), "r");
   return make_input_port(fp);
 }
 
@@ -614,7 +614,7 @@ lt *lt_bg2mpf(lt *n) {
 lt *lt_mkbg(lt *str) {
   mpz_t num;
   mpz_init(num);
-  mpz_set_str(num, string_value(str), 10);
+  mpz_set_str(num, C_string(str), 10);
   return make_bignum(num);
 }
 
@@ -816,7 +816,7 @@ lt *lt_close_out(lt *file) {
 
 lt *lt_open_out(lt *path) {
   assert(is_lt_string(path));
-  FILE *fp = fopen(string_value(path), "w");
+  FILE *fp = fopen(C_string(path), "w");
   return make_output_port(fp);
 }
 
@@ -828,7 +828,7 @@ lt *lt_write_char(lt *c, lt *dest) {
 }
 
 lt *lt_write_string(lt *str, lt *dest) {
-  write_raw_string(string_value(str), dest);
+  write_raw_string(C_string(str), dest);
   return str;
 }
 
@@ -847,7 +847,7 @@ void init_prim_output_port(void) {
 
 /* Package */
 lt *lt_in_package(lt *name) {
-  lt *pkg = search_package(string_value(name), pkgs);
+  lt *pkg = search_package(C_string(name), pkgs);
   if (pkg) {
     package = pkg;
     return the_true;
@@ -856,7 +856,7 @@ lt *lt_in_package(lt *name) {
 }
 
 lt *lt_make_package(lt *name) {
-  return ensure_package(string_value(name));
+  return ensure_package(C_string(name));
 }
 
 lt *lt_package_name(lt *pkg) {
@@ -875,12 +875,12 @@ lt *lt_char_at(lt *string, lt *index) {
   assert(string_length(string) > fixnum_value(index));
   int k = 0;
   for (int i = fixnum_value(index); i > 0; i--) {
-    int step = count1(string_value(string)[k]);
+    int step = count1(C_string(string)[k]);
     k += step;
   }
-  int len = count1(string_value(string)[k]);
+  int len = count1(C_string(string)[k]);
   char *data = GC_MALLOC(len * sizeof(char));
-  memcpy(data, string_value(string) + k, len);
+  memcpy(data, C_string(string) + k, len);
   return make_unicode(data);
 }
 
@@ -893,7 +893,7 @@ lt *lt_string_set(lt *string, lt *index, lt *new_char) {
   assert(is_lt_string(string));
   assert(isfixnum(index));
   assert(is_lt_byte(new_char));
-  string_value(string)[fixnum_value(index)] = byte_value(new_char);
+  C_string(string)[fixnum_value(index)] = byte_value(new_char);
   return string;
 }
 
@@ -951,8 +951,8 @@ lt *lt_gensym(void) {
 }
 
 lt *lt_intern(lt *name, lt *pkg_name) {
-  lt *pkg = ensure_package(string_value(pkg_name));
-  return find_or_create_symbol(string_value(name), pkg);
+  lt *pkg = ensure_package(C_string(pkg_name));
+  return find_or_create_symbol(C_string(name), pkg);
 }
 
 lt *lt_is_bound(lt *symbol) {
@@ -1213,7 +1213,7 @@ void init_prim_list(void) {
 
 /** OS **/
 lt *lt_cd(lt *dir) {
-  int res = chdir(string_value(dir));
+  int res = chdir(C_string(dir));
   if (res == 0)
     return the_true;
   else
@@ -1222,7 +1222,7 @@ lt *lt_cd(lt *dir) {
 
 lt *lt_file_size(lt *path) {
   struct stat st;
-  stat(string_value(path), &st);
+  stat(C_string(path), &st);
   return make_fixnum(st.st_size);
 }
 
@@ -1232,7 +1232,7 @@ lt *lt_get_home(void) {
 }
 
 lt *lt_is_file_exist(lt *path) {
-  if (access(string_value(path), F_OK) == 0)
+  if (access(C_string(path), F_OK) == 0)
     return the_true;
   else
     return the_false;
@@ -1632,7 +1632,7 @@ lisp_object_t *read_object_from_string(char *text) {
 }
 
 lt *lt_read_from_string(lt *string) {
-  return read_object_from_string(string_value(string));
+  return read_object_from_string(C_string(string));
 }
 
 void init_prim_reader(void) {
