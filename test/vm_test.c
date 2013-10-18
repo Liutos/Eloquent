@@ -18,10 +18,8 @@
 int main(int argc, char *argv[])
 {
   char *inputs[] = {
-      "(string-length \"Hello, world!\")",
-      "(string-length \"你好，世界\")",
-      "(char-at \"Hello, world!\" 0)",
-      "(char-at \"你好，世界\" 1)",
+      "(char-code #\\a)",
+      "(char-code #\\汉)",
   };
   init_global_variable();
   init_prims();

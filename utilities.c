@@ -15,6 +15,7 @@
 
 #include "object.h"
 #include "type.h"
+#include "utilities.h"
 
 #define MASK 0x8000
 
@@ -199,12 +200,6 @@ int raw_count1(char byte) {
 }
 
 int count1(char byte) {
-//  int count = 0;
-//  while ((byte & MASK) == MASK) {
-//    count++;
-//    byte = byte << 1;
-//  }
-//  return count == 0? 1: count;
   int tmp = raw_count1(byte);
   return tmp == 0? 1: tmp;
 }

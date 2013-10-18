@@ -790,14 +790,9 @@ void init_prim_arithmetic(void) {
 }
 
 /* Character */
-lisp_object_t *lt_char_code(lisp_object_t *c) {
-  int len = strlen(unicode_data(c));
-  unsigned int code = 0;
-  while (len > 0) {
-    code = code * 256 + unicode_data(c)[len - 1];
-    len--;
-  }
-  return make_fixnum(code);
+lt *lt_char_code(lt *c) {
+  assert(is_lt_unicode(c));
+  return make_fixnum(get_code_point(unicode_data(c)));
 }
 
 lisp_object_t *lt_code_char(lisp_object_t *code) {
