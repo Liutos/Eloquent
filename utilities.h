@@ -55,6 +55,7 @@ extern lt *let_vars(lt *);
 /* UTF-8 */
 extern int count1(char);
 extern lt *make_unicode_char(char);
+extern uint32_t get_code_point(char);
 /* String */
 extern int C_string_count(char *);
 extern lt *wrap_C_string(char *);

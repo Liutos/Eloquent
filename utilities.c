@@ -16,6 +16,8 @@
 #include "object.h"
 #include "type.h"
 
+#define MASK 0x8000
+
 lt *booleanize(int value) {
   if (value == 0)
     return the_false;
@@ -187,14 +189,49 @@ lt *let_vars(lt *bindings) {
 }
 
 /* UTF-8 */
-int count1(char byte) {
-#define MASK 0x8000
+int raw_count1(char byte) {
   int count = 0;
   while ((byte & MASK) == MASK) {
     count++;
     byte = byte << 1;
   }
-  return count == 0? 1: count;
+  return count;
+}
+
+int count1(char byte) {
+//  int count = 0;
+//  while ((byte & MASK) == MASK) {
+//    count++;
+//    byte = byte << 1;
+//  }
+//  return count == 0? 1: count;
+  int tmp = raw_count1(byte);
+  return tmp == 0? 1: tmp;
+}
+
+int get_low_bits(char byte, int n) {
+  int mask = 0;
+  for (int i = 0; i < n; i++) {
+    mask = (mask << 1) | 1;
+  }
+  return byte & mask;
+}
+
+uint32_t get_code_point(char *str) {
+  int n = raw_count1(*str);
+  switch (n) {
+    case 0:
+      return *str;
+    case 2:
+      return (get_low_bits(str[0], 5) << 6) | get_low_bits(str[1], 6);
+    case 3:
+      return (get_low_bits(str[0], 4) << 12) | (get_low_bits(str[1], 6) << 6) | get_low_bits(str[2], 6);
+    case 4:
+      return (get_low_bits(str[0], 3) << 18) | (get_low_bits(str[1], 6) << 12) |
+          (get_low_bits(str[2], 6) << 6) | get_low_bits(str[3], 6);
+    default :
+      return -1;
+  }
 }
 
 // TODO: Pre-allocate the space for storing ASCII character instead of allocating everytime
