@@ -279,11 +279,8 @@ char *code_point_to_utf8(uint32_t cp) {
   }
 }
 
-// TODO: Pre-allocate the space for storing ASCII character instead of allocating everytime
 lt *make_unicode_char(char c) {
-  char *data = GC_MALLOC(1 * sizeof(char));
-  data[0] = c;
-  return make_unicode(data);
+  return make_unicode(&tbl[(int)c]);
 }
 
 /* String */

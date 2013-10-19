@@ -19,6 +19,9 @@ int main(int argc, char *argv[])
 {
   char *inputs[] = {
       "\"a\"",
+      "#\\a",
+      "#\\汗",
+      "#\\newline",
   };
   init_global_variable();
   init_prims();

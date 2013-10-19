@@ -20,6 +20,7 @@
 int debug;
 int is_check_exception;
 int is_check_type;
+char tbl[256];
 /* Opcode */
 int opcode_max_length;
 hash_table_t *prim2op_map;

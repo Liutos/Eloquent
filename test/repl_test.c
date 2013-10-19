@@ -13,6 +13,7 @@
 #include "object.h"
 #include "prims.h"
 #include "type.h"
+#include "utilities.h"
 #include "vm.h"
 
 int main(int argc, char *argv[]) {

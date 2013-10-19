@@ -23,6 +23,7 @@
 int debug;
 int is_check_exception;
 int is_check_type;
+char tbl[256];
 lt *gensym_counter;
 lt *null_env;
 /* Opcode */
@@ -532,6 +533,12 @@ lt *make_op_catch(void) {
   return mkopcode(CATCH, 0);
 }
 
+/* Character */
+void init_character(void) {
+  for (int i = 0; i < 256; i++)
+    tbl[i] = i;
+}
+
 /* Opcode */
 lt *opcode_ref(enum OPCODE_TYPE opcode) {
   return &lt_codes[opcode];
@@ -722,6 +729,9 @@ void init_global_variable(void) {
   symbol_list = the_empty_list;
   the_undef = make_undef();
 
+//  Character
+  init_character();
+//  Opcode
   prim2op_map = make_prim2op_map();
   init_opcode_length();
 //  Packages initialization
