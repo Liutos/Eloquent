@@ -18,7 +18,7 @@ object.o: object.c hash_table.h object.h type.h
 prims.o: prims.c object.h type.h utilities.h
 	$(CC) $(CFLAGS) -c $< -o $@
 
-utilities.o: utilities.c object.h type.h
+utilities.o: utilities.c object.h type.h utilities.h
 	$(CC) $(CFLAGS) -c $< -o $@
 
 vm.o: vm.c object.h type.h prims.h utilities.h

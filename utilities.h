@@ -8,6 +8,8 @@
 #ifndef UTILITIES_H_
 #define UTILITIES_H_
 
+#include <stdint.h>
+
 #include "type.h"
 
 extern lt *booleanize(int);
@@ -54,11 +56,15 @@ extern lt *let_vars(lt *);
 
 /* UTF-8 */
 extern int count1(char);
+extern char *code_point_to_utf8(uint32_t);
 extern lt *make_unicode_char(char);
 extern uint32_t get_code_point(char *);
 /* String */
-extern char *C_string(lt *);
 extern int C_string_count(char *);
+extern int get_string_length(uint32_t *);
+extern char *C_string(lt *);
+extern char *to_C_string(uint32_t *, int);
+extern uint32_t *utf8s_to_code_point(char *);
 extern lt *wrap_C_string(char *);
 
 #endif /* UTILITIES_H_ */

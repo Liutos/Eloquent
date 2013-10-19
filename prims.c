@@ -886,7 +886,7 @@ lt *lt_char_at(lt *string, lt *index) {
 
 lt *lt_string_length(lt *str) {
   assert(is_lt_string(str));
-  return make_fixnum(string_count(str));
+  return make_fixnum(string_length(str));
 }
 
 lt *lt_string_set(lt *string, lt *index, lt *new_char) {

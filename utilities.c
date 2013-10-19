@@ -229,6 +229,56 @@ uint32_t get_code_point(char *str) {
   }
 }
 
+int bytes_need(uint32_t cp) {
+  if (cp < 0x80)
+    return 1;
+  if (cp < 0x800)
+    return 2;
+  if (cp < 0x10000)
+    return 3;
+  if (cp < 0x200000)
+    return 4;
+  else {
+    printf("Error happens\n");
+    exit(1);
+  }
+}
+
+char *code_point_to_utf8(uint32_t cp) {
+  if (cp < 0x80) {
+    char *str = calloc(1, sizeof(char));
+    str[0] = cp;
+    return str;
+  } else if (cp < 0x0800) {
+    char *str = calloc(2, sizeof(char));
+    str[1] = 0x80 | (cp & 0x3F);
+    cp = cp >> 6;
+    str[0] = 0xC0 | (cp & 0x1F);
+    return str;
+  } else if (cp < 0x10000) {
+    char *str = calloc(3, sizeof(char));
+    str[2] = 0x80 | (cp & 0x3F);
+    cp = cp >> 6;
+    str[1] = 0x80 | (cp & 0x3F);
+    cp = cp >> 6;
+    str[0] = 0xE0 | (cp & 0x0F);
+    return str;
+  } else if (cp < 0x200000) {
+    char *str = calloc(4, sizeof(char));
+    str[3] = 0x80 | (cp & 0x3F);
+    cp = cp >> 6;
+    str[2] = 0x80 | (cp & 0x3F);
+    cp = cp >> 6;
+    str[1] = 0x80 | (cp & 0x3F);
+    cp = cp >> 6;
+    str[0] = 0xF0 | (cp & 0x07);
+    return str;
+  } else {
+    printf("Error happens...");
+    exit(1);
+  }
+}
+
 // TODO: Pre-allocate the space for storing ASCII character instead of allocating everytime
 lt *make_unicode_char(char c) {
   char *data = GC_MALLOC(1 * sizeof(char));
@@ -237,6 +287,25 @@ lt *make_unicode_char(char c) {
 }
 
 /* String */
+/** Export: Code Point -> UTF-8 **/
+// Get the C string from a Lisp string
+char *to_C_string(uint32_t *value, int length) {
+  char *str = GC_MALLOC((length + 1) * sizeof(char));
+  str[length] = '\0';
+  int offset = 0;
+  for (int i = 0; value[i] != 0; i++) {
+    char *tmp = code_point_to_utf8(value[i]);
+    memcpy(str + offset, tmp, count1(*tmp));
+    offset += bytes_need(value[i]);
+  }
+  return str;
+}
+
+char *C_string(lt *string) {
+  return to_C_string(string_value(string), string_length(string));
+}
+
+/** Import: UTF-8 -> Code Point **/
 int C_string_count(char *str) {
   int count = 0;
   int i = 0;
@@ -247,10 +316,30 @@ int C_string_count(char *str) {
   return count;
 }
 
-char *C_string(lt *string) {
-  return string_value(string);
+// Convert each UTF-8 character in `str' to a number of type `uint32_t'
+uint32_t *utf8s_to_code_point(char *str) {
+  int len = C_string_count(str);
+  uint32_t *value = GC_MALLOC((len + 1) * sizeof(uint32_t));
+  value[len] = 0;
+  int k = 0;
+  for (int i = 0; i < len; i++) {
+    value[i] = get_code_point(&str[k]);
+    k += count1(str[k]);
+  }
+  return value;
+}
+
+int get_string_length(uint32_t *value) {
+  int len = 0;
+  while (*value != 0) {
+    len++;
+    value++;
+  }
+  return len;
 }
 
 lt *wrap_C_string(char *C_str) {
-  return make_string(C_string_count(C_str), C_str);
+  uint32_t *cps = utf8s_to_code_point(C_str);
+  int length = get_string_length(cps);
+  return make_string(length, cps);
 }

@@ -380,11 +380,9 @@ string_builder_t *make_str_builder(void) {
   return sb;
 }
 
-// FIXME: Computes the length of string correctly
-lt *make_string(int count, char *value) {
+lt *make_string(int length, uint32_t *value) {
   lt *string = make_object(LT_STRING);
-  string_count(string) = count;
-  string_length(string) = strlen(value);
+  string_length(string) = length;
   string_value(string) = value;
   return string;
 }

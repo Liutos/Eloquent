@@ -18,8 +18,7 @@
 int main(int argc, char *argv[])
 {
   char *inputs[] = {
-      "(char-code #\\a)",
-      "(char-code #\\汉)",
+      "\"a\"",
   };
   init_global_variable();
   init_prims();
@@ -38,4 +37,15 @@ int main(int argc, char *argv[])
       writef(standard_out, "=> %?\n", expr);
   }
   return 0;
+//  char *str = "汉字哦亲";
+//  uint32_t cp = get_code_point(str);
+//  printf("cp is %d\n", cp);
+//  uint32_t *value = utf8s_to_code_point(str);
+//  int length = get_string_length(value);
+//  printf("length is %d\n", length);
+//  printf("value[0] is %d\n", value[0]);
+//  printf("value[1] is %d\n", value[1]);
+//  str = Lisp_C_string(value, length);
+//  printf("str is %s\n", str);
+//  return 0;
 }

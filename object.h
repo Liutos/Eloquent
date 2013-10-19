@@ -10,6 +10,7 @@
 
 /* OBJECT_H_ */
 #include <stdio.h>
+#include <stdint.h>
 #include <time.h>
 
 #include <gmp.h>
@@ -81,6 +82,7 @@ extern int is_lt_string(lt *);
 extern int is_lt_symbol(lt *);
 extern int is_lt_type(lt *);
 extern int is_lt_vector(lt *);
+extern int is_lt_unicode(lt *);
 extern int is_lt_byte(lt *);
 extern int isfixnum(lt *);
 extern int isdot(lt *);
@@ -122,7 +124,7 @@ extern lt *make_pair(lt *, lt *);
 extern lt *make_primitive(int, void *, char *, int);
 extern lt *make_retaddr(lt *code, lt *env, lt *fn, int pc, int throw_flag, int sp);
 extern string_builder_t *make_str_builder(void);
-extern lt *make_string(int, char *);
+extern lt *make_string(int, uint32_t *);
 extern lt *make_structure(lt *name, int nfield);
 extern lt *make_symbol(char *, lt *);
 extern lt *make_time(struct tm *);
