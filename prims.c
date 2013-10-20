@@ -873,15 +873,8 @@ void init_prim_package(void) {
 lt *lt_char_at(lt *string, lt *index) {
   assert(is_lt_string(string) && isfixnum(index));
   assert(string_length(string) > fixnum_value(index));
-  int k = 0;
-  for (int i = fixnum_value(index); i > 0; i--) {
-    int step = count1(export_C_string(string)[k]);
-    k += step;
-  }
-  int len = count1(export_C_string(string)[k]);
-  char *data = GC_MALLOC(len * sizeof(char));
-  memcpy(data, export_C_string(string) + k, len);
-  return make_unicode(data);
+  char *c = code_point_to_utf8(string_value(string)[fixnum_value(index)]);
+  return make_unicode(c);
 }
 
 lt *lt_string_length(lt *str) {
@@ -889,11 +882,11 @@ lt *lt_string_length(lt *str) {
   return make_fixnum(string_length(str));
 }
 
-lt *lt_string_set(lt *string, lt *index, lt *new_char) {
+lt *lt_string_set(lt *string, lt *index, lt *c) {
   assert(is_lt_string(string));
   assert(isfixnum(index));
-  assert(is_lt_byte(new_char));
-  export_C_string(string)[fixnum_value(index)] = byte_value(new_char);
+  assert(is_lt_unicode(c));
+  string_value(string)[fixnum_value(index)] = get_code_point(unicode_data(c));
   return string;
 }
 

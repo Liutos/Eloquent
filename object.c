@@ -21,7 +21,6 @@
 #include "hash_table.h"
 #include "object.h"
 #include "type.h"
-//#include "utilities.h"
 
 int debug;
 int is_check_exception;
