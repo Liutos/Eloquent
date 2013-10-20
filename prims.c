@@ -830,7 +830,7 @@ lt *lt_write_char(lt *c, lt *dest) {
 
 void write_code_point(uint32_t cp, FILE *fp) {
   char *c = code_point_to_utf8(cp);
-  int cnt = count1(c);
+  int cnt = count1(*c);
   for (int i = 0; i < cnt; i++)
     putc(c[i], fp);
 }

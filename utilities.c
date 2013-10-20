@@ -70,19 +70,15 @@ int bytes_need(uint32_t cp) {
 }
 
 char *code_point_to_utf8(uint32_t cp) {
-  int MS1[] = {0xC0, 0xE0, 0xF0};
-  int MS2[] = {0x1F, 0x0F, 0x07};
+  static const int MS1[] = {0x00, 0xC0, 0xE0, 0xF0};
+  static const int MS2[] = {0xFF, 0x1F, 0x0F, 0x07};
   int n = bytes_need(cp);
   char *str = calloc(n, sizeof(char));
-  if (n == 1)
-    str[0] = cp;
-  else {
-    for (int i = n - 1; i > 0; i--) {
-      str[i] = 0x80 | (cp & 0x3F);
-      cp = cp >> 6;
-    }
-    str[0] = MS1[n - 2] | (cp & MS2[n - 2]);
+  for (int i = n - 1; i > 0; i--) {
+    str[i] = 0x80 | (cp & 0x3F);
+    cp = cp >> 6;
   }
+  str[0] = MS1[n - 1] | (cp & MS2[n - 1]);
   return str;
 }
 
