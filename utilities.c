@@ -44,18 +44,13 @@ int get_low_bits(char byte, int n) {
 
 uint32_t get_code_point(char *str) {
   int n = raw_count1(*str);
-  switch (n) {
-    case 0:
-      return *str;
-    case 2:
-      return (get_low_bits(str[0], 5) << 6) | get_low_bits(str[1], 6);
-    case 3:
-      return (get_low_bits(str[0], 4) << 12) | (get_low_bits(str[1], 6) << 6) | get_low_bits(str[2], 6);
-    case 4:
-      return (get_low_bits(str[0], 3) << 18) | (get_low_bits(str[1], 6) << 12) |
-          (get_low_bits(str[2], 6) << 6) | get_low_bits(str[3], 6);
-    default :
-      return -1;
+  if (n == 0)
+    return *str;
+  else {
+    uint32_t cp = get_low_bits(str[0], 8 - (n + 1));
+    for (int i = 1; i < n; i++)
+      cp = (cp << 6) + get_low_bits(str[i], 6);
+    return cp;
   }
 }
 
@@ -75,38 +70,20 @@ int bytes_need(uint32_t cp) {
 }
 
 char *code_point_to_utf8(uint32_t cp) {
-  if (cp < 0x80) {
-    char *str = calloc(1, sizeof(char));
+  int MS1[] = {0xC0, 0xE0, 0xF0};
+  int MS2[] = {0x1F, 0x0F, 0x07};
+  int n = bytes_need(cp);
+  char *str = calloc(n, sizeof(char));
+  if (n == 1)
     str[0] = cp;
-    return str;
-  } else if (cp < 0x0800) {
-    char *str = calloc(2, sizeof(char));
-    str[1] = 0x80 | (cp & 0x3F);
-    cp = cp >> 6;
-    str[0] = 0xC0 | (cp & 0x1F);
-    return str;
-  } else if (cp < 0x10000) {
-    char *str = calloc(3, sizeof(char));
-    str[2] = 0x80 | (cp & 0x3F);
-    cp = cp >> 6;
-    str[1] = 0x80 | (cp & 0x3F);
-    cp = cp >> 6;
-    str[0] = 0xE0 | (cp & 0x0F);
-    return str;
-  } else if (cp < 0x200000) {
-    char *str = calloc(4, sizeof(char));
-    str[3] = 0x80 | (cp & 0x3F);
-    cp = cp >> 6;
-    str[2] = 0x80 | (cp & 0x3F);
-    cp = cp >> 6;
-    str[1] = 0x80 | (cp & 0x3F);
-    cp = cp >> 6;
-    str[0] = 0xF0 | (cp & 0x07);
-    return str;
-  } else {
-    printf("Error happens...");
-    exit(1);
+  else {
+    for (int i = n - 1; i > 0; i--) {
+      str[i] = 0x80 | (cp & 0x3F);
+      cp = cp >> 6;
+    }
+    str[0] = MS1[n - 2] | (cp & MS2[n - 2]);
   }
+  return str;
 }
 
 /* Boolean */

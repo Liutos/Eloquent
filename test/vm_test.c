@@ -20,9 +20,8 @@ int main(int argc, char *argv[])
 {
   char *inputs[] = {
       "\"a\"",
-      "#\\a",
-      "#\\汗",
-      "#\\newline",
+      "\"汉\"",
+      "\"Hello, 世界\"",
   };
   init_global_variable();
   init_prims();
