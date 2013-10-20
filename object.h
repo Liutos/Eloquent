@@ -20,7 +20,6 @@
 int debug;
 int is_check_exception;
 int is_check_type;
-char tbl[256];
 /* Opcode */
 int opcode_max_length;
 hash_table_t *prim2op_map;
@@ -118,13 +117,14 @@ extern lt *make_function(lt *cenv, lt *args, lt *code, lt *renv);
 extern lt *make_input_port(FILE *);
 extern lt *make_input_string_port(char *);
 extern lt *make_mpflonum(mpf_t);
+extern lt *make_opcode(enum OPCODE_TYPE, char *, lt *);
 extern lt *make_output_port(FILE *);
 extern lt *make_output_string_port(char *);
 extern lt *make_package(lt *, hash_table_t *);
 extern lt *make_pair(lt *, lt *);
 extern lt *make_primitive(int, void *, char *, int);
 extern lt *make_retaddr(lt *code, lt *env, lt *fn, int pc, int throw_flag, int sp);
-extern string_builder_t *make_str_builder(void);
+//extern string_builder_t *make_str_builder(void);
 extern lt *make_string(int, uint32_t *);
 extern lt *make_structure(lt *name, int nfield);
 extern lt *make_symbol(char *, lt *);
@@ -132,63 +132,14 @@ extern lt *make_time(struct tm *);
 extern lt *make_type(enum TYPE, char *);
 extern lt *make_unicode(char *);
 extern lt *make_vector(int);
-extern lt *make_op_call(lt *);
-extern lt *make_op_checkex(void);
-extern lt *make_op_chkarity(lt *);
-extern lt *make_op_chktype(lt *, lt *, lt *);
-extern lt *make_op_const(lt *);
-extern lt *make_op_extenv(lt *);
-extern lt *make_op_fjump(lt *);
-extern lt *make_op_fn(lt *);
-extern lt *make_op_gset(lt *);
-extern lt *make_op_gvar(lt *);
-extern lt *make_op_jump(lt *);
-extern lt *make_op_lset(lt *i, lt *j, lt *symbol);
-extern lt *make_op_lvar(lt *i, lt *j, lt *symbol);
-extern lt *make_op_moveargs(lt *);
-extern lt *make_op_pop(void);
-extern lt *make_op_popenv(void);
-extern lt *make_op_prim(lt *);
-extern lt *make_op_restargs(lt *);
-extern lt *make_op_return(void);
-extern lt *make_op_catch(void);
-extern lt *make_fn_inst(lt *);
 
+/* Opcode */
+extern void init_opcode_length(void);
 extern lt *opcode_ref(enum OPCODE_TYPE);
-extern lt *search_op4prim(lt *);
-extern void set_op4prim(lt *, enum OPCODE_TYPE);
-/* Structure */
-extern lt *search_structure(char *);
-extern void set_structure(char *, lt *);
-/* Symbol */
-extern hash_table_t *make_symbol_table(void);
-extern lt *find_or_create_symbol(char *, lt *);
-/* Package */
-extern lt *ensure_package(char *);
-extern lt *search_package(char *, lt *);
+/* Type */
 extern lt *type_ref(enum TYPE);
-
-extern void init_global_variable(void);
-
-/* tagging system
- *   bits end in  00:  pointer
- *                01:  fixnum
- *              0110:  byte
- *              1110:  other immediate object (null_list, true, false, eof, undef, close)
- */
-#define BYTE_BITS 4
-#define BYTE_MASK 15
-#define BYTE_TAG 6
-#define FIXNUM_BITS 2
-#define FIXNUM_MASK 3
-#define FIXNUM_TAG 1
-#define IMMEDIATE_BITS 4
-#define IMMEDIATE_MASK 15
-#define IMMEDIATE_TAG 14
-#define POINTER_MASK 3
-#define POINTER_TAG 0
-
-#define LISP(name) find_or_create_symbol(name, pkg_lisp)
-#define S(name) (find_or_create_symbol(name, package))
+/* Unicode */
+extern void init_character(void);
+extern lt *make_unicode_char(char);
 
 #endif

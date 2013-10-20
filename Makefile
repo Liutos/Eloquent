@@ -9,6 +9,9 @@ compiler.o: compiler.c object.h prims.h type.h utilities.h
 hash_table.o: hash_table.c hash_table.h type.h
 	$(CC) $(CFLAGS) -c $< -o $@
 
+init.o: init.c object.h type.h utilities.h
+	$(CC) $(CFLAGS) -c $< -o $@
+
 macros.o: macros.c object.h prims.h type.h utilities.h
 	$(CC) $(CFLAGS) -c $< -o $@
 
@@ -25,35 +28,35 @@ vm.o: vm.c object.h type.h prims.h utilities.h
 	$(CC) $(CFLAGS) -c $< -o $@
 
 # Test Drivers
-compiler_test.o: test/compiler_test.c macros.h object.h type.h prims.h compiler.h
+compiler_test.o: test/compiler_test.c init.h macros.h object.h type.h prims.h compiler.h
 	$(CC) $(CFLAGS) -I. -c $< -o $@
 
-init_test.o: test/init_test.c compiler.h macros.h object.h prims.h type.h vm.h
+init_test.o: test/init_test.c compiler.h init.h macros.h object.h prims.h type.h vm.h
 	$(CC) $(CFLAGS) -I. -c $< -o $@
 
-repl_test.o: test/repl_test.c compiler.h macros.h object.h prims.h vm.h
+repl_test.o: test/repl_test.c compiler.h init.h macros.h object.h prims.h vm.h
 	$(CC) $(CFLAGS) -I. -c $< -o $@
 
-vm_test.o: test/vm_test.c compiler.h macros.h object.h prims.h type.h utilities.h vm.h
+vm_test.o: test/vm_test.c compiler.h init.h macros.h object.h prims.h type.h utilities.h vm.h
 	$(CC) $(CFLAGS) -I. -c $< -o $@
 
 # Test Executable
-test_compiler: compiler_test.o compiler.o hash_table.o macros.o object.o prims.o utilities.o vm.o
+test_compiler: compiler_test.o compiler.o hash_table.o init.o macros.o object.o prims.o utilities.o vm.o
 	if [ ! -d bin ]; then mkdir bin; fi
 	cp init.scm bin/
 	$(CC) $^ -o bin/$@ $(CFLAGS)
 
-test_init: init_test.o compiler.o hash_table.o macros.o object.o prims.o utilities.o vm.o
+test_init: init_test.o compiler.o hash_table.o init.o macros.o object.o prims.o utilities.o vm.o
 	if [ ! -d bin ]; then mkdir bin; fi
 	cp init.scm bin/
 	$(CC) $^ -o bin/$@ $(CFLAGS)
 
-test_repl: repl_test.o compiler.o hash_table.o macros.o object.o prims.o utilities.o vm.c
+test_repl: repl_test.o compiler.o hash_table.o init.o macros.o object.o prims.o utilities.o vm.c
 	if [ ! -d bin ]; then mkdir bin; fi
 	cp init.scm bin/
 	$(CC) $^ -o bin/$@ $(CFLAGS)
 
-test_vm: vm_test.o compiler.o hash_table.o macros.o object.o prims.o utilities.o vm.o
+test_vm: vm_test.o compiler.o hash_table.o init.o macros.o object.o prims.o utilities.o vm.o
 	if [ ! -d bin ]; then mkdir bin; fi
 	cp init.scm bin/
 	$(CC) $^ -o bin/$@ $(CFLAGS)

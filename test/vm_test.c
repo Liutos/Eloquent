@@ -8,6 +8,7 @@
 #include <string.h>
 
 #include "compiler.h"
+#include "init.h"
 #include "macros.h"
 #include "object.h"
 #include "prims.h"
@@ -29,7 +30,7 @@ int main(int argc, char *argv[])
   init_macros();
   load_init_file();
   for (int i = 0; i < sizeof(inputs) / sizeof(char *); i++) {
-    writef(standard_out, "%s >> %s\n", package_name(package), wrap_C_string(inputs[i]));
+    writef(standard_out, "%s >> %s\n", package_name(package), import_C_string(inputs[i]));
     lisp_object_t *expr = read_object_from_string(strdup(inputs[i]));
     expr = compile_to_bytecode(expr);
     if (!is_signaled(expr))

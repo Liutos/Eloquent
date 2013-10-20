@@ -101,7 +101,7 @@ void writef(lt *dest, const char *format, ...) {
           break;
         case 's':
           assert(is_lt_string(arg));
-          write_raw_string(C_string(arg), dest);
+          write_raw_string(export_C_string(arg), dest);
           break;
         case 'p':
           nch = fprintf(output_port_stream(dest), "%p", arg);
@@ -205,7 +205,7 @@ void write_object(lt *x, lt *output_file) {
       break;
     case LT_EXCEPTION: {
       writef(output_file, "%S: ", exception_tag(x));
-      writef(output_file, "%s\n", wrap_C_string(exception_msg(x)));
+      writef(output_file, "%s\n", import_C_string(exception_msg(x)));
       lt *backtrace = exception_backtrace(x);
       while (!isnull(backtrace)) {
         lt *fn = pair_head(backtrace);
@@ -264,7 +264,7 @@ void write_object(lt *x, lt *output_file) {
       writef(output_file, "#<RETADDR %p pc: %d>", x, make_fixnum(retaddr_pc(x)));
       break;
     case LT_STRING: {
-      char *value = C_string(x);
+      char *value = export_C_string(x);
       write_raw_string("\"", output_file);
       for (int i = 0; value[i] != '\0'; i++) {
         if (value[i] == '"')
@@ -368,7 +368,7 @@ lt *lt_exception_tag(lt *exception) {
 }
 
 lt *lt_signal_exception(lt *message) {
-  return signal_exception(C_string(message));
+  return signal_exception(export_C_string(message));
 }
 
 void init_prim_exception(void) {
@@ -520,13 +520,13 @@ lt *lt_load_file(lt *file) {
 }
 
 lt *lt_make_input_string_port(lt *str) {
-  char *c_str = C_string(str);
+  char *c_str = export_C_string(str);
   return make_input_string_port(c_str);
 }
 
 lt *lt_open_in(lt *path) {
   assert(is_lt_string(path));
-  FILE *fp = fopen(C_string(path), "r");
+  FILE *fp = fopen(export_C_string(path), "r");
   return make_input_port(fp);
 }
 
@@ -547,7 +547,7 @@ lt *lt_read_line(lt *in_port) {
     sb_add_char(sb, c);
     c = get_char(in_port);
   }
-  return wrap_C_string(sb2string(sb));
+  return import_C_string(sb2string(sb));
 }
 
 void init_prim_input_port(void) {
@@ -614,7 +614,7 @@ lt *lt_bg2mpf(lt *n) {
 lt *lt_mkbg(lt *str) {
   mpz_t num;
   mpz_init(num);
-  mpz_set_str(num, C_string(str), 10);
+  mpz_set_str(num, export_C_string(str), 10);
   return make_bignum(num);
 }
 
@@ -816,7 +816,7 @@ lt *lt_close_out(lt *file) {
 
 lt *lt_open_out(lt *path) {
   assert(is_lt_string(path));
-  FILE *fp = fopen(C_string(path), "w");
+  FILE *fp = fopen(export_C_string(path), "w");
   return make_output_port(fp);
 }
 
@@ -828,7 +828,7 @@ lt *lt_write_char(lt *c, lt *dest) {
 }
 
 lt *lt_write_string(lt *str, lt *dest) {
-  write_raw_string(C_string(str), dest);
+  write_raw_string(export_C_string(str), dest);
   return str;
 }
 
@@ -847,7 +847,7 @@ void init_prim_output_port(void) {
 
 /* Package */
 lt *lt_in_package(lt *name) {
-  lt *pkg = search_package(C_string(name), pkgs);
+  lt *pkg = search_package(export_C_string(name), pkgs);
   if (pkg) {
     package = pkg;
     return the_true;
@@ -856,7 +856,7 @@ lt *lt_in_package(lt *name) {
 }
 
 lt *lt_make_package(lt *name) {
-  return ensure_package(C_string(name));
+  return ensure_package(export_C_string(name));
 }
 
 lt *lt_package_name(lt *pkg) {
@@ -875,12 +875,12 @@ lt *lt_char_at(lt *string, lt *index) {
   assert(string_length(string) > fixnum_value(index));
   int k = 0;
   for (int i = fixnum_value(index); i > 0; i--) {
-    int step = count1(C_string(string)[k]);
+    int step = count1(export_C_string(string)[k]);
     k += step;
   }
-  int len = count1(C_string(string)[k]);
+  int len = count1(export_C_string(string)[k]);
   char *data = GC_MALLOC(len * sizeof(char));
-  memcpy(data, C_string(string) + k, len);
+  memcpy(data, export_C_string(string) + k, len);
   return make_unicode(data);
 }
 
@@ -893,7 +893,7 @@ lt *lt_string_set(lt *string, lt *index, lt *new_char) {
   assert(is_lt_string(string));
   assert(isfixnum(index));
   assert(is_lt_byte(new_char));
-  C_string(string)[fixnum_value(index)] = byte_value(new_char);
+  export_C_string(string)[fixnum_value(index)] = byte_value(new_char);
   return string;
 }
 
@@ -951,8 +951,8 @@ lt *lt_gensym(void) {
 }
 
 lt *lt_intern(lt *name, lt *pkg_name) {
-  lt *pkg = ensure_package(C_string(pkg_name));
-  return find_or_create_symbol(C_string(name), pkg);
+  lt *pkg = ensure_package(export_C_string(pkg_name));
+  return find_or_create_symbol(export_C_string(name), pkg);
 }
 
 lt *lt_is_bound(lt *symbol) {
@@ -976,7 +976,7 @@ lt *lt_symbol_macro(lt *symbol) {
 
 lisp_object_t *lt_symbol_name(lisp_object_t *symbol) {
   assert(is_lt_symbol(symbol));
-  return wrap_C_string(strdup(symbol_name(symbol)));
+  return import_C_string(strdup(symbol_name(symbol)));
 }
 
 lt *lt_symbol_package(lt *symbol) {
@@ -1213,7 +1213,7 @@ void init_prim_list(void) {
 
 /** OS **/
 lt *lt_cd(lt *dir) {
-  int res = chdir(C_string(dir));
+  int res = chdir(export_C_string(dir));
   if (res == 0)
     return the_true;
   else
@@ -1222,24 +1222,24 @@ lt *lt_cd(lt *dir) {
 
 lt *lt_file_size(lt *path) {
   struct stat st;
-  stat(C_string(path), &st);
+  stat(export_C_string(path), &st);
   return make_fixnum(st.st_size);
 }
 
 lt *lt_get_home(void) {
   struct passwd *pw = getpwuid(getuid());
-  return wrap_C_string(pw->pw_dir);
+  return import_C_string(pw->pw_dir);
 }
 
 lt *lt_is_file_exist(lt *path) {
-  if (access(C_string(path), F_OK) == 0)
+  if (access(export_C_string(path), F_OK) == 0)
     return the_true;
   else
     return the_false;
 }
 
 lt *lt_pwd(void) {
-  return wrap_C_string(getcwd(NULL, 0));
+  return import_C_string(getcwd(NULL, 0));
 }
 
 void init_prim_os(void) {
@@ -1497,7 +1497,7 @@ lisp_object_t *read_string(lisp_object_t *input_file) {
   for (;;) {
     int c = get_char(input_file);
     if (c == '"')
-      return wrap_C_string(sb2string(buffer));
+      return import_C_string(sb2string(buffer));
     if (c == '\\') {
       c = get_char(input_file);
       switch (c) { case 'n': c = '\n'; break; case 't': c = '\t'; break;}
@@ -1632,7 +1632,7 @@ lisp_object_t *read_object_from_string(char *text) {
 }
 
 lt *lt_read_from_string(lt *string) {
-  return read_object_from_string(C_string(string));
+  return read_object_from_string(export_C_string(string));
 }
 
 void init_prim_reader(void) {

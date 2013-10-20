@@ -203,6 +203,24 @@ struct string_builder_t {
 #define FALSE 0
 #define TRUE 1
 
+/* tagging system
+ *   bits end in  00:  pointer
+ *                01:  fixnum
+ *              0110:  byte
+ *              1110:  other immediate object (null_list, true, false, eof, undef, close)
+ */
+#define BYTE_BITS 4
+#define BYTE_MASK 15
+#define BYTE_TAG 6
+#define FIXNUM_BITS 2
+#define FIXNUM_MASK 3
+#define FIXNUM_TAG 1
+#define IMMEDIATE_BITS 4
+#define IMMEDIATE_MASK 15
+#define IMMEDIATE_TAG 14
+#define POINTER_MASK 3
+#define POINTER_TAG 0
+
 #define byte_value(x) (((intptr_t)x) >> BYTE_BITS)
 #define fixnum_value(x) (((intptr_t)(x)) >> FIXNUM_BITS)
 

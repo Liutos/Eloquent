@@ -7,6 +7,7 @@
 #include <string.h>
 
 #include "compiler.h"
+#include "init.h"
 #include "macros.h"
 #include "object.h"
 #include "prims.h"
