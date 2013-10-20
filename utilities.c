@@ -361,7 +361,7 @@ void use_package_in(lt *used, lt *pkg) {
 /* String */
 /** Export: Code Point -> UTF-8 **/
 // Get the C string from a Lisp string
-char *to_C_string(uint32_t *value, int length) {
+char *code_point_to_C_string(uint32_t *value, int length) {
   char *str = GC_MALLOC((length + 1) * sizeof(char));
   str[length] = '\0';
   int offset = 0;
@@ -374,7 +374,7 @@ char *to_C_string(uint32_t *value, int length) {
 }
 
 char *export_C_string(lt *string) {
-  return to_C_string(string_value(string), string_length(string));
+  return code_point_to_C_string(string_value(string), string_length(string));
 }
 
 /** Import: UTF-8 -> Code Point **/
@@ -389,7 +389,7 @@ int C_string_count(char *str) {
 }
 
 // Convert each UTF-8 character in `str' to a number of type `uint32_t'
-uint32_t *utf8s_to_code_point(char *str) {
+uint32_t *C_string_to_code_point(char *str) {
   int len = C_string_count(str);
   uint32_t *value = GC_MALLOC((len + 1) * sizeof(uint32_t));
   value[len] = 0;
@@ -401,7 +401,7 @@ uint32_t *utf8s_to_code_point(char *str) {
   return value;
 }
 
-int get_string_length(uint32_t *value) {
+int code_point_count(uint32_t *value) {
   int len = 0;
   while (*value != 0) {
     len++;
@@ -411,8 +411,8 @@ int get_string_length(uint32_t *value) {
 }
 
 lt *import_C_string(char *C_str) {
-  uint32_t *cps = utf8s_to_code_point(C_str);
-  int length = get_string_length(cps);
+  uint32_t *cps = C_string_to_code_point(C_str);
+  int length = code_point_count(cps);
   return make_string(length, cps);
 }
 

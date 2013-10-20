@@ -72,12 +72,8 @@ extern lt *search_package(char *, lt *);
 
 /* String */
 /** Export **/
-extern int C_string_count(char *);
-extern int get_string_length(uint32_t *);
 extern char *export_C_string(lt *);
-extern char *to_C_string(uint32_t *, int);
 /** Import **/
-extern uint32_t *utf8s_to_code_point(char *);
 extern lt *import_C_string(char *);
 
 /* String Builder */
