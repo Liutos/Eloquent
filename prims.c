@@ -11,6 +11,7 @@
 #include <errno.h>
 #include <pwd.h>
 #include <stdarg.h>
+#include <stdint.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -827,8 +828,18 @@ lt *lt_write_char(lt *c, lt *dest) {
   return c;
 }
 
+void write_code_point(uint32_t cp, FILE *fp) {
+  char *c = code_point_to_utf8(cp);
+  int cnt = count1(c);
+  for (int i = 0; i < cnt; i++)
+    putc(c[i], fp);
+}
+
 lt *lt_write_string(lt *str, lt *dest) {
-  write_raw_string(export_C_string(str), dest);
+  assert(is_lt_string(str));
+  assert(is_lt_input_port(dest));
+  for (int i = 0; i < string_length(str); i++)
+    write_code_point(string_value(str)[i], output_port_stream(dest));
   return str;
 }
 
