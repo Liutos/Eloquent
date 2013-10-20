@@ -837,7 +837,7 @@ void write_code_point(uint32_t cp, FILE *fp) {
 
 lt *lt_write_string(lt *str, lt *dest) {
   assert(is_lt_string(str));
-  assert(is_lt_input_port(dest));
+  assert(is_lt_output_port(dest));
   for (int i = 0; i < string_length(str); i++)
     write_code_point(string_value(str)[i], output_port_stream(dest));
   return str;
