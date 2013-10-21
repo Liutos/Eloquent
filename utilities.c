@@ -356,8 +356,16 @@ void use_package_in(lt *used, lt *pkg) {
 
 /* String */
 /** Export: Code Point -> UTF-8 **/
+int compute_nbytes(uint32_t *value, int length) {
+  int n = 0;
+  for (int i = 0; i < length; i++)
+    n += bytes_need(value[i]);
+  return n;
+}
+
 // Get the C string from a Lisp string
 char *code_point_to_C_string(uint32_t *value, int length) {
+  length = compute_nbytes(value, length);
   char *str = GC_MALLOC((length + 1) * sizeof(char));
   str[length] = '\0';
   int offset = 0;

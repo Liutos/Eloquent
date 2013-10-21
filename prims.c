@@ -822,7 +822,10 @@ lt *lt_open_out(lt *path) {
 }
 
 lt *lt_write_char(lt *c, lt *dest) {
-  for (int i = 0; unicode_data(c)[i] != '\0'; i++) {
+  assert(is_lt_unicode(c));
+  assert(is_lt_output_port(dest));
+  int len = count1(unicode_data(c)[0]);
+  for (int i = 0; i < len; i++) {
     write_raw_char(unicode_data(c)[i], dest);
   }
   return c;
