@@ -6,6 +6,3 @@
 .cproject
 .settings
 bin/
-*.orig
-.deps
-autom4te.cache
