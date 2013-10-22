@@ -141,8 +141,9 @@ void writef(lt *dest, const char *format, ...) {
 void write_opcode(lt *opcode, lt *dest) {
   write_raw_string("#<", dest);
   write_raw_string(opcode_op(opcode_ref(opcode_name(opcode))), dest);
-  for (int i = 0; i < vector_length(opcode_oprands(opcode)); i++) {
-    writef(dest, " %?", vector_value(opcode_oprands(opcode))[i]);
+  int len = opcode_length(opcode);
+  for (int i = 0; i < len; i++) {
+    writef(dest, " %?", opargn(opcode, i));
   }
   write_raw_char('>', dest);
 }
@@ -166,9 +167,10 @@ void write_compiled_function(lt *function, int indent, lt *dest) {
     if (opcode_name(ins) == FN) {
       write_compiled_function(op_fn_func(ins), output_port_colnum(dest), dest);
     } else {
-      for (int j = 0; j < vector_length(opcode_oprands(ins)); j++) {
-        write_object(vector_value(opcode_oprands(ins))[j], dest);
-        if (j != vector_length(opcode_oprands(ins)) - 1)
+      int len = opcode_length(ins);
+      for (int j = 0; j < len; j++) {
+        write_object(opargn(ins, j), dest);
+        if (j != opcode_length(ins) - 1)
           write_raw_char(' ', dest);
       }
     }
@@ -415,16 +417,6 @@ lt *compress_args(lt *args, int nrequired) {
   }
   new_args = make_pair(lt_list_nreverse(rest), new_args);
   return lt_list_nreverse(new_args);
-}
-
-// (a b ...) => ((quote a) (quote b) ...)
-lt *quote_each_args(lt *args) {
-  if (isnull(args))
-    return make_empty_list();
-  else
-    return
-        make_pair(list2(S("quote"), pair_head(args)),
-            quote_each_args(pair_tail(args)));
 }
 
 lt *macro_fn(lt *macro_name) {

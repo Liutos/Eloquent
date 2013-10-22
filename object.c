@@ -105,35 +105,35 @@ struct lisp_object_t lt_types[] = {
     DEFTYPE(LT_VECTOR, "vector"),
 };
 
-#define DEFCODE(name) {.type=LT_OPCODE, .u={.opcode={name, #name}}}
+#define DEFCODE(name, arity) {.type=LT_OPCODE, .u={.opcode={name, arity, #name, NULL}}}
 
 struct lisp_object_t lt_codes[] = {
-    DEFCODE(CALL),
-    DEFCODE(CATCH),
-    DEFCODE(CHECKEX),
-    DEFCODE(CHKARITY),
-    DEFCODE(CHKTYPE),
-    DEFCODE(CONST),
-    DEFCODE(EXTENV),
-    DEFCODE(FN),
-    DEFCODE(GSET),
-    DEFCODE(GVAR),
-    DEFCODE(FJUMP),
-    DEFCODE(JUMP),
-    DEFCODE(LSET),
-    DEFCODE(LVAR),
-    DEFCODE(MOVEARGS),
-    DEFCODE(POP),
-    DEFCODE(POPENV),
-    DEFCODE(PRIM),
-    DEFCODE(RESTARGS),
-    DEFCODE(RETURN),
+    DEFCODE(CALL, 1),
+    DEFCODE(CATCH, 0),
+    DEFCODE(CHECKEX, 0),
+    DEFCODE(CHKARITY, 1),
+    DEFCODE(CHKTYPE, 3),
+    DEFCODE(CONST, 1),
+    DEFCODE(EXTENV, 1),
+    DEFCODE(FN, 1),
+    DEFCODE(GSET, 1),
+    DEFCODE(GVAR, 1),
+    DEFCODE(FJUMP, 1),
+    DEFCODE(JUMP, 1),
+    DEFCODE(LSET, 2),
+    DEFCODE(LVAR, 2),
+    DEFCODE(MOVEARGS, 1),
+    DEFCODE(POP, 0),
+    DEFCODE(POPENV, 0),
+    DEFCODE(PRIM, 1),
+    DEFCODE(RESTARGS, 1),
+    DEFCODE(RETURN, 0),
 //    Opcodes for some primitive functions
-    DEFCODE(ADDI),
-    DEFCODE(CONS),
-    DEFCODE(DIVI),
-    DEFCODE(MULI),
-    DEFCODE(SUBI),
+    DEFCODE(ADDI, 0),
+    DEFCODE(CONS, 0),
+    DEFCODE(DIVI, 0),
+    DEFCODE(MULI, 0),
+    DEFCODE(SUBI, 0),
 };
 
 /* Type predicate */
@@ -326,8 +326,9 @@ lt *make_mpflonum(mpf_t value) {
   return obj;
 }
 
-lt *make_opcode(enum OPCODE_TYPE name, char *op, lt *oprands) {
+lt *make_opcode(enum OPCODE_TYPE name, int length, char *op, lt **oprands) {
   lt *obj = make_object(LT_OPCODE);
+  opcode_length(obj) = length;
   opcode_name(obj) = name;
   opcode_op(obj) = op;
   opcode_oprands(obj) = oprands;

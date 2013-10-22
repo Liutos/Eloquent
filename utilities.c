@@ -206,13 +206,12 @@ void sb_add_char(string_builder_t *sb, char c) {
 /* Opcode */
 /* Opcode constructor functions */
 lt *mkopcode(enum OPCODE_TYPE name, int arity, ...) {
-  lt *oprands = make_vector(arity);
+  lt **oprands = GC_MALLOC(arity * sizeof(lt *));
   va_list ap;
   va_start(ap, arity);
   for (int i = 0; i < arity; i++)
-    vector_value(oprands)[i] = va_arg(ap, lt *);
-  vector_last(oprands) = arity - 1;
-  return make_opcode(name, opcode_op(opcode_ref(name)), oprands);
+    oprands[i] = va_arg(ap, lt *);
+  return make_opcode(name, arity, opcode_op(opcode_ref(name)), oprands);
 }
 
 lisp_object_t *make_op_call(lisp_object_t *arity) {
@@ -283,7 +282,7 @@ lisp_object_t *make_op_prim(lisp_object_t *nargs) {
   return mkopcode(PRIM, 1, nargs);
 }
 
-lisp_object_t *make_op_return() {
+lisp_object_t *make_op_return(void) {
   return mkopcode(RETURN, 0);
 }
 

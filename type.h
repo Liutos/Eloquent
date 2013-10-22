@@ -128,8 +128,9 @@ struct lisp_object_t {
     } mpflonum;
     struct {
       enum OPCODE_TYPE name;
+      int length;
       char *op;
-      lt *oprands;
+      lt **oprands;
     } opcode;
     struct {
       lt *name;
@@ -243,6 +244,7 @@ struct string_builder_t {
 #define input_port_linum(x) ((x)->u.port.linum)
 #define input_port_openp(x) ((x)->u.port.openp)
 #define mpflonum_value(x) ((x)->u.mpflonum.value)
+#define opcode_length(x) ((x)->u.opcode.length)
 #define opcode_name(x) ((x)->u.opcode.name)
 #define opcode_op(x) ((x)->u.opcode.op)
 #define opcode_oprands(x) ((x)->u.opcode.oprands)
@@ -283,7 +285,7 @@ struct string_builder_t {
 
 /* Opcode accessor macros */
 #define opcode_type(x) opcode_name(x)
-#define opargn(x, n) (vector_value(opcode_oprands(x))[n])
+#define opargn(x, n) (opcode_oprands(x)[n])
 #define oparg1(x) opargn(x, 0)
 #define oparg2(x) opargn(x, 1)
 #define oparg3(x) opargn(x, 2)
