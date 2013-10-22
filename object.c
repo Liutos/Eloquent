@@ -296,13 +296,12 @@ lisp_object_t *make_float(float value) {
   return flt_num;
 }
 
-lt *make_function(lt *cenv, lt *args, lt *code, lt *renv) {
+lt *make_function(lt *args, lt *code, lt *env) {
   lt *func = make_object(LT_FUNCTION);
-  function_cenv(func) = cenv;
   function_args(func) = args;
   function_code(func) = code;
+  function_env(func) = env;
   function_name(func) = the_undef;
-  function_renv(func) = renv;
   return func;
 }
 

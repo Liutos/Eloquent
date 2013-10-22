@@ -448,16 +448,8 @@ lt *lt_set_function_name(lt *f, lt *name) {
   return f;
 }
 
-lt *lt_function_cenv(lt *f) {
-  return function_cenv(f);
-}
-
 lt *lt_function_name(lt *f) {
   return function_name(f);
-}
-
-lt *lt_function_renv(lt *f) {
-  return function_renv(f);
 }
 
 lt *lt_load(lt *path) {
@@ -478,9 +470,7 @@ void init_prim_function(void) {
   NOREST(1, lt_eval, "eval");
   NOREST(1, lt_expand_macro, "expand-macro");
   NOREST(1, lt_function_arity, "function-arity");
-  NOREST(1, lt_function_cenv, "function-cenv");
   NOREST(1, lt_function_name, "function-name");
-  NOREST(1, lt_function_renv, "function-renv");
   NOREST(2, lt_set_function_name, "set-function-name!");
   SIG("set-function-name!", T(LT_FUNCTION), T(LT_SYMBOL));
   NOREST(2, lt_simple_apply, "apply");
