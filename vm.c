@@ -382,7 +382,7 @@ lisp_object_t *run_by_llam(lisp_object_t *code_vector) {
         lt_vector_push(stack, lt_fx_sub(arg1, arg2));
         break;
       default :
-        fprintf(stdout, "In run_by_llam --- Invalid opcode %d\n", type_of(ins));
+        fprintf(stdout, "In run_by_llam --- Invalid opcode %d\n", opcode_name(ins));
         exit(1);
     }
     if (debug)

@@ -183,26 +183,33 @@ void write_compiled_function(lt *function, int indent, lt *dest) {
 
 void write_object(lt *x, lt *output_file) {
   assert(x != NULL);
-  switch(type_of(x)) {
+  if (!is_pointer(x)) {
+    if (is_lt_byte(x))
+      writef(output_file, "#<BYTE %d>", make_fixnum(byte_value(x)));
+    else if (isfixnum(x))
+      writef(output_file, "%d", x);
+    else if (iseof(x))
+      write_raw_string("#<EOF>", output_file);
+    else if (isnull(x))
+      write_raw_string("()", output_file);
+    else if (isfalse(x))
+      write_raw_string("#f", output_file);
+    else if (is_true_object(x))
+      write_raw_string("#t", output_file);
+    else if (isundef(x))
+      write_raw_string("#<UNDEF>", output_file);
+    else {
+      fprintf(stderr, "Unknown tagged-pointer 0x%p\n", x);
+      exit(1);
+    }
+    return;
+  }
+  switch(_type_of_(x)) {
   case LT_BIGNUM: {
     FILE *stream = output_port_stream(output_file);
     mpz_out_str(stream, 10, bignum_value(x));
   }
     break;
-    case LT_BOOL:
-      if (is_true_object(x))
-        write_raw_string("#t", output_file);
-      else
-        write_raw_string("#f", output_file);
-      break;
-    case LT_BYTE: {
-      int c = byte_value(x);
-      writef(output_file, "#<BYTE %d>", make_fixnum(c));
-    }
-      break;
-    case LT_EMPTY_LIST:
-    	write_raw_string("()", output_file);
-    	break;
     case LT_ENVIRONMENT:
       writef(output_file, "#<ENVIRONMENT %? %p>", environment_bindings(x), x);
       break;
@@ -222,9 +229,6 @@ void write_object(lt *x, lt *output_file) {
       }
     }
       break;
-    case LT_FIXNUM:
-    	writef(output_file, "%d", x);
-    	break;
     case LT_FLOAT:
     	writef(output_file, "%f", x);
     	break;
@@ -284,12 +288,6 @@ void write_object(lt *x, lt *output_file) {
     case LT_SYMBOL:
     	write_raw_string(symbol_name(x), output_file);
     	break;
-    case LT_TEOF:
-    	write_raw_string("#<EOF>", output_file);
-    	break;
-    case LT_TUNDEF:
-      write_raw_string("#<UNDEF>", output_file);
-      break;
     case LT_TIME: {
       char *str = asctime(time_value(x));
       str[strlen(str) - 1] = '\0';

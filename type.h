@@ -222,6 +222,8 @@ struct string_builder_t {
 #define fixnum_value(x) (((intptr_t)(x)) >> FIXNUM_BITS)
 
 /* Accessor macros */
+#define _type_of_(x) ((x)->type)
+
 #define bignum_value(x) ((x)->u.bignum.value)
 #define environment_bindings(x) ((x)->u.environment.bindings)
 #define environment_next(x) ((x)->u.environment.next)
