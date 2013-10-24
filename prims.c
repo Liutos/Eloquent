@@ -324,7 +324,7 @@ void write_object(lt *x, lt *output_file) {
       break;
     case LT_OPCODE: write_opcode(x, output_file); break;
     default :
-      fprintf(stdout, "invalid object with type %d", type_of(x));
+      fprintf(stdout, "invalid object with type %d", _type_of_(x));
       exit(1);
   }
 }
@@ -1270,6 +1270,26 @@ lt *lt_is_constant(lt *object) {
 
 lt *lt_object_size(void) {
   return make_fixnum(sizeof(lt));
+}
+
+/* Type */
+int type_of(lisp_object_t *x) {
+  if (isboolean(x))
+    return LT_BOOL;
+  if (is_lt_byte(x))
+    return LT_BYTE;
+  if (isnull(x))
+    return LT_EMPTY_LIST;
+  if (isfixnum(x))
+    return LT_FIXNUM;
+  if (isclose(x))
+    return LT_TCLOSE;
+  if (iseof(x))
+    return LT_TEOF;
+  if (isundef(x))
+    return LT_TUNDEF;
+  assert(is_pointer(x));
+  return x->type;
 }
 
 lisp_object_t *lt_type_of(lisp_object_t *object) {

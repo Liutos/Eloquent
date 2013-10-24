@@ -215,25 +215,6 @@ int isnumber(lisp_object_t *object) {
   return isfixnum(object) || is_lt_float(object);
 }
 
-int type_of(lisp_object_t *x) {
-  if (isboolean(x))
-    return LT_BOOL;
-  if (is_lt_byte(x))
-    return LT_BYTE;
-  if (isnull(x))
-    return LT_EMPTY_LIST;
-  if (isfixnum(x))
-    return LT_FIXNUM;
-  if (isclose(x))
-    return LT_TCLOSE;
-  if (iseof(x))
-    return LT_TEOF;
-  if (isundef(x))
-    return LT_TUNDEF;
-  assert(is_pointer(x));
-  return x->type;
-}
-
 /* Constructor functions */
 lt *allocate_object(void) {
   return GC_MALLOC(sizeof(struct lisp_object_t));
