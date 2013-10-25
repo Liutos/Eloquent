@@ -403,9 +403,9 @@ lt *make_type(enum TYPE type, char *name) {
   return t;
 }
 
-lt *make_unicode(char *data) {
+lt *make_unicode(uint32_t value) {
   lt *obj = make_object(LT_UNICODE);
-  unicode_data(obj) = data;
+  unicode_data(obj) = value;
   return obj;
 }
 
@@ -439,7 +439,7 @@ lt *type_ref(enum TYPE type) {
 
 /* Unicode */
 lt *make_unicode_char(char c) {
-  return make_unicode(&tbl[(int)c]);
+  return make_unicode(c);
 }
 
 void init_character(void) {

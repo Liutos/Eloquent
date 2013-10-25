@@ -148,6 +148,13 @@ void write_opcode(lt *opcode, lt *dest) {
   write_raw_char('>', dest);
 }
 
+void write_code_point(uint32_t cp, FILE *fp) {
+  char *c = code_point_to_utf8(cp);
+  int cnt = count1(*c);
+  for (int i = 0; i < cnt; i++)
+    putc(c[i], fp);
+}
+
 void write_compiled_function(lt *function, int indent, lt *dest) {
   writef(dest, "#<COMPILED-FUNCTION %p name: %?\n", function, function_name(function));
   assert(is_lt_vector(function_code(function)));
@@ -303,13 +310,12 @@ void write_object(lt *x, lt *output_file) {
       break;
     case LT_UNICODE:
       write_raw_string("#\\", output_file);
-      if (unicode_data(x)[0] == ' ')
+      if (unicode_data(x) == ' ')
         write_raw_string("space", output_file);
-      else if (unicode_data(x)[0] == '\n')
+      else if (unicode_data(x) == '\n')
         write_raw_string("newline", output_file);
       else
-        for (int i = 0; i < count1(unicode_data(x)[0]); i++)
-          write_raw_char(unicode_data(x)[i], output_file);
+        write_code_point(unicode_data(x), output_port_stream(output_file));
       break;
     case LT_VECTOR: {
       lisp_object_t **vector = vector_value(x);
@@ -773,7 +779,7 @@ void init_prim_arithmetic(void) {
 /* Character */
 lt *lt_char_code(lt *c) {
   assert(is_lt_unicode(c));
-  return make_fixnum(get_code_point(unicode_data(c)));
+  return make_fixnum(unicode_data(c));
 }
 
 lisp_object_t *lt_code_char(lisp_object_t *code) {
@@ -804,18 +810,8 @@ lt *lt_open_out(lt *path) {
 lt *lt_write_char(lt *c, lt *dest) {
   assert(is_lt_unicode(c));
   assert(is_lt_output_port(dest));
-  int len = count1(unicode_data(c)[0]);
-  for (int i = 0; i < len; i++) {
-    write_raw_char(unicode_data(c)[i], dest);
-  }
+  write_code_point(unicode_data(c), output_port_stream(dest));
   return c;
-}
-
-void write_code_point(uint32_t cp, FILE *fp) {
-  char *c = code_point_to_utf8(cp);
-  int cnt = count1(*c);
-  for (int i = 0; i < cnt; i++)
-    putc(c[i], fp);
 }
 
 lt *lt_write_string(lt *str, lt *dest) {
@@ -867,7 +863,7 @@ void init_prim_package(void) {
 lt *lt_char_at(lt *string, lt *index) {
   assert(is_lt_string(string) && isfixnum(index));
   assert(string_length(string) > fixnum_value(index));
-  char *c = code_point_to_utf8(string_value(string)[fixnum_value(index)]);
+  uint32_t c = string_value(string)[fixnum_value(index)];
   return make_unicode(c);
 }
 
@@ -880,7 +876,7 @@ lt *lt_string_set(lt *string, lt *index, lt *c) {
   assert(is_lt_string(string));
   assert(isfixnum(index));
   assert(is_lt_unicode(c));
-  string_value(string)[fixnum_value(index)] = get_code_point(unicode_data(c));
+  string_value(string)[fixnum_value(index)] = unicode_data(c);
   return string;
 }
 
@@ -1391,7 +1387,8 @@ lt *read_unicode(char b1, lt *iport) {
   for (int i = 1; i < n1; i++) {
     data[i] = read_raw_byte(iport);
   }
-  return make_unicode(data);
+  uint32_t cp = get_code_point(data);
+  return make_unicode(cp);
 }
 
 lisp_object_t *read_character(lisp_object_t *input_file) {

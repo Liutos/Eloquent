@@ -183,7 +183,7 @@ struct lisp_object_t {
       char *name;
     } type;
     struct {
-      char *data;
+      uint32_t value;
     } unicode;
     struct {
       int last, length;
@@ -275,7 +275,7 @@ struct string_builder_t {
 #define time_value(x) ((x)->u.time.value)
 #define type_tag(x) ((x)->u.type.tag)
 #define type_name(x) ((x)->u.type.name)
-#define unicode_data(x) ((x)->u.unicode.data)
+#define unicode_data(x) ((x)->u.unicode.value)
 #define vector_last(x) ((x)->u.vector.last)
 #define vector_length(x) (x->u.vector.length)
 #define vector_value(x) (x->u.vector.value)

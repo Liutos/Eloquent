@@ -19,9 +19,12 @@
 int main(int argc, char *argv[])
 {
   char *inputs[] = {
-      "\"a\"",
-      "\"汉\"",
-      "\"世界这是a very lon\"",
+      "#\\a",
+      "#\\汉",
+      "#\\newline",
+      "#\\space",
+      "#\\\n",
+      "#\\ ",
   };
   init_global_variable();
   init_prims();

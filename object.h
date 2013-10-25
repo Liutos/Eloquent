@@ -128,7 +128,7 @@ extern lt *make_structure(lt *name, int nfield);
 extern lt *make_symbol(char *, lt *);
 extern lt *make_time(struct tm *);
 extern lt *make_type(enum TYPE, char *);
-extern lt *make_unicode(char *);
+extern lt *make_unicode(uint32_t);
 extern lt *make_vector(int);
 
 /* Opcode */
