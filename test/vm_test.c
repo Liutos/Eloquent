@@ -19,12 +19,9 @@
 int main(int argc, char *argv[])
 {
   char *inputs[] = {
-      "#\\a",
-      "#\\汉",
-      "#\\newline",
-      "#\\space",
-      "#\\\n",
-      "#\\ ",
+      "(bit-and #b1 #b2)",
+      "(bit-or #b3 #b4)",
+      "(bit-xor #b5 #b5)",
   };
   init_global_variable();
   init_prims();

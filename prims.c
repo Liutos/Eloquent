@@ -369,6 +369,31 @@ lt *lt_raw_nthtail(lt *list, int n) {
   return list;
 }
 
+/* Byte */
+lt *lt_bitwise_and(lt *b1, lt *b2) {
+  assert(is_lt_byte(b1));
+  assert(is_lt_byte(b2));
+  return make_byte(byte_value(b1) & byte_value(b2));
+}
+
+lt *lt_bitwise_or(lt *b1, lt *b2) {
+  assert(is_lt_byte(b1));
+  assert(is_lt_byte(b2));
+  return make_byte(byte_value(b1) | byte_value(b2));
+}
+
+lt *lt_bitwise_xor(lt *b1, lt *b2) {
+  assert(is_lt_byte(b1));
+  assert(is_lt_byte(b2));
+  return make_byte(byte_value(b1) ^ byte_value(b2));
+}
+
+void init_prim_byte(void) {
+  PFN("bit-and", 2, lt_bitwise_and, pkg_lisp);
+  PFN("bit-or", 2, lt_bitwise_or, pkg_lisp);
+  PFN("bit-xor", 2, lt_bitwise_xor, pkg_lisp);
+}
+
 /* Exception */
 lt *lt_exception_tag(lt *exception) {
   return exception_tag(exception);
@@ -1468,6 +1493,12 @@ lt *read_fixnum(lt *input_file, int sign, char start) {
   return make_integer(sign, sum, sb2string(sb));
 }
 
+lt *read_byte(lt *iport) {
+  lt *fx = read_fixnum(iport, 1, '0');
+  assert(isfixnum(fx));
+  return make_byte(fixnum_value(fx));
+}
+
 lisp_object_t *read_pair(lisp_object_t *input_file) {
   lisp_object_t *obj = read_object(input_file);
   if (iseof(obj))
@@ -1575,6 +1606,8 @@ lisp_object_t *read_object(lisp_object_t *input_file) {
       switch (c) {
         case '\\':
         	return read_character(input_file);
+        case 'b':
+          return read_byte(input_file);
         case 't':
           if (isdelimiter(peek_char(input_file)))
             return the_true;
@@ -1645,6 +1678,7 @@ void init_prim_reader(void) {
 
 void init_prims(void) {
   init_prim_arithmetic();
+  init_prim_byte();
   init_prim_char();
   init_prim_exception();
   init_prim_function();
