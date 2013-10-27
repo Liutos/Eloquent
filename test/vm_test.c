@@ -19,9 +19,7 @@
 int main(int argc, char *argv[])
 {
   char *inputs[] = {
-      "(bit-and #b1 #b2)",
-      "(bit-or #b3 #b4)",
-      "(bit-xor #b5 #b5)",
+      "(add-char \"ab\" #\\c)",
   };
   init_global_variable();
   init_prims();

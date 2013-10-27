@@ -885,6 +885,18 @@ void init_prim_package(void) {
 }
 
 /* String */
+lt *lt_string_add_char(lt *str, lt *c) {
+  assert(is_lt_string(str));
+  assert(is_lt_unicode(c));
+  int len = string_length(str);
+  uint32_t *val = string_value(str);
+  uint32_t *value = GC_MALLOC((len + 1) * sizeof(uint32_t));
+  for (int i = 0; i < len; i++)
+    value[i] = val[i];
+  value[len] = unicode_data(c);
+  return make_string(len + 1, value);
+}
+
 lt *lt_char_at(lt *string, lt *index) {
   assert(is_lt_string(string) && isfixnum(index));
   assert(string_length(string) > fixnum_value(index));
@@ -906,6 +918,7 @@ lt *lt_string_set(lt *string, lt *index, lt *c) {
 }
 
 void init_prim_string(void) {
+  PFN("add-char", 2, lt_string_add_char, pkg_lisp);
   NOREST(2, lt_char_at, "char-at");
   NOREST(1, lt_string_length, "string-length");
   NOREST(3, lt_string_set, "string-set!");
