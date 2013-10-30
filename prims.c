@@ -188,6 +188,22 @@ void write_compiled_function(lt *function, int indent, lt *dest) {
   write_raw_char('>', dest);
 }
 
+void write_symbol(lt *x, lt *dest) {
+  lt *pkg = symbol_package(x);
+  lt *tmp = package_used_packages(package);
+  int flag = FALSE;
+  while (is_lt_pair(tmp)) {
+    if (pair_head(tmp) == pkg) {
+      flag = TRUE;
+      break;
+    }
+    tmp = pair_tail(tmp);
+  }
+  if (flag == FALSE)
+    writef(dest, "%s::", package_name(pkg));
+  write_raw_string(symbol_name(x), dest);
+}
+
 void write_object(lt *x, lt *output_file) {
   assert(x != NULL);
   if (!is_pointer(x)) {
@@ -293,7 +309,8 @@ void write_object(lt *x, lt *output_file) {
       writef(output_file, "#<STRUCTURE %p name: %S>", x, structure_name(x));
       break;
     case LT_SYMBOL:
-    	write_raw_string(symbol_name(x), output_file);
+//    	write_raw_string(symbol_name(x), output_file);
+      write_symbol(x, output_file);
     	break;
     case LT_TIME: {
       char *str = asctime(time_value(x));

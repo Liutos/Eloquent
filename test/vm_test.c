@@ -19,8 +19,8 @@
 int main(int argc, char *argv[])
 {
   char *inputs[] = {
-      "(string-concat \"abc\" \"def\")",
-      "(string-concat \"你好，\" \"世界。\")",
+      "(intern \"foo\" \"Fo\")",
+      "(intern \"foo\" \"Lisp\")",
   };
   init_global_variable();
   init_prims();

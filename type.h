@@ -156,7 +156,8 @@ struct lisp_object_t {
 //      fn: The current callee. Use for two purposes
 //          1. Use for constructing function calling chain when throwing exception
 //          2. Stores the function to be used when modify its code pointer in the `yield' form
-      int pc, throw_flag;
+//      req: The number of return values required by caller
+      int pc, throw_flag, req;
       lt *code;
       lt *env;
       lt *fn;
