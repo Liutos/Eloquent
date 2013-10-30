@@ -904,6 +904,18 @@ lt *lt_char_at(lt *string, lt *index) {
   return make_unicode(c);
 }
 
+lt *lt_string_concat(lt *s1, lt *s2) {
+  assert(is_lt_string(s1));
+  assert(is_lt_string(s2));
+  int l1 = string_length(s1);
+  int l2 = string_length(s2);
+  int len = l1 + l2;
+  uint32_t *value = GC_MALLOC(len * sizeof(uint32_t));
+  memcpy(value, string_value(s1), l1 * sizeof(uint32_t));
+  memcpy(value + l1, string_value(s2), l2 * sizeof(uint32_t));
+  return make_string(len, value);
+}
+
 lt *lt_string_length(lt *str) {
   assert(is_lt_string(str));
   return make_fixnum(string_length(str));
@@ -920,6 +932,7 @@ lt *lt_string_set(lt *string, lt *index, lt *c) {
 void init_prim_string(void) {
   PFN("add-char", 2, lt_string_add_char, pkg_lisp);
   NOREST(2, lt_char_at, "char-at");
+  PFN("string-concat", 2, lt_string_concat, pkg_lisp);
   NOREST(1, lt_string_length, "string-length");
   NOREST(3, lt_string_set, "string-set!");
 }
