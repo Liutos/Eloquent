@@ -2,5 +2,7 @@
 *.out
 *.fasl
 *.lisp
-prototype
-constructors.c
+.project
+.cproject
+.settings
+bin/
