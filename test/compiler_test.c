@@ -17,7 +17,7 @@
 int main(int argc, char *argv[])
 {
   char *inputs[] = {
-      "(lambda (x . y) (cons x y))",
+      "(lambda (x) (return x))",
   };
   init_global_variable();
   init_prims();

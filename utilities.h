@@ -100,6 +100,7 @@ extern int is_if_form(lt *);
 extern int is_lambda_form(lt *);
 extern int is_let_form(lt *);
 extern int is_quote_form(lt *);
+extern int is_return_form(lt *);
 extern int is_set_form(lt *);
 extern int is_tagbody_form(lt *);
 /** LET **/

@@ -509,6 +509,7 @@ deform_pred(is_if_form, "if")
 deform_pred(is_lambda_form, "lambda")
 deform_pred(is_let_form, "let")
 deform_pred(is_quote_form, "quote")
+deform_pred(is_return_form, "return");
 deform_pred(is_set_form, "set!")
 deform_pred(is_tagbody_form, "tagbody")
 

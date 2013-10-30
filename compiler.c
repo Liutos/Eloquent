@@ -429,6 +429,11 @@ lt *compile_app(lt *proc, lt *args, lt *env) {
         compile_checkex());
 }
 
+lt *compile_return(lt *value, lt *env) {
+  value = compile_object(value, env);
+  return seq(value, gen(RETURN));
+}
+
 lt *compile_let_bindings(lt *vals, lt *env) {
   return compile_args(vals, env);
 }
@@ -442,7 +447,6 @@ lt *compile_let(lt *form, lt *env) {
   env = make_environment(vars, env);
   return seq(gen(EXTENV, count),
       compile_let_bindings(vals, env),
-//      gen(ARGS, count),
       gen(MOVEARGS, count),
       compile_begin(body, env),
       gen(POPENV));
@@ -488,6 +492,8 @@ lisp_object_t *compile_object(lisp_object_t *object, lisp_object_t *env) {
     return gen(CATCH);
   if (is_goto_form(object))
     return gen(JUMP, second(object));
+  if (is_return_form(object))
+    return compile_return(second(object), env);
   if (is_tagbody_form(object)) {
     return compile_tagbody(pair_tail(object), env);
   }
