@@ -780,6 +780,39 @@ lisp_object_t *lt_numeric_eq(lisp_object_t *n, lisp_object_t *m) {
     return booleanize(float_value(n) == float_value(m));
 }
 
+// Generic Arithmetic Operations
+// Generic Binary Arithmetic Operation
+#define DEFINE_BINARY_OP(fn_name, fxop, fpop, bgop, mpfop) \
+lt *fn_name(lt *n, lt *m) { \
+  if (isfixnum(n)) { \
+    if (isfixnum(m)) return fxop(n, m); \
+    if (is_lt_float(m)) return fpop(lt_fx2fp(n), m); \
+    if (is_lt_bignum(m)) return bgop(lt_fx2bg(n), m); \
+    assert(is_lt_mpflonum(m)); \
+    return mpfop(lt_fx2mpf(n), m); \
+  } else if (is_lt_float(n)) { \
+    if (isfixnum(m)) return fn_name(m, n); \
+    if (is_lt_float(m)) return fpop(n, m); \
+    if (is_lt_bignum(m)) return mpfop(lt_fp2mpf(n), lt_bg2mpf(m)); \
+    assert(is_lt_mpflonum(m)); \
+    return mpfop(lt_fp2mpf(n), m); \
+  } else if (is_lt_bignum(n)) { \
+    if (isfixnum(m)) return fn_name(m, n); \
+    if (is_lt_float(m)) return fn_name(m, n); \
+    if (is_lt_bignum(m)) return bgop(n, m); \
+    assert(is_lt_mpflonum(m)); \
+    return mpfop(lt_bg2mpf(n), m); \
+  } \
+  assert(is_lt_mpflonum(n)); \
+  if (is_lt_mpflonum(m)) return mpfop(n, m); \
+  return fn_name(m, n); \
+}
+
+DEFINE_BINARY_OP(lt_g_add2, lt_fx_add, lt_fp_add, lt_bg_add, lt_mpf_add)
+DEFINE_BINARY_OP(lt_g_sub2, lt_fx_sub, lt_fp_sub, lt_bg_sub, lt_mpf_sub)
+DEFINE_BINARY_OP(lt_g_mul2, lt_fx_mul, lt_fp_mul, lt_bg_mul, lt_mpf_mul)
+DEFINE_BINARY_OP(lt_g_div2, lt_fx_div, lt_fp_div, lt_bg_div, lt_mpf_div)
+
 // The following function doesn't use in any C code
 void init_prim_arithmetic(void) {
   /* Bignum */
@@ -815,6 +848,10 @@ void init_prim_arithmetic(void) {
   NOREST(2, lt_mpf_div, "mpf/");
   NOREST(2, lt_mpf_eq, "mpf=");
   /* Generic */
+  PFN("generic+", 2, lt_g_add2, pkg_lisp);
+  PFN("generic-", 2, lt_g_sub2, pkg_lisp);
+  PFN("generic*", 2, lt_g_mul2, pkg_lisp);
+  PFN("generic/", 2, lt_g_div2, pkg_lisp);
   NOREST(2, lt_gt, ">");
 }
 

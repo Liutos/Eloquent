@@ -19,8 +19,18 @@
 int main(int argc, char *argv[])
 {
   char *inputs[] = {
-      "(intern \"foo\" \"Fo\")",
-      "(intern \"foo\" \"Lisp\")",
+      "(generic+ 1 1)",
+      "(generic+ 1.0 1)",
+      "(generic+ 9876543210123456788 1)",
+      "(generic- 1 1)",
+      "(generic- 1.0 1)",
+      "(generic- 9876543210123456789 1)",
+      "(generic* 1 1)",
+      "(generic* 1.0 1)",
+      "(generic* 1234567890 9876543210)",
+      "(generic/ 1 1)",
+      "(generic/ 1.0 1)",
+      "(generic/ 1 0)",
   };
   init_global_variable();
   init_prims();
