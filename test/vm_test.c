@@ -31,6 +31,9 @@ int main(int argc, char *argv[])
       "(generic/ 1 1)",
       "(generic/ 1.0 1)",
       "(generic/ 1 0)",
+      "(generic= 1 1)",
+      "(generic= 1.0 1)",
+      "(generic= 9876543210 9876543210)",
   };
   init_global_variable();
   init_prims();

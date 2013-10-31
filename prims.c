@@ -812,6 +812,7 @@ DEFINE_BINARY_OP(lt_g_add2, lt_fx_add, lt_fp_add, lt_bg_add, lt_mpf_add)
 DEFINE_BINARY_OP(lt_g_sub2, lt_fx_sub, lt_fp_sub, lt_bg_sub, lt_mpf_sub)
 DEFINE_BINARY_OP(lt_g_mul2, lt_fx_mul, lt_fp_mul, lt_bg_mul, lt_mpf_mul)
 DEFINE_BINARY_OP(lt_g_div2, lt_fx_div, lt_fp_div, lt_bg_div, lt_mpf_div)
+DEFINE_BINARY_OP(lt_g_eq2, lt_fx_eq, lt_fp_eq, lt_bg_eq, lt_mpf_eq)
 
 // The following function doesn't use in any C code
 void init_prim_arithmetic(void) {
@@ -852,6 +853,7 @@ void init_prim_arithmetic(void) {
   PFN("generic-", 2, lt_g_sub2, pkg_lisp);
   PFN("generic*", 2, lt_g_mul2, pkg_lisp);
   PFN("generic/", 2, lt_g_div2, pkg_lisp);
+  PFN("generic=", 2, lt_g_eq2, pkg_lisp);
   NOREST(2, lt_gt, ">");
 }
 
