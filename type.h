@@ -87,11 +87,7 @@ enum OPCODE_TYPE {
   RESTARGS,
   RETURN,
 //  Primitive Function Instructions
-  ADDI,
   CONS,
-  DIVI,
-  MULI,
-  SUBI,
 };
 
 struct lisp_object_t {

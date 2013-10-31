@@ -309,7 +309,6 @@ void write_object(lt *x, lt *output_file) {
       writef(output_file, "#<STRUCTURE %p name: %S>", x, structure_name(x));
       break;
     case LT_SYMBOL:
-//    	write_raw_string(symbol_name(x), output_file);
       write_symbol(x, output_file);
     	break;
     case LT_TIME: {
@@ -481,7 +480,6 @@ lt *lt_expand_macro(lt *form) {
 }
 
 lt *lt_function_arity(lt *function) {
-  lt *lt_list_length(lt *);
   assert(is_lt_primitive(function) || is_lt_function(function));
   if (is_lt_primitive(function))
     return make_fixnum(primitive_arity(function));
@@ -1754,11 +1752,7 @@ void init_primitive_opcode(void) {
     set_op4prim(func, opcode); \
   } while (0)
 
-  ADDOP("fx+", ADDI);
   ADDOP("cons", CONS);
-  ADDOP("fx/", DIVI);
-  ADDOP("fx*", MULI);
-  ADDOP("fx-", SUBI);
 }
 
 void load_init_file(void) {

@@ -356,30 +356,10 @@ lisp_object_t *run_by_llam(lisp_object_t *code_vector) {
         throw_exception = retaddr_throw_flag(retaddr);
       }
         break;
-      case ADDI:
-        arg2 = lt_vector_pop(stack);
-        arg1 = lt_vector_pop(stack);
-        lt_vector_push(stack, lt_fx_add(arg1, arg2));
-        break;
       case CONS:
         arg2 = lt_vector_pop(stack);
         arg1 = lt_vector_pop(stack);
         lt_vector_push(stack, make_pair(arg1, arg2));
-        break;
-      case DIVI:
-        arg2 = lt_vector_pop(stack);
-        arg1 = lt_vector_pop(stack);
-        lt_vector_push(stack, lt_fx_div(arg1, arg2));
-        break;
-      case MULI:
-        arg2 = lt_vector_pop(stack);
-        arg1 = lt_vector_pop(stack);
-        lt_vector_push(stack, lt_fx_mul(arg1, arg2));
-        break;
-      case SUBI:
-        arg2 = lt_vector_pop(stack);
-        arg1 = lt_vector_pop(stack);
-        lt_vector_push(stack, lt_fx_sub(arg1, arg2));
         break;
       default :
         fprintf(stdout, "In run_by_llam --- Invalid opcode %d\n", opcode_name(ins));
