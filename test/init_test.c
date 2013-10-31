@@ -63,7 +63,7 @@ int main(int argc, char *argv[])
       "(try-catch (/ 1 0) (error (e) -1))",
       "(+ 1 (+ 2 (try-catch (/ 1 0) (error (e) 3))))",
       "(vector-last [1 2 3])",
-      "(function-arity fx+)",
+//      "(function-arity fx+)",
       "(function-arity bin+)",
       "(append '() '(1 2 3))",
       "(append '(1 2 3) '())",

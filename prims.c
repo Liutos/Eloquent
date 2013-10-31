@@ -780,7 +780,6 @@ lisp_object_t *lt_numeric_eq(lisp_object_t *n, lisp_object_t *m) {
     return booleanize(float_value(n) == float_value(m));
 }
 
-// Generic Arithmetic Operations
 // Generic Binary Arithmetic Operation
 #define DEFINE_BINARY_OP(fn_name, fxop, fpop, bgop, mpfop) \
 lt *fn_name(lt *n, lt *m) { \
@@ -791,21 +790,23 @@ lt *fn_name(lt *n, lt *m) { \
     assert(is_lt_mpflonum(m)); \
     return mpfop(lt_fx2mpf(n), m); \
   } else if (is_lt_float(n)) { \
-    if (isfixnum(m)) return fn_name(m, n); \
+    if (isfixnum(m)) return fpop(n, lt_fx2fp(m)); \
     if (is_lt_float(m)) return fpop(n, m); \
     if (is_lt_bignum(m)) return mpfop(lt_fp2mpf(n), lt_bg2mpf(m)); \
     assert(is_lt_mpflonum(m)); \
     return mpfop(lt_fp2mpf(n), m); \
   } else if (is_lt_bignum(n)) { \
-    if (isfixnum(m)) return fn_name(m, n); \
-    if (is_lt_float(m)) return fn_name(m, n); \
+    if (isfixnum(m)) return bgop(n, lt_fx2bg(m)); \
+    if (is_lt_float(m)) return mpfop(lt_bg2mpf(n), lt_fp2mpf(m)); \
     if (is_lt_bignum(m)) return bgop(n, m); \
     assert(is_lt_mpflonum(m)); \
     return mpfop(lt_bg2mpf(n), m); \
   } \
   assert(is_lt_mpflonum(n)); \
-  if (is_lt_mpflonum(m)) return mpfop(n, m); \
-  return fn_name(m, n); \
+  if (isfixnum(m)) return mpfop(n, lt_fx2mpf(m)); \
+  if (is_lt_float(m)) return mpfop(n, lt_fp2mpf(m)); \
+  if (is_lt_bignum(m)) return mpfop(n, lt_bg2mpf(m)); \
+  return mpfop(n, m); \
 }
 
 DEFINE_BINARY_OP(lt_g_add2, lt_fx_add, lt_fp_add, lt_bg_add, lt_mpf_add)
@@ -814,46 +815,14 @@ DEFINE_BINARY_OP(lt_g_mul2, lt_fx_mul, lt_fp_mul, lt_bg_mul, lt_mpf_mul)
 DEFINE_BINARY_OP(lt_g_div2, lt_fx_div, lt_fp_div, lt_bg_div, lt_mpf_div)
 DEFINE_BINARY_OP(lt_g_eq2, lt_fx_eq, lt_fp_eq, lt_bg_eq, lt_mpf_eq)
 
-// The following function doesn't use in any C code
 void init_prim_arithmetic(void) {
-  /* Bignum */
-  NOREST(2, lt_bg_add, "bg+");
-  NOREST(2, lt_bg_sub, "bg-");
-  NOREST(2, lt_bg_mul, "bg*");
-  NOREST(2, lt_bg_div, "bg/");
-  NOREST(2, lt_bg_eq, "bg=");
-  NOREST(1, lt_bg2mpf, "bg->mpf");
-  NOREST(1, lt_mkbg, "make-bignum");
-  /* For Fixnum */
-  NOREST(1, lt_fx2bg, "fx->bg");
-  NOREST(1, lt_fx2fp, "fx->fp");
-  NOREST(1, lt_fx2mpf, "fx->mpf");
-  NOREST(2, lt_fx_add, "fx+");
-  NOREST(2, lt_fx_div, "fx/");
-  NOREST(2, lt_fx_eq, "fx=");
-  NOREST(2, lt_fx_mul, "fx*");
-  NOREST(2, lt_fx_sub, "fx-");
   NOREST(2, lt_mod, "mod");
-  /* For Floating-Point Number */
-  NOREST(2, lt_fp_add, "fp+");
-  NOREST(2, lt_fp_div, "fp/");
-  NOREST(2, lt_fp_eq, "fp=");
-  NOREST(2, lt_fp_mul, "fp*");
-  NOREST(2, lt_fp_sub, "fp-");
-  NOREST(1, lt_fp2mpf, "fp->mpf");
-  NOREST(1, lt_nt_level, "nt-level");
-  /* MPFlonum */
-  NOREST(2, lt_mpf_add, "mpf+");
-  NOREST(2, lt_mpf_sub, "mpf-");
-  NOREST(2, lt_mpf_mul, "mpf*");
-  NOREST(2, lt_mpf_div, "mpf/");
-  NOREST(2, lt_mpf_eq, "mpf=");
   /* Generic */
-  PFN("generic+", 2, lt_g_add2, pkg_lisp);
-  PFN("generic-", 2, lt_g_sub2, pkg_lisp);
-  PFN("generic*", 2, lt_g_mul2, pkg_lisp);
-  PFN("generic/", 2, lt_g_div2, pkg_lisp);
-  PFN("generic=", 2, lt_g_eq2, pkg_lisp);
+  PFN("bin+", 2, lt_g_add2, pkg_lisp);
+  PFN("bin-", 2, lt_g_sub2, pkg_lisp);
+  PFN("bin*", 2, lt_g_mul2, pkg_lisp);
+  PFN("bin/", 2, lt_g_div2, pkg_lisp);
+  PFN("=", 2, lt_g_eq2, pkg_lisp);
   NOREST(2, lt_gt, ">");
 }
 
