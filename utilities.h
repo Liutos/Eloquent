@@ -40,7 +40,7 @@ extern lt *make_unicode_char(char);
 extern uint32_t get_code_point(char *);
 
 /* Opcode */
-extern void set_op4prim(lt *, enum OPCODE_TYPE);
+extern void set_op4prim(char *, enum OPCODE_TYPE);
 extern hash_table_t *make_prim2op_map(void);
 extern lt *make_op_call(lt *);
 extern lt *make_op_checkex(void);

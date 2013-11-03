@@ -1748,8 +1748,7 @@ void init_prims(void) {
 void init_primitive_opcode(void) {
 #define ADDOP(Lisp_name, opcode) \
   do { \
-    lt *func = symbol_value(LISP(Lisp_name)); \
-    set_op4prim(func, opcode); \
+    set_op4prim(Lisp_name, opcode); \
   } while (0)
 
   ADDOP("cons", CONS);

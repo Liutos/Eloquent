@@ -318,7 +318,7 @@ int prim_comp_fn(void *p1, void *p2) {
 }
 
 unsigned int prim_hash_fn(void *prim) {
-  return (unsigned int)prim;
+  return string_hash_fn(prim);
 }
 
 hash_table_t *make_prim2op_map(void) {
@@ -326,21 +326,21 @@ hash_table_t *make_prim2op_map(void) {
 }
 
 lt *search_op4prim(lt *prim) {
-  assert(is_lt_primitive(prim));
-  return search_ht(prim, prim2op_map);
+  assert(is_lt_symbol(prim));
+  return search_ht(symbol_name(prim), prim2op_map);
 }
 
-void set_op4prim(lt *prim, enum OPCODE_TYPE opcode) {
+void set_op4prim(char *prim, enum OPCODE_TYPE opcode) {
   set_ht(prim, opcode_ref(opcode), prim2op_map);
 }
 
 int isopcode_fn(lt *prim) {
-  assert(is_lt_primitive(prim));
+  assert(is_lt_symbol(prim));
   return search_op4prim(prim) != NULL;
 }
 
 lt *make_fn_inst(lt *prim) {
-  assert(is_lt_primitive(prim));
+  assert(is_lt_symbol(prim));
   lt *opcode = search_op4prim(prim);
   assert(opcode != NULL);
   return make_pair(mkopcode(opcode_name(opcode), 0), the_empty_list);

@@ -411,10 +411,10 @@ lt *compile_app(lt *proc, lt *args, lt *env) {
     return args;
   if (is_primitive_fun_name(proc, env)) {
     lt *prim = symbol_value(proc);
-    if (isopcode_fn(prim))
+    if (isopcode_fn(proc))
       return seq(args,
           compile_type_check(prim, nargs),
-          make_fn_inst(prim),
+          make_fn_inst(proc),
           compile_checkex());
     else
       return seq(args,
