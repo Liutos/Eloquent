@@ -192,9 +192,9 @@ lisp_object_t *run_by_llam(lisp_object_t *code_vector) {
       case CHKARITY: {
         int arity = fixnum_value(op_chkarity_arity(ins));
         if (arity > nargs)
-          return signal_exception("Too few arguments passed");
+          return signal_exception("CHKARITY - Too few arguments passed");
         if (arity < nargs)
-          return signal_exception("Too many arguments passed");
+          return signal_exception("CHKARITY - Too many arguments passed");
       }
         break;
       case CHKTYPE: {
@@ -286,9 +286,9 @@ lisp_object_t *run_by_llam(lisp_object_t *code_vector) {
             return signal_exception("Too few arguments passed");
         } else {
           if (nargs > arity)
-            return signal_exception("Too many arguments passed");
+            return signal_exception("PRIM - Too many arguments passed");
           else if (nargs < arity)
-            return signal_exception("Too few arguments passed");
+            return signal_exception("PRIM - Too few arguments passed");
         }
 
         lisp_object_t *val = NULL;

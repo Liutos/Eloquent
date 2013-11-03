@@ -215,6 +215,7 @@ lt *mkopcode(enum OPCODE_TYPE name, int arity, ...) {
 }
 
 lisp_object_t *make_op_call(lisp_object_t *arity) {
+  assert(isfixnum(arity));
   return mkopcode(CALL, 1, arity);
 }
 
@@ -223,10 +224,13 @@ lt *make_op_checkex(void) {
 }
 
 lt *make_op_chkarity(lt *arity) {
+  assert(isfixnum(arity));
   return mkopcode(CHKARITY, 1, arity);
 }
 
 lt *make_op_chktype(lt *position, lt *target_type, lt *nargs) {
+  assert(isfixnum(position));
+  assert(isfixnum(nargs));
   return mkopcode(CHKTYPE, 3, position, target_type, nargs);
 }
 
@@ -235,38 +239,51 @@ lisp_object_t *make_op_const(lisp_object_t *value) {
 }
 
 lt *make_op_extenv(lt *count) {
+  assert(isfixnum(count));
   return mkopcode(EXTENV, 1, count);
 }
 
 lisp_object_t *make_op_fjump(lisp_object_t *label) {
+  assert(is_lt_symbol(label) || isfixnum(label));
   return mkopcode(FJUMP, 1, label);
 }
 
 lisp_object_t *make_op_fn(lisp_object_t *func) {
+  assert(is_lt_function(func));
   return mkopcode(FN, 1, func);
 }
 
 lisp_object_t *make_op_gset(lisp_object_t *symbol) {
+  assert(is_lt_symbol(symbol));
   return mkopcode(GSET, 1, symbol);
 }
 
 lisp_object_t *make_op_gvar(lisp_object_t *symbol) {
+  assert(is_lt_symbol(symbol));
   return mkopcode(GVAR, 1, symbol);
 }
 
 lisp_object_t *make_op_jump(lisp_object_t *label) {
+  assert(is_lt_symbol(label) || isfixnum(label));
   return mkopcode(JUMP, 1, label);
 }
 
 lt *make_op_lset(lt *i, lt *j, lt *symbol) {
+  assert(isfixnum(i));
+  assert(isfixnum(j));
+  assert(is_lt_symbol(symbol));
   return mkopcode(LSET, 3, i, j, symbol);
 }
 
 lt *make_op_lvar(lt *i, lt *j, lt *symbol) {
+  assert(isfixnum(i));
+  assert(isfixnum(j));
+  assert(is_lt_symbol(symbol));
   return mkopcode(LVAR, 3, i, j, symbol);
 }
 
 lt *make_op_moveargs(lt *count) {
+  assert(isfixnum(count));
   return mkopcode(MOVEARGS, 1, count);
 }
 
@@ -279,6 +296,7 @@ lt *make_op_popenv(void) {
 }
 
 lisp_object_t *make_op_prim(lisp_object_t *nargs) {
+  assert(isfixnum(nargs));
   return mkopcode(PRIM, 1, nargs);
 }
 
@@ -287,6 +305,7 @@ lisp_object_t *make_op_return(void) {
 }
 
 lt *make_op_restargs(lt *count) {
+  assert(isfixnum(count));
   return mkopcode(RESTARGS, 1, count);
 }
 
