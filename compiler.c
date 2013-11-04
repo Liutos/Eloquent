@@ -78,7 +78,10 @@ lt *asm_second_pass(lt *code, lt *length, lt *labels) {
   while (!isnull(code)) {
     lisp_object_t *ins = pair_head(code);
     if (!is_label(ins)) {
-      assert(is_lt_opcode(ins));
+      if (!is_lt_opcode(ins)) {
+        writef(standard_out, "ins is %?\n", ins);
+        assert(is_lt_opcode(ins));
+      }
       if (is_addr_op(ins))
         ins = change_addr(ins, labels);
       if (opcode_name(ins) == FN)
@@ -186,6 +189,7 @@ lisp_object_t *gen(enum TYPE opcode, ...) {
     case RETURN:
       ins = make_op_return();
       break;
+    case VALUES: ins = make_op_values(va_arg(ap, lt *)); break;
     default:
       fprintf(stdout, "Invalid opcode %d\n", opcode);
       exit(1);
@@ -434,6 +438,22 @@ lt *compile_return(lt *value, lt *env) {
   return seq(value, gen(RETURN));
 }
 
+lt *compile_values(lt *args, lt *env) {
+  assert(isnull(args) || is_lt_pair(args));
+  assert(is_lt_environment(env));
+  int len = 0;
+  lt *is = make_empty_list();
+  while (is_lt_pair(args)) {
+    lt *arg = pair_head(args);
+    arg = compile_object(arg, env);
+    pair_tail(arg) = is;
+    is = arg;
+    args = pair_tail(args);
+    len++;
+  }
+  return seq(is, gen(VALUES, make_fixnum(len)));
+}
+
 lt *compile_let_bindings(lt *vals, lt *env) {
   return compile_args(vals, env);
 }
@@ -496,6 +516,9 @@ lisp_object_t *compile_object(lisp_object_t *object, lisp_object_t *env) {
     return compile_return(second(object), env);
   if (is_tagbody_form(object)) {
     return compile_tagbody(pair_tail(object), env);
+  }
+  if (is_values_form(object)) {
+    return compile_values(pair_tail(object), env);
   }
   if (is_lt_pair(object)) {
     lt *args = pair_tail(object);

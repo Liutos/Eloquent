@@ -61,6 +61,7 @@ extern lt *make_op_popenv(void);
 extern lt *make_op_prim(lt *);
 extern lt *make_op_restargs(lt *);
 extern lt *make_op_return(void);
+extern lt *make_op_values(lt *);
 extern lt *make_op_catch(void);
 extern lt *make_fn_inst(lt *);
 extern lt *search_op4prim(lt *);
@@ -103,6 +104,7 @@ extern int is_quote_form(lt *);
 extern int is_return_form(lt *);
 extern int is_set_form(lt *);
 extern int is_tagbody_form(lt *);
+extern int is_values_form(lt *);
 /** LET **/
 extern lt *let_bindings(lt *);
 extern lt *let_body(lt *);

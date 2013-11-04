@@ -122,7 +122,7 @@ extern lt *make_output_string_port(char *);
 extern lt *make_package(lt *, hash_table_t *);
 extern lt *make_pair(lt *, lt *);
 extern lt *make_primitive(int, void *, char *, int);
-extern lt *make_retaddr(lt *code, lt *env, lt *fn, int pc, int throw_flag, int sp);
+extern lt *make_retaddr(lt *code, lt *env, lt *fn, int pc, int throw_flag, int sp, int is_multi);
 extern lt *make_string(int, uint32_t *);
 extern lt *make_structure(lt *name, int nfield);
 extern lt *make_symbol(char *, lt *);

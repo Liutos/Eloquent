@@ -125,6 +125,7 @@ lisp_object_t *run_by_llam(lisp_object_t *code_vector) {
   int nargs = 0;
   int pc = 0;
   int throw_exception = TRUE;
+  int is_multi = FALSE;
   lt *code = code_vector;
   lisp_object_t *env = null_env;
   lt *prim = NULL;
@@ -154,7 +155,7 @@ lisp_object_t *run_by_llam(lisp_object_t *code_vector) {
           return signal_exception(msg);
         }
         lisp_object_t *retaddr =
-            make_retaddr(code, env, func, pc, throw_exception, vector_last(stack));
+            make_retaddr(code, env, func, pc, throw_exception, vector_last(stack), is_multi);
         return_stack = make_pair(retaddr, return_stack);
         code = function_code(func);
         env = function_env(func);
@@ -352,9 +353,14 @@ lisp_object_t *run_by_llam(lisp_object_t *code_vector) {
         return_stack = pair_tail(return_stack);
         code = retaddr_code(retaddr);
         env = retaddr_env(retaddr);
+        is_multi = retaddr_is_multi(retaddr);
         pc = retaddr_pc(retaddr);
         throw_exception = retaddr_throw_flag(retaddr);
       }
+        break;
+      case VALUES:
+        assert(!isnull(return_stack));
+        retaddr_nvalues(pair_head(return_stack)) = fixnum_value(op_values_count(ins));
         break;
       case CONS:
         arg2 = lt_vector_pop(stack);

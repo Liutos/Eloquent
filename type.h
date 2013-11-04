@@ -86,6 +86,7 @@ enum OPCODE_TYPE {
   PRIM,
   RESTARGS,
   RETURN,
+  VALUES,
 //  Primitive Function Instructions
   CONS,
 };
@@ -153,7 +154,7 @@ struct lisp_object_t {
 //          1. Use for constructing function calling chain when throwing exception
 //          2. Stores the function to be used when modify its code pointer in the `yield' form
 //      req: The number of return values required by caller
-      int pc, throw_flag, req;
+      int pc, throw_flag, req, is_multi, nvalues;
       lt *code;
       lt *env;
       lt *fn;
@@ -259,6 +260,8 @@ struct string_builder_t {
 #define retaddr_code(x) ((x)->u.retaddr.code)
 #define retaddr_env(x) ((x)->u.retaddr.env)
 #define retaddr_fn(x) ((x)->u.retaddr.fn)
+#define retaddr_is_multi(x) ((x)->u.retaddr.is_multi)
+#define retaddr_nvalues(x) ((x)->u.retaddr.nvalues)
 #define retaddr_pc(x) ((x)->u.retaddr.pc)
 #define retaddr_throw_flag(x) ((x)->u.retaddr.throw_flag)
 #define string_length(x) ((x)->u.string.length)
@@ -305,5 +308,6 @@ struct string_builder_t {
 #define op_prim_nargs(x) oparg1(x)
 // The number of required parameters.
 #define op_restargs_count(x) oparg1(x)
+#define op_values_count(x) oparg1(x)
 
 #endif /* TYPE_H_ */

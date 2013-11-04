@@ -309,6 +309,11 @@ lt *make_op_restargs(lt *count) {
   return mkopcode(RESTARGS, 1, count);
 }
 
+lt *make_op_values(lt *count) {
+  assert(isfixnum(count));
+  return mkopcode(VALUES, 1, count);
+}
+
 lt *make_op_catch(void) {
   return mkopcode(CATCH, 0);
 }
@@ -528,9 +533,10 @@ deform_pred(is_if_form, "if")
 deform_pred(is_lambda_form, "lambda")
 deform_pred(is_let_form, "let")
 deform_pred(is_quote_form, "quote")
-deform_pred(is_return_form, "return");
+deform_pred(is_return_form, "return")
 deform_pred(is_set_form, "set!")
 deform_pred(is_tagbody_form, "tagbody")
+deform_pred(is_values_form, "values")
 
 lt *let_bindings(lt *form) {
   return pair_head(pair_tail(form));

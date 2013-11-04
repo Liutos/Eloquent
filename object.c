@@ -128,6 +128,7 @@ struct lisp_object_t lt_codes[] = {
     DEFCODE(PRIM, 1),
     DEFCODE(RESTARGS, 1),
     DEFCODE(RETURN, 0),
+    DEFCODE(VALUES, 1),
 //    Opcodes for some primitive functions
     DEFCODE(CONS, 0),
 };
@@ -350,11 +351,13 @@ lisp_object_t *make_primitive(int arity, void *C_function, char *Lisp_name, int 
   return p;
 }
 
-lt *make_retaddr(lt *code, lt *env, lt *fn, int pc, int throw_flag, int sp) {
+lt *make_retaddr(lt *code, lt *env, lt *fn, int pc, int throw_flag, int sp, int is_multi) {
   lt *retaddr = make_object(LT_RETADDR);
   retaddr_code(retaddr) = code;
   retaddr_env(retaddr) = env;
   retaddr_fn(retaddr) = fn;
+  retaddr_is_multi(retaddr) = is_multi;
+  retaddr_nvalues(retaddr) = 0;
   retaddr_pc(retaddr) = pc;
   retaddr_throw_flag(retaddr) = throw_flag;
   return retaddr;
