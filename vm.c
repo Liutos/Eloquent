@@ -214,8 +214,10 @@ lisp_object_t *run_by_llam(lisp_object_t *code_vector) {
         break;
       case CUTSTACK:
         if (!is_multi && nvalues > 1) {
+          lt *val = lt_vector_pop(stack);
           for (int i = 0; i < nvalues - 1; i++)
             lt_vector_pop(stack);
+          lt_vector_push(stack, val);
         }
         break;
       case EXTENV: {
