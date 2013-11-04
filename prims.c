@@ -230,10 +230,10 @@ void write_object(lt *x, lt *output_file) {
     return;
   }
   switch(_type_of_(x)) {
-  case LT_BIGNUM: {
-    FILE *stream = output_port_stream(output_file);
-    mpz_out_str(stream, 10, bignum_value(x));
-  }
+    case LT_BIGNUM: {
+      FILE *stream = output_port_stream(output_file);
+      mpz_out_str(stream, 10, bignum_value(x));
+    }
     break;
     case LT_ENVIRONMENT:
       writef(output_file, "#<ENVIRONMENT %? %p>", environment_bindings(x), x);
@@ -253,24 +253,24 @@ void write_object(lt *x, lt *output_file) {
         backtrace = pair_tail(backtrace);
       }
     }
-      break;
+    break;
     case LT_FLOAT:
-    	writef(output_file, "%f", x);
-    	break;
+      writef(output_file, "%f", x);
+      break;
     case LT_FUNCTION: {
       int indent = output_port_colnum(output_file);
       write_compiled_function(x, indent, output_file);
     }
-      break;
+    break;
     case LT_INPUT_PORT:
-    	writef(output_file, "#<INPUT-FILE %p>", x);
-    	break;
+      writef(output_file, "#<INPUT-FILE %p>", x);
+      break;
     case LT_MPFLONUM:
       mpf_out_str(output_port_stream(output_file), 10, 6, mpflonum_value(x));
       break;
     case LT_OUTPUT_PORT:
-    	writef(output_file, "#<OUTPUT-FILE %p>", x);
-    	break;
+      writef(output_file, "#<OUTPUT-FILE %p>", x);
+      break;
     case LT_PACKAGE:
       writef(output_file, "#<PACKAGE name: %s>", package_name(x));
       break;
@@ -306,13 +306,13 @@ void write_object(lt *x, lt *output_file) {
       }
       write_raw_string("\"", output_file);
     }
-      break;
+    break;
     case LT_STRUCT:
       writef(output_file, "#<STRUCTURE %p name: %S>", x, structure_name(x));
       break;
     case LT_SYMBOL:
       write_symbol(x, output_file);
-    	break;
+      break;
     case LT_TIME: {
       char *str = asctime(time_value(x));
       str[strlen(str) - 1] = '\0';
@@ -320,7 +320,7 @@ void write_object(lt *x, lt *output_file) {
       write_raw_string(str, output_file);
       write_raw_string("\" >", output_file);
     }
-      break;
+    break;
     case LT_TYPE:
       write_raw_string("#<TYPE ", output_file);
       write_raw_string(type_name(x), output_file);
@@ -345,7 +345,7 @@ void write_object(lt *x, lt *output_file) {
       }
       write_raw_string("]", output_file);
     }
-      break;
+    break;
     case LT_OPCODE: write_opcode(x, output_file); break;
     default :
       fprintf(stdout, "invalid object with type %d", _type_of_(x));
