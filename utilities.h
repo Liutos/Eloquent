@@ -47,6 +47,7 @@ extern lt *make_op_checkex(void);
 extern lt *make_op_chkarity(lt *);
 extern lt *make_op_chktype(lt *, lt *, lt *);
 extern lt *make_op_const(lt *);
+extern lt *make_op_cutstack(void);
 extern lt *make_op_extenv(lt *);
 extern lt *make_op_fjump(lt *);
 extern lt *make_op_fn(lt *);

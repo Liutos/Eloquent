@@ -131,6 +131,7 @@ lisp_object_t *gen(enum TYPE opcode, ...) {
       ins = make_op_const(value);
     }
       break;
+    case CUTSTACK: ins = make_op_cutstack(); break;
     case EXTENV: {
       lt *count = va_arg(ap, lt *);
       ins = make_op_extenv(count);
@@ -271,7 +272,7 @@ lt *compile_lambda(lt *args, lt *body, lt *env) {
   lisp_object_t *code =
       seq(arg_ins,
           compile_begin(body, env),
-          gen(RETURN, the_false));
+          gen(RETURN));
   lisp_object_t *func = make_function(args, code, env);
   return func;
 }
@@ -419,18 +420,21 @@ lt *compile_app(lt *proc, lt *args, lt *env) {
       return seq(args,
           compile_type_check(prim, nargs),
           make_fn_inst(proc),
-          compile_checkex());
+          compile_checkex(),
+          gen(CUTSTACK));
     else
       return seq(args,
           compile_type_check(prim, nargs),
           op,
           gen(PRIM, nargs),
-          compile_checkex());
+          compile_checkex(),
+          gen(CUTSTACK));
   } else
     return seq(args,
         op,
         gen(CALL, nargs),
-        compile_checkex());
+        compile_checkex(),
+        gen(CUTSTACK));
 }
 
 lt *compile_return(lt *value, lt *env) {
@@ -451,7 +455,9 @@ lt *compile_values(lt *args, lt *env) {
     args = pair_tail(args);
     len++;
   }
-  return seq(is, gen(VALUES, make_fixnum(len)));
+  return seq(is,
+      gen(VALUES, make_fixnum(len)),
+      gen(RETURN));
 }
 
 lt *compile_let_bindings(lt *vals, lt *env) {

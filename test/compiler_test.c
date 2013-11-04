@@ -18,6 +18,7 @@ int main(int argc, char *argv[])
 {
   char *inputs[] = {
       "(values 1 2 3 4)",
+      "((lambda (x) (values x 1 2)) 0)",
   };
   init_global_variable();
   init_prims();

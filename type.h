@@ -72,6 +72,7 @@ enum OPCODE_TYPE {
   CHKARITY,
   CHKTYPE,
   CONST,
+  CUTSTACK,
   EXTENV,
   FN,
   GSET,

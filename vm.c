@@ -126,6 +126,7 @@ lisp_object_t *run_by_llam(lisp_object_t *code_vector) {
   int pc = 0;
   int throw_exception = TRUE;
   int is_multi = FALSE;
+  int nvalues = 1;
   lt *code = code_vector;
   lisp_object_t *env = null_env;
   lt *prim = NULL;
@@ -210,6 +211,12 @@ lisp_object_t *run_by_llam(lisp_object_t *code_vector) {
         break;
       case CONST:
         lt_vector_push(stack, op_const_value(ins));
+        break;
+      case CUTSTACK:
+        if (!is_multi && nvalues > 1) {
+          for (int i = 0; i < nvalues - 1; i++)
+            lt_vector_pop(stack);
+        }
         break;
       case EXTENV: {
         lt *length = op_extenv_count(ins);
@@ -354,6 +361,7 @@ lisp_object_t *run_by_llam(lisp_object_t *code_vector) {
         code = retaddr_code(retaddr);
         env = retaddr_env(retaddr);
         is_multi = retaddr_is_multi(retaddr);
+        nvalues = retaddr_nvalues(retaddr);
         pc = retaddr_pc(retaddr);
         throw_exception = retaddr_throw_flag(retaddr);
       }

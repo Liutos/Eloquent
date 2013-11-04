@@ -114,6 +114,7 @@ struct lisp_object_t lt_codes[] = {
     DEFCODE(CHKARITY, 1),
     DEFCODE(CHKTYPE, 3),
     DEFCODE(CONST, 1),
+    DEFCODE(CUTSTACK, 0),
     DEFCODE(EXTENV, 1),
     DEFCODE(FN, 1),
     DEFCODE(GSET, 1),

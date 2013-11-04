@@ -149,11 +149,15 @@ lisp_object_t *append_n(lisp_object_t *list0, ...) {
 }
 
 int pair_length(lisp_object_t *pair) {
+  void writef(lt *, char *, ...);
   if (isnull(pair))
     return 0;
   int length = 0;
   while (!isnull(pair)) {
-    assert(is_lt_pair(pair));
+    if (!is_lt_pair(pair)) {
+      writef(standard_out, "IN pair_length - pair is %?\n", pair);
+      assert(is_lt_pair(pair));
+    }
     length++;
     pair = pair_tail(pair);
   }
@@ -236,6 +240,10 @@ lt *make_op_chktype(lt *position, lt *target_type, lt *nargs) {
 
 lisp_object_t *make_op_const(lisp_object_t *value) {
   return mkopcode(CONST, 1, value);
+}
+
+lt *make_op_cutstack(void) {
+  return mkopcode(CUTSTACK, 0);
 }
 
 lt *make_op_extenv(lt *count) {
