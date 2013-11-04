@@ -192,7 +192,9 @@ void write_symbol(lt *x, lt *dest) {
   lt *pkg = symbol_package(x);
   lt *tmp = package_used_packages(package);
   int flag = FALSE;
-  while (is_lt_pair(tmp)) {
+  if (package == pkg)
+    flag = TRUE;
+  while (flag == FALSE && is_lt_pair(tmp)) {
     if (pair_head(tmp) == pkg) {
       flag = TRUE;
       break;
