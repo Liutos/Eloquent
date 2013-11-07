@@ -946,6 +946,32 @@ lt *lt_string_length(lt *str) {
   return make_fixnum(string_length(str));
 }
 
+lt *lt_string_search(lt *str, lt *sub) {
+  assert(is_lt_string(str));
+  assert(is_lt_string(sub));
+  int l1 = string_length(str);
+  int l2 = string_length(sub);
+  if (l2 > l1)
+    return the_false;
+  uint32_t c = string_value(sub)[0];
+  for (int i = 0; i < l1; i++) {
+    if (c == string_value(str)[i]) {
+      int found = TRUE;
+      if (l2 > l1 - i)
+        return the_false;
+      for (int j = 0; j < l2; j++) {
+        if (string_value(str)[i + j] != string_value(sub)[j]) {
+          found = FALSE;
+          break;
+        }
+      }
+      if (found == TRUE)
+        return make_fixnum(i);
+    }
+  }
+  return the_false;
+}
+
 lt *lt_string_set(lt *string, lt *index, lt *c) {
   assert(is_lt_string(string));
   assert(isfixnum(index));
@@ -959,6 +985,7 @@ void init_prim_string(void) {
   NOREST(2, lt_char_at, "char-at");
   PFN("string-concat", 2, lt_string_concat, pkg_lisp);
   NOREST(1, lt_string_length, "string-length");
+  PFN("string-search", 2, lt_string_search, pkg_lisp);
   NOREST(3, lt_string_set, "string-set!");
 }
 
