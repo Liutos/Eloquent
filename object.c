@@ -124,11 +124,13 @@ struct lisp_object_t lt_codes[] = {
     DEFCODE(LSET, 2),
     DEFCODE(LVAR, 2),
     DEFCODE(MOVEARGS, 1),
+    DEFCODE(MVLIST, 0),
     DEFCODE(POP, 0),
     DEFCODE(POPENV, 0),
     DEFCODE(PRIM, 1),
     DEFCODE(RESTARGS, 1),
     DEFCODE(RETURN, 0),
+    DEFCODE(SETMV, 0),
     DEFCODE(VALUES, 1),
 //    Opcodes for some primitive functions
     DEFCODE(CONS, 0),

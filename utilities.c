@@ -295,6 +295,10 @@ lt *make_op_moveargs(lt *count) {
   return mkopcode(MOVEARGS, 1, count);
 }
 
+lt *make_op_mvlist(void) {
+  return mkopcode(MVLIST, 0);
+}
+
 lisp_object_t *make_op_pop(void) {
   return mkopcode(POP, 0);
 }
@@ -315,6 +319,10 @@ lisp_object_t *make_op_return(void) {
 lt *make_op_restargs(lt *count) {
   assert(isfixnum(count));
   return mkopcode(RESTARGS, 1, count);
+}
+
+lt *make_op_setmv(void) {
+  return mkopcode(SETMV, 0);
 }
 
 lt *make_op_values(lt *count) {
@@ -540,6 +548,7 @@ deform_pred(is_goto_form, "goto")
 deform_pred(is_if_form, "if")
 deform_pred(is_lambda_form, "lambda")
 deform_pred(is_let_form, "let")
+deform_pred(is_mvl_form, "multiple-value-list")
 deform_pred(is_quote_form, "quote")
 deform_pred(is_return_form, "return")
 deform_pred(is_set_form, "set!")

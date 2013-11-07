@@ -276,6 +276,13 @@ lisp_object_t *run_by_llam(lisp_object_t *code_vector) {
         }
       }
         break;
+      case MVLIST: {
+        lt *vals = make_empty_list();
+        for (int i = 0; i < nvalues; i++)
+          vals = make_pair(lt_vector_pop(stack), vals);
+        lt_vector_push(stack, vals);
+      }
+        break;
       case POP:
         lt_vector_pop(stack);
         break;
@@ -368,6 +375,7 @@ lisp_object_t *run_by_llam(lisp_object_t *code_vector) {
         throw_exception = retaddr_throw_flag(retaddr);
       }
         break;
+      case SETMV: is_multi = TRUE; break;
       case VALUES:
         assert(!isnull(return_stack));
         retaddr_nvalues(pair_head(return_stack)) = fixnum_value(op_values_count(ins));

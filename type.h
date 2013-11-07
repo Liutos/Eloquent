@@ -82,11 +82,13 @@ enum OPCODE_TYPE {
   LSET,
   LVAR,
   MOVEARGS,
+  MVLIST,
   POP,
   POPENV,
   PRIM,
   RESTARGS,
   RETURN,
+  SETMV,
   VALUES,
 //  Primitive Function Instructions
   CONS,

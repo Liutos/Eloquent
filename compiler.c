@@ -175,6 +175,7 @@ lisp_object_t *gen(enum TYPE opcode, ...) {
       ins = make_op_moveargs(count);
     }
       break;
+    case MVLIST: ins = make_op_mvlist(); break;
     case POP:
       ins = make_op_pop();
       break;
@@ -190,6 +191,7 @@ lisp_object_t *gen(enum TYPE opcode, ...) {
     case RETURN:
       ins = make_op_return();
       break;
+    case SETMV: ins = make_op_setmv(); break;
     case VALUES: ins = make_op_values(va_arg(ap, lt *)); break;
     default:
       fprintf(stdout, "Invalid opcode %d\n", opcode);
@@ -437,6 +439,12 @@ lt *compile_app(lt *proc, lt *args, lt *env) {
         gen(CUTSTACK));
 }
 
+lt *compile_mvlist(lt *arg, lt *env) {
+  arg = compile_object(arg, env);
+  return seq(arg,
+      gen(MVLIST));
+}
+
 lt *compile_return(lt *value, lt *env) {
   value = compile_object(value, env);
   return seq(value, gen(RETURN));
@@ -514,6 +522,8 @@ lisp_object_t *compile_object(lisp_object_t *object, lisp_object_t *env) {
   }
   if (is_lambda_form(object))
     return gen(FN, compile_lambda(second(object), pair_tail(pair_tail(object)), env));
+  if (is_mvl_form(object))
+    return compile_mvlist(second(object), env);
   if (is_catch_form(object))
     return gen(CATCH);
   if (is_goto_form(object))
