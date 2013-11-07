@@ -17,8 +17,7 @@
 int main(int argc, char *argv[])
 {
   char *inputs[] = {
-      "(lambda (x) (values x 2 3))",
-      "(multiple-value-list (values 1 2 3))",
+      "(multiple-value-list ((lambda () (values 1 2 3))))",
   };
   init_global_variable();
   init_prims();

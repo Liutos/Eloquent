@@ -441,7 +441,8 @@ lt *compile_app(lt *proc, lt *args, lt *env) {
 
 lt *compile_mvlist(lt *arg, lt *env) {
   arg = compile_object(arg, env);
-  return seq(arg,
+  return seq(gen(SETMV),
+      arg,
       gen(MVLIST));
 }
 
@@ -463,6 +464,7 @@ lt *compile_values(lt *args, lt *env) {
     args = pair_tail(args);
     len++;
   }
+  is = lt_list_nreverse(is);
   return seq(is,
       gen(VALUES, make_fixnum(len)),
       gen(RETURN));

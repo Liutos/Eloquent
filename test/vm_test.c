@@ -19,9 +19,8 @@
 int main(int argc, char *argv[])
 {
   char *inputs[] = {
-      "(string-search \"abc\" \"a\")",
-      "(string-search \"你好\" \"好\")",
-      "(string-search \"abcdefg\" \"bd\")",
+      "((lambda () (values 1 2 3)))",
+      "(multiple-value-list ((lambda () (values 1 2 3))))",
   };
   init_global_variable();
   init_prims();
