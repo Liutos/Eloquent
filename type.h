@@ -44,6 +44,7 @@ enum TYPE {
   LT_TUNDEF,
   /* tagged-union */
   LT_BIGNUM,
+  LT_COMPILER,
   LT_ENVIRONMENT,
   LT_EXCEPTION,
   LT_FUNCTION,
@@ -100,6 +101,10 @@ struct lisp_object_t {
     struct {
       mpz_t value;
     } bignum;
+    struct {
+      lt *first;
+      lt *last;
+    } compiler;
     struct {
       lt *bindings;
       lt *next;
@@ -226,6 +231,8 @@ struct string_builder_t {
 #define _type_of_(x) ((x)->type)
 
 #define bignum_value(x) ((x)->u.bignum.value)
+#define compiler_first(x) ((x)->u.compiler.first)
+#define compiler_last(x) ((x)->u.compiler.last)
 #define environment_bindings(x) ((x)->u.environment.bindings)
 #define environment_next(x) ((x)->u.environment.next)
 #define exception_msg(x) ((x)->u.exception.message)

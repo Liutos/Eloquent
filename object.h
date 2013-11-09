@@ -68,6 +68,7 @@ lisp_object_t *the_undef;
 
 extern int is_pointer(lt *);
 extern int is_lt_bignum(lt *);
+extern int is_lt_compiler(lt *);
 extern int is_lt_environment(lt *);
 extern int is_lt_exception(lt *);
 extern int is_lt_float(lt *);
@@ -109,6 +110,7 @@ extern lt *make_close(void);
 extern lt *make_byte(char);
 extern lt *make_fixnum(int);
 extern lt *make_bignum(mpz_t);
+extern lt *make_compiler(void);
 extern lt *make_environment(lt *, lt *);
 extern lt *make_exception(char *, int, lt *, lt *backtrace);
 extern lt *make_float(float);

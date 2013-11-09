@@ -77,6 +77,7 @@ lt *the_undef;
 
 struct lisp_object_t lt_types[] = {
     DEFTYPE(LT_BOOL, "bool"),
+    DEFTYPE(LT_COMPILER, "compiler"),
     DEFTYPE(LT_BYTE, "byte"),
     DEFTYPE(LT_EMPTY_LIST, "empty-list"),
     DEFTYPE(LT_FIXNUM, "fixnum"),
@@ -159,6 +160,7 @@ int is_of_type(lisp_object_t *object, enum TYPE type) {
   }
 
 mktype_pred(is_lt_bignum, LT_BIGNUM)
+mktype_pred(is_lt_compiler, LT_COMPILER)
 mktype_pred(is_lt_environment, LT_ENVIRONMENT)
 mktype_pred(is_lt_exception, LT_EXCEPTION)
 mktype_pred(is_lt_float, LT_FLOAT)
@@ -252,6 +254,13 @@ lt *make_fixnum(int value) {
 lt *make_bignum(mpz_t value) {
   lt *obj = make_object(LT_BIGNUM);
   *bignum_value(obj) = *value;
+  return obj;
+}
+
+lt *make_compiler(void) {
+  lt *obj = make_object(LT_COMPILER);
+  compiler_first(obj) = make_empty_list();
+  compiler_last(obj) = make_empty_list();
   return obj;
 }
 

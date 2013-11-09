@@ -39,6 +39,9 @@ extern char *code_point_to_utf8(uint32_t);
 extern lt *make_unicode_char(char);
 extern uint32_t get_code_point(char *);
 
+/* Compiler */
+extern void emit_ins(lt *, lt *);
+extern void emit_seq(lt *, lt *);
 /* Opcode */
 extern void set_op4prim(char *, enum OPCODE_TYPE);
 extern hash_table_t *make_prim2op_map(void);

@@ -90,6 +90,35 @@ lt *booleanize(int value) {
     return the_true;
 }
 
+/* Compiler */
+void emit_ins(lt *cc, lt *ins) {
+  assert(is_lt_compiler(cc));
+  assert(is_lt_opcode(ins));
+  ins = make_pair(ins, make_empty_list());
+  if (isnull(compiler_last(cc))) {
+    compiler_first(cc) = ins;
+    compiler_last(cc) = ins;
+  } else {
+    assert(is_lt_pair(compiler_last(cc)));
+    pair_tail(compiler_last(cc)) = ins;
+    compiler_last(cc) = ins;
+  }
+}
+
+void emit_seq(lt *cc, lt *seq) {
+  assert(is_lt_compiler(cc));
+  assert(is_lt_pair(seq) || isnull(seq));
+  if (isnull(compiler_last(cc))) {
+    compiler_first(cc) = seq;
+  } else {
+    pair_tail(compiler_last(cc)) = seq;
+  }
+  while (is_lt_pair(seq) && is_lt_pair(pair_tail(seq))) {
+    seq = pair_tail(seq);
+  }
+  compiler_last(cc) = seq;
+}
+
 /* Exception */
 lisp_object_t *reader_error(char *format, ...) {
   static char msg[1000];
