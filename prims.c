@@ -240,7 +240,7 @@ void write_object(lt *x, lt *output_file) {
       break;
     case LT_EXCEPTION: {
       writef(output_file, "%S: ", exception_tag(x));
-      writef(output_file, "%s\n", import_C_string(exception_msg(x)));
+      write_raw_string(exception_msg(x), output_file);
       lt *backtrace = exception_backtrace(x);
       while (!isnull(backtrace)) {
         lt *fn = pair_head(backtrace);

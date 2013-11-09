@@ -23,7 +23,6 @@ int main(int argc, char *argv[]) {
   init_global_variable();
   init_prims();
   init_macros();
-  load_init_file();
 
   int opt;
   while ((opt = getopt(argc, argv, "l:")) != -1) {

@@ -63,7 +63,6 @@ int main(int argc, char *argv[])
       "(try-catch (/ 1 0) (error (e) -1))",
       "(+ 1 (+ 2 (try-catch (/ 1 0) (error (e) 3))))",
       "(vector-last [1 2 3])",
-//      "(function-arity fx+)",
       "(function-arity bin+)",
       "(append '() '(1 2 3))",
       "(append '(1 2 3) '())",
@@ -85,16 +84,6 @@ int main(int argc, char *argv[])
   init_global_variable();
   init_prims();
   init_macros();
-  char *load_expr = "(load \"init.scm\")";
-  lt *expr = read_object_from_string(strdup(load_expr));
-  writef(standard_out, "%s\n", import_C_string(load_expr));
-  expr = compile_to_bytecode(expr);
-  if (!is_signaled(expr))
-    expr = run_by_llam(expr);
-  if (is_signaled(expr))
-    writef(standard_out, "%?\n", expr);
-  else
-    writef(standard_out, "=> %?\n", expr);
   for (int i = 0; i < sizeof(inputs) / sizeof(char *); i++) {
     writef(standard_out, ">> %s\n", import_C_string(inputs[i]));
     lisp_object_t *expr = read_object_from_string(strdup(inputs[i]));
