@@ -17,6 +17,7 @@ extern int is_label(lt *);
 extern int is_macro_form(lt *);
 extern int is_symbol_bound(lt *);
 
+extern lt *list_nreverse(lt *);
 extern lt *list1(lt *);
 extern lt *list2(lt *, lt *);
 extern lt *list3(lt *, lt *, lt *);

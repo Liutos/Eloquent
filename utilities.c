@@ -143,6 +143,23 @@ int is_tag_list(lisp_object_t *object, lisp_object_t *tag) {
   return is_lt_pair(object) && (pair_head(object) == tag);
 }
 
+lt *list_nreverse(lt *list) {
+  if (isnull(list))
+    return the_empty_list;
+  if (isnull(pair_tail(list)))
+    return list;
+  lt *rhead = the_empty_list;
+  lt *rest = list;
+  while (!isnull(rest)) {
+    assert(is_lt_pair(rest));
+    lt *tmp = pair_tail(rest);
+    pair_tail(rest) = rhead;
+    rhead = rest;
+    rest = tmp;
+  }
+  return rhead;
+}
+
 lt *list1(lt *element) {
   return make_pair(element, make_empty_list());
 }
@@ -599,25 +616,23 @@ lt *let_body(lt *form) {
 }
 
 lt *let_vals(lt *bindings) {
-  lt *lt_list_nreverse(lt *);
   lt *vals = the_empty_list;
   while (!isnull(bindings)) {
     lt *binding = pair_head(bindings);
     vals = make_pair(pair_head(pair_tail(binding)), vals);
     bindings = pair_tail(bindings);
   }
-  vals = lt_list_nreverse(vals);
+  vals = list_nreverse(vals);
   return vals;
 }
 
 lt *let_vars(lt *bindings) {
-  lt *lt_list_nreverse(lt *);
   lt *vars = the_empty_list;
   while (!isnull(bindings)) {
     lt *binding = pair_head(bindings);
     vars = make_pair(pair_head(binding), vars);
     bindings = pair_tail(bindings);
   }
-  vars = lt_list_nreverse(vars);
+  vars = list_nreverse(vars);
   return vars;
 }

@@ -445,13 +445,12 @@ lt *lt_simple_apply(lt *function, lt *args) {
   }
   code = make_pair(make_op_const(function), code);
   code = make_pair(make_op_call(arity), code);
-  code = lt_list_nreverse(code);
+  code = list_nreverse(code);
   code = assemble(code);
   return run_by_llam(code);
 }
 
 lt *compress_args(lt *args, int nrequired) {
-  lt *lt_list_nreverse(lt *);
   lt *new_args = make_empty_list();
   for (int i = 0; i < nrequired; i++) {
     new_args = make_pair(pair_head(args), new_args);
@@ -462,8 +461,8 @@ lt *compress_args(lt *args, int nrequired) {
     rest = make_pair(pair_head(args), rest);
     args = pair_tail(args);
   }
-  new_args = make_pair(lt_list_nreverse(rest), new_args);
-  return lt_list_nreverse(new_args);
+  new_args = make_pair(list_nreverse(rest), new_args);
+  return list_nreverse(new_args);
 }
 
 lt *macro_fn(lt *macro_name) {
@@ -1208,7 +1207,7 @@ lt *lt_vector_to_list(lt *vector) {
   for (int i = 0; i < length; i++) {
     list = make_pair(vector_value(vector)[i], list);
   }
-  return lt_list_nreverse(list);
+  return list_nreverse(list);
 }
 
 void init_prim_vector(void) {
@@ -1224,21 +1223,7 @@ void init_prim_vector(void) {
 
 /* List */
 lt *lt_list_nreverse(lt *list) {
-  if (isnull(list))
-    return the_empty_list;
-  if (isnull(pair_tail(list)))
-    return list;
-  lt *rhead = the_empty_list;
-  lt *rest = list;
-  while (!isnull(rest)) {
-    if (!is_lt_pair(rest))
-      return signal_exception("Argument is not a proper list.");
-    lt *tmp = pair_tail(rest);
-    pair_tail(rest) = rhead;
-    rhead = rest;
-    rest = tmp;
-  }
-  return rhead;
+  return list_nreverse(list);
 }
 
 lt *raw_list(lt *e0, ...) {
@@ -1250,7 +1235,7 @@ lt *raw_list(lt *e0, ...) {
     e0 = make_pair(next, e0);
     next = va_arg(ap, lt *);
   }
-  return lt_list_nreverse(e0);
+  return list_nreverse(e0);
 }
 
 lisp_object_t *lt_head(lisp_object_t *pair) {

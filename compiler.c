@@ -466,7 +466,7 @@ lt *compile_values(lt *args, lt *env) {
     args = pair_tail(args);
     len++;
   }
-  is = lt_list_nreverse(is);
+  is = list_nreverse(is);
   return seq(is,
       gen(VALUES, make_fixnum(len)),
       gen(RETURN));

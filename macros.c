@@ -94,7 +94,7 @@ lt *lt_pset_macro(lt *kvs) {
     vs = pair_tail(vs);
     ns = pair_tail(ns);
   }
-  bd = lt_list_nreverse(bd);
+  bd = list_nreverse(bd);
   ns = saved;
   lt *sets = the_empty_list;
   while (!isnull(ks)) {
@@ -104,7 +104,7 @@ lt *lt_pset_macro(lt *kvs) {
     ks = pair_tail(ks);
     ns = pair_tail(ns);
   }
-  sets = lt_list_nreverse(sets);
+  sets = list_nreverse(sets);
   lt *result = make_pair(LISP("let"), make_pair(bd, sets));
   return result;
 }
