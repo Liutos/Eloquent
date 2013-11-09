@@ -19,7 +19,7 @@
 int main(int argc, char *argv[])
 {
   char *inputs[] = {
-      "(list-reverse! '(1 2 3 4))",
+      "(+ 1 (- 2 (* 3 (/ 4 5.0))))",
   };
   init_global_variable();
   init_prims();

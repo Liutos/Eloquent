@@ -172,26 +172,6 @@
          (fx->bg n))
         (else (signal "Unknown convert rule."))))
 
-;; +
-(define + ns
-  (cond ((null? ns) 0)
-        (else (reduce ns bin+))))
-
-;; -
-(define - (n . ns)
-  (cond ((null? ns) (bin- 0 n))
-        (else (bin- n (reduce ns bin+)))))
-
-;; *
-(define * ns
-  (cond ((null? ns) 1)
-        (else (reduce ns bin*))))
-
-;; /
-(define / (n . ns)
-  (cond ((null? ns) (bin/ 1 n))
-        (else (bin/ n (reduce ns bin*)))))
-
 (define < (n m)
   (cond ((> n m) #f)
         ((= n m) #f)

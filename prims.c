@@ -817,10 +817,10 @@ DEFINE_BINARY_OP(lt_g_eq2, lt_fx_eq, lt_fp_eq, lt_bg_eq, lt_mpf_eq)
 void init_prim_arithmetic(void) {
   NOREST(2, lt_mod, "mod");
   /* Generic */
-  PFN("bin+", 2, lt_g_add2, pkg_lisp);
-  PFN("bin-", 2, lt_g_sub2, pkg_lisp);
-  PFN("bin*", 2, lt_g_mul2, pkg_lisp);
-  PFN("bin/", 2, lt_g_div2, pkg_lisp);
+  PFN("+", 2, lt_g_add2, pkg_lisp);
+  PFN("-", 2, lt_g_sub2, pkg_lisp);
+  PFN("*", 2, lt_g_mul2, pkg_lisp);
+  PFN("/", 2, lt_g_div2, pkg_lisp);
   PFN("=", 2, lt_g_eq2, pkg_lisp);
   NOREST(2, lt_gt, ">");
 }
@@ -1780,7 +1780,6 @@ void load_init_file(void) {
   lt *file = make_input_port(fp);
   lt *obj = read_object(file);
   while (!iseof(obj)) {
-    writef(standard_out, "IN load_init_file - obj is %?\n", obj);
     obj = compile_to_bytecode(obj);
     if (is_signaled(obj)) {
       writef(standard_out, "%?\n", obj);
