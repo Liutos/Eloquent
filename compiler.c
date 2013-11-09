@@ -276,7 +276,7 @@ lt *compile_lambda(lt *args, lt *body, lt *env) {
           compile_begin(body, env),
           gen(RETURN));
   lisp_object_t *func = make_function(args, code, env);
-  return func;
+  return gen(FN, func);
 }
 
 lisp_object_t *make_label(void) {
@@ -544,7 +544,7 @@ lisp_object_t *compile_object(lisp_object_t *object, lisp_object_t *env) {
     return compile_if(pred, then, else_part, env);
   }
   if (is_lambda_form(object))
-    return gen(FN, compile_lambda(second(object), pair_tail(pair_tail(object)), env));
+    return compile_lambda(second(object), pair_tail(pair_tail(object)), env);
   if (is_mvl_form(object))
     return compile_mvlist(second(object), env);
   if (is_catch_form(object))
@@ -553,12 +553,10 @@ lisp_object_t *compile_object(lisp_object_t *object, lisp_object_t *env) {
     return gen(JUMP, second(object));
   if (is_return_form(object))
     return compile_return(second(object), env);
-  if (is_tagbody_form(object)) {
+  if (is_tagbody_form(object))
     return compile_tagbody(pair_tail(object), env);
-  }
-  if (is_values_form(object)) {
+  if (is_values_form(object))
     return compile_values(pair_tail(object), env);
-  }
   if (is_lt_pair(object)) {
     lt *args = pair_tail(object);
     lisp_object_t *fn = pair_head(object);
