@@ -17,10 +17,18 @@
 int main(int argc, char *argv[])
 {
   char *inputs[] = {
-      "(let)",
-      "(let 1)",
-      "(let (1 . 2))",
-      "(let ((a 1) . 2))",
+      "(quote x)",
+      "(let ((a 1) (b 2)) (cons a b))",
+      "(begin 1 (+ 1 1) 3)",
+      "(set! a '(1 2 3))",
+      "(if (= n 0) 1 (* n (- n 1)))",
+      "(lambda (x y) (+ x y))",
+      "(multiple-value-list (+ 1 2 3))",
+      "(catch)",
+      "(return 1)",
+      "(tagbody a (goto b) b 1)",
+      "(values 1 2 3)",
+      "((lambda (x . y) (values x y)))",
   };
   init_global_variable();
   init_prims();
