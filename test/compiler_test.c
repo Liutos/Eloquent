@@ -17,7 +17,10 @@
 int main(int argc, char *argv[])
 {
   char *inputs[] = {
-      "(multiple-value-list ((lambda () (values 1 2 3))))",
+      "(let)",
+      "(let 1)",
+      "(let (1 . 2))",
+      "(let ((a 1) . 2))",
   };
   init_global_variable();
   init_prims();

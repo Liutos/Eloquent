@@ -470,11 +470,32 @@ lt *compile_values(lt *args, lt *env) {
       gen(RETURN));
 }
 
+lt *check_let(lt *form) {
+  if (!is_lt_pair(pair_tail(form)))
+    return compiler_error("Not well-form LET, no arguments.");
+  lt *bds = second(form);
+  if (!is_lt_pair(bds) && !isnull(bds))
+    return compiler_error("Not well-form LET bindings, must be a list.");
+  while (is_lt_pair(bds)) {
+    lt *bd = pair_head(bds);
+    if (!is_lt_pair(bd))
+      return compiler_error("Not well-form LET bindings, must be a A-list.");
+    bds = pair_tail(bds);
+    if (!is_lt_pair(bds) && !is_lt_pair(bds))
+      return compiler_error("No well-form LET bindings, must be a proper list.");
+  }
+  return the_true;
+}
+
 lt *compile_let_bindings(lt *vals, lt *env) {
   return compile_args(vals, env);
 }
 
 lt *compile_let(lt *form, lt *env) {
+//  Check the syntax of LET form
+  lt *res = check_let(form);
+  if (is_signaled(res))
+    return res;
   lt *bindings = let_bindings(form);
   lt *body = let_body(form);
   lt *vars = let_vars(bindings);
