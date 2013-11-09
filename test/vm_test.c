@@ -20,6 +20,7 @@ int main(int argc, char *argv[])
 {
   char *inputs[] = {
       "(+ 1 (- 2 (* 3 (/ 4 5.0))))",
+      "(lambda (x . y) (values (cons x y)))",
   };
   init_global_variable();
   init_prims();

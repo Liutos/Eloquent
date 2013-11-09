@@ -436,7 +436,7 @@ lt *opcode_ref(enum OPCODE_TYPE opcode) {
 void init_opcode_length(void) {
   int max = 0;
   for (int i = 0; i < sizeof(lt_codes) / sizeof(*lt_codes); i++) {
-    lt *opcode = &lt_codes[i];
+    lt *opcode = opcode_ref(i);
     if (strlen(opcode_op(opcode)) > max)
       max = strlen(opcode_op(opcode));
   }
