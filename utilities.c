@@ -160,6 +160,8 @@ lt *list4(lt *e1, lt *e2, lt *e3, lt *e4) {
 }
 
 lt *append2(lt *l1, lt *l2) {
+  assert(is_lt_pair(l1) || isnull(l1));
+  assert(is_lt_pair(l2) || isnull(l2));
   if (isnull(l1))
     return l2;
   else
@@ -203,13 +205,17 @@ int is_symbol_bound(lt *symbol) {
 }
 
 int is_macro_form(lt *form) {
+  void writef(lt *, char *, ...);
   if (!is_lt_pair(form))
     return FALSE;
   if (!is_lt_symbol(pair_head(form)))
     return FALSE;
   lt *symbol = pair_head(form);
-  if (is_lt_function(symbol_macro(symbol)) || is_lt_primitive(symbol_macro(symbol)))
+  lt *fn = symbol_macro(symbol);
+  if (is_lt_function(fn) || is_lt_primitive(fn))
     return TRUE;
+  if (!isundef(fn))
+    writef(standard_out, "IN is_macro_form - fn is %?\n", fn);
   return FALSE;
 }
 

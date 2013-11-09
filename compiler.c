@@ -413,6 +413,8 @@ lt *compile_checkex(void) {
 lt *compile_app(lt *proc, lt *args, lt *env) {
   lt *nargs = make_fixnum(pair_length(args));
   lt *op = compile_object(proc, env);
+  if (is_signaled(op))
+    return op;
   args = compile_args(args, env);
   if (is_signaled(args))
     return args;
@@ -481,7 +483,7 @@ lt *check_let(lt *form) {
     if (!is_lt_pair(bd))
       return compiler_error("Not well-form LET bindings, must be a A-list.");
     bds = pair_tail(bds);
-    if (!is_lt_pair(bds) && !is_lt_pair(bds))
+    if (!is_lt_pair(bds) && !isnull(bds))
       return compiler_error("No well-form LET bindings, must be a proper list.");
   }
   return the_true;

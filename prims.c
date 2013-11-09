@@ -1047,6 +1047,8 @@ lt *lt_is_bound(lt *symbol) {
 }
 
 lt *lt_set_symbol_macro(lt *symbol, lt *macro_fn) {
+  assert(is_lt_symbol(symbol));
+  assert(is_lt_function(macro_fn) || is_lt_primitive(macro_fn));
   symbol_macro(symbol) = macro_fn;
   return symbol;
 }
@@ -1791,5 +1793,19 @@ void load_init_file(void) {
     return;
   }
   lt *file = make_input_port(fp);
-  lt_load_file(file);
+  lt *obj = read_object(file);
+  while (!iseof(obj)) {
+    writef(standard_out, "IN load_init_file - obj is %?\n", obj);
+    obj = compile_to_bytecode(obj);
+    if (is_signaled(obj)) {
+      writef(standard_out, "%?\n", obj);
+      return;
+    }
+    obj = run_by_llam(obj);
+    if (is_signaled(obj)) {
+      writef(standard_out, "%?\n", obj);
+      return;
+    }
+    obj = read_object(file);
+  }
 }
