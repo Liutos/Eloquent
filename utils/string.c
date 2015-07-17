@@ -13,7 +13,7 @@
 
 static int string_isfull(string_t *s)
 {
-    return s->length >= s->capacity - 1;
+    return s->length + 1 >= s->capacity;
 }
 
 static void string_incr(string_t *s, size_t d)
@@ -55,4 +55,9 @@ void string_assign(string_t *str, const char *src)
         string_addc(str, *src);
         src++;
     }
+}
+
+void string_clear(string_t *s)
+{
+    s->length = 0;
 }

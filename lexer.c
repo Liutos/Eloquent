@@ -22,13 +22,19 @@ static int lexer_ungetc(lexer_t *l, int c)
     return ungetc(c, l->src);
 }
 
+static int lexer_issep(int c)
+{
+    return isspace(c) || c == EOF || c == '(' || c == ')';
+}
+
 static token_t lexer_getidentifier(lexer_t *l, int start)
 {
+    string_clear(l->text);
     int c = start;
     do {
         string_addc(l->text, c);
         c = lexer_getc(l);
-    } while (!isspace(c));
+    } while (!lexer_issep(c));
     lexer_ungetc(l, c);
     return TOKEN_IDENTIFIER;
 }
@@ -53,6 +59,7 @@ token_t lexer_gettoken(lexer_t *l)
 {
     int c = lexer_getc(l);
     switch (c) {
+        case EOF: return TOKEN_EOF;
         case ' ': case '\n': case '\t': return lexer_gettoken(l);
         case '(': return TOKEN_LEFT_PAREN;
         case ')': return TOKEN_RIGHT_PAREN;

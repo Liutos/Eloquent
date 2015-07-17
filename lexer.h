@@ -18,6 +18,7 @@ typedef struct __lexer_t lexer_t;
 
 typedef enum {
     TOKEN_INVALID,
+    TOKEN_EOF,
     TOKEN_IDENTIFIER,
     TOKEN_LEFT_PAREN,
     TOKEN_RIGHT_PAREN,

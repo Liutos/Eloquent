@@ -25,6 +25,7 @@ extern string_t *string_new(void);
 extern void string_free(string_t *);
 extern void string_addc(string_t *, char);
 extern void string_assign(string_t *, const char *);
+extern void string_clear(string_t *);
 
 #ifdef __cplusplus
 }
