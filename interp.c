@@ -16,6 +16,11 @@ static value_t *bif_add(value_t *n1, value_t *n2)
     return value_int_new(VALUE_INT_VALUE(n1) + VALUE_INT_VALUE(n2));
 }
 
+static value_t *bif_succ(value_t *n)
+{
+    return value_int_new(VALUE_INT_VALUE(n) + 1);
+}
+
 static value_t *interp_get(interp_t *interp, char *name)
 {
     return env_get(interp->env, name, NULL);
@@ -26,15 +31,16 @@ static void interp_set(interp_t *interp, char *name, value_t *value)
     env_set(interp->env, name, value);
 }
 
-static void interp_setbif(interp_t *interp, char *name, void *bif_ptr)
+static void interp_setbif(interp_t *interp, char *name, void *bif_ptr, unsigned int arity)
 {
-    value_t *val = value_bif_new(bif_ptr);
+    value_t *val = value_bif_new(bif_ptr, arity);
     interp_set(interp, name, val);
 }
 
 static void interp_initbif(interp_t *interp)
 {
-    interp_setbif(interp, "+", bif_add);
+    interp_setbif(interp, "+", bif_add, 2);
+    interp_setbif(interp, "succ", bif_succ, 1);
 }
 
 static int interp_execute_args(interp_t *interp, ast_t *args, vector_t **_vals, value_t **error)
@@ -67,10 +73,25 @@ static value_kind_t interp_execute_bif(interp_t *interp, value_t *bif, ast_t *ar
         return VALUE_INVALID;
     }
 
-    value_t *arg1 = (value_t *)vector_ref(vals, 0);
-    value_t *arg2 = (value_t *)vector_ref(vals, 1);
+    value_t *res = NULL;
+    switch (VALUE_BIF_ARITY(bif)) {
+        case 1: {
+            value_t *arg1 = (value_t *)vector_ref(vals, 0);
+            res = ((bif_1)VALUE_BIF_PTR(bif))(arg1);
+            break;
+        }
+        case 2: {
+            value_t *arg1 = (value_t *)vector_ref(vals, 0);
+            value_t *arg2 = (value_t *)vector_ref(vals, 1);
+            res = ((bif_2)VALUE_BIF_PTR(bif))(arg1, arg2);
+            break;
+        }
+        default :
+            if (value != NULL)
+                *value = value_invalid_newf("Don't support build in function of arity %d", VALUE_BIF_ARITY(bif));
+            return VALUE_INVALID;
+    }
 
-    value_t *res = ((bif_2)VALUE_BIF_PTR(bif))(arg1, arg2);
     if (value != NULL)
         *value = res;
     return res->kind;

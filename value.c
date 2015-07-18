@@ -32,10 +32,12 @@ value_t *value_int_new(int num)
     return v;
 }
 
-value_t *value_bif_new(void *bif_ptr)
+value_t *value_bif_new(void *bif_ptr, unsigned int arity)
 {
     value_t *v = malloc(sizeof(value_t));
     v->kind = VALUE_FUNCTION;
+    VALUE_FUNC_ISBIF(v) = 1;
+    VALUE_BIF_ARITY(v) = arity;
     VALUE_BIF_PTR(v) = bif_ptr;
     return v;
 }

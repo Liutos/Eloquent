@@ -11,6 +11,7 @@ extern "C" {
 typedef struct __value_t value_t;
 typedef struct __value_function_t value_function_t;
 
+typedef value_t *(*bif_1)(value_t *);
 typedef value_t *(*bif_2)(value_t *, value_t *);
 
 typedef enum {
@@ -21,6 +22,7 @@ typedef enum {
 
 struct __value_function_t {
     int is_bif;
+    unsigned int arity;
     union {
         void *bif_ptr;
     } u;
@@ -38,10 +40,12 @@ struct __value_t {
 extern value_t *value_invalid_new(const char *msg);
 extern value_t *value_invalid_newf(const char *, ...);
 extern value_t *value_int_new(int);
-extern value_t *value_bif_new(void *);
+extern value_t *value_bif_new(void *, unsigned int);
 extern void value_free(value_t *);
 extern void value_print(value_t *, FILE *);
 
+#define VALUE_FUNC_ISBIF(f) ((f)->u.func_val.is_bif)
+#define VALUE_BIF_ARITY(f) ((f)->u.func_val.arity)
 #define VALUE_BIF_PTR(f) ((f)->u.func_val.u.bif_ptr)
 #define VALUE_INT_VALUE(i) ((i)->u.int_val)
 
