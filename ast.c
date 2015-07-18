@@ -64,6 +64,13 @@ ast_t *ast_ident_new(const char *id)
     return a;
 }
 
+ast_t *ast_int_new(int num)
+{
+    ast_t *a = ast_alloc(AST_INTEGER);
+    AST_INT_VALUE(a) = num;
+    return a;
+}
+
 void ast_free(ast_t *a)
 {
     switch (a->kind) {
@@ -87,6 +94,9 @@ void ast_print(ast_t *a, FILE *output)
             break;
         case AST_IDENTIFIER:
             fprintf(output, "%s", a->u.ident_val->text);
+            break;
+        case AST_INTEGER:
+            fprintf(output, "%d", AST_INT_VALUE(a));
             break;
         default :
             fprintf(stderr, "Don't know how to print: %d", a->kind);

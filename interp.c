@@ -55,6 +55,10 @@ value_kind_t interp_execute(interp_t *interp, ast_t *ast, value_t **value)
             return interp_execute_cons(interp, ast, value);
         case AST_IDENTIFIER:
             return interp_execute_ident(interp, ast, value);
+        case AST_INTEGER:
+            if (value != NULL)
+                *value = value_int_new(AST_INT_VALUE(ast));
+            return VALUE_INT;
         default :
             fprintf(stderr, "Don't know how to execute: %d", ast->kind);
             exit(1);

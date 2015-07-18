@@ -6,7 +6,7 @@
  */
 #include <stdio.h>
 #include <stdlib.h>
-
+#include <strings.h>
 #include "string.h"
 
 /* PRIVATE */
@@ -59,5 +59,6 @@ void string_assign(string_t *str, const char *src)
 
 void string_clear(string_t *s)
 {
+    bzero(s->text, s->length);
     s->length = 0;
 }

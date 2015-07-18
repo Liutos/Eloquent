@@ -39,6 +39,18 @@ static token_t lexer_getidentifier(lexer_t *l, int start)
     return TOKEN_IDENTIFIER;
 }
 
+static token_t lexer_getinteger(lexer_t *l, int start)
+{
+    string_clear(l->text);
+    int c = start;
+    do {
+        string_addc(l->text, c);
+        c = lexer_getc(l);
+    } while (isdigit(c));
+    lexer_ungetc(l, c);
+    return TOKEN_INTEGER;
+}
+
 /* PUBLIC */
 
 lexer_t *lexer_new(FILE *src)
@@ -64,6 +76,9 @@ token_t lexer_gettoken(lexer_t *l)
         case '(': return TOKEN_LEFT_PAREN;
         case ')': return TOKEN_RIGHT_PAREN;
         default :
-            return lexer_getidentifier(l, c);
+            if (isdigit(c))
+                return lexer_getinteger(l, c);
+            else
+                return lexer_getidentifier(l, c);
     }
 }

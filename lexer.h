@@ -20,6 +20,7 @@ typedef enum {
     TOKEN_INVALID,
     TOKEN_EOF,
     TOKEN_IDENTIFIER,
+    TOKEN_INTEGER,
     TOKEN_LEFT_PAREN,
     TOKEN_RIGHT_PAREN,
 } token_t;
