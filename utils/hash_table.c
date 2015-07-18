@@ -47,19 +47,18 @@ void hash_table_set(hash_table_t *tbl, void *key, void *value)
 {
     size_t i = hash_table_hash(tbl, key);
     table_entry_t *ent = tbl->slots[i];
-    table_entry_t **p = &ent;
-    while (*p != NULL) {
-        ent = *p;
+    while (ent != NULL) {
         if (hash_table_iseq(tbl, ent->key, key))
             break;
-        p = &(*p)->next;
+        ent = ent->next;
     }
-    if (*p == NULL) {
-        *p = malloc(sizeof(table_entry_t));
-        (*p)->key = key;
-        (*p)->next = NULL;
+    if (ent == NULL) {
+        ent = malloc(sizeof(table_entry_t));
+        ent->key = key;
+        ent->next = tbl->slots[i];
+        tbl->slots[i] = ent;
     }
-    (*p)->value = value;
+    ent->value = value;
 }
 
 void *hash_table_get(hash_table_t *tbl, void *key, int *is_found)
@@ -95,5 +94,5 @@ int comp_str(void *_s1, void *_s2)
 {
     const char *s1 = _s1;
     const char *s2 = _s2;
-    return strcmp(s1, s2) != 0;
+    return strcmp(s1, s2) == 0;
 }

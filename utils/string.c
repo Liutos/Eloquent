@@ -55,6 +55,7 @@ void string_assign(string_t *str, const char *src)
         string_addc(str, *src);
         src++;
     }
+    string_addc(str, '\0');
 }
 
 void string_clear(string_t *s)

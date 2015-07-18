@@ -32,8 +32,11 @@ value_t *env_get(env_t *env, char *name, int *is_found)
 {
     while (!env_isempty(env)) {
         value_t *val = hash_table_get(env->data, name, is_found);
-        if (is_found)
+        if (val != NULL) {
+            if (is_found != NULL)
+                *is_found = 1;
             return val;
+        }
         env = env->outer;
     }
     if (is_found != NULL)

@@ -1,3 +1,4 @@
+#include <stdarg.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include "utils/string.h"
@@ -14,11 +15,28 @@ value_t *value_invalid_new(const char *msg)
     return v;
 }
 
+value_t *value_invalid_newf(const char *fmt, ...)
+{
+    va_list ap;
+    va_start(ap, fmt);
+    char msg[256] = {0};
+    vsnprintf(msg, sizeof(msg), fmt, ap);
+    return value_invalid_new(msg);
+}
+
 value_t *value_int_new(int num)
 {
     value_t *v = malloc(sizeof(value_t));
     v->kind = VALUE_INT;
     v->u.int_val = num;
+    return v;
+}
+
+value_t *value_bif_new(void *bif_ptr)
+{
+    value_t *v = malloc(sizeof(value_t));
+    v->kind = VALUE_FUNCTION;
+    VALUE_BIF_PTR(v) = bif_ptr;
     return v;
 }
 
@@ -37,6 +55,9 @@ void value_free(value_t *v)
 void value_print(value_t *v, FILE *output)
 {
     switch (v->kind) {
+        case VALUE_FUNCTION:
+            fprintf(output, "#<%p>", VALUE_BIF_PTR(v));
+            break;
         case VALUE_INT:
             fprintf(output, "%d", v->u.int_val);
             break;
