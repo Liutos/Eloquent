@@ -19,7 +19,7 @@ static int string_isfull(string_t *s)
 static void string_incr(string_t *s, size_t d)
 {
     s->capacity += d;
-    s->text = realloc(s->text, s->capacity);
+    s->text = realloc(s->text, s->capacity * sizeof(char));
 }
 
 /* PUBLIC */

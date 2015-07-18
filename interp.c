@@ -1,8 +1,13 @@
+#include <assert.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include "env.h"
 #include "interp.h"
+#include "utils/vector.h"
 #include "value.h"
+
+#define ERR 0
+#define OK 1
 
 /* PRIVATE */
 
@@ -32,23 +37,38 @@ static void interp_initbif(interp_t *interp)
     interp_setbif(interp, "+", bif_add);
 }
 
+static int interp_execute_args(interp_t *interp, ast_t *args, vector_t **_vals, value_t **error)
+{
+    assert(_vals != NULL);
+    assert(error != NULL);
+
+    vector_t *vals = vector_new();
+    while (args->kind != AST_END_OF_CONS) {
+        ast_t *ele = AST_CONS_CAR(args);
+        value_t *val = NULL;
+        if (interp_execute(interp, ele, &val) == VALUE_INVALID) {
+            *error = val;
+            return ERR;
+        }
+        vector_push(vals, (intptr_t)val);
+        args = AST_CONS_CDR(args);
+    }
+    *_vals = vals;
+    return OK;
+}
+
 static value_kind_t interp_execute_bif(interp_t *interp, value_t *bif, ast_t *args, value_t **value)
 {
-    ast_t *arg_form1 = AST_CONS_CAR(args);
-    value_t *arg1 = NULL;
-    if (interp_execute(interp, arg_form1, &arg1) == VALUE_INVALID) {
+    value_t *error = NULL;
+    vector_t *vals = NULL;
+    if (interp_execute_args(interp, args, &vals, &error) == ERR) {
         if (value != NULL)
-            *value = arg1;
+            *value = error;
         return VALUE_INVALID;
     }
 
-    ast_t *arg_form2 = AST_CONS_CAR( AST_CONS_CDR(args) );
-    value_t *arg2 = NULL;
-    if (interp_execute(interp, arg_form2, &arg2) == VALUE_INVALID) {
-        if (value != NULL)
-            *value = arg2;
-        return VALUE_INVALID;
-    }
+    value_t *arg1 = (value_t *)vector_ref(vals, 0);
+    value_t *arg2 = (value_t *)vector_ref(vals, 1);
 
     value_t *res = ((bif_2)VALUE_BIF_PTR(bif))(arg1, arg2);
     if (value != NULL)
