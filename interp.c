@@ -51,6 +51,16 @@ static void interp_set(interp_t *interp, char *name, value_t *value)
     env_set(interp->env, name, value);
 }
 
+static void interp_extend_scope(interp_t *interp)
+{
+    interp->env = env_new(interp->env);
+}
+
+static void interp_exit_scope(interp_t *interp)
+{
+    interp->env = interp->env->outer;
+}
+
 /* SYNTAX BEGIN */
 
 static value_kind_t bis_set(interp_t *interp, ast_t *body, value_t **result)
@@ -104,6 +114,16 @@ static value_kind_t bis_begin(interp_t *interp, ast_t *body, value_t **result)
     return interp_execute(interp, AST_CONS_CAR(body), result);
 }
 
+static value_kind_t bis_lambda(interp_t *interp, ast_t *body, value_t **result)
+{
+    ast_t *pars = AST_CONS_CAR(body);
+    body = AST_CONS_CDR(body);
+    value_t *val = value_udf_new(pars, body);
+    if (result != NULL)
+        *result = val;
+    return val->kind;
+}
+
 /* SYNTAX END */
 
 static void interp_setbif(interp_t *interp, char *name, void *bif_ptr, unsigned int arity)
@@ -127,6 +147,7 @@ static void interp_initbif(interp_t *interp)
     interp_setbis(interp, "set", bis_set);
     interp_setbis(interp, "if", bis_if);
     interp_setbis(interp, "begin", bis_begin);
+    interp_setbis(interp, "lambda", bis_lambda);
 }
 
 static value_kind_t interp_execute_syntax(interp_t *interp, syntax_t *bis, ast_t *body, value_t **result)
@@ -188,6 +209,45 @@ static value_kind_t interp_execute_bif(interp_t *interp, value_t *bif, ast_t *ar
     return res->kind;
 }
 
+static int interp_bind_args(interp_t *interp, ast_t *pars, ast_t *exprs, value_t **error)
+{
+    assert(error != NULL);
+    while (pars->kind == AST_CONS) {
+        ast_t *par = AST_CONS_CAR(pars);
+        ast_t *expr = AST_CONS_CAR(exprs);
+        value_t *val = NULL;
+        if (interp_execute(interp, expr, &val) == VALUE_ERROR) {
+            *error = val;
+            return ERR;
+        }
+        interp_set(interp, AST_IDENT_NAME(par), val);
+        pars = AST_CONS_CDR(pars);
+    }
+    return OK;
+}
+
+static value_kind_t interp_execute_udf(interp_t *interp, value_t *f, ast_t *args, value_t **value)
+{
+    interp_extend_scope(interp);
+    value_t *err = NULL;
+    if (interp_bind_args(interp, VALUE_UDF_PARS(f), args, &err) == ERR) {
+        if (value != NULL)
+            *value = err;
+        return err->kind;
+    }
+    value_kind_t kind = bis_begin(interp, VALUE_UDF_BODY(f), value);
+    interp_exit_scope(interp);
+    return kind;
+}
+
+static value_kind_t interp_execute_function(interp_t *interp, value_t *f, ast_t *args, value_t **value)
+{
+    if (VALUE_FUNC_ISBIF(f))
+        return interp_execute_bif(interp, f, args, value);
+    else
+        return interp_execute_udf(interp, f, args, value);
+}
+
 static value_kind_t interp_execute_cons(interp_t *interp, ast_t *ast, value_t **value)
 {
     ast_t *op = AST_CONS_CAR(ast);
@@ -216,7 +276,7 @@ static value_kind_t interp_execute_cons(interp_t *interp, ast_t *ast, value_t **
         return VALUE_ERROR;
     }
 
-    return interp_execute_bif(interp, op_value, AST_CONS_CDR(ast), value);
+    return interp_execute_function(interp, op_value, AST_CONS_CDR(ast), value);
 }
 
 static value_kind_t interp_execute_ident(interp_t *interp, ast_t *ast, value_t **value)

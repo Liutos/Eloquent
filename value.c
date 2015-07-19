@@ -1,8 +1,24 @@
 #include <stdarg.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include "ast.h"
 #include "utils/string.h"
 #include "value.h"
+
+/* PRIVATE */
+
+static void value_function_print(value_t *v, FILE *output)
+{
+    if (VALUE_FUNC_ISBIF(v)) {
+        fprintf(output, "#<%p>", VALUE_BIF_PTR(v));
+    } else {
+        fprintf(output, "#<");
+        ast_print(VALUE_UDF_PARS(v), output);
+        fputc(' ', output);
+        ast_print(VALUE_UDF_BODY(v), output);
+        fprintf(output, ">");
+    }
+}
 
 /* PUBLIC */
 
@@ -42,6 +58,16 @@ value_t *value_bif_new(void *bif_ptr, unsigned int arity)
     return v;
 }
 
+value_t *value_udf_new(ast_t *pars, ast_t *body)
+{
+    value_t *v = malloc(sizeof(value_t));
+    v->kind = VALUE_FUNCTION;
+    VALUE_FUNC_ISBIF(v) = 0;
+    VALUE_UDF_PARS(v) = pars;
+    VALUE_UDF_BODY(v) = body;
+    return v;
+}
+
 void value_free(value_t *v)
 {
     switch (v->kind) {
@@ -61,7 +87,7 @@ void value_print(value_t *v, FILE *output)
             fprintf(output, "ERROR: %s", VALUE_ERR_MSG(v));
             break;
         case VALUE_FUNCTION:
-            fprintf(output, "#<%p>", VALUE_BIF_PTR(v));
+            value_function_print(v, output);
             break;
         case VALUE_INT:
             fprintf(output, "%d", v->u.int_val);
