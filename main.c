@@ -21,7 +21,7 @@ int main(int argc, char *argv[])
             value_print(value, stdout);
             fprintf(stdout, "\n");
         } else {
-            fprintf(stdout, "%s\n", value->u.invalid_msg->text);
+            fprintf(stdout, "INVALID: %s\n", value->u.invalid_msg->text);
         }
         kind = parser_getast(parser, &ast);
     }

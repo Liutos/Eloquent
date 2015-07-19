@@ -24,6 +24,15 @@ value_t *value_invalid_newf(const char *fmt, ...)
     return value_invalid_new(msg);
 }
 
+value_t *value_error_new(const char *msg)
+{
+    value_t *v = malloc(sizeof(value_t));
+    v->kind = VALUE_ERROR;
+    v->u.err_val.msg = string_new();
+    string_assign(v->u.err_val.msg, msg);
+    return v;
+}
+
 value_t *value_int_new(int num)
 {
     value_t *v = malloc(sizeof(value_t));
@@ -48,6 +57,9 @@ void value_free(value_t *v)
         case VALUE_INVALID:
             string_free(v->u.invalid_msg);
             break;
+        case VALUE_ERROR:
+            string_free(v->u.err_val.msg);
+            break;
         case VALUE_INT:
         default :;
     }
@@ -57,6 +69,9 @@ void value_free(value_t *v)
 void value_print(value_t *v, FILE *output)
 {
     switch (v->kind) {
+        case VALUE_ERROR:
+            fprintf(output, "ERROR: %s", VALUE_ERR_MSG(v));
+            break;
         case VALUE_FUNCTION:
             fprintf(output, "#<%p>", VALUE_BIF_PTR(v));
             break;
