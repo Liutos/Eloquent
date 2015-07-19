@@ -1,6 +1,7 @@
 #include <assert.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include "ast.h"
 #include "env.h"
 #include "interp.h"
 #include "utils/vector.h"
@@ -88,6 +89,21 @@ static value_kind_t bis_if(interp_t *interp, ast_t *body, value_t **result)
     }
 }
 
+static value_kind_t bis_begin(interp_t *interp, ast_t *body, value_t **result)
+{
+    while (body->kind == AST_CONS && AST_CONS_CDR(body)->kind != AST_END_OF_CONS) {
+        ast_t *expr = AST_CONS_CAR(body);
+        value_t *v = NULL;
+        if (interp_execute(interp, expr, &v) == VALUE_ERROR) {
+            if (result != NULL)
+                *result = v;
+            return v->kind;
+        }
+        body = AST_CONS_CDR(body);
+    }
+    return interp_execute(interp, AST_CONS_CAR(body), result);
+}
+
 /* SYNTAX END */
 
 static void interp_setbif(interp_t *interp, char *name, void *bif_ptr, unsigned int arity)
@@ -110,6 +126,7 @@ static void interp_initbif(interp_t *interp)
 
     interp_setbis(interp, "set", bis_set);
     interp_setbis(interp, "if", bis_if);
+    interp_setbis(interp, "begin", bis_begin);
 }
 
 static value_kind_t interp_execute_syntax(interp_t *interp, syntax_t *bis, ast_t *body, value_t **result)
