@@ -24,10 +24,12 @@ typedef enum {
     AST_END_OF_FILE,
     AST_IDENTIFIER,
     AST_INTEGER,
+    AST_RIGHT_PAREN,
 } ast_kind_t;
 
 struct __ast_t {
     ast_kind_t kind;
+    int line, column;
     union {
         string_t *ident_val;
         struct {

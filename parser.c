@@ -6,8 +6,17 @@
 
 /* PRIVATE */
 
+static void parser_posast(parser_t *parser, ast_t *ast)
+{
+    ast->line = parser->lexer->tk_line;
+    ast->column = parser->lexer->tk_column;
+}
+
 static ast_kind_t parser_getcons(parser_t *parser, ast_t **ast)
 {
+    int line = parser->lexer->tk_line;
+    int column = parser->lexer->tk_column;
+
     ast_t *car = NULL;
     ast_kind_t kind = parser_getast(parser, &car);
     if (kind == AST_INVALID) {
@@ -15,9 +24,9 @@ static ast_kind_t parser_getcons(parser_t *parser, ast_t **ast)
             *ast = car;
         return AST_INVALID;
     }
-    if (kind == AST_END_OF_CONS) {
+    if (kind == AST_RIGHT_PAREN) {
         if (ast != NULL)
-            *ast = car;
+            *ast = ast_eoc_new();
         return AST_END_OF_CONS;
     }
     ast_t *cdr = NULL;
@@ -26,8 +35,11 @@ static ast_kind_t parser_getcons(parser_t *parser, ast_t **ast)
             *ast = cdr;
         return AST_INVALID;
     }
-    if (ast != NULL)
+    if (ast != NULL) {
         *ast = ast_cons_new(car, cdr);
+        (*ast)->line = line;
+        (*ast)->column = column;
+    }
     return AST_CONS;
 }
 
@@ -35,8 +47,10 @@ static ast_kind_t parser_getidentifier(parser_t *parser, ast_t **ast)
 {
     lexer_t *lexer = parser->lexer;
     const char *text = lexer->text->text;
-    if (ast != NULL)
+    if (ast != NULL) {
         *ast = ast_ident_new(text);
+        parser_posast(parser, *ast);
+    }
     return AST_IDENTIFIER;
 }
 
@@ -44,8 +58,10 @@ static ast_kind_t parser_getinteger(parser_t *parser, ast_t **ast)
 {
     lexer_t *lexer = parser->lexer;
     const char *text = lexer->text->text;
-    if (ast != NULL)
+    if (ast != NULL) {
         *ast = ast_int_new(atoi(text));
+        parser_posast(parser, *ast);
+    }
     return AST_INTEGER;
 }
 
@@ -77,9 +93,7 @@ ast_kind_t parser_getast(parser_t *parser, ast_t **ast)
         case TOKEN_LEFT_PAREN:
             return parser_getcons(parser, ast);
         case TOKEN_RIGHT_PAREN:
-            if (ast != NULL)
-                *ast = ast_eoc_new();
-            return AST_END_OF_CONS;
+            return AST_RIGHT_PAREN;
         case TOKEN_INVALID:
             if (ast != NULL)
                 *ast = ast_invalid_new();

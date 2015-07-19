@@ -14,11 +14,22 @@
 
 static int lexer_getc(lexer_t *l)
 {
-    return fgetc(l->src);
+    int c = fgetc(l->src);
+    if (c == '\n') {
+        l->line++;
+        l->column = 0;
+    } else
+        l->column++;
+    return c;
 }
 
 static int lexer_ungetc(lexer_t *l, int c)
 {
+    if (c == '\n') {
+        l->line--;
+        /* XXX: 此处l->column应当设置为上一行的长度 */
+    } else
+        l->column--;
     return ungetc(c, l->src);
 }
 
@@ -29,6 +40,9 @@ static int lexer_issep(int c)
 
 static token_t lexer_getidentifier(lexer_t *l, int start)
 {
+    l->tk_line = l->line;
+    l->tk_column = l->column;
+
     string_clear(l->text);
     int c = start;
     do {
@@ -41,6 +55,9 @@ static token_t lexer_getidentifier(lexer_t *l, int start)
 
 static token_t lexer_getinteger(lexer_t *l, int start)
 {
+    l->tk_line = l->line;
+    l->tk_column = l->column;
+
     string_clear(l->text);
     int c = start;
     do {
@@ -58,6 +75,8 @@ lexer_t *lexer_new(FILE *src)
     lexer_t *l = malloc(sizeof(lexer_t));
     l->src = src;
     l->text = string_new();
+    l->tk_line = l->line = 1;
+    l->tk_column = l->column = 0;
     return l;
 }
 

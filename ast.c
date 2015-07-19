@@ -92,6 +92,9 @@ void ast_print(ast_t *a, FILE *output)
         case AST_CONS:
             ast_print_cons(a, output);
             break;
+        case AST_END_OF_CONS:
+            fprintf(output, "()");
+            break;
         case AST_IDENTIFIER:
             fprintf(output, "%s", a->u.ident_val->text);
             break;

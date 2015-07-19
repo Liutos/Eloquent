@@ -270,7 +270,7 @@ static value_kind_t interp_execute_cons(interp_t *interp, ast_t *ast, value_t **
     ast_t *op = AST_CONS_CAR(ast);
     if (op->kind != AST_IDENTIFIER) {
         if (value != NULL)
-            *value = value_error_new("The first element must be identifier");
+            *value = value_error_newf("Line %d, column %d: The first element must be identifier", ast->line, ast->column);
         return VALUE_ERROR;
     }
 
@@ -289,7 +289,7 @@ static value_kind_t interp_execute_cons(interp_t *interp, ast_t *ast, value_t **
 
     if (kind != VALUE_FUNCTION) {
         if (value != NULL)
-            *value = value_error_new("The first element must evaluated to a function");
+            *value = value_error_newf("Line %d, column %d: The first element must evaluated to a function", ast->line, ast->column);
         return VALUE_ERROR;
     }
 
@@ -306,7 +306,7 @@ static value_kind_t interp_execute_ident(interp_t *interp, ast_t *ast, value_t *
         return val->kind;
     } else {
         if (value != NULL)
-            *value = value_error_newf("Can't find value of `%s'", name);
+            *value = value_error_newf("Line %d, column %d: Can't find value of `%s'", ast->line, ast->column, name);
         return VALUE_ERROR;
     }
 }
@@ -333,6 +333,10 @@ value_kind_t interp_execute(interp_t *interp, ast_t *ast, value_t **value)
     switch (ast->kind) {
         case AST_CONS:
             return interp_execute_cons(interp, ast, value);
+        case AST_END_OF_CONS:
+            if (value != NULL)
+                *value = value_int_new(0);
+            return VALUE_INT;
         case AST_IDENTIFIER:
             return interp_execute_ident(interp, ast, value);
         case AST_INTEGER:

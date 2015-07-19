@@ -28,6 +28,8 @@ typedef enum {
 struct __lexer_t {
     FILE *src;
     string_t *text;
+    int line, column;
+    int tk_line, tk_column;
 };
 
 extern lexer_t *lexer_new(FILE *);
