@@ -54,6 +54,7 @@ extern value_t *value_bif_new(void *, unsigned int);
 extern value_t *value_udf_new(ast_t *, ast_t *);
 extern void value_free(value_t *);
 extern void value_print(value_t *, FILE *);
+extern int value_isequal(value_t *, value_t *);
 
 #define VALUE_ERR_MSG(e) ((e)->u.err_val.msg->text)
 #define VALUE_FUNC_ISBIF(f) ((f)->u.func_val.is_bif)

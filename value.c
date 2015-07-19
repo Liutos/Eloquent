@@ -97,3 +97,13 @@ void value_print(value_t *v, FILE *output)
             exit(1);
     }
 }
+
+int value_isequal(value_t *v1, value_t *v2)
+{
+    switch (v1->kind) {
+        case VALUE_INT:
+            return VALUE_INT_VALUE(v1) == VALUE_INT_VALUE(v2);
+        default :
+            return v1 == v2;
+    }
+}
