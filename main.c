@@ -17,12 +17,9 @@ int main(int argc, char *argv[])
         ast_print(ast, stdout);
         fprintf(stdout, "\n");
         value_t *value = NULL;
-        if (interp_execute(interp, ast, &value) != VALUE_INVALID) {
-            value_print(value, stdout);
-            fprintf(stdout, "\n");
-        } else {
-            fprintf(stdout, "INVALID: %s\n", value->u.invalid_msg->text);
-        }
+        interp_execute(interp, ast, &value);
+        value_print(value, stdout);
+        fprintf(stdout, "\n");
         kind = parser_getast(parser, &ast);
     }
     return 0;

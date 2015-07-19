@@ -16,7 +16,6 @@ typedef value_t *(*bif_1)(value_t *);
 typedef value_t *(*bif_2)(value_t *, value_t *);
 
 typedef enum {
-    VALUE_INVALID,
     VALUE_ERROR,
     VALUE_FUNCTION,
     VALUE_INT,
@@ -38,15 +37,13 @@ struct __value_t {
     value_kind_t kind;
     union {
         int int_val;
-        string_t *invalid_msg;
         value_error_t err_val;
         value_function_t func_val;
     } u;
 };
 
-extern value_t *value_invalid_new(const char *msg);
-extern value_t *value_invalid_newf(const char *, ...);
 extern value_t *value_error_new(const char *);
+extern value_t *value_error_newf(const char *, ...);
 extern value_t *value_int_new(int);
 extern value_t *value_bif_new(void *, unsigned int);
 extern void value_free(value_t *);

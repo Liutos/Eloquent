@@ -6,24 +6,6 @@
 
 /* PUBLIC */
 
-value_t *value_invalid_new(const char *msg)
-{
-    value_t *v = malloc(sizeof(value_t));
-    v->kind = VALUE_INVALID;
-    v->u.invalid_msg = string_new();
-    string_assign(v->u.invalid_msg, msg);
-    return v;
-}
-
-value_t *value_invalid_newf(const char *fmt, ...)
-{
-    va_list ap;
-    va_start(ap, fmt);
-    char msg[256] = {0};
-    vsnprintf(msg, sizeof(msg), fmt, ap);
-    return value_invalid_new(msg);
-}
-
 value_t *value_error_new(const char *msg)
 {
     value_t *v = malloc(sizeof(value_t));
@@ -31,6 +13,15 @@ value_t *value_error_new(const char *msg)
     v->u.err_val.msg = string_new();
     string_assign(v->u.err_val.msg, msg);
     return v;
+}
+
+value_t *value_error_newf(const char *fmt, ...)
+{
+    va_list ap;
+    va_start(ap, fmt);
+    char msg[256] = {0};
+    vsnprintf(msg, sizeof(msg), fmt, ap);
+    return value_error_new(msg);
 }
 
 value_t *value_int_new(int num)
@@ -54,9 +45,6 @@ value_t *value_bif_new(void *bif_ptr, unsigned int arity)
 void value_free(value_t *v)
 {
     switch (v->kind) {
-        case VALUE_INVALID:
-            string_free(v->u.invalid_msg);
-            break;
         case VALUE_ERROR:
             string_free(v->u.err_val.msg);
             break;

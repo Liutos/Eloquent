@@ -57,11 +57,12 @@ static value_kind_t bis_set(interp_t *interp, ast_t *body, value_t **result)
     ast_t *var = AST_CONS_CAR(body);
     ast_t *expr = AST_CONS_CAR( AST_CONS_CDR(body) );
     value_t *val = NULL;
-    if (interp_execute(interp, expr, &val) == VALUE_INVALID) {
+    if (interp_execute(interp, expr, &val) == VALUE_ERROR) {
         if (result != NULL)
             *result = val;
-        return VALUE_INVALID;
+        return val->kind;
     }
+
     interp_set(interp, AST_IDENT_NAME(var), val);
     if (result != NULL)
         *result = val;
@@ -74,10 +75,10 @@ static value_kind_t bis_if(interp_t *interp, ast_t *body, value_t **result)
     ast_t *p = AST_CONS_CAR( AST_CONS_CDR(body) );
     ast_t *e = AST_CONS_CAR( AST_CONS_CDR( AST_CONS_CDR(body) ) );
     value_t *pred_val = NULL;
-    if (interp_execute(interp, pred, &pred_val) == VALUE_INVALID) {
+    if (interp_execute(interp, pred, &pred_val) == VALUE_ERROR) {
         if (result != NULL)
             *result = pred_val;
-        return VALUE_INVALID;
+        return pred_val->kind;
     }
 
     if (pred_val->kind == VALUE_INT && VALUE_INT_VALUE(pred_val) == 0) {
@@ -125,7 +126,7 @@ static int interp_execute_args(interp_t *interp, ast_t *args, vector_t **_vals, 
     while (args->kind != AST_END_OF_CONS) {
         ast_t *ele = AST_CONS_CAR(args);
         value_t *val = NULL;
-        if (interp_execute(interp, ele, &val) == VALUE_INVALID) {
+        if (interp_execute(interp, ele, &val) == VALUE_ERROR) {
             *error = val;
             return ERR;
         }
@@ -143,7 +144,7 @@ static value_kind_t interp_execute_bif(interp_t *interp, value_t *bif, ast_t *ar
     if (interp_execute_args(interp, args, &vals, &error) == ERR) {
         if (value != NULL)
             *value = error;
-        return VALUE_INVALID;
+        return error->kind;
     }
 
     value_t *res = NULL;
@@ -161,8 +162,8 @@ static value_kind_t interp_execute_bif(interp_t *interp, value_t *bif, ast_t *ar
         }
         default :
             if (value != NULL)
-                *value = value_invalid_newf("Don't support build in function of arity %d", VALUE_BIF_ARITY(bif));
-            return VALUE_INVALID;
+                *value = value_error_newf("Don't support build in function of arity %d", VALUE_BIF_ARITY(bif));
+            return VALUE_ERROR;
     }
 
     if (value != NULL)
@@ -175,8 +176,8 @@ static value_kind_t interp_execute_cons(interp_t *interp, ast_t *ast, value_t **
     ast_t *op = AST_CONS_CAR(ast);
     if (op->kind != AST_IDENTIFIER) {
         if (value != NULL)
-            *value = value_invalid_new("The first element must be identifier");
-        return VALUE_INVALID;
+            *value = value_error_new("The first element must be identifier");
+        return VALUE_ERROR;
     }
 
     char *name = AST_IDENT_NAME(op);
@@ -186,16 +187,16 @@ static value_kind_t interp_execute_cons(interp_t *interp, ast_t *ast, value_t **
 
     value_t *op_value = NULL;
     value_kind_t kind = interp_execute(interp, op, &op_value);
-    if (kind == VALUE_INVALID) {
+    if (kind == VALUE_ERROR) {
         if (value != NULL)
             *value = op_value;
-        return VALUE_INVALID;
+        return kind;
     }
 
     if (kind != VALUE_FUNCTION) {
         if (value != NULL)
-            *value = value_invalid_new("The first element must evaluated to a function");
-        return VALUE_INVALID;
+            *value = value_error_new("The first element must evaluated to a function");
+        return VALUE_ERROR;
     }
 
     return interp_execute_bif(interp, op_value, AST_CONS_CDR(ast), value);
@@ -211,8 +212,8 @@ static value_kind_t interp_execute_ident(interp_t *interp, ast_t *ast, value_t *
         return val->kind;
     } else {
         if (value != NULL)
-            *value = value_invalid_newf("Can't find value of `%s'", name);
-        return VALUE_INVALID;
+            *value = value_error_newf("Can't find value of `%s'", name);
+        return VALUE_ERROR;
     }
 }
 
