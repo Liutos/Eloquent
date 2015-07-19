@@ -11,6 +11,13 @@
 
 /* PRIVATE */
 
+static syntax_t *syntax_new(void *ptr)
+{
+    syntax_t *s = malloc(sizeof(syntax_t));
+    s->ptr = ptr;
+    return s;
+}
+
 static value_t *bif_add(value_t *n1, value_t *n2)
 {
     return value_int_new(VALUE_INT_VALUE(n1) + VALUE_INT_VALUE(n2));
@@ -33,10 +40,54 @@ static value_t *interp_get(interp_t *interp, char *name)
     return env_get(interp->env, name, NULL);
 }
 
+static syntax_t *interp_getbis(interp_t *interp, const char *name)
+{
+    return hash_table_get(interp->syntax_env, (void *)name, NULL);
+}
+
 static void interp_set(interp_t *interp, char *name, value_t *value)
 {
     env_set(interp->env, name, value);
 }
+
+/* SYNTAX BEGIN */
+
+static value_kind_t bis_set(interp_t *interp, ast_t *body, value_t **result)
+{
+    ast_t *var = AST_CONS_CAR(body);
+    ast_t *expr = AST_CONS_CAR( AST_CONS_CDR(body) );
+    value_t *val = NULL;
+    if (interp_execute(interp, expr, &val) == VALUE_INVALID) {
+        if (result != NULL)
+            *result = val;
+        return VALUE_INVALID;
+    }
+    interp_set(interp, AST_IDENT_NAME(var), val);
+    if (result != NULL)
+        *result = val;
+    return val->kind;
+}
+
+static value_kind_t bis_if(interp_t *interp, ast_t *body, value_t **result)
+{
+    ast_t *pred = AST_CONS_CAR(body);
+    ast_t *p = AST_CONS_CAR( AST_CONS_CDR(body) );
+    ast_t *e = AST_CONS_CAR( AST_CONS_CDR( AST_CONS_CDR(body) ) );
+    value_t *pred_val = NULL;
+    if (interp_execute(interp, pred, &pred_val) == VALUE_INVALID) {
+        if (result != NULL)
+            *result = pred_val;
+        return VALUE_INVALID;
+    }
+
+    if (pred_val->kind == VALUE_INT && VALUE_INT_VALUE(pred_val) == 0) {
+        return interp_execute(interp, e, result);
+    } else {
+        return interp_execute(interp, p, result);
+    }
+}
+
+/* SYNTAX END */
 
 static void interp_setbif(interp_t *interp, char *name, void *bif_ptr, unsigned int arity)
 {
@@ -44,11 +95,25 @@ static void interp_setbif(interp_t *interp, char *name, void *bif_ptr, unsigned 
     interp_set(interp, name, val);
 }
 
+static void interp_setbis(interp_t *interp, const char *name, void *bis_ptr)
+{
+    syntax_t *s = syntax_new(bis_ptr);
+    hash_table_set(interp->syntax_env, (void *)name, s);
+}
+
 static void interp_initbif(interp_t *interp)
 {
     interp_setbif(interp, "+", bif_add, 2);
     interp_setbif(interp, "succ", bif_succ, 1);
     interp_setbif(interp, "/", bif_div, 2);
+
+    interp_setbis(interp, "set", bis_set);
+    interp_setbis(interp, "if", bis_if);
+}
+
+static value_kind_t interp_execute_syntax(interp_t *interp, syntax_t *bis, ast_t *body, value_t **result)
+{
+    return ((bis_t)(bis->ptr))(interp, body, result);
 }
 
 static int interp_execute_args(interp_t *interp, ast_t *args, vector_t **_vals, value_t **error)
@@ -114,6 +179,11 @@ static value_kind_t interp_execute_cons(interp_t *interp, ast_t *ast, value_t **
         return VALUE_INVALID;
     }
 
+    char *name = AST_IDENT_NAME(op);
+    syntax_t *bis = interp_getbis(interp, name);
+    if (bis != NULL)
+        return interp_execute_syntax(interp, bis, AST_CONS_CDR(ast), value);
+
     value_t *op_value = NULL;
     value_kind_t kind = interp_execute(interp, op, &op_value);
     if (kind == VALUE_INVALID) {
@@ -152,6 +222,7 @@ interp_t *interp_new(void)
 {
     interp_t *i = malloc(sizeof(interp_t));
     i->env = env_new(env_empty_new());
+    i->syntax_env = hash_table_new(hash_str, comp_str);
     interp_initbif(i);
     return i;
 }
