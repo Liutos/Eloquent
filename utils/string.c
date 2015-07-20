@@ -30,9 +30,9 @@ static void string_incr(string_t *s, size_t d)
 string_t *string_new(void)
 {
     string_t *s = malloc(sizeof(string_t));
-    s->capacity = 0;
+    s->capacity = DELTA;
     s->length = 0;
-    s->text = NULL;
+    s->text = calloc(s->capacity, sizeof(char));
     return s;
 }
 
@@ -72,7 +72,7 @@ int string_printf(string_t *s, const char *fmt, ...)
     int len = vsnprintf(s->text, s->capacity - 1, fmt, ap);
     if (len >= s->capacity - 1) {
         s->capacity = len + DELTA;
-        s->text = realloc(s->text, s->length * sizeof(char));
+        s->text = realloc(s->text, s->capacity * sizeof(char));
     }
     return vsnprintf(s->text, s->capacity - 1, fmt, ap);
 }
