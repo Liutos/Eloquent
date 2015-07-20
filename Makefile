@@ -1,5 +1,5 @@
 CC = gcc
-CFLAGS = -Wall -g
+CFLAGS = -Wall -g -pg
 SRCS = $(shell find . -maxdepth 1 -name '*.c')
 OBJS = $(patsubst %.c, %.o, $(SRCS))
 ELOI = eloi
@@ -25,7 +25,7 @@ utils/vector.o: utils/vector.c utils/vector.h
 # executables
 
 $(ELOI): $(OBJS) utils/hash_table.o utils/string.o utils/vector.o
-	gcc -Wall -g -o $@ $^
+	$(CC) $(CFLAGS) -o $@ $^
 
 .PHONY: clean
 
