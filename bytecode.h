@@ -19,6 +19,7 @@ typedef struct __bytecode_t bytecode_t;
 typedef vector_t ins_t;
 
 #define BC_KIND(op) \
+    op(BC_GET), \
     op(BC_POP), \
     op(BC_PUSH),
 #define BC_IDENTIFY(bc) bc
@@ -32,11 +33,15 @@ struct __bytecode_t {
     bytecode_kind_t kind;
     union {
         void *push_ptr;
+        struct {
+            int i, j;
+        } bc_get;
     } u;
 };
 
 extern bytecode_t *bc_pop_new(void);
 extern bytecode_t *bc_push_new(void *);
+extern bytecode_t *bc_get_new(int, int);
 extern void bytecode_free(bytecode_t *);
 
 #define ins_new() vector_new()

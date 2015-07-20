@@ -24,11 +24,11 @@ bytecode_t *bc_new(bytecode_kind_t kind)
 void bc_print(bytecode_t *bc, FILE *output)
 {
     switch (bc->kind) {
+        default :
         case BC_POP:
         case BC_PUSH:
             fprintf(output, "%s", bc_names[bc->kind]);
             break;
-        default :;
     }
 }
 
@@ -43,6 +43,14 @@ bytecode_t *bc_push_new(void *ptr)
 {
     bytecode_t *bc = bc_new(BC_PUSH);
     bc->u.push_ptr = ptr;
+    return bc;
+}
+
+bytecode_t *bc_get_new(int i, int j)
+{
+    bytecode_t *bc = bc_new(BC_GET);
+    bc->u.bc_get.i = i;
+    bc->u.bc_get.j = j;
     return bc;
 }
 

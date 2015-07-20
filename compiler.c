@@ -38,6 +38,14 @@ static int compiler_do_int(compiler_t *comp, ast_t *n, ins_t *ins)
     return 1;
 }
 
+static int compiler_do_ident(compiler_t *comp, ast_t *id, ins_t *ins)
+{
+    /* FIXME: 此处应当从当前环境中计算出i和j，即变量相对于当前环境的偏移 */
+    int i = 0, j = 0;
+    ins_push(ins, bc_get_new(i, j));
+    return 1;
+}
+
 static int compiler_do_cons(compiler_t *comp, ast_t *cons, ins_t *ins)
 {
     ast_t *op = AST_CONS_CAR(cons);
@@ -83,6 +91,8 @@ int compiler_do(compiler_t *comp, ast_t *ast, ins_t *ins)
 {
     assert(ins != NULL);
     switch (ast->kind) {
+        case AST_IDENTIFIER:
+            return compiler_do_ident(comp, ast, ins);
         case AST_INTEGER:
             return compiler_do_int(comp, ast, ins);
         case AST_CONS:
