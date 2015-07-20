@@ -23,7 +23,8 @@ int main(int argc, char *argv[])
         ins_t *ins = ins_new();
         if (compiler_do(comp, ast, ins) == 1) {
             ins_print(ins, stdout);
-        }
+        } else
+            fprintf(stdout, "Compiler error: %s\n", comp->error->text);
 
         value_t *value = NULL;
         interp_execute(interp, ast, &value);

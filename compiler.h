@@ -10,6 +10,7 @@
 
 #include "ast.h"
 #include "bytecode.h"
+#include "utils/hash_table.h"
 #include "utils/string.h"
 #include "utils/vector.h"
 
@@ -21,6 +22,7 @@ typedef struct __compiler_t compiler_t;
 
 struct __compiler_t {
     string_t *error;
+    hash_table_t *rts;
 };
 
 extern compiler_t *compiler_new(void);
