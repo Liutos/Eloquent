@@ -65,6 +65,7 @@ extern bytecode_t *bc_set_new(int, int);
 extern bytecode_t *bc_fjump_new(bytecode_t *);
 extern bytecode_t *bc_jump_new(bytecode_t *);
 extern bytecode_t *bc_label_new(const char *);
+extern bytecode_t *bc_nope_new(void);
 extern void bytecode_free(bytecode_t *);
 
 #define ins_new() vector_new()
