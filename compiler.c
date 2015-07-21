@@ -49,6 +49,11 @@ static int compiler_do_ident(compiler_t *comp, ast_t *id, ins_t *ins)
 static int compiler_do_cons(compiler_t *comp, ast_t *cons, ins_t *ins)
 {
     ast_t *op = AST_CONS_CAR(cons);
+    if (op->kind != AST_IDENTIFIER) {
+        string_printf(comp->error, "Line %d, column %d: The first element must be an identifier: %d", op->line, op->column, op->kind);
+        return 0;
+    }
+
     char *name = AST_IDENT_NAME(op);
     compiler_rt_t rt = compiler_getrt(comp, name);
     if (rt == NULL) {
