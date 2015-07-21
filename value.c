@@ -53,6 +53,7 @@ value_t *value_bif_new(void *bif_ptr, unsigned int arity)
     value_t *v = malloc(sizeof(value_t));
     v->kind = VALUE_FUNCTION;
     VALUE_FUNC_ISBIF(v) = 1;
+    VALUE_FUNC_ISCMP(v) = 0;
     VALUE_BIF_ARITY(v) = arity;
     VALUE_BIF_PTR(v) = bif_ptr;
     return v;
@@ -63,8 +64,19 @@ value_t *value_udf_new(ast_t *pars, ast_t *body)
     value_t *v = malloc(sizeof(value_t));
     v->kind = VALUE_FUNCTION;
     VALUE_FUNC_ISBIF(v) = 0;
+    VALUE_FUNC_ISCMP(v) = 0;
     VALUE_UDF_PARS(v) = pars;
     VALUE_UDF_BODY(v) = body;
+    return v;
+}
+
+value_t *value_ucf_new(ins_t *code)
+{
+    value_t *v = malloc(sizeof(value_t));
+    v->kind = VALUE_FUNCTION;
+    VALUE_FUNC_ISBIF(v) = 0;
+    VALUE_FUNC_ISCMP(v) = 1;
+    VALUE_UCF_CODE(v) = code;
     return v;
 }
 
