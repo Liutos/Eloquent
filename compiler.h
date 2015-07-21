@@ -19,10 +19,17 @@ extern "C" {
 #endif
 
 typedef struct __compiler_t compiler_t;
+typedef struct __compiler_env_t compiler_env_t;
+
+struct __compiler_env_t {
+    vector_t *vars;
+    compiler_env_t *outer;
+};
 
 struct __compiler_t {
     string_t *error;
     hash_table_t *rts;
+    compiler_env_t *env;
 };
 
 extern compiler_t *compiler_new(void);
