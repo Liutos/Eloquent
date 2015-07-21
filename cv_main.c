@@ -35,9 +35,9 @@ int main(int argc, char *argv[])
 
         ins_t *ins = ins_new();
         if (compiler_do(comp, ast, ins) == 1) {
-            fprintf(stdout, "BYTECODE > ");
+            fprintf(stdout, "BYTECODE >\n");
             fflush(stdout);
-            ins_print(ins, stdout);
+            ins_pretty_print(ins, stdout);
         } else
             fprintf(stdout, "Compiler error: %s\n", comp->error->text);
         kind = prompt(parser, &ast);

@@ -24,6 +24,7 @@ typedef vector_t ins_t;
     op(BC_GET), \
     op(BC_JUMP), \
     op(BC_LABEL), \
+    op(BC_NOPE), \
     op(BC_POP), \
     op(BC_PUSH), \
     op(BC_SET),
@@ -68,7 +69,9 @@ extern void bytecode_free(bytecode_t *);
 
 #define ins_new() vector_new()
 #define ins_push(ins, v) vector_push(ins, (intptr_t)v)
+#define ins_ref(ins, i) (bytecode_t *)vector_ref(ins, i);
 extern void ins_print(ins_t *, FILE *);
+extern void ins_pretty_print(ins_t *, FILE *);
 
 #define BC_FJUMP_LABEL(f) ((f)->u.bc_fjump.label)
 #define BC_FJUMP_LABEL_NAME(f) BC_LABEL_NAME( BC_FJUMP_LABEL(f) )

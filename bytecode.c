@@ -100,6 +100,11 @@ bytecode_t *bc_label_new(const char *name)
     return bc;
 }
 
+bytecode_t *bc_nope_new(void)
+{
+    return bc_new(BC_NOPE);
+}
+
 void bytecode_free(bytecode_t *bc)
 {
     free(bc);
@@ -109,9 +114,25 @@ void ins_print(ins_t *ins, FILE *output)
 {
     int i = 0;
     while (i < ins->count) {
-        bytecode_t *bc = (bytecode_t *)vector_ref(ins, i);
+        bytecode_t *bc = ins_ref(ins, i);
         bc_print(bc, output);
         fputc('\n', output);
+        i++;
+    }
+}
+
+void ins_pretty_print(ins_t *ins, FILE *output)
+{
+    int i = 0;
+    while (i < ins->count) {
+        bytecode_t *bc = ins_ref(ins, i);
+        if (bc->kind == BC_LABEL)
+            fprintf(output, "%s", BC_LABEL_NAME(bc));
+        else {
+            fprintf(output, "\t\t");
+            bc_print(bc, output);
+            fputc('\n', output);
+        }
         i++;
     }
 }

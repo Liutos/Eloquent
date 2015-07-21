@@ -151,6 +151,7 @@ static int compiler_do_if(compiler_t *comp, ast_t *body, ins_t *ins)
     if (compiler_do(comp, e, ins) == ERR)
         return ERR;
     ins_push(ins, label_end);
+    ins_push(ins, bc_nope_new());
     return 1;
 }
 
