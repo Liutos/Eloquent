@@ -21,6 +21,15 @@ typedef int (*compiler_rt_t)(compiler_t *, ast_t *, ins_t *);
 
 /* PRIVATE */
 
+static bytecode_t *compiler_mklabel(compiler_t *comp)
+{
+    char name[32] = {0};
+    snprintf(name, sizeof(name), "LABEL%d", comp->counter);
+    bytecode_t *label = bc_label_new(name);
+    comp->counter++;
+    return label;
+}
+
 static compiler_env_t *compiler_env_new(compiler_env_t *outer)
 {
     compiler_env_t *env = malloc(sizeof(compiler_env_t));
@@ -103,7 +112,8 @@ static int compiler_do_begin(compiler_t *comp, ast_t *body, ins_t *ins)
 {
     while (body->kind == AST_CONS && AST_CONS_CDR(body)->kind != AST_END_OF_CONS) {
         ast_t *expr = AST_CONS_CAR(body);
-        compiler_do(comp, expr, ins);
+        if (compiler_do(comp, expr, ins) == ERR)
+            return ERR;
         ins_push(ins, bc_pop_new());
         body = AST_CONS_CDR(body);
     }
@@ -114,12 +124,33 @@ static int compiler_do_set(compiler_t *comp, ast_t *body, ins_t *ins)
 {
     ast_t *var = AST_CONS_CAR(body);
     ast_t *expr = AST_CONS_CAR( AST_CONS_CDR(body) );
-    compiler_do(comp, expr, ins);
+    if (compiler_do(comp, expr, ins) == ERR)
+        return ERR;
     int i = 0, j = 0;
     if (compiler_env_lookup(comp->env, AST_IDENT_NAME(var), &i, &j) == ERR) {
         compiler_env_intern(comp->env, AST_IDENT_NAME(var), &i, &j);
     }
     ins_push(ins, bc_set_new(i, j));
+    return OK;
+}
+
+static int compiler_do_if(compiler_t *comp, ast_t *body, ins_t *ins)
+{
+    ast_t *pred = AST_CONS_CAR(body);
+    ast_t *p = AST_CONS_CAR( AST_CONS_CDR(body) );
+    ast_t *e = AST_CONS_CAR( AST_CONS_CDR( AST_CONS_CDR(body) ) );
+    if (compiler_do(comp, pred, ins) == ERR)
+        return ERR;
+    bytecode_t *label_else = compiler_mklabel(comp);
+    bytecode_t *label_end = compiler_mklabel(comp);
+    ins_push(ins, bc_fjump_new(label_else));
+    if (compiler_do(comp, p, ins) == ERR)
+        return ERR;
+    ins_push(ins, bc_jump_new(label_end));
+    ins_push(ins, label_else);
+    if (compiler_do(comp, e, ins) == ERR)
+        return ERR;
+    ins_push(ins, label_end);
     return 1;
 }
 
@@ -133,6 +164,8 @@ compiler_t *compiler_new(void)
     c->rts = hash_table_new(hash_str, comp_str);
     compiler_setrt(c, "begin", compiler_do_begin);
     compiler_setrt(c, "set", compiler_do_set);
+    compiler_setrt(c, "if", compiler_do_if);
+    c->counter = 0;
     return c;
 }
 

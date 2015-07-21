@@ -24,6 +24,15 @@ bytecode_t *bc_new(bytecode_kind_t kind)
 void bc_print(bytecode_t *bc, FILE *output)
 {
     switch (bc->kind) {
+        case BC_FJUMP:
+            fprintf(output, "%s %s", bc_names[bc->kind], BC_FJUMP_LABEL_NAME(bc));
+            break;
+        case BC_JUMP:
+            fprintf(output, "%s %s", bc_names[bc->kind], BC_JUMP_LABEL_NAME(bc));
+            break;
+        case BC_LABEL:
+            fprintf(output, "%s %s", bc_names[bc->kind], BC_LABEL_NAME(bc));
+            break;
         case BC_SET:
             fprintf(output, "%s %d %d", bc_names[bc->kind], bc->u.bc_set.i, bc->u.bc_set.j);
             break;
@@ -66,6 +75,28 @@ bytecode_t *bc_set_new(int i, int j)
     bytecode_t *bc = bc_new(BC_SET);
     bc->u.bc_set.i = i;
     bc->u.bc_set.j = j;
+    return bc;
+}
+
+bytecode_t *bc_fjump_new(bytecode_t *label)
+{
+    bytecode_t *bc = bc_new(BC_FJUMP);
+    bc->u.bc_fjump.label = label;
+    return bc;
+}
+
+bytecode_t *bc_jump_new(bytecode_t *label)
+{
+    bytecode_t *bc = bc_new(BC_JUMP);
+    BC_JUMP_LABEL(bc) = label;
+    return bc;
+}
+
+bytecode_t *bc_label_new(const char *name)
+{
+    bytecode_t *bc = bc_new(BC_LABEL);
+    bc->u.bc_label.name = string_new();
+    string_assign(bc->u.bc_label.name, name);
     return bc;
 }
 

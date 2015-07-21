@@ -30,6 +30,7 @@ struct __compiler_t {
     string_t *error;
     hash_table_t *rts;
     compiler_env_t *env;
+    unsigned int counter;
 };
 
 extern compiler_t *compiler_new(void);
