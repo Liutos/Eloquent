@@ -74,6 +74,17 @@ static int compiler_do_begin(compiler_t *comp, ast_t *body, ins_t *ins)
     return compiler_do(comp, AST_CONS_CAR(body), ins);
 }
 
+static int compiler_do_set(compiler_t *comp, ast_t *body, ins_t *ins)
+{
+    ast_t *var = AST_CONS_CAR(body);
+    ast_t *expr = AST_CONS_CAR( AST_CONS_CDR(body) );
+    compiler_do(comp, expr, ins);
+    int i = 0, j = 0;
+    /* FIXME: 使用var确定索引i和j的值，用于后续赋值 */
+    ins_push(ins, bc_set_new(i, j));
+    return 1;
+}
+
 /* PUBLIC */
 
 compiler_t *compiler_new(void)
@@ -82,6 +93,7 @@ compiler_t *compiler_new(void)
     c->error = string_new();
     c->rts = hash_table_new(hash_str, comp_str);
     compiler_setrt(c, "begin", compiler_do_begin);
+    compiler_setrt(c, "set", compiler_do_set);
     return c;
 }
 

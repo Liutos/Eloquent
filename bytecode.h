@@ -21,7 +21,9 @@ typedef vector_t ins_t;
 #define BC_KIND(op) \
     op(BC_GET), \
     op(BC_POP), \
-    op(BC_PUSH),
+    op(BC_PUSH), \
+    op(BC_SET),
+
 #define BC_IDENTIFY(bc) bc
 #define BC_STRINGIFY(bc) #bc
 
@@ -36,12 +38,16 @@ struct __bytecode_t {
         struct {
             int i, j;
         } bc_get;
+        struct {
+            int i, j;
+        } bc_set;
     } u;
 };
 
 extern bytecode_t *bc_pop_new(void);
 extern bytecode_t *bc_push_new(void *);
 extern bytecode_t *bc_get_new(int, int);
+extern bytecode_t *bc_set_new(int, int);
 extern void bytecode_free(bytecode_t *);
 
 #define ins_new() vector_new()
