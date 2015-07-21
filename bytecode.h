@@ -20,6 +20,7 @@ typedef struct __bytecode_t bytecode_t;
 typedef vector_t ins_t;
 
 #define BC_KIND(op) \
+    op(BC_CALL), \
     op(BC_FJUMP), \
     op(BC_GET), \
     op(BC_JUMP), \
@@ -66,6 +67,7 @@ extern bytecode_t *bc_fjump_new(bytecode_t *);
 extern bytecode_t *bc_jump_new(bytecode_t *);
 extern bytecode_t *bc_label_new(const char *);
 extern bytecode_t *bc_nope_new(void);
+extern bytecode_t *bc_call_new(void);
 extern void bytecode_free(bytecode_t *);
 
 #define ins_new() vector_new()

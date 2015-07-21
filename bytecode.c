@@ -105,6 +105,11 @@ bytecode_t *bc_nope_new(void)
     return bc_new(BC_NOPE);
 }
 
+bytecode_t *bc_call_new(void)
+{
+    return bc_new(BC_CALL);
+}
+
 void bytecode_free(bytecode_t *bc)
 {
     free(bc);

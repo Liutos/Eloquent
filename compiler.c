@@ -108,6 +108,20 @@ static int compiler_do_ident(compiler_t *comp, ast_t *id, ins_t *ins)
     return OK;
 }
 
+static int compiler_do_call(compiler_t *comp, ast_t *op, ast_t *args, ins_t *ins)
+{
+    if (compiler_do(comp, op, ins) == ERR)
+        return ERR;
+    while (args->kind == AST_CONS) {
+        ast_t *expr = AST_CONS_CAR(args);
+        if (compiler_do(comp, expr, ins) == ERR)
+            return ERR;
+        args = AST_CONS_CDR(args);
+    }
+    ins_push(ins, bc_call_new());
+    return OK;
+}
+
 static int compiler_do_cons(compiler_t *comp, ast_t *cons, ins_t *ins)
 {
     ast_t *op = AST_CONS_CAR(cons);
@@ -119,8 +133,7 @@ static int compiler_do_cons(compiler_t *comp, ast_t *cons, ins_t *ins)
     char *name = AST_IDENT_NAME(op);
     compiler_rt_t rt = compiler_getrt(comp, name);
     if (rt == NULL) {
-        string_printf(comp->error, "Line %d, column %d: Don't know how to compile: %s", op->line, op->column, name);
-        return 0;
+        return compiler_do_call(comp, op, AST_CONS_CDR(cons), ins);
     }
     return (*rt)(comp, AST_CONS_CDR(cons), ins);
 }
