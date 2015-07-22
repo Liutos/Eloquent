@@ -20,6 +20,7 @@ typedef struct __bytecode_t bytecode_t;
 typedef vector_t ins_t;
 
 #define BC_KIND(op) \
+    op(BC_ARGS), \
     op(BC_CALL), \
     op(BC_FJUMP), \
     op(BC_GET), \
@@ -56,6 +57,9 @@ struct __bytecode_t {
         struct {
             bytecode_t *label;
         } bc_jump;
+        struct {
+            int arity;
+        } bc_args;
     } u;
 };
 
@@ -68,6 +72,7 @@ extern bytecode_t *bc_jump_new(bytecode_t *);
 extern bytecode_t *bc_label_new(const char *);
 extern bytecode_t *bc_nope_new(void);
 extern bytecode_t *bc_call_new(void);
+extern bytecode_t *bc_args_new(int);
 extern void bytecode_free(bytecode_t *);
 
 #define ins_new() vector_new()
@@ -76,6 +81,7 @@ extern void bytecode_free(bytecode_t *);
 extern void ins_print(ins_t *, FILE *);
 extern void ins_pretty_print(ins_t *, FILE *);
 
+#define BC_ARGS_ARITY(a) ((a)->u.bc_args.arity)
 #define BC_FJUMP_LABEL(f) ((f)->u.bc_fjump.label)
 #define BC_FJUMP_LABEL_NAME(f) BC_LABEL_NAME( BC_FJUMP_LABEL(f) )
 #define BC_JUMP_LABEL(j) ((j)->u.bc_jump.label)

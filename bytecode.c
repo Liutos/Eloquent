@@ -24,6 +24,9 @@ bytecode_t *bc_new(bytecode_kind_t kind)
 void bc_print(bytecode_t *bc, FILE *output)
 {
     switch (bc->kind) {
+        case BC_ARGS:
+            fprintf(output, "%s %d", bc_names[bc->kind], BC_ARGS_ARITY(bc));
+            break;
         case BC_FJUMP:
             fprintf(output, "%s %s", bc_names[bc->kind], BC_FJUMP_LABEL_NAME(bc));
             break;
@@ -108,6 +111,13 @@ bytecode_t *bc_nope_new(void)
 bytecode_t *bc_call_new(void)
 {
     return bc_new(BC_CALL);
+}
+
+bytecode_t *bc_args_new(int arity)
+{
+    bytecode_t *bc = bc_new(BC_ARGS);
+    bc->u.bc_args.arity = arity;
+    return bc;
 }
 
 void bytecode_free(bytecode_t *bc)

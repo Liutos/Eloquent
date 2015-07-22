@@ -64,14 +64,17 @@ static int compiler_env_lookup(compiler_env_t *env, const char *var, int *i, int
     return 0;
 }
 
-static void compiler_extend_scope(compiler_t *comp, ast_t *pars)
+static int compiler_extend_scope(compiler_t *comp, ast_t *pars)
 {
+    int i = 0;
     comp->env = compiler_env_new(comp->env);
     while (pars->kind == AST_CONS) {
         ast_t *par = AST_CONS_CAR(pars);
         compiler_env_intern(comp->env, AST_IDENT_NAME(par), NULL, NULL);
         pars = AST_CONS_CDR(pars);
+        i++;
     }
+    return i;
 }
 
 static void compiler_exit_scope(compiler_t *comp)
@@ -189,14 +192,17 @@ static int compiler_do_lambda(compiler_t *comp, ast_t *body, ins_t *ins)
 {
     ast_t *pars = AST_CONS_CAR(body);
     body = AST_CONS_CDR(body);
-    compiler_extend_scope(comp, pars);
+    int arity = compiler_extend_scope(comp, pars);
     ins_t *code = ins_new();
+    ins_push(code, bc_args_new(arity));
     if (compiler_do_begin(comp, body, code) == ERR) {
         compiler_exit_scope(comp);
         return ERR;
     }
     ins_pretty_print(code, stdout);
     compiler_exit_scope(comp);
+    value_t *f = value_ucf_new(arity, code);
+    ins_push(ins, bc_push_new(f));
     return OK;
 }
 

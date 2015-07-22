@@ -70,10 +70,11 @@ value_t *value_udf_new(ast_t *pars, ast_t *body)
     return v;
 }
 
-value_t *value_ucf_new(ins_t *code)
+value_t *value_ucf_new(int arity, ins_t *code)
 {
     value_t *v = malloc(sizeof(value_t));
     v->kind = VALUE_FUNCTION;
+    v->u.func_val.arity = arity;
     VALUE_FUNC_ISBIF(v) = 0;
     VALUE_FUNC_ISCMP(v) = 1;
     VALUE_UCF_CODE(v) = code;

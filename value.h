@@ -57,7 +57,7 @@ extern value_t *value_error_newf(const char *, ...);
 extern value_t *value_int_new(int);
 extern value_t *value_bif_new(void *, unsigned int);
 extern value_t *value_udf_new(ast_t *, ast_t *);
-extern value_t *value_ucf_new(ins_t *);
+extern value_t *value_ucf_new(int, ins_t *);
 extern void value_free(value_t *);
 extern void value_print(value_t *, FILE *);
 extern int value_isequal(value_t *, value_t *);
