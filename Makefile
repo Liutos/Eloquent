@@ -2,6 +2,14 @@ CC = gcc
 CFLAGS = -Wall -g -pg
 SRCS = $(shell find . -maxdepth 1 -name '*.c' -not -name '*main.c')
 OBJS = $(patsubst %.c, %.o, $(SRCS))
+UTILS_SRCS = \
+utils/hash_table.c \
+utils/seg_vector.c \
+utils/string.c \
+utils/vector.c
+
+UTILS_OBJS = $(patsubst %.c, %.o, $(UTILS_SRCS))
+
 ELOI = eloi
 ELOC = eloc
 
@@ -25,10 +33,10 @@ utils/vector.o: utils/vector.c utils/vector.h
 
 # executables
 
-$(ELOI): main.o $(OBJS) utils/hash_table.o utils/string.o utils/vector.o
+$(ELOI): main.o $(OBJS) $(UTILS_OBJS)
 	$(CC) $(CFLAGS) -o $@ $^
 
-$(ELOC): cv_main.o $(OBJS) utils/hash_table.o utils/string.o utils/vector.o
+$(ELOC): cv_main.o $(OBJS) $(UTILS_OBJS)
 	$(CC) $(CFLAGS) -o $@ $^
 
 .PHONY: clean

@@ -32,10 +32,7 @@ static bytecode_t *compiler_mklabel(compiler_t *comp)
 
 static compiler_env_t *compiler_env_new(compiler_env_t *outer)
 {
-    compiler_env_t *env = malloc(sizeof(compiler_env_t));
-    env->outer = outer;
-    env->vars = vector_new();
-    return env;
+    return seg_vector_new(outer);
 }
 
 static void compiler_env_intern(compiler_env_t *env, const char *var, int *i, int *j)
@@ -43,25 +40,13 @@ static void compiler_env_intern(compiler_env_t *env, const char *var, int *i, in
     if (i != NULL)
         *i = 0;
     if (j != NULL)
-        *j = env->vars->count;
-    vector_push(env->vars, (intptr_t)var);
+        *j = env->data->count;
+    seg_vector_push(env, var);
 }
 
 static int compiler_env_lookup(compiler_env_t *env, const char *var, int *i, int *j)
 {
-    int oi = 0;
-    compiler_env_t *it = env;
-    while (it != NULL) {
-        int ii = vector_posif(it->vars, (intptr_t)var, (ele_comp_t)comp_str);
-        if (ii != -1) {
-            *i = oi;
-            *j = ii;
-            return 1;
-        }
-        it = it->outer;
-        oi++;
-    }
-    return 0;
+    return seg_vector_locate(env, var, (ele_comp_t)comp_str, i, j);
 }
 
 static int compiler_extend_scope(compiler_t *comp, ast_t *pars)
@@ -79,7 +64,7 @@ static int compiler_extend_scope(compiler_t *comp, ast_t *pars)
 
 static void compiler_exit_scope(compiler_t *comp)
 {
-    comp->env = comp->env->outer;
+    comp->env = comp->env->next;
 }
 
 static compiler_rt_t compiler_getrt(compiler_t *comp, const char *name)

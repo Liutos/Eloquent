@@ -11,6 +11,7 @@
 #include "ast.h"
 #include "bytecode.h"
 #include "utils/hash_table.h"
+#include "utils/seg_vector.h"
 #include "utils/string.h"
 #include "utils/vector.h"
 
@@ -19,12 +20,7 @@ extern "C" {
 #endif
 
 typedef struct __compiler_t compiler_t;
-typedef struct __compiler_env_t compiler_env_t;
-
-struct __compiler_env_t {
-    vector_t *vars;
-    compiler_env_t *outer;
-};
+typedef seg_vector_t compiler_env_t;
 
 struct __compiler_t {
     string_t *error;
