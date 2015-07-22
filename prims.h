@@ -1,0 +1,27 @@
+/*
+ * prims.h
+ *
+ *  Created on: 2015年7月22日
+ *      Author: liutos
+ */
+
+#ifndef PRIMS_H_
+#define PRIMS_H_
+
+#include "value.h"
+
+#ifdef __cplusplus
+extern "C" {
+#endif
+
+extern value_t *bif_add(value_t *, value_t *);
+extern value_t *bif_succ(value_t *);
+extern value_t *bif_pred(value_t *);
+extern value_t *bif_div(value_t *, value_t *);
+extern value_t *bif_equal(value_t *, value_t *);
+
+#ifdef __cplusplus
+}
+#endif
+
+#endif /* PRIMS_H_ */

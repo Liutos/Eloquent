@@ -220,6 +220,13 @@ compiler_t *compiler_new(void)
     compiler_setrt(c, "if", compiler_do_if);
     compiler_setrt(c, "lambda", compiler_do_lambda);
     c->counter = 0;
+
+    compiler_env_intern(c->env, "+", NULL, NULL);
+    compiler_env_intern(c->env, "succ", NULL, NULL);
+    compiler_env_intern(c->env, "/", NULL, NULL);
+    compiler_env_intern(c->env, "=", NULL, NULL);
+    compiler_env_intern(c->env, "pred", NULL, NULL);
+
     return c;
 }
 

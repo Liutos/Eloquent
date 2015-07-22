@@ -4,6 +4,7 @@
 #include "ast.h"
 #include "env.h"
 #include "interp.h"
+#include "prims.h"
 #include "utils/vector.h"
 #include "value.h"
 
@@ -18,37 +19,6 @@ static syntax_t *syntax_new(void *ptr)
     s->ptr = ptr;
     return s;
 }
-
-/* FUNCTION BEGIN */
-
-static value_t *bif_add(value_t *n1, value_t *n2)
-{
-    return value_int_new(VALUE_INT_VALUE(n1) + VALUE_INT_VALUE(n2));
-}
-
-static value_t *bif_succ(value_t *n)
-{
-    return value_int_new(VALUE_INT_VALUE(n) + 1);
-}
-
-static value_t *bif_pred(value_t *n)
-{
-    return value_int_new(VALUE_INT_VALUE(n) - 1);
-}
-
-static value_t *bif_div(value_t *n1, value_t *n2)
-{
-    if (VALUE_INT_VALUE(n2) == 0)
-        return value_error_new("Divided by zero");
-    return value_int_new(VALUE_INT_VALUE(n1) / VALUE_INT_VALUE(n2));
-}
-
-static value_t *bif_equal(value_t *v1, value_t *v2)
-{
-    return value_int_new(value_isequal(v1, v2));
-}
-
-/* FUNCTION END */
 
 static value_t *interp_get(interp_t *interp, char *name)
 {
