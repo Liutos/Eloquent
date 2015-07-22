@@ -199,6 +199,7 @@ static int compiler_do_lambda(compiler_t *comp, ast_t *body, ins_t *ins)
         compiler_exit_scope(comp);
         return ERR;
     }
+    ins_push(code, bc_return_new());
     compiler_exit_scope(comp);
     value_t *f = value_ucf_new(arity, code);
     ins_push(ins, bc_push_new(f));

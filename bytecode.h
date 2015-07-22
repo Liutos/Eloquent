@@ -30,6 +30,7 @@ typedef vector_t ins_t;
     op(BC_NOPE), \
     op(BC_POP), \
     op(BC_PUSH), \
+    op(BC_RETURN), \
     op(BC_SET),
 
 #define BC_IDENTIFY(bc) bc
@@ -75,6 +76,7 @@ extern bytecode_t *bc_nope_new(void);
 extern bytecode_t *bc_call_new(void);
 extern bytecode_t *bc_args_new(int);
 extern bytecode_t *bc_func_new(void);
+extern bytecode_t *bc_return_new(void);
 extern void bytecode_free(bytecode_t *);
 
 #define ins_new() vector_new()

@@ -127,6 +127,11 @@ bytecode_t *bc_func_new(void)
     return bc_new(BC_FUNC);
 }
 
+bytecode_t *bc_return_new(void)
+{
+    return bc_new(BC_RETURN);
+}
+
 void bytecode_free(bytecode_t *bc)
 {
     free(bc);
