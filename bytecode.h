@@ -23,6 +23,7 @@ typedef vector_t ins_t;
     op(BC_ARGS), \
     op(BC_CALL), \
     op(BC_FJUMP), \
+    op(BC_FUNC), \
     op(BC_GET), \
     op(BC_JUMP), \
     op(BC_LABEL), \
@@ -73,6 +74,7 @@ extern bytecode_t *bc_label_new(const char *);
 extern bytecode_t *bc_nope_new(void);
 extern bytecode_t *bc_call_new(void);
 extern bytecode_t *bc_args_new(int);
+extern bytecode_t *bc_func_new(void);
 extern void bytecode_free(bytecode_t *);
 
 #define ins_new() vector_new()
@@ -87,6 +89,7 @@ extern void ins_pretty_print(ins_t *, FILE *);
 #define BC_JUMP_LABEL(j) ((j)->u.bc_jump.label)
 #define BC_JUMP_LABEL_NAME(j) BC_LABEL_NAME((j)->u.bc_jump.label)
 #define BC_LABEL_NAME(l) ((l)->u.bc_label.name->text)
+#define BC_PUSH_OBJ(p) ((value_t *)(p)->u.push_ptr)
 
 #ifdef __cplusplus
 }

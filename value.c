@@ -2,6 +2,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include "ast.h"
+#include "bytecode.h"
 #include "utils/string.h"
 #include "value.h"
 
@@ -11,12 +12,16 @@ static void value_function_print(value_t *v, FILE *output)
 {
     if (VALUE_FUNC_ISBIF(v)) {
         fprintf(output, "#<%p>", VALUE_BIF_PTR(v));
-    } else {
+    } else if (!VALUE_FUNC_ISCMP(v)) {
         fprintf(output, "#<");
         ast_print(VALUE_UDF_PARS(v), output);
         fputc(' ', output);
         ast_print(VALUE_UDF_BODY(v), output);
         fprintf(output, ">");
+    } else {
+        fprintf(output, "#<");
+        ins_pretty_print(VALUE_UCF_CODE(v), output);
+        fputc('>', output);
     }
 }
 

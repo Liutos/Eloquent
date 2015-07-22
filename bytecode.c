@@ -7,6 +7,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include "bytecode.h"
+#include "value.h"
 
 /* PRIVATE */
 
@@ -40,7 +41,8 @@ void bc_print(bytecode_t *bc, FILE *output)
             fprintf(output, "%s %d %d", bc_names[bc->kind], bc->u.bc_set.i, bc->u.bc_set.j);
             break;
         case BC_PUSH:
-            fprintf(output, "%s %p", bc_names[bc->kind], bc->u.push_ptr);
+            fprintf(output, "%s ", bc_names[bc->kind]);
+            value_print(BC_PUSH_OBJ(bc), output);
             break;
         case BC_GET:
             fprintf(output, "%s %d %d", bc_names[bc->kind], bc->u.bc_get.i, bc->u.bc_get.j);
@@ -118,6 +120,11 @@ bytecode_t *bc_args_new(int arity)
     bytecode_t *bc = bc_new(BC_ARGS);
     bc->u.bc_args.arity = arity;
     return bc;
+}
+
+bytecode_t *bc_func_new(void)
+{
+    return bc_new(BC_FUNC);
 }
 
 void bytecode_free(bytecode_t *bc)
