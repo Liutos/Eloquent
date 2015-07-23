@@ -98,14 +98,14 @@ static int compiler_do_ident(compiler_t *comp, ast_t *id, ins_t *ins)
 
 static int compiler_do_call(compiler_t *comp, ast_t *op, ast_t *args, ins_t *ins)
 {
-    if (compiler_do(comp, op, ins) == ERR)
-        return ERR;
     while (args->kind == AST_CONS) {
         ast_t *expr = AST_CONS_CAR(args);
         if (compiler_do(comp, expr, ins) == ERR)
             return ERR;
         args = AST_CONS_CDR(args);
     }
+    if (compiler_do(comp, op, ins) == ERR)
+        return ERR;
     ins_push(ins, bc_call_new());
     return OK;
 }

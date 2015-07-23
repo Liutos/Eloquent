@@ -23,6 +23,7 @@ extern void vector_push(vector_t *, intptr_t);
 extern intptr_t vector_pop(vector_t *);
 extern intptr_t vector_ref(vector_t *, size_t);
 extern int vector_posif(vector_t *, intptr_t, ele_comp_t);
+extern intptr_t vector_top(vector_t *);
 
 #ifdef __cplusplus
 }

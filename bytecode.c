@@ -11,45 +11,45 @@
 
 /* PRIVATE */
 
-static char *bc_names[] ={
+static const char *bc_names[] ={
         BC_KIND(BC_STRINGIFY)
 };
 
-bytecode_t *bc_new(bytecode_kind_t kind)
+static bytecode_t *bc_new(bytecode_kind_t kind)
 {
     bytecode_t *bc = malloc(sizeof(bytecode_t));
     bc->kind = kind;
     return bc;
 }
 
-void bc_print(bytecode_t *bc, FILE *output)
+static void bc_print(bytecode_t *bc, FILE *output)
 {
     switch (bc->kind) {
         case BC_ARGS:
-            fprintf(output, "%s %d", bc_names[bc->kind], BC_ARGS_ARITY(bc));
+            fprintf(output, "%s %d", bc_name(bc), BC_ARGS_ARITY(bc));
             break;
         case BC_FJUMP:
-            fprintf(output, "%s %s", bc_names[bc->kind], BC_FJUMP_LABEL_NAME(bc));
+            fprintf(output, "%s %s", bc_name(bc), BC_FJUMP_LABEL_NAME(bc));
             break;
         case BC_JUMP:
-            fprintf(output, "%s %s", bc_names[bc->kind], BC_JUMP_LABEL_NAME(bc));
+            fprintf(output, "%s %s", bc_name(bc), BC_JUMP_LABEL_NAME(bc));
             break;
         case BC_LABEL:
-            fprintf(output, "%s %s", bc_names[bc->kind], BC_LABEL_NAME(bc));
+            fprintf(output, "%s %s", bc_name(bc), BC_LABEL_NAME(bc));
             break;
         case BC_SET:
-            fprintf(output, "%s %d %d", bc_names[bc->kind], bc->u.bc_set.i, bc->u.bc_set.j);
+            fprintf(output, "%s %d %d", bc_name(bc), bc->u.bc_set.i, bc->u.bc_set.j);
             break;
         case BC_PUSH:
-            fprintf(output, "%s ", bc_names[bc->kind]);
+            fprintf(output, "%s ", bc_name(bc));
             value_print(BC_PUSH_OBJ(bc), output);
             break;
         case BC_GET:
-            fprintf(output, "%s %d %d", bc_names[bc->kind], bc->u.bc_get.i, bc->u.bc_get.j);
+            fprintf(output, "%s %d %d", bc_name(bc), bc->u.bc_get.i, bc->u.bc_get.j);
             break;
         case BC_POP:
         default :
-            fprintf(output, "%s", bc_names[bc->kind]);
+            fprintf(output, "%s", bc_name(bc));
     }
 }
 
@@ -162,4 +162,9 @@ void ins_pretty_print(ins_t *ins, FILE *output)
         }
         i++;
     }
+}
+
+const char *bc_name(bytecode_t *bc)
+{
+    return bc_names[bc->kind];
 }

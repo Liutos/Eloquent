@@ -10,6 +10,7 @@
 #include "compiler.h"
 #include "lexer.h"
 #include "parser.h"
+#include "vm.h"
 
 static ast_kind_t prompt(parser_t *parser, ast_t **ast)
 {
@@ -23,6 +24,7 @@ int main(int argc, char *argv[])
     lexer_t *lexer = lexer_new(stdin);
     parser_t *parser = parser_new(lexer);
     compiler_t *comp = compiler_new();
+    vm_t *vm = vm_new();
     ast_t *ast = NULL;
     ast_kind_t kind = prompt(parser, &ast);
     while (kind != AST_INVALID) {
@@ -38,6 +40,11 @@ int main(int argc, char *argv[])
             fprintf(stdout, "BYTECODE >\n");
             fflush(stdout);
             ins_pretty_print(ins, stdout);
+
+            vm_execute(vm, ins);
+            fprintf(stdout, "VM > ");
+            fflush(stdout);
+            vm_print_top(vm, stdout);
         } else
             fprintf(stdout, "Compiler error: %s\n", comp->error->text);
         kind = prompt(parser, &ast);

@@ -63,3 +63,8 @@ int vector_posif(vector_t *v, intptr_t key, ele_comp_t comp_func)
     }
     return -1;
 }
+
+intptr_t vector_top(vector_t *v)
+{
+    return v->slots[v->count - 1];
+}

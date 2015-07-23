@@ -45,3 +45,12 @@ int seg_vector_locate(seg_vector_t *sv, const void *key, ele_comp_t comp_func, i
     }
     return 0;
 }
+
+void *seg_vector_ref(seg_vector_t *sv, int i, int j)
+{
+    while (i > 0) {
+        sv = sv->next;
+        i--;
+    }
+    return (void *)vector_ref(sv->data, j);
+}
