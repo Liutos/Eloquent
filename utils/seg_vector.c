@@ -54,3 +54,12 @@ void *seg_vector_ref(seg_vector_t *sv, int i, int j)
     }
     return (void *)vector_ref(sv->data, j);
 }
+
+void seg_vector_set(seg_vector_t *sv, void *obj, int i, int j)
+{
+    while (i > 0) {
+        sv = sv->next;
+        i--;
+    }
+    vector_set(sv->data, (intptr_t)obj, j);
+}

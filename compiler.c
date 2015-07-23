@@ -146,9 +146,10 @@ static int compiler_do_set(compiler_t *comp, ast_t *body, ins_t *ins)
         return ERR;
     int i = 0, j = 0;
     if (compiler_env_lookup(comp->env, AST_IDENT_NAME(var), &i, &j) == ERR) {
-        compiler_env_intern(comp->env, AST_IDENT_NAME(var), &i, &j);
-    }
-    ins_push(ins, bc_set_new(i, j));
+        compiler_env_intern(comp->env, AST_IDENT_NAME(var), NULL, NULL);
+        ins_push(ins, bc_set_new(-1, -1));
+    } else
+        ins_push(ins, bc_set_new(i, j));
     return OK;
 }
 

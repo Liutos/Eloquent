@@ -68,3 +68,8 @@ intptr_t vector_top(vector_t *v)
 {
     return v->slots[v->count - 1];
 }
+
+void vector_set(vector_t *v, intptr_t obj, int index)
+{
+    v->slots[index] = obj;
+}

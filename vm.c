@@ -31,6 +31,20 @@ static void vm_env_intern(vm_t *vm, value_t *o)
     seg_vector_push(vm->env, o);
 }
 
+static value_t *vm_top(vm_t *vm)
+{
+    return (value_t *)vector_top(vm->stack);
+}
+
+static void vm_env_set(vm_t *vm, int i, int j)
+{
+    value_t *val = vm_top(vm);
+    if (i == -1 && j == -1)
+        vm_env_intern(vm, val);
+    else
+        seg_vector_set(vm->env, val, i, j);
+}
+
 static void vm_env_internbif(vm_t *vm, void *bif, int arity)
 {
     value_t *v = value_bif_new(bif, arity);
@@ -45,11 +59,6 @@ static value_t *vm_pop(vm_t *vm)
 static void vm_push(vm_t *vm, value_t *obj)
 {
     vector_push(vm->stack, (intptr_t)obj);
-}
-
-static value_t *vm_top(vm_t *vm)
-{
-    return (value_t *)vector_top(vm->stack);
 }
 
 static void vm_execute_bif(vm_t *vm, value_t *f)
@@ -122,6 +131,9 @@ void vm_execute(vm_t *vm, ins_t *ins)
                 break;
             case BC_PUSH:
                 vm_push(vm, BC_PUSH_OBJ(bc));
+                break;
+            case BC_SET:
+                vm_env_set(vm, BC_SET_I(bc), BC_SET_J(bc));
                 break;
             default :
                 fprintf(stderr, "Not support: %s\n", bc_name(bc));

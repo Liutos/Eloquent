@@ -96,6 +96,8 @@ extern void ins_pretty_print(ins_t *, FILE *);
 #define BC_JUMP_LABEL_NAME(j) BC_LABEL_NAME((j)->u.bc_jump.label)
 #define BC_LABEL_NAME(l) ((l)->u.bc_label.name->text)
 #define BC_PUSH_OBJ(p) ((value_t *)(p)->u.push_ptr)
+#define BC_SET_I(s) ((s)->u.bc_set.i)
+#define BC_SET_J(s) ((s)->u.bc_set.j)
 
 #ifdef __cplusplus
 }
