@@ -53,6 +53,11 @@ intptr_t vector_ref(vector_t *v, size_t index)
     return v->slots[index];
 }
 
+intptr_t vector_iref(vector_t *v, int index)
+{
+    return v->slots[v->count - 1 - index];
+}
+
 int vector_posif(vector_t *v, intptr_t key, ele_comp_t comp_func)
 {
     int i = 0;

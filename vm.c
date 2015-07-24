@@ -4,6 +4,7 @@
  *  Created on: 2015年7月22日
  *      Author: liutos
  */
+#include <assert.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include "prims.h"
@@ -61,6 +62,11 @@ static void vm_push(vm_t *vm, value_t *obj)
     vector_push(vm->stack, (intptr_t)obj);
 }
 
+static value_t *vm_iref(vm_t *vm, int i)
+{
+    return (value_t *)vector_iref(vm->stack, i);
+}
+
 static void vm_execute_bif(vm_t *vm, value_t *f)
 {
     value_t *res = NULL;
@@ -88,7 +94,11 @@ static void vm_execute_function(vm_t *vm)
     if (VALUE_FUNC_ISBIF(f))
         vm_execute_bif(vm, f);
     else {
-        fprintf(stderr, "Unsupported type of function\n");
+        assert(VALUE_FUNC_ISCMP(f));
+        vm_env_t *old_env = vm->env;
+        vm->env = vm_env_new(VALUE_UCF_ENV(f));
+        vm_execute(vm, VALUE_UCF_CODE(f));
+        vm->env = old_env;
     }
 }
 
@@ -120,9 +130,22 @@ void vm_execute(vm_t *vm, ins_t *ins)
     while (i < ins_length(ins)) {
         bytecode_t *bc = ins_ref(ins, i);
         switch (bc->kind) {
+            case BC_ARGS: {
+                int i = BC_ARGS_ARITY(bc) - 1;
+                for (; i >= 0; i--) {
+                    value_t *obj = vm_iref(vm, i);
+                    vm_env_intern(vm, obj);
+                }
+                break;
+            }
             case BC_CALL:
                 vm_execute_function(vm);
                 break;
+            case BC_FUNC: {
+                value_t *f = vm_top(vm);
+                VALUE_UCF_ENV(f) = vm->env;
+                break;
+            }
             case BC_GET:
                 vm_push(vm, vm_env_ref(vm, BC_GET_I(bc), BC_GET_J(bc)));
                 break;
@@ -131,6 +154,8 @@ void vm_execute(vm_t *vm, ins_t *ins)
                 break;
             case BC_PUSH:
                 vm_push(vm, BC_PUSH_OBJ(bc));
+                break;
+            case BC_RETURN:
                 break;
             case BC_SET:
                 vm_env_set(vm, BC_SET_I(bc), BC_SET_J(bc));

@@ -4,6 +4,7 @@
 #include <stdio.h>
 #include "ast.h"
 #include "bytecode.h"
+#include "utils/seg_vector.h"
 #include "utils/string.h"
 
 #ifdef __cplusplus
@@ -39,6 +40,7 @@ struct __value_function_t {
         } udf;
         struct {
             ins_t *code;
+            seg_vector_t *env;
         } ucf;
     } u;
 };
@@ -70,6 +72,7 @@ extern int value_isequal(value_t *, value_t *);
 #define VALUE_UDF_PARS(f) ((f)->u.func_val.u.udf.pars)
 #define VALUE_UDF_BODY(f) ((f)->u.func_val.u.udf.body)
 #define VALUE_UCF_CODE(f) ((f)->u.func_val.u.ucf.code)
+#define VALUE_UCF_ENV(f) ((f)->u.func_val.u.ucf.env)
 #define VALUE_INT_VALUE(i) ((i)->u.int_val)
 
 #ifdef __cplusplus

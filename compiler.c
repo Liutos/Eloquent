@@ -142,14 +142,14 @@ static int compiler_do_set(compiler_t *comp, ast_t *body, ins_t *ins)
 {
     ast_t *var = AST_CONS_CAR(body);
     ast_t *expr = AST_CONS_CAR( AST_CONS_CDR(body) );
-    if (compiler_do(comp, expr, ins) == ERR)
-        return ERR;
     int i = 0, j = 0;
     if (compiler_env_lookup(comp->env, AST_IDENT_NAME(var), &i, &j) == ERR) {
         compiler_env_intern(comp->env, AST_IDENT_NAME(var), NULL, NULL);
-        ins_push(ins, bc_set_new(-1, -1));
-    } else
-        ins_push(ins, bc_set_new(i, j));
+        i = j = -1;
+    }
+    if (compiler_do(comp, expr, ins) == ERR)
+        return ERR;
+    ins_push(ins, bc_set_new(i, j));
     return OK;
 }
 

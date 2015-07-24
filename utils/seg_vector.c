@@ -42,6 +42,7 @@ int seg_vector_locate(seg_vector_t *sv, const void *key, ele_comp_t comp_func, i
             return 1;
         }
         sv = sv->next;
+        si++;
     }
     return 0;
 }
