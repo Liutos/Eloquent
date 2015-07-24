@@ -27,6 +27,7 @@ struct __compiler_t {
     hash_table_t *rts;
     compiler_env_t *env;
     unsigned int counter;
+    hash_table_t *label_table;
 };
 
 extern compiler_t *compiler_new(void);

@@ -141,6 +141,12 @@ void vm_execute(vm_t *vm, ins_t *ins)
             case BC_CALL:
                 vm_execute_function(vm);
                 break;
+            case BC_FJUMP: {
+                value_t *o = vm_pop(vm);
+                if (o->kind == VALUE_INT && VALUE_INT_VALUE(o) == 0)
+                    i = BC_FJUMP_INDEX(bc) - 1;
+                break;
+            }
             case BC_FUNC: {
                 value_t *f = vm_top(vm);
                 VALUE_UCF_ENV(f) = vm->env;
@@ -148,6 +154,11 @@ void vm_execute(vm_t *vm, ins_t *ins)
             }
             case BC_GET:
                 vm_push(vm, vm_env_ref(vm, BC_GET_I(bc), BC_GET_J(bc)));
+                break;
+            case BC_JUMP:
+                i = BC_JUMP_INDEX(bc) - 1;
+                break;
+            case BC_NOPE:
                 break;
             case BC_POP:
                 vm_pop(vm);

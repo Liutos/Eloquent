@@ -52,12 +52,14 @@ struct __bytecode_t {
         } bc_set;
         struct {
             bytecode_t *label;
+            int index;
         } bc_fjump;
         struct {
             string_t *name;
         } bc_label;
         struct {
             bytecode_t *label;
+            int index;
         } bc_jump;
         struct {
             int arity;
@@ -88,10 +90,12 @@ extern void ins_print(ins_t *, FILE *);
 extern void ins_pretty_print(ins_t *, FILE *);
 
 #define BC_ARGS_ARITY(a) ((a)->u.bc_args.arity)
+#define BC_FJUMP_INDEX(f) ((f)->u.bc_fjump.index)
 #define BC_FJUMP_LABEL(f) ((f)->u.bc_fjump.label)
 #define BC_FJUMP_LABEL_NAME(f) BC_LABEL_NAME( BC_FJUMP_LABEL(f) )
 #define BC_GET_I(g) ((g)->u.bc_get.i)
 #define BC_GET_J(g) ((g)->u.bc_get.j)
+#define BC_JUMP_INDEX(f) ((f)->u.bc_jump.index)
 #define BC_JUMP_LABEL(j) ((j)->u.bc_jump.label)
 #define BC_JUMP_LABEL_NAME(j) BC_LABEL_NAME((j)->u.bc_jump.label)
 #define BC_LABEL_NAME(l) ((l)->u.bc_label.name->text)

@@ -29,10 +29,10 @@ static void bc_print(bytecode_t *bc, FILE *output)
             fprintf(output, "%s %d", bc_name(bc), BC_ARGS_ARITY(bc));
             break;
         case BC_FJUMP:
-            fprintf(output, "%s %s", bc_name(bc), BC_FJUMP_LABEL_NAME(bc));
+            fprintf(output, "%s %d", bc_name(bc), BC_FJUMP_INDEX(bc));
             break;
         case BC_JUMP:
-            fprintf(output, "%s %s", bc_name(bc), BC_JUMP_LABEL_NAME(bc));
+            fprintf(output, "%s %d", bc_name(bc), BC_JUMP_INDEX(bc));
             break;
         case BC_LABEL:
             fprintf(output, "%s %s", bc_name(bc), BC_LABEL_NAME(bc));
@@ -86,6 +86,7 @@ bytecode_t *bc_set_new(int i, int j)
 bytecode_t *bc_fjump_new(bytecode_t *label)
 {
     bytecode_t *bc = bc_new(BC_FJUMP);
+    BC_FJUMP_INDEX(bc) = -1;
     bc->u.bc_fjump.label = label;
     return bc;
 }
@@ -94,6 +95,7 @@ bytecode_t *bc_jump_new(bytecode_t *label)
 {
     bytecode_t *bc = bc_new(BC_JUMP);
     BC_JUMP_LABEL(bc) = label;
+    BC_JUMP_INDEX(bc) = -1;
     return bc;
 }
 

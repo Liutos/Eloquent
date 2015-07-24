@@ -7,6 +7,7 @@
 #include <assert.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 #include "bytecode.h"
 #include "compiler.h"
 #include "utils/hash_table.h"
@@ -76,6 +77,48 @@ static void compiler_setrt(compiler_t *comp, const char *name, compiler_rt_t rt)
 {
     hash_table_set(comp->rts, (void *)name, rt);
 }
+
+/* ASSEMBLER BEGIN */
+
+static void compiler_assembly_scan(compiler_t *comp, ins_t *ins)
+{
+    int i = 0, offset = 0;
+    while (i < ins_length(ins)) {
+        bytecode_t *bc = ins_ref(ins, i);
+        if (bc->kind == BC_LABEL)
+            hash_table_set(comp->label_table, BC_LABEL_NAME(bc), (void *)offset);
+        else
+            offset++;
+        i++;
+    }
+}
+
+static ins_t *compiler_assembly_rebuild(compiler_t *comp, ins_t *ins)
+{
+    ins_t *asm_ins = ins_new();
+    int i = 0;
+    while (i < ins_length(ins)) {
+        bytecode_t *bc = ins_ref(ins, i);
+        if (bc->kind == BC_FJUMP) {
+            BC_FJUMP_INDEX(bc) = (int)hash_table_get(comp->label_table, BC_FJUMP_LABEL_NAME(bc), NULL);
+            ins_push(asm_ins, bc);
+        } else if (bc->kind == BC_JUMP) {
+            BC_JUMP_INDEX(bc) = (int)hash_table_get(comp->label_table, BC_JUMP_LABEL_NAME(bc), NULL);
+            ins_push(asm_ins, bc);
+        } else if (bc->kind != BC_LABEL)
+            ins_push(asm_ins, bc);
+        i++;
+    }
+    return asm_ins;
+}
+
+static ins_t *compiler_assemby(compiler_t *comp, ins_t *ins)
+{
+    compiler_assembly_scan(comp, ins);
+    return compiler_assembly_rebuild(comp, ins);
+}
+
+/* ASSEMBLER END */
 
 static int compiler_do_int(compiler_t *comp, ast_t *n, ins_t *ins)
 {
@@ -187,6 +230,7 @@ static int compiler_do_lambda(compiler_t *comp, ast_t *body, ins_t *ins)
     }
     ins_push(code, bc_return_new());
     compiler_exit_scope(comp);
+    code = compiler_assemby(comp, code);
     value_t *f = value_ucf_new(arity, code);
     ins_push(ins, bc_push_new(f));
     ins_push(ins, bc_func_new());
@@ -200,6 +244,7 @@ compiler_t *compiler_new(void)
     compiler_t *c = malloc(sizeof(compiler_t));
     c->error = string_new();
     c->env = compiler_env_new(NULL);
+    c->label_table = hash_table_new(hash_str, comp_str);
     c->rts = hash_table_new(hash_str, comp_str);
     compiler_setrt(c, "begin", compiler_do_begin);
     compiler_setrt(c, "set", compiler_do_set);
@@ -226,15 +271,23 @@ void compiler_free(compiler_t *c)
 int compiler_do(compiler_t *comp, ast_t *ast, ins_t *ins)
 {
     assert(ins != NULL);
+    int status = ERR;
     switch (ast->kind) {
         case AST_IDENTIFIER:
-            return compiler_do_ident(comp, ast, ins);
+            status = compiler_do_ident(comp, ast, ins);
+            break;
         case AST_INTEGER:
-            return compiler_do_int(comp, ast, ins);
+            status = compiler_do_int(comp, ast, ins);
+            break;
         case AST_CONS:
-            return compiler_do_cons(comp, ast, ins);
+            status = compiler_do_cons(comp, ast, ins);
+            break;
         default :
             string_printf(comp->error, "Don't know how to compile: %d", ast->kind);
             return ERR;
     }
+    ins_t *asm_ins = compiler_assemby(comp, ins);
+    /* FIXME: 此处需要一个复制操作，将汇编后的指令复制到作为结果的ins变量中 */
+    memcpy(ins, asm_ins, sizeof(ins_t));
+    return status;
 }
