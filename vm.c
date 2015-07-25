@@ -175,6 +175,9 @@ void vm_execute(vm_t *vm, ins_t *ins)
                 fprintf(stderr, "Not support: %s\n", bc_name(bc));
                 return;
         }
+        value_t *top = vm_top(vm);
+        if (top->kind == VALUE_ERROR)
+            return;
         i++;
     }
 }
