@@ -114,6 +114,9 @@ vm_t *vm_new(void)
     vm_env_internbif(vm, bif_div, 2);
     vm_env_internbif(vm, bif_equal, 2);
     vm_env_internbif(vm, bif_pred, 1);
+    vm_env_internbif(vm, bif_i2d, 1);
+    vm_env_internbif(vm, bif_ge, 1);
+    vm_env_internbif(vm, bif_mul, 1);
     return vm;
 }
 

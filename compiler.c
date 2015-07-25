@@ -257,6 +257,9 @@ compiler_t *compiler_new(void)
     compiler_env_intern(c->env, "/", NULL, NULL);
     compiler_env_intern(c->env, "=", NULL, NULL);
     compiler_env_intern(c->env, "pred", NULL, NULL);
+    compiler_env_intern(c->env, "i2d", NULL, NULL);
+    compiler_env_intern(c->env, ">=", NULL, NULL);
+    compiler_env_intern(c->env, "*", NULL, NULL);
 
     return c;
 }

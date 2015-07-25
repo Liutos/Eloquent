@@ -20,6 +20,7 @@ typedef value_t *(*bif_2)(value_t *, value_t *);
 
 typedef enum {
     VALUE_ERROR,
+    VALUE_FLOAT,
     VALUE_FUNCTION,
     VALUE_INT,
 } value_kind_t;
@@ -51,12 +52,14 @@ struct __value_t {
         int int_val;
         value_error_t err_val;
         value_function_t func_val;
+        double float_val;
     } u;
 };
 
 extern value_t *value_error_new(const char *);
 extern value_t *value_error_newf(const char *, ...);
 extern value_t *value_int_new(int);
+extern value_t *value_float_new(double);
 extern value_t *value_bif_new(void *, unsigned int);
 extern value_t *value_udf_new(ast_t *, ast_t *);
 extern value_t *value_ucf_new(int, ins_t *);
@@ -73,6 +76,7 @@ extern int value_isequal(value_t *, value_t *);
 #define VALUE_UDF_BODY(f) ((f)->u.func_val.u.udf.body)
 #define VALUE_UCF_CODE(f) ((f)->u.func_val.u.ucf.code)
 #define VALUE_UCF_ENV(f) ((f)->u.func_val.u.ucf.env)
+#define VALUE_FLOAT_VALUE(f) ((f)->u.float_val)
 #define VALUE_INT_VALUE(i) ((i)->u.int_val)
 
 #ifdef __cplusplus

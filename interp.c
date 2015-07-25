@@ -129,6 +129,9 @@ static void interp_initbif(interp_t *interp)
     interp_setbif(interp, "/", bif_div, 2);
     interp_setbif(interp, "=", bif_equal, 2);
     interp_setbif(interp, "pred", bif_pred, 1);
+    interp_setbif(interp, "i2d", bif_i2d, 1);
+    interp_setbif(interp, ">=", bif_ge, 2);
+    interp_setbif(interp, "*", bif_mul, 2);
 
     interp_setbis(interp, "set", bis_set);
     interp_setbis(interp, "if", bis_if);

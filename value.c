@@ -53,6 +53,14 @@ value_t *value_int_new(int num)
     return v;
 }
 
+value_t *value_float_new(double num)
+{
+    value_t *v = malloc(sizeof(*v));
+    v->kind = VALUE_FLOAT;
+    VALUE_FLOAT_VALUE(v) = num;
+    return v;
+}
+
 value_t *value_bif_new(void *bif_ptr, unsigned int arity)
 {
     value_t *v = malloc(sizeof(value_t));
@@ -103,6 +111,9 @@ void value_print(value_t *v, FILE *output)
     switch (v->kind) {
         case VALUE_ERROR:
             fprintf(output, "ERROR: %s", VALUE_ERR_MSG(v));
+            break;
+        case VALUE_FLOAT:
+            fprintf(output, "%f", VALUE_FLOAT_VALUE(v));
             break;
         case VALUE_FUNCTION:
             value_function_print(v, output);

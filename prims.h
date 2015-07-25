@@ -19,6 +19,9 @@ extern value_t *bif_succ(value_t *);
 extern value_t *bif_pred(value_t *);
 extern value_t *bif_div(value_t *, value_t *);
 extern value_t *bif_equal(value_t *, value_t *);
+extern value_t *bif_i2d(value_t *);
+extern value_t *bif_ge(value_t *, value_t *);
+extern value_t *bif_mul(value_t *, value_t *);
 
 #ifdef __cplusplus
 }
