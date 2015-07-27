@@ -15,6 +15,7 @@ extern "C" {
 #endif
 
 extern value_t *bif_add(value_t *, value_t *);
+extern value_t *bif_sub(value_t *, value_t *);
 extern value_t *bif_succ(value_t *);
 extern value_t *bif_pred(value_t *);
 extern value_t *bif_div(value_t *, value_t *);

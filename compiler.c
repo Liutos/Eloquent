@@ -253,6 +253,7 @@ compiler_t *compiler_new(void)
     c->counter = 0;
 
     compiler_env_intern(c->env, "+", NULL, NULL);
+    compiler_env_intern(c->env, "-", NULL, NULL);
     compiler_env_intern(c->env, "succ", NULL, NULL);
     compiler_env_intern(c->env, "/", NULL, NULL);
     compiler_env_intern(c->env, "=", NULL, NULL);

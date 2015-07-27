@@ -20,6 +20,17 @@ value_t *bif_add(value_t *n1, value_t *n2)
     return value_float_new(VALUE_FLOAT_VALUE(n1) + VALUE_FLOAT_VALUE(n2));
 }
 
+value_t *bif_sub(value_t *n1, value_t *n2)
+{
+    if (n1->kind == VALUE_INT && n2->kind == VALUE_INT)
+        return value_int_new(VALUE_INT_VALUE(n1) - VALUE_INT_VALUE(n2));
+    if (n1->kind == VALUE_INT && n2->kind == VALUE_FLOAT)
+        return value_float_new(VALUE_INT_VALUE(n1) - VALUE_FLOAT_VALUE(n2));
+    if (n1->kind == VALUE_FLOAT && n2->kind == VALUE_INT)
+        return value_float_new(VALUE_FLOAT_VALUE(n1) - VALUE_INT_VALUE(n2));
+    return value_float_new(VALUE_FLOAT_VALUE(n1) - VALUE_FLOAT_VALUE(n2));
+}
+
 value_t *bif_mul(value_t *n1, value_t *n2)
 {
     if (n1->kind == VALUE_INT && n2->kind == VALUE_INT)

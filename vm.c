@@ -110,6 +110,7 @@ vm_t *vm_new(void)
     vm->env = vm_env_new(NULL);
     vm->stack = vm_stack_new();
     vm_env_internbif(vm, bif_add, 2);
+    vm_env_internbif(vm, bif_sub, 2);
     vm_env_internbif(vm, bif_succ, 1);
     vm_env_internbif(vm, bif_div, 2);
     vm_env_internbif(vm, bif_equal, 2);

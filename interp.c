@@ -125,6 +125,7 @@ static void interp_setbis(interp_t *interp, const char *name, void *bis_ptr)
 static void interp_initbif(interp_t *interp)
 {
     interp_setbif(interp, "+", bif_add, 2);
+    interp_setbif(interp, "-", bif_sub, 2);
     interp_setbif(interp, "succ", bif_succ, 1);
     interp_setbif(interp, "/", bif_div, 2);
     interp_setbif(interp, "=", bif_equal, 2);
