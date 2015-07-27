@@ -20,7 +20,7 @@ extern env_t *env_empty_new(void);
 extern int env_isempty(env_t *);
 extern void env_free(env_t *);
 extern value_t *env_get(env_t *, char *, int *);
-extern void env_set(env_t *, char *, value_t *);
+extern void env_set(env_t *, const char *, value_t *);
 
 #ifdef __cplusplus
 }

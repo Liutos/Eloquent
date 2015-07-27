@@ -30,7 +30,7 @@ static syntax_t *interp_getbis(interp_t *interp, const char *name)
     return hash_table_get(interp->syntax_env, (void *)name, NULL);
 }
 
-static void interp_set(interp_t *interp, char *name, value_t *value)
+static void interp_set(interp_t *interp, const char *name, value_t *value)
 {
     env_set(interp->env, name, value);
 }
@@ -110,7 +110,7 @@ static value_kind_t bis_lambda(interp_t *interp, ast_t *body, value_t **result)
 
 /* SYNTAX END */
 
-static void interp_setbif(interp_t *interp, char *name, void *bif_ptr, unsigned int arity)
+static void interp_setbif(interp_t *interp, const char *name, void *bif_ptr, unsigned int arity)
 {
     value_t *val = value_bif_new(bif_ptr, arity);
     interp_set(interp, name, val);
@@ -124,15 +124,12 @@ static void interp_setbis(interp_t *interp, const char *name, void *bis_ptr)
 
 static void interp_initbif(interp_t *interp)
 {
-    interp_setbif(interp, "+", bif_add, 2);
-    interp_setbif(interp, "-", bif_sub, 2);
-    interp_setbif(interp, "succ", bif_succ, 1);
-    interp_setbif(interp, "/", bif_div, 2);
-    interp_setbif(interp, "=", bif_equal, 2);
-    interp_setbif(interp, "pred", bif_pred, 1);
-    interp_setbif(interp, "i2d", bif_i2d, 1);
-    interp_setbif(interp, ">=", bif_ge, 2);
-    interp_setbif(interp, "*", bif_mul, 2);
+    int i = 0;
+    while (i < prims_num) {
+        prim_t *p = &prims[i];
+        interp_setbif(interp, p->name, p->func_ptr, p->arity);
+        i++;
+    }
 
     interp_setbis(interp, "set", bis_set);
     interp_setbis(interp, "if", bis_if);

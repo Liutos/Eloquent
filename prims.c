@@ -88,3 +88,16 @@ value_t *bif_ge(value_t *n1, value_t *n2)
         return value_int_new(VALUE_FLOAT_VALUE(n1) >= VALUE_INT_VALUE(n2));
     return value_int_new(VALUE_FLOAT_VALUE(n1) >= VALUE_FLOAT_VALUE(n2));
 }
+
+prim_t prims[] = {
+        { .name = "+", .func_ptr = bif_add, .arity = 2 },
+        { .name = "-", .func_ptr = bif_sub, .arity = 2 },
+        { .name = "*", .func_ptr = bif_mul, .arity = 2 },
+        { .name = "/", .func_ptr = bif_div, .arity = 2 },
+        { .name = "succ", .func_ptr = bif_succ, .arity = 1 },
+        { .name = "pred", .func_ptr = bif_pred, .arity = 1 },
+        { .name = "i2d", .func_ptr = bif_i2d, .arity = 1 },
+        { .name = "=", .func_ptr = bif_equal, .arity = 2 },
+        { .name = ">=", .func_ptr = bif_ge, .arity = 2 },
+};
+size_t prims_num = sizeof(prims) / sizeof(prim_t);

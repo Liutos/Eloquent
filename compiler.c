@@ -10,6 +10,7 @@
 #include <string.h>
 #include "bytecode.h"
 #include "compiler.h"
+#include "prims.h"
 #include "utils/hash_table.h"
 #include "utils/string.h"
 #include "utils/vector.h"
@@ -252,15 +253,12 @@ compiler_t *compiler_new(void)
     compiler_setrt(c, "lambda", compiler_do_lambda);
     c->counter = 0;
 
-    compiler_env_intern(c->env, "+", NULL, NULL);
-    compiler_env_intern(c->env, "-", NULL, NULL);
-    compiler_env_intern(c->env, "succ", NULL, NULL);
-    compiler_env_intern(c->env, "/", NULL, NULL);
-    compiler_env_intern(c->env, "=", NULL, NULL);
-    compiler_env_intern(c->env, "pred", NULL, NULL);
-    compiler_env_intern(c->env, "i2d", NULL, NULL);
-    compiler_env_intern(c->env, ">=", NULL, NULL);
-    compiler_env_intern(c->env, "*", NULL, NULL);
+    int i = 0;
+    while (i < prims_num) {
+        prim_t *p = &prims[i];
+        compiler_env_intern(c->env, p->name, NULL, NULL);
+        i++;
+    }
 
     return c;
 }

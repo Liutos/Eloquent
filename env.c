@@ -44,7 +44,7 @@ value_t *env_get(env_t *env, char *name, int *is_found)
     return NULL;
 }
 
-void env_set(env_t *env, char *name, value_t *value)
+void env_set(env_t *env, const char *name, value_t *value)
 {
-    hash_table_set(env->data, name, value);
+    hash_table_set(env->data, (void *)name, value);
 }

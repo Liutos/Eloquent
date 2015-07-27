@@ -14,6 +14,17 @@
 extern "C" {
 #endif
 
+typedef struct __prim_t prim_t;
+
+struct __prim_t {
+    const char *name;
+    void *func_ptr;
+    int arity;
+};
+
+extern prim_t prims[];
+extern size_t prims_num;
+
 extern value_t *bif_add(value_t *, value_t *);
 extern value_t *bif_sub(value_t *, value_t *);
 extern value_t *bif_succ(value_t *);

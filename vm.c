@@ -109,15 +109,13 @@ vm_t *vm_new(void)
     vm_t *vm = malloc(sizeof(*vm));
     vm->env = vm_env_new(NULL);
     vm->stack = vm_stack_new();
-    vm_env_internbif(vm, bif_add, 2);
-    vm_env_internbif(vm, bif_sub, 2);
-    vm_env_internbif(vm, bif_succ, 1);
-    vm_env_internbif(vm, bif_div, 2);
-    vm_env_internbif(vm, bif_equal, 2);
-    vm_env_internbif(vm, bif_pred, 1);
-    vm_env_internbif(vm, bif_i2d, 1);
-    vm_env_internbif(vm, bif_ge, 1);
-    vm_env_internbif(vm, bif_mul, 1);
+
+    int i = 0;
+    while (i < prims_num) {
+        prim_t *p = &prims[i];
+        vm_env_internbif(vm, p->func_ptr, p->arity);
+        i++;
+    }
     return vm;
 }
 
