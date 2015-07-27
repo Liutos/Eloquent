@@ -38,14 +38,14 @@ static void bc_print(bytecode_t *bc, FILE *output)
             fprintf(output, "%s %s", bc_name(bc), BC_LABEL_NAME(bc));
             break;
         case BC_SET:
-            fprintf(output, "%s %d %d", bc_name(bc), bc->u.bc_set.i, bc->u.bc_set.j);
+            fprintf(output, "%s %d %d ; %s", bc_name(bc), bc->u.bc_set.i, bc->u.bc_set.j, bc->u.bc_set.name);
             break;
         case BC_PUSH:
             fprintf(output, "%s ", bc_name(bc));
             value_print(BC_PUSH_OBJ(bc), output);
             break;
         case BC_GET:
-            fprintf(output, "%s %d %d", bc_name(bc), bc->u.bc_get.i, bc->u.bc_get.j);
+            fprintf(output, "%s %d %d ; %s", bc_name(bc), bc->u.bc_get.i, bc->u.bc_get.j, bc->u.bc_get.name);
             break;
         case BC_POP:
         default :
@@ -67,19 +67,21 @@ bytecode_t *bc_push_new(void *ptr)
     return bc;
 }
 
-bytecode_t *bc_get_new(int i, int j)
+bytecode_t *bc_get_new(int i, int j, char *name)
 {
     bytecode_t *bc = bc_new(BC_GET);
     bc->u.bc_get.i = i;
     bc->u.bc_get.j = j;
+    bc->u.bc_get.name = name;
     return bc;
 }
 
-bytecode_t *bc_set_new(int i, int j)
+bytecode_t *bc_set_new(int i, int j, char *name)
 {
     bytecode_t *bc = bc_new(BC_SET);
     bc->u.bc_set.i = i;
     bc->u.bc_set.j = j;
+    bc->u.bc_set.name = name;
     return bc;
 }
 

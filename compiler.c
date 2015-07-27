@@ -132,11 +132,12 @@ static int compiler_do_int(compiler_t *comp, ast_t *n, ins_t *ins)
 static int compiler_do_ident(compiler_t *comp, ast_t *id, ins_t *ins)
 {
     int i = 0, j = 0;
-    if (compiler_env_lookup(comp->env, AST_IDENT_NAME(id), &i, &j) == 0) {
-        string_printf(comp->error, "Line %d, column %d: Can't find value of `%s'", id->line, id->column, AST_IDENT_NAME(id));
+    char *name = AST_IDENT_NAME(id);
+    if (compiler_env_lookup(comp->env, name, &i, &j) == 0) {
+        string_printf(comp->error, "Line %d, column %d: Can't find value of `%s'", id->line, id->column, name);
         return ERR;
     }
-    ins_push(ins, bc_get_new(i, j));
+    ins_push(ins, bc_get_new(i, j, name));
     return OK;
 }
 
@@ -187,13 +188,14 @@ static int compiler_do_set(compiler_t *comp, ast_t *body, ins_t *ins)
     ast_t *var = AST_CONS_CAR(body);
     ast_t *expr = AST_CONS_CAR( AST_CONS_CDR(body) );
     int i = 0, j = 0;
-    if (compiler_env_lookup(comp->env, AST_IDENT_NAME(var), &i, &j) == ERR) {
-        compiler_env_intern(comp->env, AST_IDENT_NAME(var), NULL, NULL);
+    char *name = AST_IDENT_NAME(var);
+    if (compiler_env_lookup(comp->env, name, &i, &j) == ERR) {
+        compiler_env_intern(comp->env, name, NULL, NULL);
         i = j = -1;
     }
     if (compiler_do(comp, expr, ins) == ERR)
         return ERR;
-    ins_push(ins, bc_set_new(i, j));
+    ins_push(ins, bc_set_new(i, j, name));
     return OK;
 }
 

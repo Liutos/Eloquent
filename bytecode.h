@@ -46,9 +46,11 @@ struct __bytecode_t {
         void *push_ptr;
         struct {
             int i, j;
+            char *name;
         } bc_get;
         struct {
             int i, j;
+            char *name;
         } bc_set;
         struct {
             bytecode_t *label;
@@ -69,8 +71,8 @@ struct __bytecode_t {
 
 extern bytecode_t *bc_pop_new(void);
 extern bytecode_t *bc_push_new(void *);
-extern bytecode_t *bc_get_new(int, int);
-extern bytecode_t *bc_set_new(int, int);
+extern bytecode_t *bc_get_new(int, int, char *);
+extern bytecode_t *bc_set_new(int, int, char *);
 extern bytecode_t *bc_fjump_new(bytecode_t *);
 extern bytecode_t *bc_jump_new(bytecode_t *);
 extern bytecode_t *bc_label_new(const char *);
