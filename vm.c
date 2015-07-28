@@ -16,6 +16,7 @@
 
 #define vm_stack_new() vector_new()
 #define vm_stack_free(s) vector_free(s)
+#define vm_stack_shrink(s, n) vector_shrink(s, n)
 
 static vm_env_t *vm_env_new(vm_env_t *outer)
 {
@@ -138,6 +139,7 @@ void vm_execute(vm_t *vm, ins_t *ins)
                     value_t *obj = vm_iref(vm, i);
                     vm_env_intern(vm, obj);
                 }
+                vm_stack_shrink(vm->stack, BC_ARGS_ARITY(bc));
                 break;
             }
             case BC_CALL:

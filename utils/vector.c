@@ -78,3 +78,10 @@ void vector_set(vector_t *v, intptr_t obj, int index)
 {
     v->slots[index] = obj;
 }
+
+void vector_shrink(vector_t *v, size_t n)
+{
+    v->count -= n;
+    if (v->count < 0)
+        v->count = 0;
+}

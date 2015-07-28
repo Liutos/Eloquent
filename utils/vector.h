@@ -26,6 +26,7 @@ extern int vector_posif(vector_t *, intptr_t, ele_comp_t);
 extern intptr_t vector_top(vector_t *);
 extern void vector_set(vector_t *, intptr_t, int);
 extern intptr_t vector_iref(vector_t *, int);
+extern void vector_shrink(vector_t *v, size_t);
 
 #ifdef __cplusplus
 }
