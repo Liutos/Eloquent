@@ -85,6 +85,7 @@ extern bytecode_t *bc_chkex_new(void);
 extern bytecode_t *bc_return_new(void);
 extern void bytecode_free(bytecode_t *);
 extern const char *bc_name(bytecode_t *);
+extern void bc_sprint(bytecode_t *, char *, size_t);
 
 #define ins_length(ins) ((ins)->count)
 #define ins_new() vector_new()

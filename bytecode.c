@@ -177,3 +177,10 @@ const char *bc_name(bytecode_t *bc)
 {
     return bc_names[bc->kind];
 }
+
+void bc_sprint(bytecode_t *bc, char *desc, size_t size)
+{
+    FILE *outs = fmemopen(desc, size, "w");
+    bc_print(bc, outs);
+    fclose(outs);
+}

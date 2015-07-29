@@ -66,6 +66,7 @@ extern value_t *value_ucf_new(int, ins_t *);
 extern void value_free(value_t *);
 extern void value_print(value_t *, FILE *);
 extern int value_isequal(value_t *, value_t *);
+extern void value_sprint(value_t *, char *, size_t);
 
 #define VALUE_ERR_MSG(e) ((e)->u.err_val.msg->text)
 #define VALUE_FUNC_ISBIF(f) ((f)->u.func_val.is_bif)

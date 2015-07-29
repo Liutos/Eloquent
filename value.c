@@ -136,3 +136,10 @@ int value_isequal(value_t *v1, value_t *v2)
             return v1 == v2;
     }
 }
+
+void value_sprint(value_t *v, char *output, size_t size)
+{
+    FILE *outs = fmemopen(output, size, "w");
+    value_print(v, outs);
+    fclose(outs);
+}

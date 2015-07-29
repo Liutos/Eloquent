@@ -5,6 +5,7 @@
  *      Author: liutos
  */
 #include <assert.h>
+#include <stdarg.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include "prims.h"
@@ -13,6 +14,55 @@
 #include "vm.h"
 
 /* PRIVATE */
+
+/* LOG BEGIN */
+
+static void vm_log(vm_t *vm, const char *fmt, ...)
+{
+    va_list ap;
+    va_start(ap, fmt);
+    char msg[256] = {0};
+    vsnprintf(msg, sizeof(msg), fmt, ap);
+    fprintf(vm->log, "[DEBUG] %s\n", msg);
+}
+
+static void vm_log_bc(vm_t *vm, bytecode_t *bc, const char *fmt, ...)
+{
+    char val[1024] = {0};
+    bc_sprint(bc, val, sizeof(val));
+    va_list ap;
+    va_start(ap, fmt);
+    char msg[256] = {0};
+    vsnprintf(msg, sizeof(msg), fmt, ap);
+    fprintf(vm->log, "[DEBUG] %s`bytecode=%s\n", msg, val);
+}
+
+static void vm_log_value(vm_t *vm, value_t *v, const char *fmt, ...)
+{
+    char val[1024] = {0};
+    value_sprint(v, val, sizeof(val));
+    va_list ap;
+    va_start(ap, fmt);
+    char msg[256] = {0};
+    vsnprintf(msg, sizeof(msg), fmt, ap);
+    fprintf(vm->log, "[DEBUG] %s`val=%s\n", msg, val);
+}
+
+static void vm_log_stack(vm_t *vm)
+{
+    int i = vm->stack->count - 1;
+    while (i >= 0) {
+        value_t *o = vector_ref(vm->stack, i);
+        vm_log_value(vm, o, "msg=In stack`i=%d", i);
+        i--;
+    }
+}
+
+#define VMLOG(vm, fmt, ...) vm_log(vm, "pos=%s:%d`"fmt, __FILE__, __LINE__, __VA_ARGS__)
+#define VMLOG_BC(vm, bc, fmt, ...) vm_log_bc(vm, bc, "pos=%s:%d`"fmt, __FILE__, __LINE__, __VA_ARGS__)
+#define VMLOG_VAL(vm, v, fmt, ...) vm_log_value(vm, v, "pos=%s:%d`"fmt, __FILE__, __LINE__, __VA_ARGS__)
+
+/* LOG END */
 
 #define vm_stack_new() vector_new()
 #define vm_stack_free(s) vector_free(s)
@@ -115,6 +165,7 @@ vm_t *vm_new(void)
     vm->env = vm_env_new(NULL);
     vm->stack = vm_stack_new();
     vm->sp = 0;
+    vm->log = fopen("/tmp/eloquent.log", "w+");
 
     int i = 0;
     while (i < prims_num) {
@@ -137,11 +188,13 @@ void vm_execute(vm_t *vm, ins_t *ins)
     int i = 0;
     while (i < ins_length(ins)) {
         bytecode_t *bc = ins_ref(ins, i);
+        VMLOG_BC(vm, bc, "msg=Executing`i=%d", i);
         switch (bc->kind) {
             case BC_ARGS: {
                 int i = BC_ARGS_ARITY(bc) - 1;
                 for (; i >= 0; i--) {
                     value_t *obj = vm_iref(vm, i);
+                    VMLOG_VAL(vm, obj, "msg=Moving`i=%d", i);
                     vm_env_intern(vm, obj);
                 }
                 vm_stack_shrink(vm->stack, BC_ARGS_ARITY(bc));
@@ -155,8 +208,9 @@ void vm_execute(vm_t *vm, ins_t *ins)
                 if (top->kind == VALUE_ERROR) {
                     vm_stack_restore(vm);
                     vm_push(vm, top);
+                    return;
                 }
-                return;
+                break;
             }
             case BC_FJUMP: {
                 value_t *o = vm_pop(vm);
@@ -193,6 +247,8 @@ void vm_execute(vm_t *vm, ins_t *ins)
                 return;
         }
         i++;
+        if (vm->stack->count != 0)
+            vm_log_stack(vm);
     }
 }
 
@@ -213,4 +269,5 @@ void vm_print_all(vm_t *vm, FILE *output)
         fputc('\n', output);
         i--;
     }
+    vector_setpos(vm->stack, 0);
 }

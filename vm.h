@@ -8,6 +8,7 @@
 #ifndef VM_H_
 #define VM_H_
 
+#include <stdio.h>
 #include "bytecode.h"
 #include "utils/seg_vector.h"
 #include "utils/vector.h"
@@ -24,6 +25,7 @@ struct __vm_t {
     vm_env_t *env;
     vm_stack_t *stack;
     size_t sp;
+    FILE *log;
 };
 
 extern vm_t *vm_new(void);
