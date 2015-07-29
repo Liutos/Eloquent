@@ -23,12 +23,14 @@ typedef seg_vector_t vm_env_t;
 struct __vm_t {
     vm_env_t *env;
     vm_stack_t *stack;
+    size_t sp;
 };
 
 extern vm_t *vm_new(void);
 extern void vm_free(vm_t *);
 extern void vm_execute(vm_t *, ins_t *);
 extern void vm_print_top(vm_t *, FILE *);
+extern void vm_print_all(vm_t *, FILE *);
 
 #ifdef __cplusplus
 }

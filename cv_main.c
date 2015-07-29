@@ -44,7 +44,7 @@ int main(int argc, char *argv[])
             vm_execute(vm, ins);
             fprintf(stdout, "VM > ");
             fflush(stdout);
-            vm_print_top(vm, stdout);
+            vm_print_all(vm, stdout);
         } else
             fprintf(stdout, "Compiler error: %s\n", comp->error->text);
         kind = prompt(parser, &ast);

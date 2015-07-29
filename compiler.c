@@ -152,6 +152,7 @@ static int compiler_do_call(compiler_t *comp, ast_t *op, ast_t *args, ins_t *ins
     if (compiler_do(comp, op, ins) == ERR)
         return ERR;
     ins_push(ins, bc_call_new());
+    ins_push(ins, bc_chkex_new());
     return OK;
 }
 

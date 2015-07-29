@@ -22,6 +22,7 @@ typedef vector_t ins_t;
 #define BC_KIND(op) \
     op(BC_ARGS), \
     op(BC_CALL), \
+    op(BC_CHKEX), \
     op(BC_FJUMP), \
     op(BC_FUNC), \
     op(BC_GET), \
@@ -80,6 +81,7 @@ extern bytecode_t *bc_nope_new(void);
 extern bytecode_t *bc_call_new(void);
 extern bytecode_t *bc_args_new(int);
 extern bytecode_t *bc_func_new(void);
+extern bytecode_t *bc_chkex_new(void);
 extern bytecode_t *bc_return_new(void);
 extern void bytecode_free(bytecode_t *);
 extern const char *bc_name(bytecode_t *);

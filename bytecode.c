@@ -131,6 +131,11 @@ bytecode_t *bc_func_new(void)
     return bc_new(BC_FUNC);
 }
 
+bytecode_t *bc_chkex_new(void)
+{
+    return bc_new(BC_CHKEX);
+}
+
 bytecode_t *bc_return_new(void)
 {
     return bc_new(BC_RETURN);

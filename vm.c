@@ -17,6 +17,8 @@
 #define vm_stack_new() vector_new()
 #define vm_stack_free(s) vector_free(s)
 #define vm_stack_shrink(s, n) vector_shrink(s, n)
+#define vm_stack_restore(vm) vector_setpos(vm->stack, vm->sp)
+#define vm_stack_save(vm) vector_curpos(vm->stack)
 
 static vm_env_t *vm_env_new(vm_env_t *outer)
 {
@@ -97,8 +99,10 @@ static void vm_execute_function(vm_t *vm)
     else {
         assert(VALUE_FUNC_ISCMP(f));
         vm_env_t *old_env = vm->env;
+        size_t old_sp = vm_stack_save(vm);
         vm->env = vm_env_new(VALUE_UCF_ENV(f));
         vm_execute(vm, VALUE_UCF_CODE(f));
+        vm->sp = old_sp;
         vm->env = old_env;
     }
 }
@@ -110,6 +114,7 @@ vm_t *vm_new(void)
     vm_t *vm = malloc(sizeof(*vm));
     vm->env = vm_env_new(NULL);
     vm->stack = vm_stack_new();
+    vm->sp = 0;
 
     int i = 0;
     while (i < prims_num) {
@@ -145,6 +150,14 @@ void vm_execute(vm_t *vm, ins_t *ins)
             case BC_CALL:
                 vm_execute_function(vm);
                 break;
+            case BC_CHKEX: {
+                value_t *top = vm_top(vm);
+                if (top->kind == VALUE_ERROR) {
+                    vm_stack_restore(vm);
+                    vm_push(vm, top);
+                }
+                return;
+            }
             case BC_FJUMP: {
                 value_t *o = vm_pop(vm);
                 if (o->kind == VALUE_INT && VALUE_INT_VALUE(o) == 0)
@@ -179,9 +192,6 @@ void vm_execute(vm_t *vm, ins_t *ins)
                 fprintf(stderr, "Not support: %s\n", bc_name(bc));
                 return;
         }
-        value_t *top = vm_top(vm);
-        if (top->kind == VALUE_ERROR)
-            return;
         i++;
     }
 }
@@ -191,4 +201,16 @@ void vm_print_top(vm_t *vm, FILE *output)
     value_t *o = vm_top(vm);
     value_print(o, output);
     fputc('\n', output);
+}
+
+void vm_print_all(vm_t *vm, FILE *output)
+{
+    int i = vm->stack->count - 1;
+    while (i >= 0) {
+        value_t *o = (value_t *)vector_ref(vm->stack, i);
+        fprintf(output, "%d\t", i);
+        value_print(o, output);
+        fputc('\n', output);
+        i--;
+    }
 }

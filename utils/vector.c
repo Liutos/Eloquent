@@ -85,3 +85,13 @@ void vector_shrink(vector_t *v, size_t n)
     if (v->count < 0)
         v->count = 0;
 }
+
+size_t vector_curpos(vector_t *v)
+{
+    return v->count;
+}
+
+void vector_setpos(vector_t *v, size_t pos)
+{
+    v->count = pos;
+}
