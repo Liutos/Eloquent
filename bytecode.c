@@ -22,37 +22,6 @@ static bytecode_t *bc_new(bytecode_kind_t kind)
     return bc;
 }
 
-static void bc_print(bytecode_t *bc, FILE *output)
-{
-    switch (bc->kind) {
-        case BC_ARGS:
-            fprintf(output, "%s %d", bc_name(bc), BC_ARGS_ARITY(bc));
-            break;
-        case BC_FJUMP:
-            fprintf(output, "%s %d", bc_name(bc), BC_FJUMP_INDEX(bc));
-            break;
-        case BC_JUMP:
-            fprintf(output, "%s %d", bc_name(bc), BC_JUMP_INDEX(bc));
-            break;
-        case BC_LABEL:
-            fprintf(output, "%s %s", bc_name(bc), BC_LABEL_NAME(bc));
-            break;
-        case BC_SET:
-            fprintf(output, "%s %d %d ; %s", bc_name(bc), bc->u.bc_set.i, bc->u.bc_set.j, bc->u.bc_set.name);
-            break;
-        case BC_PUSH:
-            fprintf(output, "%s ", bc_name(bc));
-            value_print(BC_PUSH_OBJ(bc), output);
-            break;
-        case BC_GET:
-            fprintf(output, "%s %d %d ; %s", bc_name(bc), bc->u.bc_get.i, bc->u.bc_get.j, bc->u.bc_get.name);
-            break;
-        case BC_POP:
-        default :
-            fprintf(output, "%s", bc_name(bc));
-    }
-}
-
 /* PUBLIC */
 
 bytecode_t *bc_pop_new(void)
@@ -141,6 +110,11 @@ bytecode_t *bc_return_new(void)
     return bc_new(BC_RETURN);
 }
 
+bytecode_t *bc_print_new(void)
+{
+    return bc_new(BC_PRINT);
+}
+
 void bytecode_free(bytecode_t *bc)
 {
     free(bc);
@@ -176,6 +150,37 @@ void ins_pretty_print(ins_t *ins, FILE *output)
 const char *bc_name(bytecode_t *bc)
 {
     return bc_names[bc->kind];
+}
+
+void bc_print(bytecode_t *bc, FILE *output)
+{
+    switch (bc->kind) {
+        case BC_ARGS:
+            fprintf(output, "%s %d", bc_name(bc), BC_ARGS_ARITY(bc));
+            break;
+        case BC_FJUMP:
+            fprintf(output, "%s %d", bc_name(bc), BC_FJUMP_INDEX(bc));
+            break;
+        case BC_JUMP:
+            fprintf(output, "%s %d", bc_name(bc), BC_JUMP_INDEX(bc));
+            break;
+        case BC_LABEL:
+            fprintf(output, "%s %s", bc_name(bc), BC_LABEL_NAME(bc));
+            break;
+        case BC_SET:
+            fprintf(output, "%s %d %d ; %s", bc_name(bc), bc->u.bc_set.i, bc->u.bc_set.j, bc->u.bc_set.name);
+            break;
+        case BC_PUSH:
+            fprintf(output, "%s ", bc_name(bc));
+            value_print(BC_PUSH_OBJ(bc), output);
+            break;
+        case BC_GET:
+            fprintf(output, "%s %d %d ; %s", bc_name(bc), bc->u.bc_get.i, bc->u.bc_get.j, bc->u.bc_get.name);
+            break;
+        case BC_POP:
+        default :
+            fprintf(output, "%s", bc_name(bc));
+    }
 }
 
 void bc_sprint(bytecode_t *bc, char *desc, size_t size)

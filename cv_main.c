@@ -37,17 +37,15 @@ int main(int argc, char *argv[])
 
         ins_t *ins = ins_new();
         if (compiler_do(comp, ast, ins) == 1) {
+            vm_inject_print(ins);
             fprintf(stdout, "BYTECODE >\n");
-            fflush(stdout);
             ins_pretty_print(ins, stdout);
 
             vm_execute(vm, ins);
-            fprintf(stdout, "VM > ");
-            fflush(stdout);
-            vm_print_all(vm, stdout);
         } else
             fprintf(stdout, "Compiler error: %s\n", comp->error->text);
         kind = prompt(parser, &ast);
     }
+    fputc('\n', stdout);
     return 0;
 }

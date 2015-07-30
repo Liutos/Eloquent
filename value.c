@@ -19,9 +19,7 @@ static void value_function_print(value_t *v, FILE *output)
         ast_print(VALUE_UDF_BODY(v), output);
         fprintf(output, ">");
     } else {
-        fprintf(output, "#<");
-        ins_pretty_print(VALUE_UCF_CODE(v), output);
-        fputc('>', output);
+        fprintf(output, "#<%p>", v);
     }
 }
 

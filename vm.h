@@ -33,6 +33,7 @@ extern void vm_free(vm_t *);
 extern void vm_execute(vm_t *, ins_t *);
 extern void vm_print_top(vm_t *, FILE *);
 extern void vm_print_all(vm_t *, FILE *);
+extern void vm_inject_print(ins_t *);
 
 #ifdef __cplusplus
 }

@@ -52,7 +52,7 @@ static void vm_log_stack(vm_t *vm)
 {
     int i = vm->stack->count - 1;
     while (i >= 0) {
-        value_t *o = vector_ref(vm->stack, i);
+        value_t *o = (value_t *)vector_ref(vm->stack, i);
         vm_log_value(vm, o, "msg=In stack`i=%d", i);
         i--;
     }
@@ -157,6 +157,33 @@ static void vm_execute_function(vm_t *vm)
     }
 }
 
+/* PRINT BEGIN */
+
+static void vm_value_function_print(vm_t *vm, value_t *object)
+{
+    ins_t *ins = VALUE_UCF_CODE(object);
+    int i = 0;
+    while (i < ins_length(ins)) {
+        bytecode_t *bc = ins_ref(ins, i);
+        fprintf(stdout, "[%d]\t", i);
+        bc_print(bc, stdout);
+        fputc('\n', stdout);
+        i++;
+    }
+}
+
+static void vm_value_print(vm_t *vm, value_t *object)
+{
+    if (object->kind == VALUE_FUNCTION && VALUE_FUNC_ISCMP(object))
+        vm_value_function_print(vm, object);
+    else {
+        value_print(object, stdout);
+        fputc('\n', stdout);
+    }
+}
+
+/* PRINT END */
+
 /* PUBLIC */
 
 vm_t *vm_new(void)
@@ -234,6 +261,11 @@ void vm_execute(vm_t *vm, ins_t *ins)
             case BC_POP:
                 vm_pop(vm);
                 break;
+            case BC_PRINT: {
+                value_t *object = vm_top(vm);
+                vm_value_print(vm, object);
+                break;
+            }
             case BC_PUSH:
                 vm_push(vm, BC_PUSH_OBJ(bc));
                 break;
@@ -270,4 +302,9 @@ void vm_print_all(vm_t *vm, FILE *output)
         i--;
     }
     vector_setpos(vm->stack, 0);
+}
+
+void vm_inject_print(ins_t *ins)
+{
+    ins_push(ins, bc_print_new());
 }

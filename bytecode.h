@@ -30,6 +30,7 @@ typedef vector_t ins_t;
     op(BC_LABEL), \
     op(BC_NOPE), \
     op(BC_POP), \
+    op(BC_PRINT), \
     op(BC_PUSH), \
     op(BC_RETURN), \
     op(BC_SET),
@@ -83,8 +84,10 @@ extern bytecode_t *bc_args_new(int);
 extern bytecode_t *bc_func_new(void);
 extern bytecode_t *bc_chkex_new(void);
 extern bytecode_t *bc_return_new(void);
+extern bytecode_t *bc_print_new(void);
 extern void bytecode_free(bytecode_t *);
 extern const char *bc_name(bytecode_t *);
+extern void bc_print(bytecode_t *, FILE *);
 extern void bc_sprint(bytecode_t *, char *, size_t);
 
 #define ins_length(ins) ((ins)->count)
