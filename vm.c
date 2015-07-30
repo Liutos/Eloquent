@@ -17,15 +17,6 @@
 
 /* LOG BEGIN */
 
-static void vm_log(vm_t *vm, const char *fmt, ...)
-{
-    va_list ap;
-    va_start(ap, fmt);
-    char msg[256] = {0};
-    vsnprintf(msg, sizeof(msg), fmt, ap);
-    fprintf(vm->log, "[DEBUG] %s\n", msg);
-}
-
 static void vm_log_bc(vm_t *vm, bytecode_t *bc, const char *fmt, ...)
 {
     char val[1024] = {0};
@@ -58,7 +49,6 @@ static void vm_log_stack(vm_t *vm)
     }
 }
 
-#define VMLOG(vm, fmt, ...) vm_log(vm, "pos=%s:%d`"fmt, __FILE__, __LINE__, __VA_ARGS__)
 #define VMLOG_BC(vm, bc, fmt, ...) vm_log_bc(vm, bc, "pos=%s:%d`"fmt, __FILE__, __LINE__, __VA_ARGS__)
 #define VMLOG_VAL(vm, v, fmt, ...) vm_log_value(vm, v, "pos=%s:%d`"fmt, __FILE__, __LINE__, __VA_ARGS__)
 

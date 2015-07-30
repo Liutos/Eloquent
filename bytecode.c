@@ -4,6 +4,7 @@
  *  Created on: 2015年7月20日
  *      Author: liutos
  */
+#include <assert.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include "bytecode.h"
@@ -120,29 +121,47 @@ void bytecode_free(bytecode_t *bc)
     free(bc);
 }
 
-void ins_print(ins_t *ins, FILE *output)
+void ins_indent_print(int indent, FILE *output)
 {
-    int i = 0;
-    while (i < ins->count) {
-        bytecode_t *bc = ins_ref(ins, i);
-        bc_print(bc, output);
-        fputc('\n', output);
-        i++;
+    while (indent >= 0) {
+        fputc('\t', output);
+        indent--;
     }
 }
 
-void ins_pretty_print(ins_t *ins, FILE *output)
+void ins_push_ucf_print(value_t *ucf, FILE *output, int indent)
+{
+    ins_indent_print(indent, output);
+    fprintf(output, "BC_PUSH #< ; This is a function\n");
+    ins_t *ins = VALUE_UCF_CODE(ucf);
+    ins_pretty_print(ins, output, indent + 1);
+    ins_indent_print(indent, output);
+    fprintf(output, "        >");
+}
+
+void ins_push_print(bytecode_t *bc, FILE *output, int indent)
+{
+    value_t *object = BC_PUSH_OBJ(bc);
+    if (object->kind == VALUE_FUNCTION && VALUE_FUNC_ISCMP(object))
+        ins_push_ucf_print(object, output, indent);
+    else {
+        ins_indent_print(indent, output);
+        bc_print(bc, output);
+    }
+}
+
+void ins_pretty_print(ins_t *ins, FILE *output, int indent)
 {
     int i = 0;
-    while (i < ins->count) {
+    while (i < ins_length(ins)) {
         bytecode_t *bc = ins_ref(ins, i);
-        if (bc->kind == BC_LABEL)
-            fprintf(output, "%s", BC_LABEL_NAME(bc));
-        else {
-            fprintf(output, "\t\t");
+        assert(bc->kind != BC_LABEL);
+        if (bc->kind != BC_PUSH) {
+            ins_indent_print(indent, output);
             bc_print(bc, output);
-            fputc('\n', output);
-        }
+        } else
+            ins_push_print(bc, output, indent);
+        fputc('\n', output);
         i++;
     }
 }

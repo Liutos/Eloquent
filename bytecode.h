@@ -94,8 +94,7 @@ extern void bc_sprint(bytecode_t *, char *, size_t);
 #define ins_new() vector_new()
 #define ins_push(ins, v) vector_push(ins, (intptr_t)v)
 #define ins_ref(ins, i) (bytecode_t *)vector_ref(ins, i);
-extern void ins_print(ins_t *, FILE *);
-extern void ins_pretty_print(ins_t *, FILE *);
+extern void ins_pretty_print(ins_t *, FILE *, int);
 
 #define BC_ARGS_ARITY(a) ((a)->u.bc_args.arity)
 #define BC_FJUMP_INDEX(f) ((f)->u.bc_fjump.index)
