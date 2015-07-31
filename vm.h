@@ -20,12 +20,14 @@ extern "C" {
 typedef struct __vm_t vm_t;
 typedef vector_t vm_stack_t;
 typedef seg_vector_t vm_env_t;
+typedef vector_t __vm_stack_t;
 
 struct __vm_t {
     vm_env_t *env;
     vm_stack_t *stack;
     size_t sp;
     FILE *log;
+    __vm_stack_t *sys_stack;
 };
 
 extern vm_t *vm_new(void);

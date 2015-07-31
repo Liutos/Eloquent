@@ -13,6 +13,10 @@
 #include "value.h"
 #include "vm.h"
 
+#define __vm_stack_new() vector_new()
+#define __vm_stack_push(vm, o) vector_push(vm->sys_stack, (intptr_t)o)
+#define __vm_stack_pop(vm) vector_pop(vm->sys_stack)
+
 /* PRIVATE */
 
 /* LOG BEGIN */
@@ -131,22 +135,6 @@ static void vm_execute_bif(vm_t *vm, value_t *f)
     vm_push(vm, res);
 }
 
-static void vm_execute_function(vm_t *vm)
-{
-    value_t *f = vm_pop(vm);
-    if (VALUE_FUNC_ISBIF(f))
-        vm_execute_bif(vm, f);
-    else {
-        assert(VALUE_FUNC_ISCMP(f));
-        vm_env_t *old_env = vm->env;
-        size_t old_sp = vm_stack_save(vm);
-        vm->env = vm_env_new(VALUE_UCF_ENV(f));
-        vm_execute(vm, VALUE_UCF_CODE(f));
-        vm->sp = old_sp;
-        vm->env = old_env;
-    }
-}
-
 /* PRINT BEGIN */
 
 static void vm_value_function_print(vm_t *vm, value_t *object)
@@ -183,6 +171,7 @@ vm_t *vm_new(void)
     vm->stack = vm_stack_new();
     vm->sp = 0;
     vm->log = fopen("/tmp/eloquent.log", "w+");
+    vm->sys_stack = __vm_stack_new();
 
     int i = 0;
     while (i < prims_num) {
@@ -217,9 +206,27 @@ void vm_execute(vm_t *vm, ins_t *ins)
                 vm_stack_shrink(vm->stack, BC_ARGS_ARITY(bc));
                 break;
             }
-            case BC_CALL:
-                vm_execute_function(vm);
+            case BC_CALL: {
+                value_t *f = vm_pop(vm);
+                if (VALUE_FUNC_ISBIF(f))
+                    vm_execute_bif(vm, f);
+                else {
+                    /* 保存环境信息 */
+                    __vm_stack_push(vm, vm->env);
+                    /* 保存栈指针信息 */
+                    __vm_stack_push(vm, vm->sp);
+                    /* 保存指令信息 */
+                    __vm_stack_push(vm, ins);
+                    /* 保存指令指针 */
+                    __vm_stack_push(vm, i);
+                    /* 初始化环境、字节码序列和指令指针 */
+                    vm->env = vm_env_new(VALUE_UCF_ENV(f));
+                    ins = VALUE_UCF_CODE(f);
+                    i = -1;
+                    /* 开始执行新的字节码指令 */
+                }
                 break;
+            }
             case BC_CHKEX: {
                 value_t *top = vm_top(vm);
                 if (top->kind == VALUE_ERROR) {
@@ -260,6 +267,15 @@ void vm_execute(vm_t *vm, ins_t *ins)
                 vm_push(vm, BC_PUSH_OBJ(bc));
                 break;
             case BC_RETURN:
+                /* 恢复指令指针 */
+                i = (int)__vm_stack_pop(vm);
+                /* 恢复指令信息 */
+                ins = (ins_t *)__vm_stack_pop(vm);
+                /* 恢复栈指针信息 */
+                vm->sp = (size_t)__vm_stack_pop(vm);
+                /* 恢复环境信息 */
+                vm->env = (vm_env_t *)__vm_stack_pop(vm);
+                /* 开始执行旧的字节码指令 */
                 break;
             case BC_SET:
                 vm_env_set(vm, BC_SET_I(bc), BC_SET_J(bc));

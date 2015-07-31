@@ -9,3 +9,8 @@
 bin/
 eloi
 eloc
+
+# Files used by `global'
+GPATH
+GRTAGS
+GTAGS
