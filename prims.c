@@ -4,6 +4,7 @@
  *  Created on: 2015年7月22日
  *      Author: liutos
  */
+#include "bytecode.h"
 #include "prims.h"
 #include "value.h"
 
@@ -114,15 +115,29 @@ value_t *bif_ge(value_t *n1, value_t *n2)
     return value_int_new(VALUE_FLOAT_VALUE(n1) >= VALUE_FLOAT_VALUE(n2));
 }
 
+/* Built-in Compiled Functions */
+
+void bcf_print(ins_t *ins)
+{
+    ins_push(ins, bc_args_new(1));
+    ins_push(ins, bc_get_new(0, 0, NULL));
+    ins_push(ins, bc_print_new());
+    ins_push(ins, bc_return_new());
+}
+
+#define _BIF(_name, _ptr, _arity) { .is_compiled = 0, .name = _name, .func_ptr = _ptr, .arity = _arity }
+#define _BCF(_name, _ptr, _arity) { .is_compiled = 1, .name = _name, .func_ptr = _ptr, .arity = _arity }
+
 prim_t prims[] = {
-        { .name = "+", .func_ptr = bif_add, .arity = 2 },
-        { .name = "-", .func_ptr = bif_sub, .arity = 2 },
-        { .name = "*", .func_ptr = bif_mul, .arity = 2 },
-        { .name = "/", .func_ptr = bif_div, .arity = 2 },
-        { .name = "succ", .func_ptr = bif_succ, .arity = 1 },
-        { .name = "pred", .func_ptr = bif_pred, .arity = 1 },
-        { .name = "i2d", .func_ptr = bif_i2d, .arity = 1 },
-        { .name = "=", .func_ptr = bif_equal, .arity = 2 },
-        { .name = ">=", .func_ptr = bif_ge, .arity = 2 },
+        _BIF("+", bif_add, 2),
+        _BIF("-", bif_sub, 2),
+        _BIF("*", bif_mul, 2),
+        _BIF("/", bif_div, 2),
+        _BIF("succ", bif_succ, 1),
+        _BIF("pred", bif_pred, 1),
+        _BIF("i2d", bif_i2d, 1),
+        _BIF("=", bif_equal, 2),
+        _BIF(">=", bif_ge, 2),
+        _BCF("print", bcf_print, 1),
 };
 size_t prims_num = sizeof(prims) / sizeof(prim_t);

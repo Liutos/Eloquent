@@ -94,6 +94,14 @@ static void vm_env_set(vm_t *vm, int i, int j)
         seg_vector_set(vm->env, val, i, j);
 }
 
+static void vm_env_internbcf(vm_t *vm, void *bcf, int arity)
+{
+    ins_t *code = ins_new();
+    ((bcf_t)bcf)(code);
+    value_t *f = value_ucf_new(arity, code);
+    vm_env_intern(vm, f);
+}
+
 static void vm_env_internbif(vm_t *vm, void *bif, int arity)
 {
     value_t *v = value_bif_new(bif, arity);
@@ -177,7 +185,10 @@ vm_t *vm_new(void)
     int i = 0;
     while (i < prims_num) {
         prim_t *p = &prims[i];
-        vm_env_internbif(vm, p->func_ptr, p->arity);
+        if (!p->is_compiled)
+            vm_env_internbif(vm, p->func_ptr, p->arity);
+        else
+            vm_env_internbcf(vm, p->func_ptr, p->arity);
         i++;
     }
     return vm;

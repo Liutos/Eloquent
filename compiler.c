@@ -243,15 +243,6 @@ static int compiler_do_lambda(compiler_t *comp, ast_t *body, ins_t *ins)
     return OK;
 }
 
-static int compiler_do_print(compiler_t *compiler, ast_t *body, ins_t *ins)
-{
-    ast_t *expr = AST_CONS_CAR(body);
-    if (compiler_do(compiler, expr, ins) == ERR)
-        return ERR;
-    ins_push(ins, bc_print_new());
-    return OK;
-}
-
 /* PUBLIC */
 
 compiler_t *compiler_new(void)
@@ -265,7 +256,6 @@ compiler_t *compiler_new(void)
     compiler_setrt(c, "set", compiler_do_set);
     compiler_setrt(c, "if", compiler_do_if);
     compiler_setrt(c, "lambda", compiler_do_lambda);
-    compiler_setrt(c, "print", compiler_do_print);
     c->counter = 0;
 
     int i = 0;

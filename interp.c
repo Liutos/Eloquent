@@ -127,7 +127,8 @@ static void interp_initbif(interp_t *interp)
     int i = 0;
     while (i < prims_num) {
         prim_t *p = &prims[i];
-        interp_setbif(interp, p->name, p->func_ptr, p->arity);
+        if (!p->is_compiled)
+            interp_setbif(interp, p->name, p->func_ptr, p->arity);
         i++;
     }
 

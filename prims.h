@@ -8,6 +8,7 @@
 #ifndef PRIMS_H_
 #define PRIMS_H_
 
+#include "bytecode.h"
 #include "value.h"
 
 #ifdef __cplusplus
@@ -15,8 +16,10 @@ extern "C" {
 #endif
 
 typedef struct __prim_t prim_t;
+typedef void (*bcf_t)(ins_t *);
 
 struct __prim_t {
+    int is_compiled;
     const char *name;
     void *func_ptr;
     int arity;
