@@ -233,6 +233,7 @@ void vm_execute(vm_t *vm, ins_t *ins)
                 }
                 break;
             }
+__check_exception:
             case BC_CHKEX: {
                 value_t *top = vm_top(vm);
                 if (elo_ERRORP(top)) {
@@ -263,9 +264,16 @@ void vm_execute(vm_t *vm, ins_t *ins)
                 VALUE_UCF_ENV(f) = vm->env;
                 break;
             }
-            case BC_GET:
-                vm_push(vm, vm_env_ref(vm, BC_GET_I(bc), BC_GET_J(bc)));
+            case BC_GET: {
+                value_t *object = vm_env_ref(vm, BC_GET_I(bc), BC_GET_J(bc));
+                if (object == NULL) {
+                    vm_push(vm, value_error_newf("Undefined variable: %s", BC_GET_NAME(bc)));
+                    goto __check_exception;
+                }
+
+                vm_push(vm, object);
                 break;
+            }
             case BC_JUMP:
                 i = BC_JUMP_INDEX(bc) - 1;
                 break;

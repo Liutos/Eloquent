@@ -105,6 +105,7 @@ extern void ins_pretty_print(ins_t *, FILE *, int);
 #define BC_FJUMP_LABEL_NAME(f) BC_LABEL_NAME( BC_FJUMP_LABEL(f) )
 #define BC_GET_I(g) ((g)->u.bc_get.i)
 #define BC_GET_J(g) ((g)->u.bc_get.j)
+#define BC_GET_NAME(b) ((b)->u.bc_get.name)
 #define BC_JUMP_INDEX(f) ((f)->u.bc_jump.index)
 #define BC_JUMP_LABEL(j) ((j)->u.bc_jump.label)
 #define BC_JUMP_LABEL_NAME(j) BC_LABEL_NAME((j)->u.bc_jump.label)
