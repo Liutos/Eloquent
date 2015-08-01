@@ -177,13 +177,13 @@ static value_kind_t interp_execute_bif(interp_t *interp, value_t *bif, ast_t *ar
     switch (VALUE_FUNC_ARITY(bif)) {
         case 1: {
             value_t *arg1 = (value_t *)vector_ref(vals, 0);
-            res = ((bif_1)VALUE_BIF_PTR(bif))(arg1);
+            res = elo_apply1(bif, arg1);
             break;
         }
         case 2: {
             value_t *arg1 = (value_t *)vector_ref(vals, 0);
             value_t *arg2 = (value_t *)vector_ref(vals, 1);
-            res = ((bif_2)VALUE_BIF_PTR(bif))(arg1, arg2);
+            res = elo_apply2(bif, arg1, arg2);
             break;
         }
         default :

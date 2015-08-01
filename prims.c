@@ -1,12 +1,20 @@
 /*
  * prims.c
  *
+ * Functions defined in this file should not be directly invoked in C code, but just
+ * be used as implementation of primitives.
+ *
  *  Created on: 2015年7月22日
  *      Author: liutos
  */
 #include "bytecode.h"
 #include "prims.h"
 #include "value.h"
+
+#define BIF_NAME(name) bif_##name
+#define DEFINE_BIF(name, ...) value_t *BIF_NAME(name)(__VA_ARGS__)
+#define DEFINE_BIF1(name, arg1) DEFINE_BIF(name, value_t *arg1)
+#define DEFINE_BIF2(name, arg1, arg2) DEFINE_BIF(name, value_t *arg1, value_t *arg2)
 
 #define elo_INT_ASSERT(var) \
     do { \
@@ -22,7 +30,7 @@
 
 /* PUBLIC */
 
-value_t *bif_add(value_t *n1, value_t *n2)
+DEFINE_BIF2(add, n1, n2)
 {
     elo_NUMBER_ASSERT(n1);
     elo_NUMBER_ASSERT(n2);
@@ -35,7 +43,7 @@ value_t *bif_add(value_t *n1, value_t *n2)
     return value_float_new(VALUE_FLOAT_VALUE(n1) + VALUE_FLOAT_VALUE(n2));
 }
 
-value_t *bif_sub(value_t *n1, value_t *n2)
+DEFINE_BIF2(sub, n1, n2)
 {
     elo_NUMBER_ASSERT(n1);
     elo_NUMBER_ASSERT(n2);
@@ -48,7 +56,7 @@ value_t *bif_sub(value_t *n1, value_t *n2)
     return value_float_new(VALUE_FLOAT_VALUE(n1) - VALUE_FLOAT_VALUE(n2));
 }
 
-value_t *bif_mul(value_t *n1, value_t *n2)
+DEFINE_BIF2(mul, n1, n2)
 {
     elo_NUMBER_ASSERT(n1);
     elo_NUMBER_ASSERT(n2);
@@ -61,19 +69,7 @@ value_t *bif_mul(value_t *n1, value_t *n2)
     return value_float_new(VALUE_FLOAT_VALUE(n1) * VALUE_FLOAT_VALUE(n2));
 }
 
-value_t *bif_succ(value_t *n)
-{
-    elo_INT_ASSERT(n);
-    return value_int_new(VALUE_INT_VALUE(n) + 1);
-}
-
-value_t *bif_pred(value_t *n)
-{
-    elo_INT_ASSERT(n);
-    return value_int_new(VALUE_INT_VALUE(n) - 1);
-}
-
-value_t *bif_div(value_t *n1, value_t *n2)
+DEFINE_BIF2(div, n1, n2)
 {
     elo_NUMBER_ASSERT(n1);
     elo_NUMBER_ASSERT(n2);
@@ -91,18 +87,30 @@ value_t *bif_div(value_t *n1, value_t *n2)
     return value_float_new(VALUE_FLOAT_VALUE(n1) / VALUE_FLOAT_VALUE(n2));
 }
 
-value_t *bif_equal(value_t *v1, value_t *v2)
+DEFINE_BIF1(succ, n)
+{
+    elo_INT_ASSERT(n);
+    return value_int_new(VALUE_INT_VALUE(n) + 1);
+}
+
+DEFINE_BIF1(pred, n)
+{
+    elo_INT_ASSERT(n);
+    return value_int_new(VALUE_INT_VALUE(n) - 1);
+}
+
+DEFINE_BIF2(equal, v1, v2)
 {
     return value_int_new(value_isequal(v1, v2));
 }
 
-value_t *bif_i2d(value_t *n)
+DEFINE_BIF1(i2d, n)
 {
     elo_INT_ASSERT(n);
     return value_float_new(VALUE_INT_VALUE(n));
 }
 
-value_t *bif_ge(value_t *n1, value_t *n2)
+DEFINE_BIF2(ge, n1, n2)
 {
     elo_NUMBER_ASSERT(n1);
     elo_NUMBER_ASSERT(n2);
@@ -125,19 +133,19 @@ void bcf_print(ins_t *ins)
     ins_push(ins, bc_return_new());
 }
 
-#define _BIF(_name, _ptr, _arity) { .is_compiled = 0, .name = _name, .func_ptr = _ptr, .arity = _arity }
+#define _BIF(_name, _ptr, _arity) { .is_compiled = 0, .name = _name, .func_ptr = BIF_NAME(_ptr), .arity = _arity }
 #define _BCF(_name, _ptr, _arity) { .is_compiled = 1, .name = _name, .func_ptr = _ptr, .arity = _arity }
 
 prim_t prims[] = {
-        _BIF("+", bif_add, 2),
-        _BIF("-", bif_sub, 2),
-        _BIF("*", bif_mul, 2),
-        _BIF("/", bif_div, 2),
-        _BIF("succ", bif_succ, 1),
-        _BIF("pred", bif_pred, 1),
-        _BIF("i2d", bif_i2d, 1),
-        _BIF("=", bif_equal, 2),
-        _BIF(">=", bif_ge, 2),
+        _BIF("+", add, 2),
+        _BIF("-", sub, 2),
+        _BIF("*", mul, 2),
+        _BIF("/", div, 2),
+        _BIF("succ", succ, 1),
+        _BIF("pred", pred, 1),
+        _BIF("i2d", i2d, 1),
+        _BIF("=", equal, 2),
+        _BIF(">=", ge, 2),
         _BCF("print", bcf_print, 1),
 };
 size_t prims_num = sizeof(prims) / sizeof(prim_t);

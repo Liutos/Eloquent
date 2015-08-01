@@ -91,6 +91,10 @@ extern void value_sprint(value_t *, char *, size_t);
 #define VALUE_FLOAT_VALUE(f) ((f)->u.float_val)
 #define VALUE_INT_VALUE(i) ((i)->u.int_val)
 
+/* Primitives invocation */
+#define elo_apply1(f, arg1) (((bif_1)VALUE_BIF_PTR(f))(arg1))
+#define elo_apply2(f, arg1, arg2) (((bif_2)VALUE_BIF_PTR(f))(arg1, arg2))
+
 #ifdef __cplusplus
 }
 #endif
