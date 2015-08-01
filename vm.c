@@ -16,6 +16,7 @@
 #define __vm_stack_new() vector_new()
 #define __vm_stack_push(vm, o) vector_push(vm->sys_stack, (intptr_t)o)
 #define __vm_stack_pop(vm) vector_pop(vm->sys_stack)
+#define __vm_stack_isempty(vm) ((vm)->sys_stack->count == 0)
 
 /* PRIVATE */
 
@@ -229,9 +230,20 @@ void vm_execute(vm_t *vm, ins_t *ins)
             }
             case BC_CHKEX: {
                 value_t *top = vm_top(vm);
-                if (top->kind == VALUE_ERROR) {
-                    vm_stack_restore(vm);
-                    vm_push(vm, top);
+                if (elo_ERRORP(top)) {
+                    if (!__vm_stack_isempty(vm)) {
+                        /* 恢复指令指针 */
+                        i = (int)__vm_stack_pop(vm);
+                        /* 恢复指令信息 */
+                        ins = (ins_t *)__vm_stack_pop(vm);
+                        /* 恢复栈指针信息 */
+                        vm->sp = (size_t)__vm_stack_pop(vm);
+                        /* 恢复环境信息 */
+                        vm->env = (vm_env_t *)__vm_stack_pop(vm);
+                        /* 将运行时错误压回参数栈 */
+                        vm_push(vm, top);
+                    } else
+                        return;
                 }
                 break;
             }
