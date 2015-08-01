@@ -123,31 +123,35 @@ void bytecode_free(bytecode_t *bc)
     free(bc);
 }
 
-void ins_indent_print(int indent, FILE *output)
+void ins_indent_print(int indent, int index, FILE *output)
 {
-    while (indent >= 0) {
+    int prefix = indent - 1;
+    while (prefix >= 0) {
         fputc('\t', output);
-        indent--;
+        prefix--;
     }
+    if (index != -1)
+        fprintf(output, "[%d]", index);
+    fputc('\t', output);
 }
 
-void ins_push_ucf_print(value_t *ucf, FILE *output, int indent)
+void ins_push_ucf_print(value_t *ucf, FILE *output, int indent, int index)
 {
-    ins_indent_print(indent, output);
+    ins_indent_print(indent, index, output);
     fprintf(output, "BC_PUSH #< ; This is a function\n");
     ins_t *ins = VALUE_UCF_CODE(ucf);
     ins_pretty_print(ins, output, indent + 1);
-    ins_indent_print(indent, output);
+    ins_indent_print(indent, -1, output);
     fprintf(output, "        >");
 }
 
-void ins_push_print(bytecode_t *bc, FILE *output, int indent)
+void ins_push_print(bytecode_t *bc, FILE *output, int indent, int index)
 {
     value_t *object = BC_PUSH_OBJ(bc);
     if (object->kind == VALUE_FUNCTION && VALUE_FUNC_ISCMP(object))
-        ins_push_ucf_print(object, output, indent);
+        ins_push_ucf_print(object, output, indent, index);
     else {
-        ins_indent_print(indent, output);
+        ins_indent_print(indent, index, output);
         bc_print(bc, output);
     }
 }
@@ -159,10 +163,10 @@ void ins_pretty_print(ins_t *ins, FILE *output, int indent)
         bytecode_t *bc = ins_ref(ins, i);
         assert(bc->opcode != BC_LABEL);
         if (bc->opcode != BC_PUSH) {
-            ins_indent_print(indent, output);
+            ins_indent_print(indent, i, output);
             bc_print(bc, output);
         } else
-            ins_push_print(bc, output, indent);
+            ins_push_print(bc, output, indent, i);
         fputc('\n', output);
         i++;
     }
