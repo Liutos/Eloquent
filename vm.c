@@ -196,7 +196,7 @@ void vm_execute(vm_t *vm, ins_t *ins)
     while (i < ins_length(ins)) {
         bytecode_t *bc = ins_ref(ins, i);
         VMLOG_BC(vm, bc, "msg=Executing`i=%d", i);
-        switch (bc->kind) {
+        switch (bc->opcode) {
             case BC_ARGS: {
                 int i = BC_ARGS_ARITY(bc) - 1;
                 for (; i >= 0; i--) {

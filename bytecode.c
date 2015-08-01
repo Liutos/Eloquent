@@ -16,10 +16,10 @@ static const char *bc_names[] ={
         BC_KIND(BC_STRINGIFY)
 };
 
-static bytecode_t *bc_new(bytecode_kind_t kind)
+static bytecode_t *bc_new(opcode_t kind)
 {
     bytecode_t *bc = malloc(sizeof(bytecode_t));
-    bc->kind = kind;
+    bc->opcode = kind;
     return bc;
 }
 
@@ -157,8 +157,8 @@ void ins_pretty_print(ins_t *ins, FILE *output, int indent)
     int i = 0;
     while (i < ins_length(ins)) {
         bytecode_t *bc = ins_ref(ins, i);
-        assert(bc->kind != BC_LABEL);
-        if (bc->kind != BC_PUSH) {
+        assert(bc->opcode != BC_LABEL);
+        if (bc->opcode != BC_PUSH) {
             ins_indent_print(indent, output);
             bc_print(bc, output);
         } else
@@ -170,12 +170,12 @@ void ins_pretty_print(ins_t *ins, FILE *output, int indent)
 
 const char *bc_name(bytecode_t *bc)
 {
-    return bc_names[bc->kind];
+    return bc_names[bc->opcode];
 }
 
 void bc_print(bytecode_t *bc, FILE *output)
 {
-    switch (bc->kind) {
+    switch (bc->opcode) {
         case BC_ARGS:
             fprintf(output, "%s %d", bc_name(bc), BC_ARGS_ARITY(bc));
             break;

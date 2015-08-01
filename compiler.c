@@ -86,7 +86,7 @@ static void compiler_assembly_scan(compiler_t *comp, ins_t *ins)
     int i = 0, offset = 0;
     while (i < ins_length(ins)) {
         bytecode_t *bc = ins_ref(ins, i);
-        if (bc->kind == BC_LABEL)
+        if (bc->opcode == BC_LABEL)
             hash_table_set(comp->label_table, BC_LABEL_NAME(bc), (void *)offset);
         else
             offset++;
@@ -100,13 +100,13 @@ static ins_t *compiler_assembly_rebuild(compiler_t *comp, ins_t *ins)
     int i = 0;
     while (i < ins_length(ins)) {
         bytecode_t *bc = ins_ref(ins, i);
-        if (bc->kind == BC_FJUMP) {
+        if (bc->opcode == BC_FJUMP) {
             BC_FJUMP_INDEX(bc) = (int)hash_table_get(comp->label_table, BC_FJUMP_LABEL_NAME(bc), NULL);
             ins_push(asm_ins, bc);
-        } else if (bc->kind == BC_JUMP) {
+        } else if (bc->opcode == BC_JUMP) {
             BC_JUMP_INDEX(bc) = (int)hash_table_get(comp->label_table, BC_JUMP_LABEL_NAME(bc), NULL);
             ins_push(asm_ins, bc);
-        } else if (bc->kind != BC_LABEL)
+        } else if (bc->opcode != BC_LABEL)
             ins_push(asm_ins, bc);
         i++;
     }

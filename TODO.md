@@ -1,7 +1,9 @@
 # 代码
 
+* seg\_vector\_ref的实现需要对坐标有效性进行检查
 * 在C语言中定义用户函数
 * <del>统一预置函数在解释器/编译器/虚拟机上的载入流程</del>
+* <del>使用opcode\_t代替bytecode\_kind\_t</del>
 
 # 语言实现
 

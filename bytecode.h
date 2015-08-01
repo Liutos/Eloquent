@@ -40,10 +40,10 @@ typedef vector_t ins_t;
 
 typedef enum {
     BC_KIND(BC_IDENTIFY)
-} bytecode_kind_t;
+} opcode_t;
 
 struct __bytecode_t {
-    bytecode_kind_t kind;
+    opcode_t opcode;
     union {
         void *push_ptr;
         struct {
