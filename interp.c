@@ -173,7 +173,7 @@ static value_kind_t interp_execute_bif(interp_t *interp, value_t *bif, ast_t *ar
     }
 
     value_t *res = NULL;
-    switch (VALUE_BIF_ARITY(bif)) {
+    switch (VALUE_FUNC_ARITY(bif)) {
         case 1: {
             value_t *arg1 = (value_t *)vector_ref(vals, 0);
             res = ((bif_1)VALUE_BIF_PTR(bif))(arg1);
@@ -187,7 +187,7 @@ static value_kind_t interp_execute_bif(interp_t *interp, value_t *bif, ast_t *ar
         }
         default :
             if (value != NULL)
-                *value = value_error_newf("Don't support build in function of arity %d", VALUE_BIF_ARITY(bif));
+                *value = value_error_newf("Don't support build in function of arity %d", VALUE_FUNC_ARITY(bif));
             return VALUE_ERROR;
     }
 

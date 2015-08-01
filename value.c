@@ -8,6 +8,13 @@
 
 /* PRIVATE */
 
+static value_t *value_alloc(value_kind_t type)
+{
+    value_t *v = malloc(sizeof(*v));
+    elo_type(v) = type;
+    return v;
+}
+
 static void value_function_print(value_t *v, FILE *output)
 {
     if (VALUE_FUNC_ISBIF(v)) {
@@ -27,8 +34,7 @@ static void value_function_print(value_t *v, FILE *output)
 
 value_t *value_error_new(const char *msg)
 {
-    value_t *v = malloc(sizeof(value_t));
-    v->kind = VALUE_ERROR;
+    value_t *v = value_alloc(VALUE_ERROR);
     v->u.err_val.msg = string_new();
     string_assign(v->u.err_val.msg, msg);
     return v;
@@ -45,35 +51,31 @@ value_t *value_error_newf(const char *fmt, ...)
 
 value_t *value_int_new(int num)
 {
-    value_t *v = malloc(sizeof(value_t));
-    v->kind = VALUE_INT;
+    value_t *v = value_alloc(VALUE_INT);
     v->u.int_val = num;
     return v;
 }
 
 value_t *value_float_new(double num)
 {
-    value_t *v = malloc(sizeof(*v));
-    v->kind = VALUE_FLOAT;
+    value_t *v = value_alloc(VALUE_FLOAT);
     VALUE_FLOAT_VALUE(v) = num;
     return v;
 }
 
 value_t *value_bif_new(void *bif_ptr, unsigned int arity)
 {
-    value_t *v = malloc(sizeof(value_t));
-    v->kind = VALUE_FUNCTION;
+    value_t *v = value_alloc(VALUE_FUNCTION);
+    VALUE_FUNC_ARITY(v) = arity;
     VALUE_FUNC_ISBIF(v) = 1;
     VALUE_FUNC_ISCMP(v) = 0;
-    VALUE_BIF_ARITY(v) = arity;
     VALUE_BIF_PTR(v) = bif_ptr;
     return v;
 }
 
 value_t *value_udf_new(ast_t *pars, ast_t *body)
 {
-    value_t *v = malloc(sizeof(value_t));
-    v->kind = VALUE_FUNCTION;
+    value_t *v = value_alloc(VALUE_FUNCTION);
     VALUE_FUNC_ISBIF(v) = 0;
     VALUE_FUNC_ISCMP(v) = 0;
     VALUE_UDF_PARS(v) = pars;
@@ -83,9 +85,8 @@ value_t *value_udf_new(ast_t *pars, ast_t *body)
 
 value_t *value_ucf_new(int arity, ins_t *code)
 {
-    value_t *v = malloc(sizeof(value_t));
-    v->kind = VALUE_FUNCTION;
-    v->u.func_val.arity = arity;
+    value_t *v = value_alloc(VALUE_FUNCTION);
+    VALUE_FUNC_ARITY(v) = arity;
     VALUE_FUNC_ISBIF(v) = 0;
     VALUE_FUNC_ISCMP(v) = 1;
     VALUE_UCF_CODE(v) = code;

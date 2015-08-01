@@ -118,7 +118,7 @@ static value_t *vm_iref(vm_t *vm, int i)
 static void vm_execute_bif(vm_t *vm, value_t *f)
 {
     value_t *res = NULL;
-    switch (VALUE_BIF_ARITY(f)) {
+    switch (VALUE_FUNC_ARITY(f)) {
         case 1: {
             value_t *arg1 = vm_pop(vm);
             res = ((bif_1)VALUE_BIF_PTR(f))(arg1);
@@ -131,7 +131,7 @@ static void vm_execute_bif(vm_t *vm, value_t *f)
             break;
         }
         default :
-            fprintf(stderr, "Unsupported arity of bif: %d\n", VALUE_BIF_ARITY(f));
+            fprintf(stderr, "Unsupported arity of bif: %d\n", VALUE_FUNC_ARITY(f));
     }
     vm_push(vm, res);
 }
@@ -209,6 +209,11 @@ void vm_execute(vm_t *vm, ins_t *ins)
             }
             case BC_CALL: {
                 value_t *f = vm_pop(vm);
+                if (BC_CALL_NARGS(bc) != VALUE_FUNC_ARITY(f)) {
+                    vm_push(vm, value_error_newf("Incorrect number of arguments. Expecting %d but get %d ones", VALUE_FUNC_ARITY(f), BC_CALL_NARGS(bc)));
+                    break;
+                }
+
                 if (VALUE_FUNC_ISBIF(f))
                     vm_execute_bif(vm, f);
                 else {

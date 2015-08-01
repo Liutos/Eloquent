@@ -68,6 +68,7 @@ struct __bytecode_t {
         struct {
             int arity;
         } bc_args;
+        struct { int nargs; } bc_call;
     } u;
 };
 
@@ -79,7 +80,7 @@ extern bytecode_t *bc_fjump_new(bytecode_t *);
 extern bytecode_t *bc_jump_new(bytecode_t *);
 extern bytecode_t *bc_label_new(const char *);
 extern bytecode_t *bc_nope_new(void);
-extern bytecode_t *bc_call_new(void);
+extern bytecode_t *bc_call_new(int);
 extern bytecode_t *bc_args_new(int);
 extern bytecode_t *bc_func_new(void);
 extern bytecode_t *bc_chkex_new(void);
@@ -96,7 +97,9 @@ extern void bc_sprint(bytecode_t *, char *, size_t);
 #define ins_ref(ins, i) (bytecode_t *)vector_ref(ins, i);
 extern void ins_pretty_print(ins_t *, FILE *, int);
 
+/* Accessors */
 #define BC_ARGS_ARITY(a) ((a)->u.bc_args.arity)
+#define BC_CALL_NARGS(b) ((b)->u.bc_call.nargs)
 #define BC_FJUMP_INDEX(f) ((f)->u.bc_fjump.index)
 #define BC_FJUMP_LABEL(f) ((f)->u.bc_fjump.label)
 #define BC_FJUMP_LABEL_NAME(f) BC_LABEL_NAME( BC_FJUMP_LABEL(f) )

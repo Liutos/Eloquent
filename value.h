@@ -78,10 +78,11 @@ extern void value_sprint(value_t *, char *, size_t);
 
 #define elo_NUMBERP(x) (elo_INTP(x) || elo_FLOATP(x))
 
+/* Accessors */
 #define VALUE_ERR_MSG(e) ((e)->u.err_val.msg->text)
+#define VALUE_FUNC_ARITY(f) ((f)->u.func_val.arity)
 #define VALUE_FUNC_ISBIF(f) ((f)->u.func_val.is_bif)
 #define VALUE_FUNC_ISCMP(f) ((f)->u.func_val.is_compiled)
-#define VALUE_BIF_ARITY(f) ((f)->u.func_val.arity)
 #define VALUE_BIF_PTR(f) ((f)->u.func_val.u.bif_ptr)
 #define VALUE_UDF_PARS(f) ((f)->u.func_val.u.udf.pars)
 #define VALUE_UDF_BODY(f) ((f)->u.func_val.u.udf.body)

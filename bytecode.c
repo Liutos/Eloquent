@@ -84,9 +84,11 @@ bytecode_t *bc_nope_new(void)
     return bc_new(BC_NOPE);
 }
 
-bytecode_t *bc_call_new(void)
+bytecode_t *bc_call_new(int nargs)
 {
-    return bc_new(BC_CALL);
+    bytecode_t *bc = bc_new(BC_CALL);
+    BC_CALL_NARGS(bc) = nargs;
+    return bc;
 }
 
 bytecode_t *bc_args_new(int arity)
@@ -176,6 +178,9 @@ void bc_print(bytecode_t *bc, FILE *output)
     switch (bc->kind) {
         case BC_ARGS:
             fprintf(output, "%s %d", bc_name(bc), BC_ARGS_ARITY(bc));
+            break;
+        case BC_CALL:
+            fprintf(output, "%s %d", bc_name(bc), BC_CALL_NARGS(bc));
             break;
         case BC_FJUMP:
             fprintf(output, "%s %d", bc_name(bc), BC_FJUMP_INDEX(bc));

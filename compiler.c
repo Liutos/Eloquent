@@ -143,15 +143,17 @@ static int compiler_do_ident(compiler_t *comp, ast_t *id, ins_t *ins)
 
 static int compiler_do_call(compiler_t *comp, ast_t *op, ast_t *args, ins_t *ins)
 {
+    int nargs = 0;
     while (args->kind == AST_CONS) {
         ast_t *expr = AST_CONS_CAR(args);
         if (compiler_do(comp, expr, ins) == ERR)
             return ERR;
         args = AST_CONS_CDR(args);
+        nargs++;
     }
     if (compiler_do(comp, op, ins) == ERR)
         return ERR;
-    ins_push(ins, bc_call_new());
+    ins_push(ins, bc_call_new(nargs));
     ins_push(ins, bc_chkex_new());
     return OK;
 }
