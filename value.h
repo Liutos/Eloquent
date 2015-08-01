@@ -56,6 +56,8 @@ struct __value_t {
     } u;
 };
 
+#define elo_type(x) ((x)->kind)
+
 extern value_t *value_error_new(const char *);
 extern value_t *value_error_newf(const char *, ...);
 extern value_t *value_int_new(int);
@@ -67,6 +69,14 @@ extern void value_free(value_t *);
 extern void value_print(value_t *, FILE *);
 extern int value_isequal(value_t *, value_t *);
 extern void value_sprint(value_t *, char *, size_t);
+
+/* Type predicates */
+#define elo_ERRORP(x) (elo_type(x) == VALUE_ERROR)
+#define elo_FLOATP(x) (elo_type(x) == VALUE_FLOAT)
+#define elo_FUNCTIONP(x) (elo_type(x) == VALUE_FUNCTION)
+#define elo_INTP(x) (elo_type(x) == VALUE_INT)
+
+#define elo_NUMBERP(x) (elo_INTP(x) || elo_FLOATP(x))
 
 #define VALUE_ERR_MSG(e) ((e)->u.err_val.msg->text)
 #define VALUE_FUNC_ISBIF(f) ((f)->u.func_val.is_bif)

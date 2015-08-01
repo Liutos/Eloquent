@@ -232,7 +232,6 @@ void vm_execute(vm_t *vm, ins_t *ins)
                 if (top->kind == VALUE_ERROR) {
                     vm_stack_restore(vm);
                     vm_push(vm, top);
-                    return;
                 }
                 break;
             }
