@@ -38,6 +38,14 @@ static int lexer_issep(int c)
     return isspace(c) || c == EOF || c == '(' || c == ')';
 }
 
+static void lexer_skip_comment(lexer_t *lexer)
+{
+    int c;
+    do {
+        c = lexer_getc(lexer);
+    } while (c != EOF && c != '\n');
+}
+
 static token_t lexer_getidentifier(lexer_t *l, int start)
 {
     l->tk_line = l->line;
@@ -94,6 +102,9 @@ token_t lexer_gettoken(lexer_t *l)
         case ' ': case '\n': case '\t': return lexer_gettoken(l);
         case '(': return TOKEN_LEFT_PAREN;
         case ')': return TOKEN_RIGHT_PAREN;
+        case ';':
+            lexer_skip_comment(l);
+            return lexer_gettoken(l);
         default :
             if (isdigit(c))
                 return lexer_getinteger(l, c);
