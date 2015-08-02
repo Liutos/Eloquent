@@ -8,6 +8,8 @@
 #ifndef HASH_TABLE_H_
 #define HASH_TABLE_H_
 
+#include <stdio.h>
+
 #ifdef __cplusplus
 extern "C" {
 #endif

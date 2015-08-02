@@ -22,6 +22,7 @@ struct __syntax_t {
 struct __interp_t {
     hash_table_t *syntax_env;
     env_t *env;
+    env_t *denv;
 };
 
 extern interp_t *interp_new(void);

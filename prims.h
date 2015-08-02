@@ -9,6 +9,7 @@
 #define PRIMS_H_
 
 #include "bytecode.h"
+#include "env.h"
 #include "value.h"
 
 #ifdef __cplusplus
@@ -17,6 +18,13 @@ extern "C" {
 
 typedef struct __prim_t prim_t;
 typedef void (*bcf_t)(ins_t *);
+
+typedef value_t *(*bif_1)(env_t *, value_t *);
+typedef value_t *(*bif_2)(env_t *, value_t *, value_t *);
+
+/* Primitives invocation */
+#define elo_apply1(f, denv, arg1) (((bif_1)VALUE_BIF_PTR(f))(denv, arg1))
+#define elo_apply2(f, denv, arg1, arg2) (((bif_2)VALUE_BIF_PTR(f))(denv, arg1, arg2))
 
 struct __prim_t {
     int is_compiled;
@@ -27,16 +35,6 @@ struct __prim_t {
 
 extern prim_t prims[];
 extern size_t prims_num;
-
-extern value_t *bif_add(value_t *, value_t *);
-extern value_t *bif_sub(value_t *, value_t *);
-extern value_t *bif_succ(value_t *);
-extern value_t *bif_pred(value_t *);
-extern value_t *bif_div(value_t *, value_t *);
-extern value_t *bif_equal(value_t *, value_t *);
-extern value_t *bif_i2d(value_t *);
-extern value_t *bif_ge(value_t *, value_t *);
-extern value_t *bif_mul(value_t *, value_t *);
 
 #ifdef __cplusplus
 }

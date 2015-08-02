@@ -15,9 +15,6 @@ typedef struct __value_t value_t;
 typedef struct __value_error_t value_error_t;
 typedef struct __value_function_t value_function_t;
 
-typedef value_t *(*bif_1)(value_t *);
-typedef value_t *(*bif_2)(value_t *, value_t *);
-
 typedef enum {
     VALUE_ERROR,
     VALUE_FLOAT,
@@ -90,10 +87,6 @@ extern void value_sprint(value_t *, char *, size_t);
 #define VALUE_UCF_ENV(f) ((f)->u.func_val.u.ucf.env)
 #define VALUE_FLOAT_VALUE(f) ((f)->u.float_val)
 #define VALUE_INT_VALUE(i) ((i)->u.int_val)
-
-/* Primitives invocation */
-#define elo_apply1(f, arg1) (((bif_1)VALUE_BIF_PTR(f))(arg1))
-#define elo_apply2(f, arg1, arg2) (((bif_2)VALUE_BIF_PTR(f))(arg1, arg2))
 
 #ifdef __cplusplus
 }

@@ -7,12 +7,14 @@
  *  Created on: 2015年7月22日
  *      Author: liutos
  */
+#include "env.h"
 #include "bytecode.h"
 #include "prims.h"
 #include "value.h"
 
 #define BIF_NAME(name) bif_##name
-#define DEFINE_BIF(name, ...) value_t *BIF_NAME(name)(__VA_ARGS__)
+#define DENV denv
+#define DEFINE_BIF(name, ...) value_t *BIF_NAME(name)(env_t *DENV, __VA_ARGS__)
 #define DEFINE_BIF1(name, arg1) DEFINE_BIF(name, value_t *arg1)
 #define DEFINE_BIF2(name, arg1, arg2) DEFINE_BIF(name, value_t *arg1, value_t *arg2)
 

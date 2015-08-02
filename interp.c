@@ -64,6 +64,42 @@ static value_kind_t bis_set(interp_t *interp, ast_t *body, value_t **result)
     return val->kind;
 }
 
+/* Set dynamic variable */
+static value_kind_t bis_dset(interp_t *interp, ast_t *body, value_t **result)
+{
+    ast_t *var = AST_CONS_CAR(body);
+    ast_t *expr = AST_CONS_CAR( AST_CONS_CDR(body) );
+    value_t *val = NULL;
+    if (interp_execute(interp, expr, &val) == VALUE_ERROR) {
+        if (result != NULL)
+            *result = val;
+        return val->kind;
+    }
+
+    env_set(interp->denv, AST_IDENT_NAME(var), val);
+    if (result != NULL)
+        *result = val;
+    return val->kind;
+}
+
+/* Get value of dynamic variable */
+static value_kind_t bis_dget(interp_t *interp, ast_t *body, value_t **result)
+{
+    ast_t *var = AST_CONS_CAR(body);
+    char *name = AST_IDENT_NAME(var);
+    int is_found;
+    value_t *val = env_get(interp->denv, name, &is_found);
+    if (is_found) {
+        if (result != NULL)
+            *result = val;
+        return val->kind;
+    } else {
+        if (result != NULL)
+            *result = value_error_newf("Line %d, column %d: Can't find value of `%s'", var->line, var->column, name);
+        return VALUE_ERROR;
+    }
+}
+
 static value_kind_t bis_if(interp_t *interp, ast_t *body, value_t **result)
 {
     ast_t *pred = AST_CONS_CAR(body);
@@ -136,6 +172,8 @@ static void interp_initbif(interp_t *interp)
     interp_setbis(interp, "if", bis_if);
     interp_setbis(interp, "begin", bis_begin);
     interp_setbis(interp, "lambda", bis_lambda);
+    interp_setbis(interp, "dset", bis_dset);
+    interp_setbis(interp, "dget", bis_dget);
 }
 
 static value_kind_t interp_execute_syntax(interp_t *interp, syntax_t *bis, ast_t *body, value_t **result)
@@ -177,13 +215,13 @@ static value_kind_t interp_execute_bif(interp_t *interp, value_t *bif, ast_t *ar
     switch (VALUE_FUNC_ARITY(bif)) {
         case 1: {
             value_t *arg1 = (value_t *)vector_ref(vals, 0);
-            res = elo_apply1(bif, arg1);
+            res = elo_apply1(bif, interp->denv, arg1);
             break;
         }
         case 2: {
             value_t *arg1 = (value_t *)vector_ref(vals, 0);
             value_t *arg2 = (value_t *)vector_ref(vals, 1);
-            res = elo_apply2(bif, arg1, arg2);
+            res = elo_apply2(bif, interp->denv, arg1, arg2);
             break;
         }
         default :
@@ -290,6 +328,7 @@ interp_t *interp_new(void)
     interp_t *i = malloc(sizeof(interp_t));
     i->env = env_new(env_empty_new());
     i->syntax_env = hash_table_new(hash_str, comp_str);
+    i->denv = env_new(env_empty_new());
     interp_initbif(i);
     return i;
 }

@@ -129,13 +129,13 @@ static void vm_execute_bif(vm_t *vm, value_t *f)
     switch (VALUE_FUNC_ARITY(f)) {
         case 1: {
             value_t *arg1 = vm_pop(vm);
-            res = elo_apply1(f, arg1);
+            res = elo_apply1(f, NULL, arg1);
             break;
         }
         case 2: {
             value_t *arg2 = vm_pop(vm);
             value_t *arg1 = vm_pop(vm);
-            res = elo_apply2(f, arg1, arg2);
+            res = elo_apply2(f, NULL, arg1, arg2);
             break;
         }
         default :
