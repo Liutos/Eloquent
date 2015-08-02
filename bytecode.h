@@ -23,6 +23,8 @@ typedef vector_t ins_t;
     op(BC_ARGS), \
     op(BC_CALL), \
     op(BC_CHKEX), \
+    op(BC_DGET), \
+    op(BC_DSET), \
     op(BC_FJUMP), \
     op(BC_FUNC), \
     op(BC_GET), \
@@ -69,6 +71,8 @@ struct __bytecode_t {
             int arity;
         } bc_args;
         struct { int nargs; } bc_call;
+        struct { char *name; } bc_dget;
+        struct { char *name; } bc_dset;
     } u;
 };
 
@@ -81,6 +85,8 @@ extern bytecode_t *bc_jump_new(bytecode_t *);
 extern bytecode_t *bc_label_new(const char *);
 extern bytecode_t *bc_nope_new(void);
 extern bytecode_t *bc_call_new(int);
+extern bytecode_t *bc_dget_new(char *);
+extern bytecode_t *bc_dset_new(char *);
 extern bytecode_t *bc_args_new(int);
 extern bytecode_t *bc_func_new(void);
 extern bytecode_t *bc_chkex_new(void);
@@ -100,6 +106,8 @@ extern void ins_pretty_print(ins_t *, FILE *, int);
 /* Accessors */
 #define BC_ARGS_ARITY(a) ((a)->u.bc_args.arity)
 #define BC_CALL_NARGS(b) ((b)->u.bc_call.nargs)
+#define BC_DGET_NAME(b) ((b)->u.bc_dget.name)
+#define BC_DSET_NAME(b) ((b)->u.bc_dset.name)
 #define BC_FJUMP_INDEX(f) ((f)->u.bc_fjump.index)
 #define BC_FJUMP_LABEL(f) ((f)->u.bc_fjump.label)
 #define BC_FJUMP_LABEL_NAME(f) BC_LABEL_NAME( BC_FJUMP_LABEL(f) )

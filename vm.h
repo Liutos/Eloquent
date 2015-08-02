@@ -10,6 +10,7 @@
 
 #include <stdio.h>
 #include "bytecode.h"
+#include "env.h"
 #include "utils/seg_vector.h"
 #include "utils/vector.h"
 
@@ -28,6 +29,7 @@ struct __vm_t {
     size_t sp;
     FILE *log;
     __vm_stack_t *sys_stack;
+    env_t *denv;
 };
 
 extern vm_t *vm_new(void);

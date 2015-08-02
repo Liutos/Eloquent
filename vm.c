@@ -8,6 +8,7 @@
 #include <stdarg.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include "env.h"
 #include "prims.h"
 #include "utils/seg_vector.h"
 #include "value.h"
@@ -19,45 +20,6 @@
 #define __vm_stack_isempty(vm) ((vm)->sys_stack->count == 0)
 
 /* PRIVATE */
-
-/* LOG BEGIN */
-
-static void vm_log_bc(vm_t *vm, bytecode_t *bc, const char *fmt, ...)
-{
-    char val[1024] = {0};
-    bc_sprint(bc, val, sizeof(val));
-    va_list ap;
-    va_start(ap, fmt);
-    char msg[256] = {0};
-    vsnprintf(msg, sizeof(msg), fmt, ap);
-    fprintf(vm->log, "[DEBUG] %s`bytecode=%s\n", msg, val);
-}
-
-static void vm_log_value(vm_t *vm, value_t *v, const char *fmt, ...)
-{
-    char val[1024] = {0};
-    value_sprint(v, val, sizeof(val));
-    va_list ap;
-    va_start(ap, fmt);
-    char msg[256] = {0};
-    vsnprintf(msg, sizeof(msg), fmt, ap);
-    fprintf(vm->log, "[DEBUG] %s`val=%s\n", msg, val);
-}
-
-static void vm_log_stack(vm_t *vm)
-{
-    int i = vm->stack->count - 1;
-    while (i >= 0) {
-        value_t *o = (value_t *)vector_ref(vm->stack, i);
-        vm_log_value(vm, o, "msg=In stack`i=%d", i);
-        i--;
-    }
-}
-
-#define VMLOG_BC(vm, bc, fmt, ...) vm_log_bc(vm, bc, "pos=%s:%d`"fmt, __FILE__, __LINE__, __VA_ARGS__)
-#define VMLOG_VAL(vm, v, fmt, ...) vm_log_value(vm, v, "pos=%s:%d`"fmt, __FILE__, __LINE__, __VA_ARGS__)
-
-/* LOG END */
 
 #define vm_stack_new() vector_new()
 #define vm_stack_free(s) vector_free(s)
@@ -129,13 +91,13 @@ static void vm_execute_bif(vm_t *vm, value_t *f)
     switch (VALUE_FUNC_ARITY(f)) {
         case 1: {
             value_t *arg1 = vm_pop(vm);
-            res = elo_apply1(f, NULL, arg1);
+            res = elo_apply1(f, vm->denv, arg1);
             break;
         }
         case 2: {
             value_t *arg2 = vm_pop(vm);
             value_t *arg1 = vm_pop(vm);
-            res = elo_apply2(f, NULL, arg1, arg2);
+            res = elo_apply2(f, vm->denv, arg1, arg2);
             break;
         }
         default :
@@ -179,8 +141,8 @@ vm_t *vm_new(void)
     vm->env = vm_env_new(NULL);
     vm->stack = vm_stack_new();
     vm->sp = 0;
-    vm->log = fopen("/tmp/eloquent.log", "w+");
     vm->sys_stack = __vm_stack_new();
+    vm->denv = env_new(env_empty_new());
 
     int i = 0;
     while (i < prims_num) {
@@ -201,18 +163,27 @@ void vm_free(vm_t *vm)
     free(vm);
 }
 
+#define RESTORE \
+    /* 恢复指令指针 */ \
+    i = (int)__vm_stack_pop(vm); \
+    /* 恢复指令信息 */ \
+    ins = (ins_t *)__vm_stack_pop(vm); \
+    /* 恢复栈指针信息 */ \
+    vm->sp = (size_t)__vm_stack_pop(vm); \
+    /* 恢复环境信息 */ \
+    vm->env = (vm_env_t *)__vm_stack_pop(vm); \
+    vm->denv = vm->denv->outer
+
 void vm_execute(vm_t *vm, ins_t *ins)
 {
     int i = 0;
     while (i < ins_length(ins)) {
         bytecode_t *bc = ins_ref(ins, i);
-        VMLOG_BC(vm, bc, "msg=Executing`i=%d", i);
         switch (bc->opcode) {
             case BC_ARGS: {
                 int i = BC_ARGS_ARITY(bc) - 1;
                 for (; i >= 0; i--) {
                     value_t *obj = vm_iref(vm, i);
-                    VMLOG_VAL(vm, obj, "msg=Moving`i=%d", i);
                     vm_env_intern(vm, obj);
                 }
                 vm_stack_shrink(vm->stack, BC_ARGS_ARITY(bc));
@@ -238,6 +209,7 @@ void vm_execute(vm_t *vm, ins_t *ins)
                     __vm_stack_push(vm, i);
                     /* 初始化环境、字节码序列和指令指针 */
                     vm->env = vm_env_new(VALUE_UCF_ENV(f));
+                    vm->denv = env_new(vm->denv);
                     ins = VALUE_UCF_CODE(f);
                     i = -1;
                     /* 开始执行新的字节码指令 */
@@ -249,14 +221,7 @@ __check_exception:
                 value_t *top = vm_top(vm);
                 if (elo_ERRORP(top)) {
                     if (!__vm_stack_isempty(vm)) {
-                        /* 恢复指令指针 */
-                        i = (int)__vm_stack_pop(vm);
-                        /* 恢复指令信息 */
-                        ins = (ins_t *)__vm_stack_pop(vm);
-                        /* 恢复栈指针信息 */
-                        vm->sp = (size_t)__vm_stack_pop(vm);
-                        /* 恢复环境信息 */
-                        vm->env = (vm_env_t *)__vm_stack_pop(vm);
+                        RESTORE;
                         /* 将运行时错误压回参数栈 */
                         vm_push(vm, top);
                     } else
@@ -264,6 +229,20 @@ __check_exception:
                 }
                 break;
             }
+            case BC_DGET: {
+                int is_found;
+                value_t *object = env_get(vm->denv, BC_DGET_NAME(bc), &is_found);
+                if (!is_found) {
+                    vm_push(vm, value_error_newf("Undefined dynamic variable: %s", BC_DGET_NAME(bc)));
+                    goto __check_exception;
+                }
+
+                vm_push(vm, object);
+                break;
+            }
+            case BC_DSET:
+                env_set(vm->denv, BC_DSET_NAME(bc), vm_top(vm));
+                break;
             case BC_FJUMP: {
                 value_t *o = vm_pop(vm);
                 if (o->kind == VALUE_INT && VALUE_INT_VALUE(o) == 0)
@@ -302,14 +281,7 @@ __check_exception:
                 vm_push(vm, BC_PUSH_OBJ(bc));
                 break;
             case BC_RETURN:
-                /* 恢复指令指针 */
-                i = (int)__vm_stack_pop(vm);
-                /* 恢复指令信息 */
-                ins = (ins_t *)__vm_stack_pop(vm);
-                /* 恢复栈指针信息 */
-                vm->sp = (size_t)__vm_stack_pop(vm);
-                /* 恢复环境信息 */
-                vm->env = (vm_env_t *)__vm_stack_pop(vm);
+                RESTORE;
                 /* 开始执行旧的字节码指令 */
                 break;
             case BC_SET:
@@ -317,11 +289,9 @@ __check_exception:
                 break;
             default :
                 fprintf(stderr, "Not support: %s\n", bc_name(bc));
-                return;
+                exit(0);
         }
         i++;
-        if (vm->stack->count != 0)
-            vm_log_stack(vm);
     }
 }
 

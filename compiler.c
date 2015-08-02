@@ -243,6 +243,23 @@ static int compiler_do_lambda(compiler_t *comp, ast_t *body, ins_t *ins)
     return OK;
 }
 
+static int compiler_do_dget(compiler_t *comp, ast_t *body, ins_t *ins)
+{
+    ast_t *var = AST_CONS_CAR(body);
+    ins_push(ins, bc_dget_new(AST_IDENT_NAME(var)));
+    return OK;
+}
+
+static int compiler_do_dset(compiler_t *comp, ast_t *body, ins_t *ins)
+{
+    ast_t *var = AST_CONS_CAR(body);
+    ast_t *expr = AST_CONS_CAR( AST_CONS_CDR(body) );
+    if (compiler_do(comp, expr, ins) == ERR)
+        return ERR;
+    ins_push(ins, bc_dset_new(AST_IDENT_NAME(var)));
+    return OK;
+}
+
 /* PUBLIC */
 
 compiler_t *compiler_new(void)
@@ -256,6 +273,8 @@ compiler_t *compiler_new(void)
     compiler_setrt(c, "set", compiler_do_set);
     compiler_setrt(c, "if", compiler_do_if);
     compiler_setrt(c, "lambda", compiler_do_lambda);
+    compiler_setrt(c, "dget", compiler_do_dget);
+    compiler_setrt(c, "dset", compiler_do_dset);
     c->counter = 0;
 
     int i = 0;

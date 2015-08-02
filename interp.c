@@ -256,6 +256,7 @@ static int interp_bind_args(interp_t *interp, ast_t *pars, ast_t *exprs, value_t
 static value_kind_t interp_execute_udf(interp_t *interp, value_t *f, ast_t *args, value_t **value)
 {
     interp_extend_scope(interp);
+    interp->denv = env_new(interp->denv);
     value_t *err = NULL;
     if (interp_bind_args(interp, VALUE_UDF_PARS(f), args, &err) == ERR) {
         if (value != NULL)
@@ -264,6 +265,7 @@ static value_kind_t interp_execute_udf(interp_t *interp, value_t *f, ast_t *args
     }
     value_kind_t kind = bis_begin(interp, VALUE_UDF_BODY(f), value);
     interp_exit_scope(interp);
+    interp->denv = interp->denv->outer;
     return kind;
 }
 

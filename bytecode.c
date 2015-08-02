@@ -91,6 +91,20 @@ bytecode_t *bc_call_new(int nargs)
     return bc;
 }
 
+bytecode_t *bc_dget_new(char *name)
+{
+    bytecode_t *bc = bc_new(BC_DGET);
+    BC_DGET_NAME(bc) = name;
+    return bc;
+}
+
+bytecode_t *bc_dset_new(char *name)
+{
+    bytecode_t *bc = bc_new(BC_DSET);
+    BC_DSET_NAME(bc) = name;
+    return bc;
+}
+
 bytecode_t *bc_args_new(int arity)
 {
     bytecode_t *bc = bc_new(BC_ARGS);
@@ -186,6 +200,8 @@ void bc_print(bytecode_t *bc, FILE *output)
         case BC_CALL:
             fprintf(output, "%s %d", bc_name(bc), BC_CALL_NARGS(bc));
             break;
+        case BC_DGET: fprintf(output, "%s %s", bc_name(bc), BC_DGET_NAME(bc)); break;
+        case BC_DSET: fprintf(output, "%s %s", bc_name(bc), BC_DSET_NAME(bc)); break;
         case BC_FJUMP:
             fprintf(output, "%s %d", bc_name(bc), BC_FJUMP_INDEX(bc));
             break;
