@@ -35,16 +35,6 @@ static void interp_set(interp_t *interp, const char *name, value_t *value)
     env_set(interp->env, name, value);
 }
 
-static void interp_extend_scope(interp_t *interp)
-{
-    interp->env = env_new(interp->env);
-}
-
-static void interp_exit_scope(interp_t *interp)
-{
-    interp->env = interp->env->outer;
-}
-
 /* SYNTAX BEGIN */
 
 static value_kind_t bis_set(interp_t *interp, ast_t *body, value_t **result)
@@ -138,7 +128,7 @@ static value_kind_t bis_lambda(interp_t *interp, ast_t *body, value_t **result)
 {
     ast_t *pars = AST_CONS_CAR(body);
     body = AST_CONS_CDR(body);
-    value_t *val = value_udf_new(pars, body);
+    value_t *val = value_udf_new(pars, body, interp->env);
     if (result != NULL)
         *result = val;
     return val->kind;
@@ -235,7 +225,7 @@ static value_kind_t interp_execute_bif(interp_t *interp, value_t *bif, ast_t *ar
     return res->kind;
 }
 
-static int interp_bind_args(interp_t *interp, ast_t *pars, ast_t *exprs, value_t **error)
+static int interp_bind_args(interp_t *interp, ast_t *pars, ast_t *exprs, env_t *env, value_t **error)
 {
     assert(error != NULL);
     while (pars->kind == AST_CONS) {
@@ -246,7 +236,7 @@ static int interp_bind_args(interp_t *interp, ast_t *pars, ast_t *exprs, value_t
             *error = val;
             return ERR;
         }
-        interp_set(interp, AST_IDENT_NAME(par), val);
+        env_set(env, AST_IDENT_NAME(par), val);
         pars = AST_CONS_CDR(pars);
         exprs = AST_CONS_CDR(exprs);
     }
@@ -255,16 +245,19 @@ static int interp_bind_args(interp_t *interp, ast_t *pars, ast_t *exprs, value_t
 
 static value_kind_t interp_execute_udf(interp_t *interp, value_t *f, ast_t *args, value_t **value)
 {
-    interp_extend_scope(interp);
-    interp->denv = env_new(interp->denv);
+    env_t *new_env = env_new(VALUE_UDF_ENV(f));
     value_t *err = NULL;
-    if (interp_bind_args(interp, VALUE_UDF_PARS(f), args, &err) == ERR) {
+    if (interp_bind_args(interp, VALUE_UDF_PARS(f), args, new_env, &err) == ERR) {
         if (value != NULL)
             *value = err;
         return err->kind;
     }
+
+    env_t *old_env = interp->env;
+    interp->env = new_env;
+    interp->denv = env_new(interp->denv);
     value_kind_t kind = bis_begin(interp, VALUE_UDF_BODY(f), value);
-    interp_exit_scope(interp);
+    interp->env = old_env;
     interp->denv = interp->denv->outer;
     return kind;
 }
