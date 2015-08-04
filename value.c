@@ -95,18 +95,6 @@ value_t *value_ucf_new(int arity, ins_t *code)
     return v;
 }
 
-void value_free(value_t *v)
-{
-    switch (v->kind) {
-        case VALUE_ERROR:
-            string_free(v->u.err_val.msg);
-            break;
-        case VALUE_INT:
-        default :;
-    }
-    free(v);
-}
-
 void value_print(value_t *v, FILE *output)
 {
     switch (v->kind) {

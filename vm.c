@@ -92,14 +92,14 @@ static void vm_execute_bif(vm_t *vm, value_t *f)
         case 1: {
             value_t *arg1 = vm_pop(vm);
             res = elo_apply1(f, vm->denv, arg1);
-            break;
         }
+        break;
         case 2: {
             value_t *arg2 = vm_pop(vm);
             value_t *arg1 = vm_pop(vm);
             res = elo_apply2(f, vm->denv, arg1, arg2);
-            break;
         }
+        break;
         default :
             fprintf(stderr, "Unsupported arity of bif: %d\n", VALUE_FUNC_ARITY(f));
     }
@@ -187,8 +187,8 @@ void vm_execute(vm_t *vm, ins_t *ins)
                     vm_env_intern(vm, obj);
                 }
                 vm_stack_shrink(vm->stack, BC_ARGS_ARITY(bc));
-                break;
             }
+            break;
             case BC_CALL: {
                 value_t *f = vm_pop(vm);
                 if (BC_CALL_NARGS(bc) != VALUE_FUNC_ARITY(f)) {
@@ -214,8 +214,8 @@ void vm_execute(vm_t *vm, ins_t *ins)
                     i = -1;
                     /* 开始执行新的字节码指令 */
                 }
-                break;
             }
+            break;
 __check_exception:
             case BC_CHKEX: {
                 value_t *top = vm_top(vm);
@@ -227,8 +227,8 @@ __check_exception:
                     } else
                         return;
                 }
-                break;
             }
+            break;
             case BC_DGET: {
                 int is_found;
                 value_t *object = env_get(vm->denv, BC_DGET_NAME(bc), &is_found);
@@ -238,8 +238,8 @@ __check_exception:
                 }
 
                 vm_push(vm, object);
-                break;
             }
+            break;
             case BC_DSET:
                 env_set(vm->denv, BC_DSET_NAME(bc), vm_top(vm));
                 break;
@@ -247,13 +247,13 @@ __check_exception:
                 value_t *o = vm_pop(vm);
                 if (o->kind == VALUE_INT && VALUE_INT_VALUE(o) == 0)
                     i = BC_FJUMP_INDEX(bc) - 1;
-                break;
             }
+            break;
             case BC_FUNC: {
                 value_t *f = vm_top(vm);
                 VALUE_UCF_ENV(f) = vm->env;
-                break;
             }
+            break;
             case BC_GET: {
                 value_t *object = vm_env_ref(vm, BC_GET_I(bc), BC_GET_J(bc));
                 if (object == NULL) {
@@ -262,8 +262,8 @@ __check_exception:
                 }
 
                 vm_push(vm, object);
-                break;
             }
+            break;
             case BC_JUMP:
                 i = BC_JUMP_INDEX(bc) - 1;
                 break;
@@ -275,8 +275,8 @@ __check_exception:
             case BC_PRINT: {
                 value_t *object = vm_top(vm);
                 vm_value_print(vm, object);
-                break;
             }
+            break;
             case BC_PUSH:
                 vm_push(vm, BC_PUSH_OBJ(bc));
                 break;

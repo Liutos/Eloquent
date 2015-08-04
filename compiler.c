@@ -10,14 +10,12 @@
 #include <string.h>
 #include "bytecode.h"
 #include "compiler.h"
+#include "misc.h"
 #include "prims.h"
 #include "utils/hash_table.h"
 #include "utils/string.h"
 #include "utils/vector.h"
 #include "value.h"
-
-#define ERR 0
-#define OK 1
 
 typedef int (*compiler_rt_t)(compiler_t *, ast_t *, ins_t *);
 

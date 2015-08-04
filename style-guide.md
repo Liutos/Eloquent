@@ -2,7 +2,7 @@
 
 ## Source Code Layout
 
-* Use two **spaces** per indentation level. No hard tabs.
+* Use four **spaces** per indentation level. No hard tabs.
 * Put the statement in **switch**...**case** at the next line of **case**.
 * Put the **break** statement as the last one at a single line.
 * Put the left brace **{** at the same line as **if**, **while**, **switch**, **struct**, **enum**.
@@ -42,12 +42,22 @@
 ## Code Position
 
 * Include header files
+* `extern "C"` declaration
 * Type declarations use `typedef`
 * enum type definitions
 * struct type definitions
 * Global variable declarations
 * Function prototype declarations
 * Constant macro definitions
+* Accessor macro definitions
 * Function macro definitions
 * Global variable definitions
 * Function definitions
+
+### Function Definition Order
+
+* Private definitions above public ones
+* Initializer function
+* Constructor function
+* Destructor function
+* Others

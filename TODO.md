@@ -1,5 +1,8 @@
 # 代码
 
+* 分离bc_print中对指令名和参数的打印逻辑
+* 在utils/中定义专用的栈类型
+* 统一seg\_vector\_t及其衍生类型的使用
 * <del>统一预置函数在解释器/编译器/虚拟机上的载入流程</del>
 * <del>使用opcode\_t代替bytecode\_kind\_t</del>
 * <del>seg\_vector\_ref的实现需要对坐标有效性进行检查</del>

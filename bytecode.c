@@ -132,11 +132,6 @@ bytecode_t *bc_print_new(void)
     return bc_new(BC_PRINT);
 }
 
-void bytecode_free(bytecode_t *bc)
-{
-    free(bc);
-}
-
 void ins_indent_print(int indent, int index, FILE *output)
 {
     int prefix = indent - 1;
@@ -200,8 +195,12 @@ void bc_print(bytecode_t *bc, FILE *output)
         case BC_CALL:
             fprintf(output, "%s %d", bc_name(bc), BC_CALL_NARGS(bc));
             break;
-        case BC_DGET: fprintf(output, "%s %s", bc_name(bc), BC_DGET_NAME(bc)); break;
-        case BC_DSET: fprintf(output, "%s %s", bc_name(bc), BC_DSET_NAME(bc)); break;
+        case BC_DGET:
+            fprintf(output, "%s %s", bc_name(bc), BC_DGET_NAME(bc));
+            break;
+        case BC_DSET:
+            fprintf(output, "%s %s", bc_name(bc), BC_DSET_NAME(bc));
+            break;
         case BC_FJUMP:
             fprintf(output, "%s %d", bc_name(bc), BC_FJUMP_INDEX(bc));
             break;

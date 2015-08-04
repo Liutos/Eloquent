@@ -4,12 +4,10 @@
 #include "ast.h"
 #include "env.h"
 #include "interp.h"
+#include "misc.h"
 #include "prims.h"
 #include "utils/vector.h"
 #include "value.h"
-
-#define ERR 0
-#define OK 1
 
 /* PRIVATE */
 
@@ -18,11 +16,6 @@ static syntax_t *syntax_new(void *ptr)
     syntax_t *s = malloc(sizeof(syntax_t));
     s->ptr = ptr;
     return s;
-}
-
-static value_t *interp_get(interp_t *interp, char *name)
-{
-    return env_get(interp->env, name, NULL);
 }
 
 static syntax_t *interp_getbis(interp_t *interp, const char *name)
@@ -304,7 +297,7 @@ static value_kind_t interp_execute_cons(interp_t *interp, ast_t *ast, value_t **
 static value_kind_t interp_execute_ident(interp_t *interp, ast_t *ast, value_t **value)
 {
     char *name = AST_IDENT_NAME(ast);
-    value_t *val = interp_get(interp, name);
+    value_t *val = env_get(interp->env, name, NULL);
     if (val != NULL) {
         if (value != NULL)
             *value = val;
@@ -326,12 +319,6 @@ interp_t *interp_new(void)
     i->denv = env_new(env_empty_new());
     interp_initbif(i);
     return i;
-}
-
-void interp_free(interp_t *i)
-{
-    env_free(i->env);
-    free(i);
 }
 
 value_kind_t interp_execute(interp_t *interp, ast_t *ast, value_t **value)

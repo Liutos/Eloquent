@@ -92,7 +92,6 @@ extern bytecode_t *bc_func_new(void);
 extern bytecode_t *bc_chkex_new(void);
 extern bytecode_t *bc_return_new(void);
 extern bytecode_t *bc_print_new(void);
-extern void bytecode_free(bytecode_t *);
 extern const char *bc_name(bytecode_t *);
 extern void bc_print(bytecode_t *, FILE *);
 extern void bc_sprint(bytecode_t *, char *, size_t);
