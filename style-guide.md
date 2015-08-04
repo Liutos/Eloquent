@@ -43,6 +43,7 @@
 
 * Include header files
 * `extern "C"` declaration
+* Forward declaration
 * Type declarations use `typedef`
 * enum type definitions
 * struct type definitions
