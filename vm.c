@@ -11,21 +11,11 @@
 #include "env.h"
 #include "prims.h"
 #include "utils/seg_vector.h"
+#include "utils/stack.h"
 #include "value.h"
 #include "vm.h"
 
-#define __vm_stack_new() vector_new()
-#define __vm_stack_push(vm, o) vector_push(vm->sys_stack, (intptr_t)o)
-#define __vm_stack_pop(vm) vector_pop(vm->sys_stack)
-#define __vm_stack_isempty(vm) ((vm)->sys_stack->count == 0)
-
 /* PRIVATE */
-
-#define vm_stack_new() vector_new()
-#define vm_stack_free(s) vector_free(s)
-#define vm_stack_shrink(s, n) vector_shrink(s, n)
-#define vm_stack_restore(vm) vector_setpos(vm->stack, vm->sp)
-#define vm_stack_save(vm) vector_curpos(vm->stack)
 
 static value_env_t *vm_env_new(value_env_t *outer)
 {
@@ -139,9 +129,9 @@ vm_t *vm_new(void)
 {
     vm_t *vm = malloc(sizeof(*vm));
     vm->env = vm_env_new(NULL);
-    vm->stack = vm_stack_new();
+    vm->stack = stack_new();
     vm->sp = 0;
-    vm->sys_stack = __vm_stack_new();
+    vm->sys_stack = stack_new();
     vm->denv = env_new(env_empty_new());
 
     int i = 0;
@@ -159,19 +149,19 @@ vm_t *vm_new(void)
 void vm_free(vm_t *vm)
 {
     seg_vector_free(vm->env);
-    vm_stack_free(vm->stack);
+    stack_free(vm->stack);
     free(vm);
 }
 
 #define RESTORE \
     /* 恢复指令指针 */ \
-    i = (int)__vm_stack_pop(vm); \
+    i = (int)stack_pop(vm->sys_stack); \
     /* 恢复指令信息 */ \
-    ins = (ins_t *)__vm_stack_pop(vm); \
+    ins = (ins_t *)stack_pop(vm->sys_stack); \
     /* 恢复栈指针信息 */ \
-    vm->sp = (size_t)__vm_stack_pop(vm); \
+    vm->sp = (size_t)stack_pop(vm->sys_stack); \
     /* 恢复环境信息 */ \
-    vm->env = (value_env_t *)__vm_stack_pop(vm); \
+    vm->env = (value_env_t *)stack_pop(vm->sys_stack); \
     vm->denv = vm->denv->outer
 
 void vm_execute(vm_t *vm, ins_t *ins)
@@ -186,7 +176,7 @@ void vm_execute(vm_t *vm, ins_t *ins)
                     value_t *obj = vm_iref(vm, i);
                     vm_env_intern(vm, obj);
                 }
-                vm_stack_shrink(vm->stack, BC_ARGS_ARITY(bc));
+                stack_shrink(vm->stack, BC_ARGS_ARITY(bc));
             }
             break;
             case BC_CALL: {
@@ -200,13 +190,13 @@ void vm_execute(vm_t *vm, ins_t *ins)
                     vm_execute_bif(vm, f);
                 else {
                     /* 保存环境信息 */
-                    __vm_stack_push(vm, vm->env);
+                    stack_push(vm->sys_stack, vm->env);
                     /* 保存栈指针信息 */
-                    __vm_stack_push(vm, vm->sp);
+                    stack_push(vm->sys_stack, vm->sp);
                     /* 保存指令信息 */
-                    __vm_stack_push(vm, ins);
+                    stack_push(vm->sys_stack, ins);
                     /* 保存指令指针 */
-                    __vm_stack_push(vm, i);
+                    stack_push(vm->sys_stack, i);
                     /* 初始化环境、字节码序列和指令指针 */
                     vm->env = vm_env_new(VALUE_UCF_ENV(f));
                     vm->denv = env_new(vm->denv);
@@ -220,7 +210,7 @@ __check_exception:
             case BC_CHKEX: {
                 value_t *top = vm_top(vm);
                 if (elo_ERRORP(top)) {
-                    if (!__vm_stack_isempty(vm)) {
+                    if (!stack_isempty(vm->sys_stack)) {
                         RESTORE;
                         /* 将运行时错误压回参数栈 */
                         vm_push(vm, top);
