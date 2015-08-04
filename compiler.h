@@ -14,18 +14,18 @@
 #include "utils/seg_vector.h"
 #include "utils/string.h"
 #include "utils/vector.h"
+#include "value.h"
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
 typedef struct __compiler_t compiler_t;
-typedef seg_vector_t compiler_env_t;
 
 struct __compiler_t {
     string_t *error;
     hash_table_t *rts;
-    compiler_env_t *env;
+    value_env_t *env;
     unsigned int counter;
     hash_table_t *label_table;
 };

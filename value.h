@@ -12,6 +12,8 @@ extern "C" {
 #endif
 
 struct __env_t;
+
+typedef seg_vector_t value_env_t;
 typedef struct __value_t value_t;
 typedef struct __value_error_t value_error_t;
 typedef struct __value_function_t value_function_t;
@@ -36,11 +38,11 @@ struct __value_function_t {
         struct {
             ast_t *pars;
             ast_t *body;
-	    struct __env_t *env;
+            struct __env_t *env;
         } udf;
         struct {
             ins_t *code;
-            seg_vector_t *env;
+            value_env_t *env;
         } ucf;
     } u;
 };

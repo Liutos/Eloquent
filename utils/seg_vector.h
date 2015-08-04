@@ -24,7 +24,7 @@ struct __seg_vector_t {
 extern seg_vector_t *seg_vector_new(seg_vector_t *);
 extern void seg_vector_free(seg_vector_t *);
 extern void seg_vector_push(seg_vector_t *, const void *);
-extern int seg_vector_locate(seg_vector_t *, const void *, ele_comp_t, int *, int *);
+extern int seg_vector_locate(seg_vector_t *, const void *, vec_comp_func_t, int *, int *);
 extern void *seg_vector_ref(seg_vector_t *, int, int);
 extern int seg_vector_set(seg_vector_t *, void *, int, int);
 

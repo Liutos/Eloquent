@@ -9,6 +9,7 @@
 #define VM_H_
 
 #include <stdio.h>
+
 #include "bytecode.h"
 #include "env.h"
 #include "utils/seg_vector.h"
@@ -20,11 +21,10 @@ extern "C" {
 
 typedef struct __vm_t vm_t;
 typedef vector_t vm_stack_t;
-typedef seg_vector_t vm_env_t;
 typedef vector_t __vm_stack_t;
 
 struct __vm_t {
-    vm_env_t *env;
+    value_env_t *env;
     vm_stack_t *stack;
     size_t sp;
     FILE *log;

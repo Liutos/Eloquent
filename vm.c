@@ -27,7 +27,7 @@
 #define vm_stack_restore(vm) vector_setpos(vm->stack, vm->sp)
 #define vm_stack_save(vm) vector_curpos(vm->stack)
 
-static vm_env_t *vm_env_new(vm_env_t *outer)
+static value_env_t *vm_env_new(value_env_t *outer)
 {
     return seg_vector_new(outer);
 }
@@ -171,7 +171,7 @@ void vm_free(vm_t *vm)
     /* 恢复栈指针信息 */ \
     vm->sp = (size_t)__vm_stack_pop(vm); \
     /* 恢复环境信息 */ \
-    vm->env = (vm_env_t *)__vm_stack_pop(vm); \
+    vm->env = (value_env_t *)__vm_stack_pop(vm); \
     vm->denv = vm->denv->outer
 
 void vm_execute(vm_t *vm, ins_t *ins)

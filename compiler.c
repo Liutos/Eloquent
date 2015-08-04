@@ -30,12 +30,12 @@ static bytecode_t *compiler_mklabel(compiler_t *comp)
     return label;
 }
 
-static compiler_env_t *compiler_env_new(compiler_env_t *outer)
+static value_env_t *compiler_env_new(value_env_t *outer)
 {
     return seg_vector_new(outer);
 }
 
-static void compiler_env_intern(compiler_env_t *env, const char *var, int *i, int *j)
+static void compiler_env_intern(value_env_t *env, const char *var, int *i, int *j)
 {
     if (i != NULL)
         *i = 0;
@@ -44,9 +44,9 @@ static void compiler_env_intern(compiler_env_t *env, const char *var, int *i, in
     seg_vector_push(env, var);
 }
 
-static int compiler_env_lookup(compiler_env_t *env, const char *var, int *i, int *j)
+static int compiler_env_lookup(value_env_t *env, const char *var, int *i, int *j)
 {
-    return seg_vector_locate(env, var, (ele_comp_t)comp_str, i, j);
+    return seg_vector_locate(env, var, (vec_comp_func_t)comp_str, i, j);
 }
 
 static int compiler_extend_scope(compiler_t *comp, ast_t *pars)

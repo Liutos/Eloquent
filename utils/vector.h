@@ -9,7 +9,7 @@ extern "C" {
 
 typedef struct __vector_t vector_t;
 
-typedef int (*ele_comp_t)(intptr_t, intptr_t);
+typedef int (*vec_comp_func_t)(intptr_t, intptr_t);
 
 struct __vector_t {
     intptr_t *slots;
@@ -22,7 +22,7 @@ extern void vector_free(vector_t *);
 extern void vector_push(vector_t *, intptr_t);
 extern intptr_t vector_pop(vector_t *);
 extern intptr_t vector_ref(vector_t *, size_t);
-extern int vector_posif(vector_t *, intptr_t, ele_comp_t);
+extern int vector_posif(vector_t *, intptr_t, vec_comp_func_t);
 extern intptr_t vector_top(vector_t *);
 extern void vector_set(vector_t *, intptr_t, int);
 extern intptr_t vector_iref(vector_t *, int);

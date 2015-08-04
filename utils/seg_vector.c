@@ -29,7 +29,7 @@ void seg_vector_push(seg_vector_t *sv, const void *ptr)
     vector_push(sv->data, (intptr_t)ptr);
 }
 
-int seg_vector_locate(seg_vector_t *sv, const void *key, ele_comp_t comp_func, int *seg_index, int *vector_index)
+int seg_vector_locate(seg_vector_t *sv, const void *key, vec_comp_func_t comp_func, int *seg_index, int *vector_index)
 {
     int si = 0;
     while (sv != NULL) {
