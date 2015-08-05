@@ -5,6 +5,7 @@
  *      Author: liutos
  */
 #include <stdlib.h>
+
 #include "seg_vector.h"
 #include "vector.h"
 
@@ -47,17 +48,6 @@ int seg_vector_locate(seg_vector_t *sv, const void *key, vec_comp_func_t comp_fu
     return 0;
 }
 
-void *seg_vector_ref(seg_vector_t *sv, int i, int j)
-{
-    while (i > 0 && sv != NULL) {
-        sv = sv->next;
-        i--;
-    }
-    if (sv->data->count < j)
-        return NULL;
-    return (void *)vector_ref(sv->data, j);
-}
-
 int seg_vector_set(seg_vector_t *sv, void *obj, int i, int j)
 {
     while (i > 0 && sv != NULL) {
@@ -68,4 +58,15 @@ int seg_vector_set(seg_vector_t *sv, void *obj, int i, int j)
         return 0;
     vector_set(sv->data, (intptr_t)obj, j);
     return 1;
+}
+
+void *seg_vector_ref(seg_vector_t *sv, int i, int j)
+{
+    while (i > 0 && sv != NULL) {
+        sv = sv->next;
+        i--;
+    }
+    if (sv->data->count < j)
+        return NULL;
+    return (void *)vector_ref(sv->data, j);
 }

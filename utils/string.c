@@ -14,15 +14,15 @@
 
 /* PRIVATE */
 
-static int string_isfull(string_t *s)
-{
-    return s->length + 1 >= s->capacity;
-}
-
 static void string_incr(string_t *s, size_t d)
 {
     s->capacity += d;
     s->text = realloc(s->text, s->capacity * sizeof(char));
+}
+
+static int string_isfull(string_t *s)
+{
+    return s->length + 1 >= s->capacity;
 }
 
 /* PUBLIC */
