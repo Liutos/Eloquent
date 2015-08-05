@@ -130,7 +130,6 @@ vm_t *vm_new(void)
     vm_t *vm = malloc(sizeof(*vm));
     vm->env = vm_env_new(NULL);
     vm->stack = stack_new();
-    vm->sp = 0;
     vm->sys_stack = stack_new();
     vm->denv = env_new(env_empty_new());
 
@@ -158,8 +157,6 @@ void vm_free(vm_t *vm)
     i = (int)stack_pop(vm->sys_stack); \
     /* 恢复指令信息 */ \
     ins = (ins_t *)stack_pop(vm->sys_stack); \
-    /* 恢复栈指针信息 */ \
-    vm->sp = (size_t)stack_pop(vm->sys_stack); \
     /* 恢复环境信息 */ \
     vm->env = (value_env_t *)stack_pop(vm->sys_stack); \
     vm->denv = vm->denv->outer
@@ -191,8 +188,6 @@ void vm_execute(vm_t *vm, ins_t *ins)
                 else {
                     /* 保存环境信息 */
                     stack_push(vm->sys_stack, vm->env);
-                    /* 保存栈指针信息 */
-                    stack_push(vm->sys_stack, vm->sp);
                     /* 保存指令信息 */
                     stack_push(vm->sys_stack, ins);
                     /* 保存指令指针 */

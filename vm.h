@@ -25,7 +25,6 @@ typedef struct __vm_t vm_t;
 struct __vm_t {
     value_env_t *env;
     stack_t *stack;
-    size_t sp;
     stack_t *sys_stack;
     env_t *denv;
 };
@@ -33,9 +32,9 @@ struct __vm_t {
 extern vm_t *vm_new(void);
 extern void vm_free(vm_t *);
 extern void vm_execute(vm_t *, ins_t *);
-extern void vm_print_top(vm_t *, FILE *);
-extern void vm_print_all(vm_t *, FILE *);
 extern void vm_inject_print(ins_t *);
+extern void vm_print_all(vm_t *, FILE *);
+extern void vm_print_top(vm_t *, FILE *);
 
 #ifdef __cplusplus
 }
