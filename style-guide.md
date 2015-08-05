@@ -61,4 +61,8 @@
 * Initializer function
 * Constructor function
 * Destructor function
+* Functions without return type
+* Functions with primitive return type
+* Functions with pointer of primitive return type
+* Functions with pointer of user defined structure return type
 * Others

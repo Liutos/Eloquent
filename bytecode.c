@@ -12,7 +12,7 @@
 
 /* PRIVATE */
 
-static const char *bc_names[] ={
+static const char *bc_names[] = {
         BC_KIND(BC_STRINGIFY)
 };
 
@@ -188,41 +188,41 @@ const char *bc_name(bytecode_t *bc)
 
 void bc_print(bytecode_t *bc, FILE *output)
 {
+    fprintf(output, "%s", bc_name(bc));
     switch (bc->opcode) {
         case BC_ARGS:
-            fprintf(output, "%s %d", bc_name(bc), BC_ARGS_ARITY(bc));
+            fprintf(output, " %d", BC_ARGS_ARITY(bc));
             break;
         case BC_CALL:
-            fprintf(output, "%s %d", bc_name(bc), BC_CALL_NARGS(bc));
+            fprintf(output, " %d", BC_CALL_NARGS(bc));
             break;
         case BC_DGET:
-            fprintf(output, "%s %s", bc_name(bc), BC_DGET_NAME(bc));
+            fprintf(output, " %s", BC_DGET_NAME(bc));
             break;
         case BC_DSET:
-            fprintf(output, "%s %s", bc_name(bc), BC_DSET_NAME(bc));
+            fprintf(output, " %s", BC_DSET_NAME(bc));
             break;
         case BC_FJUMP:
-            fprintf(output, "%s %d", bc_name(bc), BC_FJUMP_INDEX(bc));
-            break;
-        case BC_JUMP:
-            fprintf(output, "%s %d", bc_name(bc), BC_JUMP_INDEX(bc));
-            break;
-        case BC_LABEL:
-            fprintf(output, "%s %s", bc_name(bc), BC_LABEL_NAME(bc));
-            break;
-        case BC_SET:
-            fprintf(output, "%s %d %d ; %s", bc_name(bc), bc->u.bc_set.i, bc->u.bc_set.j, bc->u.bc_set.name);
-            break;
-        case BC_PUSH:
-            fprintf(output, "%s ", bc_name(bc));
-            value_print(BC_PUSH_OBJ(bc), output);
+            fprintf(output, " %d", BC_FJUMP_INDEX(bc));
             break;
         case BC_GET:
-            fprintf(output, "%s %d %d ; %s", bc_name(bc), bc->u.bc_get.i, bc->u.bc_get.j, bc->u.bc_get.name);
+            fprintf(output, " %d %d ; %s", BC_GET_I(bc), BC_GET_J(bc), BC_GET_NAME(bc));
             break;
-        case BC_POP:
+        case BC_JUMP:
+            fprintf(output, " %d", BC_JUMP_INDEX(bc));
+            break;
+        case BC_LABEL:
+            fprintf(output, " %s", BC_LABEL_NAME(bc));
+            break;
+        case BC_PUSH:
+            fputc(' ', output);
+            value_print(BC_PUSH_OBJ(bc), output);
+            break;
+        case BC_SET:
+            fprintf(output, " %d %d ; %s", BC_SET_I(bc), BC_SET_J(bc), BC_SET_NAME(bc));
+            break;
         default :
-            fprintf(output, "%s", bc_name(bc));
+            break;
     }
 }
 

@@ -120,6 +120,7 @@ extern void ins_pretty_print(ins_t *, FILE *, int);
 #define BC_PUSH_OBJ(p) ((value_t *)(p)->u.push_ptr)
 #define BC_SET_I(s) ((s)->u.bc_set.i)
 #define BC_SET_J(s) ((s)->u.bc_set.j)
+#define BC_SET_NAME(s) ((s)->u.bc_set.name)
 
 #ifdef __cplusplus
 }
