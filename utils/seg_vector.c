@@ -48,6 +48,30 @@ int seg_vector_locate(seg_vector_t *sv, const void *key, vec_comp_func_t comp_fu
     return 0;
 }
 
+int seg_vector_locate2(seg_vector_t *sv, const void *key, vec_comp_func_t comp_func, int *seg_index, int *vector_index, int *is_last_seg)
+{
+    int si = 0;
+    while (sv != NULL) {
+        int vi = vector_posif(sv->data, (intptr_t)key, comp_func);
+        if (vi != -1) {
+            if (seg_index != NULL)
+                *seg_index = si;
+            if (vector_index != NULL)
+                *vector_index = vi;
+            if (is_last_seg != NULL) {
+                if (sv->next == NULL)
+                    *is_last_seg = 1;
+                else
+                    *is_last_seg = 0;
+            }
+            return 1;
+        }
+        sv = sv->next;
+        si++;
+    }
+    return 0;
+}
+
 int seg_vector_set(seg_vector_t *sv, void *obj, int i, int j)
 {
     while (i > 0 && sv != NULL) {
