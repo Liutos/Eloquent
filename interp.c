@@ -70,9 +70,8 @@ static value_kind_t bis_dget(interp_t *interp, ast_t *body, value_t **result)
 {
     ast_t *var = AST_CONS_CAR(body);
     char *name = AST_IDENT_NAME(var);
-    int is_found;
-    value_t *val = env_get(interp->denv, name, &is_found);
-    if (is_found) {
+    value_t *val = env_get(interp->denv, name);
+    if (val != NULL) {
         if (result != NULL)
             *result = val;
         return val->kind;
@@ -297,7 +296,7 @@ static value_kind_t interp_execute_cons(interp_t *interp, ast_t *ast, value_t **
 static value_kind_t interp_execute_ident(interp_t *interp, ast_t *ast, value_t **value)
 {
     char *name = AST_IDENT_NAME(ast);
-    value_t *val = env_get(interp->env, name, NULL);
+    value_t *val = env_get(interp->env, name);
     if (val != NULL) {
         if (value != NULL)
             *value = val;

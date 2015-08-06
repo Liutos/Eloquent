@@ -58,33 +58,36 @@ static void ins_push_print(bytecode_t *bc, FILE *output, int indent, int index)
 
 /* PUBLIC */
 
-bytecode_t *bc_pop_new(void)
+bytecode_t *bc_args_new(int arity)
 {
-    return bc_new(BC_POP);
-}
-
-bytecode_t *bc_push_new(void *ptr)
-{
-    bytecode_t *bc = bc_new(BC_PUSH);
-    BC_PUSH_PTR(bc) = ptr;
+    bytecode_t *bc = bc_new(BC_ARGS);
+    bc->u.bc_args.arity = arity;
     return bc;
 }
 
-bytecode_t *bc_ref_new(int i, int j, char *name)
+bytecode_t *bc_call_new(int nargs)
 {
-    bytecode_t *bc = bc_new(BC_REF);
-    BC_REF_I(bc) = i;
-    BC_REF_J(bc) = j;
-    BC_REF_NAME(bc) = name;
+    bytecode_t *bc = bc_new(BC_CALL);
+    BC_CALL_NARGS(bc) = nargs;
     return bc;
 }
 
-bytecode_t *bc_set_new(int i, int j, char *name)
+bytecode_t *bc_chkex_new(void)
 {
-    bytecode_t *bc = bc_new(BC_SET);
-    bc->u.bc_set.i = i;
-    bc->u.bc_set.j = j;
-    bc->u.bc_set.name = name;
+    return bc_new(BC_CHKEX);
+}
+
+bytecode_t *bc_dget_new(char *name)
+{
+    bytecode_t *bc = bc_new(BC_DGET);
+    BC_DGET_NAME(bc) = name;
+    return bc;
+}
+
+bytecode_t *bc_dset_new(char *name)
+{
+    bytecode_t *bc = bc_new(BC_DSET);
+    BC_DSET_NAME(bc) = name;
     return bc;
 }
 
@@ -94,6 +97,11 @@ bytecode_t *bc_fjump_new(bytecode_t *label)
     BC_FJUMP_INDEX(bc) = -1;
     bc->u.bc_fjump.label = label;
     return bc;
+}
+
+bytecode_t *bc_func_new(void)
+{
+    return bc_new(BC_FUNC);
 }
 
 bytecode_t *bc_jump_new(bytecode_t *label)
@@ -117,42 +125,30 @@ bytecode_t *bc_nope_new(void)
     return bc_new(BC_NOPE);
 }
 
-bytecode_t *bc_call_new(int nargs)
+bytecode_t *bc_pop_new(void)
 {
-    bytecode_t *bc = bc_new(BC_CALL);
-    BC_CALL_NARGS(bc) = nargs;
+    return bc_new(BC_POP);
+}
+
+bytecode_t *bc_print_new(void)
+{
+    return bc_new(BC_PRINT);
+}
+
+bytecode_t *bc_push_new(void *ptr)
+{
+    bytecode_t *bc = bc_new(BC_PUSH);
+    BC_PUSH_PTR(bc) = ptr;
     return bc;
 }
 
-bytecode_t *bc_dget_new(char *name)
+bytecode_t *bc_ref_new(int i, int j, char *name)
 {
-    bytecode_t *bc = bc_new(BC_DGET);
-    BC_DGET_NAME(bc) = name;
+    bytecode_t *bc = bc_new(BC_REF);
+    BC_REF_I(bc) = i;
+    BC_REF_J(bc) = j;
+    BC_REF_NAME(bc) = name;
     return bc;
-}
-
-bytecode_t *bc_dset_new(char *name)
-{
-    bytecode_t *bc = bc_new(BC_DSET);
-    BC_DSET_NAME(bc) = name;
-    return bc;
-}
-
-bytecode_t *bc_args_new(int arity)
-{
-    bytecode_t *bc = bc_new(BC_ARGS);
-    bc->u.bc_args.arity = arity;
-    return bc;
-}
-
-bytecode_t *bc_func_new(void)
-{
-    return bc_new(BC_FUNC);
-}
-
-bytecode_t *bc_chkex_new(void)
-{
-    return bc_new(BC_CHKEX);
 }
 
 bytecode_t *bc_return_new(void)
@@ -160,9 +156,13 @@ bytecode_t *bc_return_new(void)
     return bc_new(BC_RETURN);
 }
 
-bytecode_t *bc_print_new(void)
+bytecode_t *bc_set_new(int i, int j, char *name)
 {
-    return bc_new(BC_PRINT);
+    bytecode_t *bc = bc_new(BC_SET);
+    bc->u.bc_set.i = i;
+    bc->u.bc_set.j = j;
+    bc->u.bc_set.name = name;
+    return bc;
 }
 
 void bc_print(bytecode_t *bc, FILE *output)

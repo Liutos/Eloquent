@@ -215,9 +215,8 @@ __check_exception:
             }
             break;
             case BC_DGET: {
-                int is_found;
-                value_t *object = env_get(vm->denv, BC_DGET_NAME(bc), &is_found);
-                if (!is_found) {
+                value_t *object = env_get(vm->denv, BC_DGET_NAME(bc));
+                if (object != NULL) {
                     vm_push(vm, value_error_newf("Undefined dynamic variable: %s", BC_DGET_NAME(bc)));
                     goto __check_exception;
                 }

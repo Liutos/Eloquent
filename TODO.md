@@ -1,5 +1,6 @@
 # 代码
 
+* 定义C级别的符号类型，代替fjump/jump指令的label成员变量的当前类型
 * <del>统一预置函数在解释器/编译器/虚拟机上的载入流程</del>
 * <del>使用opcode\_t代替bytecode\_kind\_t</del>
 * <del>seg\_vector\_ref的实现需要对坐标有效性进行检查</del>

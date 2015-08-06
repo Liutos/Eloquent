@@ -33,6 +33,16 @@ static void value_function_print(value_t *v, FILE *output)
 
 /* PUBLIC */
 
+value_t *value_bif_new(void *bif_ptr, unsigned int arity)
+{
+    value_t *v = value_alloc(VALUE_FUNCTION);
+    VALUE_FUNC_ARITY(v) = arity;
+    VALUE_FUNC_ISBIF(v) = 1;
+    VALUE_FUNC_ISCMP(v) = 0;
+    VALUE_BIF_PTR(v) = bif_ptr;
+    return v;
+}
+
 value_t *value_error_new(const char *msg)
 {
     value_t *v = value_alloc(VALUE_ERROR);
@@ -50,13 +60,6 @@ value_t *value_error_newf(const char *fmt, ...)
     return value_error_new(msg);
 }
 
-value_t *value_int_new(int num)
-{
-    value_t *v = value_alloc(VALUE_INT);
-    v->u.int_val = num;
-    return v;
-}
-
 value_t *value_float_new(double num)
 {
     value_t *v = value_alloc(VALUE_FLOAT);
@@ -64,13 +67,20 @@ value_t *value_float_new(double num)
     return v;
 }
 
-value_t *value_bif_new(void *bif_ptr, unsigned int arity)
+value_t *value_int_new(int num)
+{
+    value_t *v = value_alloc(VALUE_INT);
+    v->u.int_val = num;
+    return v;
+}
+
+value_t *value_ucf_new(int arity, ins_t *code)
 {
     value_t *v = value_alloc(VALUE_FUNCTION);
     VALUE_FUNC_ARITY(v) = arity;
-    VALUE_FUNC_ISBIF(v) = 1;
-    VALUE_FUNC_ISCMP(v) = 0;
-    VALUE_BIF_PTR(v) = bif_ptr;
+    VALUE_FUNC_ISBIF(v) = 0;
+    VALUE_FUNC_ISCMP(v) = 1;
+    VALUE_UCF_CODE(v) = code;
     return v;
 }
 
@@ -82,16 +92,6 @@ value_t *value_udf_new(ast_t *pars, ast_t *body, env_t *env)
     VALUE_UDF_ENV(v) = env;
     VALUE_UDF_PARS(v) = pars;
     VALUE_UDF_BODY(v) = body;
-    return v;
-}
-
-value_t *value_ucf_new(int arity, ins_t *code)
-{
-    value_t *v = value_alloc(VALUE_FUNCTION);
-    VALUE_FUNC_ARITY(v) = arity;
-    VALUE_FUNC_ISBIF(v) = 0;
-    VALUE_FUNC_ISCMP(v) = 1;
-    VALUE_UCF_CODE(v) = code;
     return v;
 }
 
@@ -124,11 +124,4 @@ int value_isequal(value_t *v1, value_t *v2)
         default :
             return v1 == v2;
     }
-}
-
-void value_sprint(value_t *v, char *output, size_t size)
-{
-    FILE *outs = fmemopen(output, size, "w");
-    value_print(v, outs);
-    fclose(outs);
 }

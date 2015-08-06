@@ -15,12 +15,12 @@ struct __env_t {
     env_t *outer;
 };
 
-extern env_t *env_new(env_t *);
 extern env_t *env_empty_new(void);
-extern int env_isempty(env_t *);
+extern env_t *env_new(env_t *);
 extern void env_free(env_t *);
-extern value_t *env_get(env_t *, char *, int *);
 extern void env_set(env_t *, const char *, value_t *);
+extern int env_isempty(env_t *);
+extern value_t *env_get(env_t *, char *);
 
 #ifdef __cplusplus
 }
