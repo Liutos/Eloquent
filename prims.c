@@ -130,7 +130,7 @@ DEFINE_BIF2(ge, n1, n2)
 void bcf_print(ins_t *ins)
 {
     ins_push(ins, bc_args_new(1));
-    ins_push(ins, bc_get_new(0, 0, NULL));
+    ins_push(ins, bc_ref_new(0, 0, NULL));
     ins_push(ins, bc_print_new());
     ins_push(ins, bc_return_new());
 }

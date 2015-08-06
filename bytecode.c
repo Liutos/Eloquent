@@ -19,8 +19,41 @@ static const char *bc_names[] = {
 static bytecode_t *bc_new(opcode_t kind)
 {
     bytecode_t *bc = malloc(sizeof(bytecode_t));
-    bc->opcode = kind;
+    BC_OPCODE(bc) = kind;
     return bc;
+}
+
+static void ins_indent_print(int indent, int index, FILE *output)
+{
+    int prefix = indent - 1;
+    while (prefix >= 0) {
+        fputc('\t', output);
+        prefix--;
+    }
+    if (index != -1)
+        fprintf(output, "[%d]", index);
+    fputc('\t', output);
+}
+
+static void ins_push_ucf_print(value_t *ucf, FILE *output, int indent, int index)
+{
+    ins_indent_print(indent, index, output);
+    fprintf(output, "BC_PUSH #< ; This is a function\n");
+    ins_t *ins = VALUE_UCF_CODE(ucf);
+    ins_pretty_print(ins, output, indent + 1);
+    ins_indent_print(indent, -1, output);
+    fprintf(output, "        >");
+}
+
+static void ins_push_print(bytecode_t *bc, FILE *output, int indent, int index)
+{
+    value_t *object = BC_PUSH_PTR(bc);
+    if (object->kind == VALUE_FUNCTION && VALUE_FUNC_ISCMP(object))
+        ins_push_ucf_print(object, output, indent, index);
+    else {
+        ins_indent_print(indent, index, output);
+        bc_print(bc, output);
+    }
 }
 
 /* PUBLIC */
@@ -33,16 +66,16 @@ bytecode_t *bc_pop_new(void)
 bytecode_t *bc_push_new(void *ptr)
 {
     bytecode_t *bc = bc_new(BC_PUSH);
-    bc->u.push_ptr = ptr;
+    BC_PUSH_PTR(bc) = ptr;
     return bc;
 }
 
-bytecode_t *bc_get_new(int i, int j, char *name)
+bytecode_t *bc_ref_new(int i, int j, char *name)
 {
-    bytecode_t *bc = bc_new(BC_GET);
-    bc->u.bc_get.i = i;
-    bc->u.bc_get.j = j;
-    bc->u.bc_get.name = name;
+    bytecode_t *bc = bc_new(BC_REF);
+    BC_REF_I(bc) = i;
+    BC_REF_J(bc) = j;
+    BC_REF_NAME(bc) = name;
     return bc;
 }
 
@@ -132,64 +165,10 @@ bytecode_t *bc_print_new(void)
     return bc_new(BC_PRINT);
 }
 
-void ins_indent_print(int indent, int index, FILE *output)
-{
-    int prefix = indent - 1;
-    while (prefix >= 0) {
-        fputc('\t', output);
-        prefix--;
-    }
-    if (index != -1)
-        fprintf(output, "[%d]", index);
-    fputc('\t', output);
-}
-
-void ins_push_ucf_print(value_t *ucf, FILE *output, int indent, int index)
-{
-    ins_indent_print(indent, index, output);
-    fprintf(output, "BC_PUSH #< ; This is a function\n");
-    ins_t *ins = VALUE_UCF_CODE(ucf);
-    ins_pretty_print(ins, output, indent + 1);
-    ins_indent_print(indent, -1, output);
-    fprintf(output, "        >");
-}
-
-void ins_push_print(bytecode_t *bc, FILE *output, int indent, int index)
-{
-    value_t *object = BC_PUSH_OBJ(bc);
-    if (object->kind == VALUE_FUNCTION && VALUE_FUNC_ISCMP(object))
-        ins_push_ucf_print(object, output, indent, index);
-    else {
-        ins_indent_print(indent, index, output);
-        bc_print(bc, output);
-    }
-}
-
-void ins_pretty_print(ins_t *ins, FILE *output, int indent)
-{
-    int i = 0;
-    while (i < ins_length(ins)) {
-        bytecode_t *bc = ins_ref(ins, i);
-        assert(bc->opcode != BC_LABEL);
-        if (bc->opcode != BC_PUSH) {
-            ins_indent_print(indent, i, output);
-            bc_print(bc, output);
-        } else
-            ins_push_print(bc, output, indent, i);
-        fputc('\n', output);
-        i++;
-    }
-}
-
-const char *bc_name(bytecode_t *bc)
-{
-    return bc_names[bc->opcode];
-}
-
 void bc_print(bytecode_t *bc, FILE *output)
 {
     fprintf(output, "%s", bc_name(bc));
-    switch (bc->opcode) {
+    switch (BC_OPCODE(bc)) {
         case BC_ARGS:
             fprintf(output, " %d", BC_ARGS_ARITY(bc));
             break;
@@ -205,9 +184,6 @@ void bc_print(bytecode_t *bc, FILE *output)
         case BC_FJUMP:
             fprintf(output, " %d", BC_FJUMP_INDEX(bc));
             break;
-        case BC_GET:
-            fprintf(output, " %d %d ; %s", BC_GET_I(bc), BC_GET_J(bc), BC_GET_NAME(bc));
-            break;
         case BC_JUMP:
             fprintf(output, " %d", BC_JUMP_INDEX(bc));
             break;
@@ -216,7 +192,10 @@ void bc_print(bytecode_t *bc, FILE *output)
             break;
         case BC_PUSH:
             fputc(' ', output);
-            value_print(BC_PUSH_OBJ(bc), output);
+            value_print(BC_PUSH_PTR(bc), output);
+            break;
+        case BC_REF:
+            fprintf(output, " %d %d ; %s", BC_REF_I(bc), BC_REF_J(bc), BC_REF_NAME(bc));
             break;
         case BC_SET:
             fprintf(output, " %d %d ; %s", BC_SET_I(bc), BC_SET_J(bc), BC_SET_NAME(bc));
@@ -226,9 +205,23 @@ void bc_print(bytecode_t *bc, FILE *output)
     }
 }
 
-void bc_sprint(bytecode_t *bc, char *desc, size_t size)
+void ins_pretty_print(ins_t *ins, FILE *output, int indent)
 {
-    FILE *outs = fmemopen(desc, size, "w");
-    bc_print(bc, outs);
-    fclose(outs);
+    int i = 0;
+    while (i < ins_length(ins)) {
+        bytecode_t *bc = ins_ref(ins, i);
+        assert(BC_OPCODE(bc) != BC_LABEL);
+        if (BC_OPCODE(bc) != BC_PUSH) {
+            ins_indent_print(indent, i, output);
+            bc_print(bc, output);
+        } else
+            ins_push_print(bc, output, indent, i);
+        fputc('\n', output);
+        i++;
+    }
+}
+
+const char *bc_name(bytecode_t *bc)
+{
+    return bc_names[BC_OPCODE(bc)];
 }

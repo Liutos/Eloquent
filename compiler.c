@@ -84,7 +84,7 @@ static void compiler_assembly_scan(compiler_t *comp, ins_t *ins)
     int i = 0, offset = 0;
     while (i < ins_length(ins)) {
         bytecode_t *bc = ins_ref(ins, i);
-        if (bc->opcode == BC_LABEL)
+        if (BC_OPCODE(bc) == BC_LABEL)
             hash_table_set(comp->label_table, BC_LABEL_NAME(bc), (void *)offset);
         else
             offset++;
@@ -98,13 +98,13 @@ static ins_t *compiler_assembly_rebuild(compiler_t *comp, ins_t *ins)
     int i = 0;
     while (i < ins_length(ins)) {
         bytecode_t *bc = ins_ref(ins, i);
-        if (bc->opcode == BC_FJUMP) {
+        if (BC_OPCODE(bc) == BC_FJUMP) {
             BC_FJUMP_INDEX(bc) = (int)hash_table_get(comp->label_table, BC_FJUMP_LABEL_NAME(bc), NULL);
             ins_push(asm_ins, bc);
-        } else if (bc->opcode == BC_JUMP) {
+        } else if (BC_OPCODE(bc) == BC_JUMP) {
             BC_JUMP_INDEX(bc) = (int)hash_table_get(comp->label_table, BC_JUMP_LABEL_NAME(bc), NULL);
             ins_push(asm_ins, bc);
-        } else if (bc->opcode != BC_LABEL)
+        } else if (BC_OPCODE(bc) != BC_LABEL)
             ins_push(asm_ins, bc);
         i++;
     }
@@ -135,7 +135,7 @@ static int compiler_do_ident(compiler_t *comp, ast_t *id, ins_t *ins)
         string_printf(comp->error, "Line %d, column %d: Can't find value of `%s'", id->line, id->column, name);
         return ERR;
     }
-    ins_push(ins, bc_get_new(i, j, name));
+    ins_push(ins, bc_ref_new(i, j, name));
     return OK;
 }
 

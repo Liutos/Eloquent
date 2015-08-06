@@ -166,7 +166,7 @@ void vm_execute(vm_t *vm, ins_t *ins)
     int i = 0;
     while (i < ins_length(ins)) {
         bytecode_t *bc = ins_ref(ins, i);
-        switch (bc->opcode) {
+        switch (BC_OPCODE(bc)) {
             case BC_ARGS: {
                 int i = BC_ARGS_ARITY(bc) - 1;
                 for (; i >= 0; i--) {
@@ -239,16 +239,6 @@ __check_exception:
                 VALUE_UCF_ENV(f) = vm->env;
             }
             break;
-            case BC_GET: {
-                value_t *object = vm_env_ref(vm, BC_GET_I(bc), BC_GET_J(bc));
-                if (object == NULL) {
-                    vm_push(vm, value_error_newf("Undefined variable: %s", BC_GET_NAME(bc)));
-                    goto __check_exception;
-                }
-
-                vm_push(vm, object);
-            }
-            break;
             case BC_JUMP:
                 i = BC_JUMP_INDEX(bc) - 1;
                 break;
@@ -263,12 +253,22 @@ __check_exception:
             }
             break;
             case BC_PUSH:
-                vm_push(vm, BC_PUSH_OBJ(bc));
+                vm_push(vm, BC_PUSH_PTR(bc));
                 break;
             case BC_RETURN:
                 RESTORE;
                 /* 开始执行旧的字节码指令 */
                 break;
+            case BC_REF: {
+                value_t *object = vm_env_ref(vm, BC_REF_I(bc), BC_REF_J(bc));
+                if (object == NULL) {
+                    vm_push(vm, value_error_newf("Undefined variable: %s", BC_REF_NAME(bc)));
+                    goto __check_exception;
+                }
+
+                vm_push(vm, object);
+            }
+            break;
             case BC_SET:
                 vm_env_set(vm, BC_SET_I(bc), BC_SET_J(bc));
                 break;
