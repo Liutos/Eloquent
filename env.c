@@ -3,6 +3,7 @@
 #include <string.h>
 
 #include "env.h"
+#include "misc.h"
 #include "utils/vector.h"
 
 typedef struct __binding_t binding_t;
@@ -61,6 +62,17 @@ int env_isempty(env_t *env)
     return env == NULL;
 }
 
+int env_update(env_t *env, int index, int offset, value_t *value)
+{
+    for (int i = 0; i < index && env != NULL; i++)
+        env = env->outer;
+    if (env == NULL || offset > env->data.count - 1)
+        return ERR;
+    binding_t *b = (binding_t *)vector_ref(&env->data, offset);
+    b->value = value;
+    return OK;
+}
+
 value_t *env_get(env_t *env, const char *name)
 {
     while (!env_isempty(env)) {
@@ -72,4 +84,14 @@ value_t *env_get(env_t *env, const char *name)
         env = env->outer;
     }
     return NULL;
+}
+
+value_t *env_ref(env_t *env, int index, int offset)
+{
+    for (int i = 0; i < index && env != NULL; i++)
+        env = env->outer;
+    if (env == NULL || offset > env->data.count - 1)
+        return NULL;
+    binding_t *b = (binding_t *)vector_ref(&env->data, offset);
+    return (value_t *)b->value;
 }

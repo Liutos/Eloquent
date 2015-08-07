@@ -21,7 +21,9 @@ extern env_t *env_new(env_t *);
 extern void env_free(env_t *);
 extern void env_set(env_t *, const char *, value_t *);
 extern int env_isempty(env_t *);
+extern int env_update(env_t *, int, int, value_t *);
 extern value_t *env_get(env_t *, const char *);
+extern value_t *env_ref(env_t *, int, int);
 
 #ifdef __cplusplus
 }
