@@ -18,19 +18,23 @@ static int vector_isfull(vector_t *v)
 
 /* PUBLIC */
 
-vector_t *vector_new(void)
+vector_t *vector_init(vector_t *v)
 {
-    vector_t *v = malloc(sizeof(vector_t));
     v->slots = NULL;
     v->capacity = 0;
     v->count = 0;
     return v;
 }
 
+vector_t *vector_new(void)
+{
+    vector_t *v = malloc(sizeof(vector_t));
+    return vector_init(v);
+}
+
 void vector_free(vector_t *v)
 {
     free(v->slots);
-    free(v);
 }
 
 void vector_set(vector_t *v, intptr_t obj, int index)

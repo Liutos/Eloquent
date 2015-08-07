@@ -1,5 +1,5 @@
 CC = gcc
-CFLAGS = -Wall -g -pg
+CFLAGS = -Wall -g -pg -std=c99
 SRCS = $(shell find . -maxdepth 1 -name '*.c' -not -name '*main.c')
 OBJS = $(patsubst %.c, %.o, $(SRCS))
 UTILS_SRCS = \

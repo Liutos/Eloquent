@@ -17,6 +17,7 @@ struct __vector_t {
     size_t count;
 };
 
+extern vector_t *vector_init(vector_t *);
 extern vector_t *vector_new(void);
 extern void vector_free(vector_t *);
 extern void vector_push(vector_t *, intptr_t);
