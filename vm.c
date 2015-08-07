@@ -8,56 +8,27 @@
 #include <stdarg.h>
 #include <stdio.h>
 #include <stdlib.h>
+
 #include "env.h"
 #include "prims.h"
-#include "utils/seg_vector.h"
 #include "utils/stack.h"
 #include "value.h"
 #include "vm.h"
 
 /* PRIVATE */
 
-static value_env_t *vm_env_new(value_env_t *outer)
-{
-    return seg_vector_new(outer);
-}
-
-static value_t *vm_env_ref(vm_t *vm, int i, int j)
-{
-    return (value_t *)seg_vector_ref(vm->env, i, j);
-}
-
-static void vm_env_intern(vm_t *vm, value_t *o)
-{
-    seg_vector_push(vm->env, o);
-}
-
 static value_t *vm_top(vm_t *vm)
 {
     return (value_t *)vector_top(vm->stack);
 }
 
-static void vm_env_set(vm_t *vm, int i, int j)
+static void vm_env_set(vm_t *vm, int i, int j, const char *name)
 {
     value_t *val = vm_top(vm);
     if (i == -1 && j == -1)
-        vm_env_intern(vm, val);
+        env_set(vm->env, name, val);
     else
-        seg_vector_set(vm->env, val, i, j);
-}
-
-static void vm_env_internbcf(vm_t *vm, void *bcf, int arity)
-{
-    ins_t *code = ins_new();
-    ((bcf_t)bcf)(code);
-    value_t *f = value_ucf_new(arity, code);
-    vm_env_intern(vm, f);
-}
-
-static void vm_env_internbif(vm_t *vm, void *bif, int arity)
-{
-    value_t *v = value_bif_new(bif, arity);
-    vm_env_intern(vm, v);
+        env_update(vm->env, i, j, val);
 }
 
 static value_t *vm_pop(vm_t *vm)
@@ -128,27 +99,19 @@ static void vm_value_print(vm_t *vm, value_t *object)
 vm_t *vm_new(void)
 {
     vm_t *vm = malloc(sizeof(*vm));
-    vm->env = vm_env_new(NULL);
+    vm->denv = env_new(env_empty_new());
+    vm->env = elo_extend_env(env_new(env_empty_new()));
     vm->stack = stack_new();
     vm->sys_stack = stack_new();
-    vm->denv = env_new(env_empty_new());
-
-    int i = 0;
-    while (i < prims_num) {
-        prim_t *p = &prims[i];
-        if (!p->is_compiled)
-            vm_env_internbif(vm, p->func_ptr, p->arity);
-        else
-            vm_env_internbcf(vm, p->func_ptr, p->arity);
-        i++;
-    }
     return vm;
 }
 
 void vm_free(vm_t *vm)
 {
-    seg_vector_free(vm->env);
+    env_free(vm->denv);
+    env_free(vm->env);
     stack_free(vm->stack);
+    stack_free(vm->sys_stack);
     free(vm);
 }
 
@@ -158,7 +121,7 @@ void vm_free(vm_t *vm)
     /* 恢复指令信息 */ \
     ins = (ins_t *)stack_pop(vm->sys_stack); \
     /* 恢复环境信息 */ \
-    vm->env = (value_env_t *)stack_pop(vm->sys_stack); \
+    vm->env = (env_t *)stack_pop(vm->sys_stack); \
     vm->denv = vm->denv->outer
 
 void vm_execute(vm_t *vm, ins_t *ins)
@@ -171,7 +134,7 @@ void vm_execute(vm_t *vm, ins_t *ins)
                 int i = BC_ARGS_ARITY(bc) - 1;
                 for (; i >= 0; i--) {
                     value_t *obj = vm_iref(vm, i);
-                    vm_env_intern(vm, obj);
+                    env_set(vm->env, NULL, obj);
                 }
                 stack_shrink(vm->stack, BC_ARGS_ARITY(bc));
             }
@@ -193,7 +156,7 @@ void vm_execute(vm_t *vm, ins_t *ins)
                     /* 保存指令指针 */
                     stack_push(vm->sys_stack, i);
                     /* 初始化环境、字节码序列和指令指针 */
-                    vm->env = vm_env_new(VALUE_UCF_ENV(f));
+                    vm->env = env_new(VALUE_UCF_ENV(f));
                     vm->denv = env_new(vm->denv);
                     ins = VALUE_UCF_CODE(f);
                     i = -1;
@@ -259,7 +222,7 @@ __check_exception:
                 /* 开始执行旧的字节码指令 */
                 break;
             case BC_REF: {
-                value_t *object = vm_env_ref(vm, BC_REF_I(bc), BC_REF_J(bc));
+                value_t *object = env_ref(vm->env, BC_REF_I(bc), BC_REF_J(bc));
                 if (object == NULL) {
                     vm_push(vm, value_error_newf("Undefined variable: %s", BC_REF_NAME(bc)));
                     goto __check_exception;
@@ -269,7 +232,7 @@ __check_exception:
             }
             break;
             case BC_SET:
-                vm_env_set(vm, BC_SET_I(bc), BC_SET_J(bc));
+                vm_env_set(vm, BC_SET_I(bc), BC_SET_J(bc), BC_SET_NAME(bc));
                 break;
             default :
                 fprintf(stderr, "Not support: %s\n", bc_name(bc));

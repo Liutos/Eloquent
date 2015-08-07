@@ -151,3 +151,20 @@ prim_t prims[] = {
         _BCF("print", bcf_print, 1),
 };
 size_t prims_num = sizeof(prims) / sizeof(prim_t);
+
+env_t *elo_extend_env(env_t *env)
+{
+    for (int i = 0; i < prims_num; i++) {
+        prim_t *p = &prims[i];
+        value_t *f = NULL;
+        if (p->is_compiled) {
+            ins_t *code = ins_new();
+            ((bcf_t)p->func_ptr)(code);
+            f = value_ucf_new(p->arity, code);
+        } else {
+            f = value_bif_new(p->func_ptr, p->arity);
+        }
+        env_set(env, p->name, f);
+    }
+    return env;
+}

@@ -30,32 +30,13 @@ static bytecode_t *compiler_mklabel(compiler_t *comp)
     return label;
 }
 
-static value_env_t *compiler_env_new(value_env_t *outer)
-{
-    return seg_vector_new(outer);
-}
-
-static void compiler_env_intern(value_env_t *env, const char *var, int *i, int *j)
-{
-    if (i != NULL)
-        *i = 0;
-    if (j != NULL)
-        *j = env->data->count;
-    seg_vector_push(env, var);
-}
-
-static int compiler_env_lookup(value_env_t *env, const char *var, int *i, int *j)
-{
-    return seg_vector_locate(env, var, (vec_comp_func_t)comp_str, i, j);
-}
-
 static int compiler_extend_scope(compiler_t *comp, ast_t *pars)
 {
     int i = 0;
-    comp->env = compiler_env_new(comp->env);
+    comp->env = env_new(comp->env);
     while (pars->kind == AST_CONS) {
         ast_t *par = AST_CONS_CAR(pars);
-        compiler_env_intern(comp->env, AST_IDENT_NAME(par), NULL, NULL);
+        env_push(comp->env, AST_IDENT_NAME(par), NULL, NULL, NULL);
         pars = AST_CONS_CDR(pars);
         i++;
     }
@@ -64,7 +45,7 @@ static int compiler_extend_scope(compiler_t *comp, ast_t *pars)
 
 static void compiler_exit_scope(compiler_t *comp)
 {
-    comp->env = comp->env->next;
+    comp->env = comp->env->outer;
 }
 
 static compiler_rt_t compiler_getrt(compiler_t *comp, const char *name)
@@ -131,7 +112,7 @@ static int compiler_do_ident(compiler_t *comp, ast_t *id, ins_t *ins)
 {
     int i = 0, j = 0;
     char *name = AST_IDENT_NAME(id);
-    if (compiler_env_lookup(comp->env, name, &i, &j) == 0) {
+    if (env_locate(comp->env, name, &i, &j) == ERR) {
         string_printf(comp->error, "Line %d, column %d: Can't find value of `%s'", id->line, id->column, name);
         return ERR;
     }
@@ -190,8 +171,8 @@ static int compiler_do_set(compiler_t *comp, ast_t *body, ins_t *ins)
     ast_t *expr = AST_CONS_CAR( AST_CONS_CDR(body) );
     int i = 0, j = 0;
     char *name = AST_IDENT_NAME(var);
-    if (compiler_env_lookup(comp->env, name, &i, &j) == ERR) {
-        compiler_env_intern(comp->env, name, NULL, NULL);
+    if (env_locate(comp->env, name, &i, &j) == ERR) {
+        env_push(comp->env, name, NULL, NULL, NULL);
         i = j = -1;
     }
     if (compiler_do(comp, expr, ins) == ERR)
@@ -264,7 +245,7 @@ compiler_t *compiler_new(void)
 {
     compiler_t *c = malloc(sizeof(compiler_t));
     c->error = string_new();
-    c->env = compiler_env_new(NULL);
+    c->env = elo_extend_env(env_new(env_empty_new()));
     c->label_table = hash_table_new(hash_str, comp_str);
     c->rts = hash_table_new(hash_str, comp_str);
     compiler_setrt(c, "begin", compiler_do_begin);
@@ -274,14 +255,6 @@ compiler_t *compiler_new(void)
     compiler_setrt(c, "dget", compiler_do_dget);
     compiler_setrt(c, "dset", compiler_do_dset);
     c->counter = 0;
-
-    int i = 0;
-    while (i < prims_num) {
-        prim_t *p = &prims[i];
-        compiler_env_intern(c->env, p->name, NULL, NULL);
-        i++;
-    }
-
     return c;
 }
 

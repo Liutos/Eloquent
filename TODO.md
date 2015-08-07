@@ -8,6 +8,7 @@
 * <del>统一seg\_vector\_t及其衍生类型的使用</del>
 * <del>在utils/中定义专用的栈类型</del>
 * <del>分离bc_print中对指令名和参数的打印逻辑</del>
+* <del>合并编译器和虚拟机所使用的环境</del>
 
 # 语言实现
 

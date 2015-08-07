@@ -43,7 +43,7 @@ struct __value_function_t {
         } udf;
         struct {
             ins_t *code;
-            value_env_t *env;
+            struct __env_t *env;
         } ucf;
     } u;
 };

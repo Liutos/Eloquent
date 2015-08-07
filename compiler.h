@@ -10,11 +10,9 @@
 
 #include "ast.h"
 #include "bytecode.h"
+#include "env.h"
 #include "utils/hash_table.h"
-#include "utils/seg_vector.h"
 #include "utils/string.h"
-#include "utils/vector.h"
-#include "value.h"
 
 #ifdef __cplusplus
 extern "C" {
@@ -23,11 +21,11 @@ extern "C" {
 typedef struct __compiler_t compiler_t;
 
 struct __compiler_t {
-    string_t *error;
-    hash_table_t *rts;
-    value_env_t *env;
     unsigned int counter;
+    env_t *env;
     hash_table_t *label_table;
+    hash_table_t *rts;
+    string_t *error;
 };
 
 extern compiler_t *compiler_new(void);

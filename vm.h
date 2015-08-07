@@ -12,9 +12,7 @@
 
 #include "bytecode.h"
 #include "env.h"
-#include "utils/seg_vector.h"
 #include "utils/stack.h"
-#include "utils/vector.h"
 
 #ifdef __cplusplus
 extern "C" {
@@ -23,10 +21,10 @@ extern "C" {
 typedef struct __vm_t vm_t;
 
 struct __vm_t {
-    value_env_t *env;
+    env_t *denv;
+    env_t *env;
     stack_t *stack;
     stack_t *sys_stack;
-    env_t *denv;
 };
 
 extern vm_t *vm_new(void);

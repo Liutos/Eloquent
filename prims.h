@@ -36,6 +36,8 @@ struct __prim_t {
 extern prim_t prims[];
 extern size_t prims_num;
 
+extern env_t *elo_extend_env(env_t *);
+
 #ifdef __cplusplus
 }
 #endif

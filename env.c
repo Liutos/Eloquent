@@ -44,11 +44,21 @@ void env_free(env_t *env)
     free(env);
 }
 
+void env_push(env_t *env, const char *name, value_t *value, int *index, int *offset)
+{
+    if (index != NULL)
+        *index = 0;
+    if (offset != NULL)
+        *offset = env->data.count;
+    binding_t *b = binding_new(name, value);
+    vector_push(&env->data, (intptr_t)b);
+}
+
 void env_set(env_t *env, const char *name, value_t *value)
 {
     for (int i = 0; i < env->data.count; i++) {
         binding_t *b = (binding_t *)vector_ref(&env->data, i);
-        if (strcmp(b->name, name) == 0) {
+        if (b->name != NULL && strcmp(b->name, name) == 0) {
             b->value = value;
             return;
         }
@@ -60,6 +70,26 @@ void env_set(env_t *env, const char *name, value_t *value)
 int env_isempty(env_t *env)
 {
     return env == NULL;
+}
+
+int env_locate(env_t *env, const char *name, int *index, int *offset)
+{
+    int i = 0;
+    while (!env_isempty(env)) {
+        for (int j = 0; j < env->data.count; j++) {
+            binding_t *b = (binding_t *)vector_ref(&env->data, j);
+            if (b->name != NULL && strcmp(b->name, name) == 0) {
+                if (index != NULL)
+                    *index = i;
+                if (offset != NULL)
+                    *offset = j;
+                return OK;
+            }
+        }
+        env = env->outer;
+        i++;
+    }
+    return ERR;
 }
 
 int env_update(env_t *env, int index, int offset, value_t *value)
@@ -78,7 +108,7 @@ value_t *env_get(env_t *env, const char *name)
     while (!env_isempty(env)) {
         for (int i = 0; i < env->data.count; i++) {
             binding_t *b = (binding_t *)vector_ref(&env->data, i);
-            if (strcmp(b->name, name) == 0)
+            if (b->name != NULL && strcmp(b->name, name) == 0)
                 return b->value;
         }
         env = env->outer;
