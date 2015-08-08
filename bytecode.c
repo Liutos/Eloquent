@@ -115,8 +115,7 @@ bytecode_t *bc_jump_new(bytecode_t *label)
 bytecode_t *bc_label_new(const char *name)
 {
     bytecode_t *bc = bc_new(BC_LABEL);
-    bc->u.bc_label.name = string_new();
-    string_assign(bc->u.bc_label.name, name);
+    BC_LABEL_IDENT(bc) = ident_intern(name);
     return bc;
 }
 

@@ -15,6 +15,8 @@ struct __ident_t {
 
 extern ident_t *ident_intern(const char *);
 
+#define IDENT_NAME(i) ((i)->name.text)
+
 #ifdef __cplusplus
 }
 #endif

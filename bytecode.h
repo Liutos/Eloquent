@@ -10,6 +10,7 @@
 
 #include <stdio.h>
 
+#include "ident.h"
 #include "utils/string.h"
 #include "utils/vector.h"
 
@@ -63,7 +64,7 @@ struct __bytecode_t {
             bytecode_t *label;
             int index;
         } bc_jump;
-        struct { string_t *name; } bc_label;
+        struct { ident_t *name; } bc_label;
         struct {
             int i, j;
             char *name;
@@ -112,7 +113,8 @@ extern void ins_pretty_print(ins_t *, FILE *, int);
 #define BC_JUMP_INDEX(f) ((f)->u.bc_jump.index)
 #define BC_JUMP_LABEL(j) ((j)->u.bc_jump.label)
 #define BC_JUMP_LABEL_NAME(j) BC_LABEL_NAME(BC_JUMP_LABEL(bc))
-#define BC_LABEL_NAME(l) ((l)->u.bc_label.name->text)
+#define BC_LABEL_IDENT(l) ((l)->u.bc_label.name)
+#define BC_LABEL_NAME(l) IDENT_NAME( BC_LABEL_IDENT(l) )
 #define BC_PUSH_PTR(p) ((p)->u.bc_push.ptr)
 #define BC_SET_I(s) ((s)->u.bc_set.i)
 #define BC_SET_J(s) ((s)->u.bc_set.j)
