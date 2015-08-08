@@ -104,6 +104,24 @@ bytecode_t *bc_func_new(void)
     return bc_new(BC_FUNC);
 }
 
+bytecode_t *bc_gref_new(int i, int j, char *name)
+{
+    bytecode_t *bc = bc_new(BC_GREF);
+    BC_REF_I(bc) = i;
+    BC_REF_J(bc) = j;
+    BC_REF_NAME(bc) = name;
+    return bc;
+}
+
+bytecode_t *bc_gset_new(int i, int j, char *name)
+{
+    bytecode_t *bc = bc_new(BC_GSET);
+    BC_SET_I(bc) = i;
+    BC_SET_J(bc) = j;
+    BC_SET_NAME(bc) = name;
+    return bc;
+}
+
 bytecode_t *bc_jump_new(bytecode_t *label)
 {
     bytecode_t *bc = bc_new(BC_JUMP);
@@ -193,9 +211,11 @@ void bc_print(bytecode_t *bc, FILE *output)
             fputc(' ', output);
             value_print(BC_PUSH_PTR(bc), output);
             break;
+        case BC_GREF:
         case BC_REF:
             fprintf(output, " %d %d ; %s", BC_REF_I(bc), BC_REF_J(bc), BC_REF_NAME(bc));
             break;
+        case BC_GSET:
         case BC_SET:
             fprintf(output, " %d %d ; %s", BC_SET_I(bc), BC_SET_J(bc), BC_SET_NAME(bc));
             break;

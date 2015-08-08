@@ -17,13 +17,12 @@
 
 /* PRIVATE */
 
-static void vm_env_set(vm_t *vm, int i, int j, const char *name)
+static void vm_env_set(env_t *env, int i, int j, const char *name, value_t *val)
 {
-    value_t *val = (value_t *)stack_top(vm->stack);
     if (i == -1 && j == -1)
-        env_set(vm->env, name, val);
+        env_set(env, name, val);
     else
-        env_update(vm->env, i, j, val);
+        env_update(env, i, j, val);
 }
 
 static void vm_execute_bif(vm_t *vm, value_t *f)
@@ -119,8 +118,12 @@ vm_t *vm_new(void)
 {
     vm_t *vm = malloc(sizeof(*vm));
     vm->ip = 0;
+    /* Environments */
     vm->denv = env_new(env_empty_new());
-    vm->env = elo_extend_env(env_new(env_empty_new()));
+    vm->env = env_new(env_empty_new());
+    vm->init_env = elo_extend_env(env_new(env_empty_new()));
+    vm->global_env = vm->init_env;
+
     vm->stack = stack_new();
     vm->sys_stack = stack_new();
     return vm;
@@ -197,6 +200,19 @@ __check_exception:
                 if (_val_->kind == VALUE_INT && VALUE_INT_VALUE(_val_) == 0)
                     vm_goto(vm, BC_FJUMP_INDEX(bc));
                 break;
+            case BC_GREF:
+                _val_ = env_ref(vm->global_env, BC_REF_I(bc), BC_REF_J(bc));
+                if (_val_ == NULL) {
+                    stack_push(vm->stack, value_error_newf("Undefined variable: %s", BC_REF_NAME(bc)));
+                    goto __check_exception;
+                }
+
+                stack_push(vm->stack, _val_);
+                break;
+            case BC_GSET:
+                _val_ = (value_t *)stack_top(vm->stack);
+                vm_env_set(vm->global_env, BC_SET_I(bc), BC_SET_J(bc), BC_SET_NAME(bc), _val_);
+                break;
             case BC_FUNC:
                 _val_ = (value_t *)stack_top(vm->stack);
                 VALUE_FUNC_ENV(_val_) = vm->env;
@@ -230,7 +246,8 @@ __check_exception:
                 stack_push(vm->stack, _val_);
                 break;
             case BC_SET:
-                vm_env_set(vm, BC_SET_I(bc), BC_SET_J(bc), BC_SET_NAME(bc));
+                _val_ = (value_t *)stack_top(vm->stack);
+                vm_env_set(vm->env, BC_SET_I(bc), BC_SET_J(bc), BC_SET_NAME(bc), _val_);
                 break;
             default :
                 fprintf(stderr, "Not support: %s\n", bc_name(bc));

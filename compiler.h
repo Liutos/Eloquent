@@ -22,7 +22,9 @@ typedef struct __compiler_t compiler_t;
 
 struct __compiler_t {
     unsigned int counter;
-    env_t *env;
+    env_t *env; // Current lexical environment
+    env_t *global_env; // The unique global environment
+    env_t *init_env; // Environment with primitives
     hash_table_t *label_table;
     hash_table_t *rts;
     string_t *error;

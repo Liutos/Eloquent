@@ -31,13 +31,15 @@ typedef vector_t ins_t;
     op(BC_DSET), \
     op(BC_FJUMP), \
     op(BC_FUNC), \
-    op(BC_REF), \
+    op(BC_GREF), \
+    op(BC_GSET), \
     op(BC_JUMP), \
     op(BC_LABEL), \
     op(BC_NOPE), \
     op(BC_POP), \
     op(BC_PRINT), \
     op(BC_PUSH), \
+    op(BC_REF), \
     op(BC_RETURN), \
     op(BC_SET),
 
@@ -68,11 +70,11 @@ struct __bytecode_t {
         struct {
             int i, j;
             char *name;
-        } bc_ref;
+        } bc_gref, bc_ref;
         struct {
             int i, j;
             char *name;
-        } bc_set;
+        } bc_gset, bc_set;
     } u;
 };
 
@@ -83,6 +85,8 @@ extern bytecode_t *bc_dget_new(char *);
 extern bytecode_t *bc_dset_new(char *);
 extern bytecode_t *bc_fjump_new(bytecode_t *);
 extern bytecode_t *bc_func_new(void);
+extern bytecode_t *bc_gref_new(int, int, char *);
+extern bytecode_t *bc_gset_new(int, int, char *);
 extern bytecode_t *bc_jump_new(bytecode_t *);
 extern bytecode_t *bc_label_new(const char *);
 extern bytecode_t *bc_nope_new(void);

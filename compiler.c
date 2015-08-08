@@ -112,12 +112,19 @@ static int compiler_do_ident(compiler_t *comp, ast_t *id, ins_t *ins)
 {
     int i = 0, j = 0;
     char *name = AST_IDENT_NAME(id);
-    if (env_locate(comp->env, name, &i, &j) == ERR) {
-        string_printf(comp->error, "Line %d, column %d: Can't find value of `%s'", id->line, id->column, name);
-        return ERR;
+    /* In current lexical environment */
+    if (env_locate(comp->env, name, &i, &j) == OK) {
+        ins_push(ins, bc_ref_new(i, j, name));
+        return OK;
     }
-    ins_push(ins, bc_ref_new(i, j, name));
-    return OK;
+    /* In global environment */
+    if (env_locate(comp->global_env, name, &i, &j) == OK) {
+        ins_push(ins, bc_gref_new(i, j, name));
+        return OK;
+    }
+    /* Undefined */
+    string_printf(comp->error, "Line %d, column %d: Can't find value of `%s'", id->line, id->column, name);
+    return ERR;
 }
 
 static int compiler_do_call(compiler_t *comp, ast_t *op, ast_t *args, ins_t *ins)
@@ -169,15 +176,23 @@ static int compiler_do_set(compiler_t *comp, ast_t *body, ins_t *ins)
 {
     ast_t *var = AST_CONS_CAR(body);
     ast_t *expr = AST_CONS_CAR( AST_CONS_CDR(body) );
+    bytecode_t *bc = NULL;
     int i = 0, j = 0;
     char *name = AST_IDENT_NAME(var);
-    if (env_locate(comp->env, name, &i, &j) == ERR) {
+    if (env_locate(comp->env, name, &i, &j) == OK) {
+        /* In the current lexical environment */
+        bc = bc_set_new(i, j, name);
+    } else if (env_locate(comp->global_env, name, &i, &j) == OK) {
+        /* In the global environment */
+        bc = bc_gset_new(i, j, name);
+    } else {
+        /* Define in current lexical environment */
         env_push(comp->env, name, NULL, NULL, NULL);
-        i = j = -1;
+        bc = bc_set_new(-1, -1, name);
     }
     if (compiler_do(comp, expr, ins) == ERR)
         return ERR;
-    ins_push(ins, bc_set_new(i, j, name));
+    ins_push(ins, bc);
     return OK;
 }
 
@@ -245,7 +260,11 @@ compiler_t *compiler_new(void)
 {
     compiler_t *c = malloc(sizeof(compiler_t));
     c->error = string_new();
-    c->env = elo_extend_env(env_new(env_empty_new()));
+    /* Environment */
+    c->env = env_new(env_empty_new());
+    c->init_env = elo_extend_env(env_new(env_empty_new()));
+    c->global_env = c->init_env;
+
     c->label_table = hash_table_new(hash_str, comp_str);
     c->rts = hash_table_new(hash_str, comp_str);
     compiler_setrt(c, "begin", compiler_do_begin);

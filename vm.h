@@ -22,8 +22,10 @@ typedef struct __vm_t vm_t;
 
 struct __vm_t {
     int ip; // Instruction Pointer. Points to the next instruction to be executed
-    env_t *denv;
-    env_t *env;
+    env_t *denv; // Current dynamic environment
+    env_t *env; // Current lexical environment
+    env_t *global_env; // The unique global environment
+    env_t *init_env; // The environment with primitives
     stack_t *stack;
     stack_t *sys_stack;
 };
