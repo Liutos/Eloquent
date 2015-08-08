@@ -74,11 +74,51 @@ static void vm_value_print(vm_t *vm, value_t *object)
 
 /* PRINT END */
 
+static void vm_goto(vm_t *vm, int index)
+{
+    vm->ip = index;
+}
+
+static void vm_restore(vm_t *vm, ins_t **ins)
+{
+    /* 恢复指令指针 */
+    vm->ip = (int)stack_pop(vm->sys_stack);
+    /* 恢复指令信息 */
+    *ins = (ins_t *)stack_pop(vm->sys_stack);
+    /* 恢复环境信息 */
+    vm->env = (env_t *)stack_pop(vm->sys_stack);
+    vm->denv = (env_t *)stack_pop(vm->sys_stack);
+}
+
+static void vm_save(vm_t *vm, ins_t *ins)
+{
+    /* 保存环境信息 */
+    stack_push(vm->sys_stack, vm->denv);
+    stack_push(vm->sys_stack, vm->env);
+    /* 保存指令信息 */
+    stack_push(vm->sys_stack, ins);
+    /* 保存指令指针 */
+    stack_push(vm->sys_stack, vm->ip);
+}
+
+static int vm_hasnext(vm_t *vm, ins_t *ins)
+{
+    return vm->ip < ins_length(ins);
+}
+
+static bytecode_t *vm_nextins(vm_t *vm, ins_t *ins)
+{
+    bytecode_t *bc = ins_ref(ins, vm->ip);
+    vm->ip++;
+    return bc;
+}
+
 /* PUBLIC */
 
 vm_t *vm_new(void)
 {
     vm_t *vm = malloc(sizeof(*vm));
+    vm->ip = 0;
     vm->denv = env_new(env_empty_new());
     vm->env = elo_extend_env(env_new(env_empty_new()));
     vm->stack = stack_new();
@@ -95,20 +135,11 @@ void vm_free(vm_t *vm)
     free(vm);
 }
 
-#define RESTORE \
-    /* 恢复指令指针 */ \
-    i = (int)stack_pop(vm->sys_stack); \
-    /* 恢复指令信息 */ \
-    ins = (ins_t *)stack_pop(vm->sys_stack); \
-    /* 恢复环境信息 */ \
-    vm->env = (env_t *)stack_pop(vm->sys_stack); \
-    vm->denv = vm->denv->outer
-
 void vm_execute(vm_t *vm, ins_t *ins)
 {
-    int i = 0;
-    while (i < ins_length(ins)) {
-        bytecode_t *bc = ins_ref(ins, i);
+    vm->ip = 0;
+    while (vm_hasnext(vm, ins)) {
+        bytecode_t *bc = vm_nextins(vm, ins);
         switch (BC_OPCODE(bc)) {
             case BC_ARGS: {
                 int i = BC_ARGS_ARITY(bc) - 1;
@@ -129,17 +160,12 @@ void vm_execute(vm_t *vm, ins_t *ins)
                 if (VALUE_FUNC_ISBIF(f))
                     vm_execute_bif(vm, f);
                 else {
-                    /* 保存环境信息 */
-                    stack_push(vm->sys_stack, vm->env);
-                    /* 保存指令信息 */
-                    stack_push(vm->sys_stack, ins);
-                    /* 保存指令指针 */
-                    stack_push(vm->sys_stack, i);
+                    vm_save(vm, ins);
                     /* 初始化环境、字节码序列和指令指针 */
                     vm->env = env_new(VALUE_FUNC_ENV(f));
                     vm->denv = env_new(vm->denv);
                     ins = VALUE_UCF_CODE(f);
-                    i = -1;
+                    vm_goto(vm, 0);
                     /* 开始执行新的字节码指令 */
                 }
             }
@@ -149,7 +175,7 @@ __check_exception:
                 value_t *top = (value_t *)stack_top(vm->stack);
                 if (elo_ERRORP(top)) {
                     if (!stack_isempty(vm->sys_stack)) {
-                        RESTORE;
+                        vm_restore(vm, &ins);
                         /* 将运行时错误压回参数栈 */
                         stack_push(vm->stack, top);
                     } else
@@ -173,7 +199,7 @@ __check_exception:
             case BC_FJUMP: {
                 value_t *o = (value_t *)stack_pop(vm->stack);
                 if (o->kind == VALUE_INT && VALUE_INT_VALUE(o) == 0)
-                    i = BC_FJUMP_INDEX(bc) - 1;
+                    vm_goto(vm, BC_FJUMP_INDEX(bc));
             }
             break;
             case BC_FUNC: {
@@ -182,7 +208,7 @@ __check_exception:
             }
             break;
             case BC_JUMP:
-                i = BC_JUMP_INDEX(bc) - 1;
+                vm_goto(vm, BC_JUMP_INDEX(bc));
                 break;
             case BC_NOPE:
                 break;
@@ -198,7 +224,7 @@ __check_exception:
                 stack_push(vm->stack, BC_PUSH_PTR(bc));
                 break;
             case BC_RETURN:
-                RESTORE;
+                vm_restore(vm, &ins);
                 /* 开始执行旧的字节码指令 */
                 break;
             case BC_REF: {
@@ -218,28 +244,7 @@ __check_exception:
                 fprintf(stderr, "Not support: %s\n", bc_name(bc));
                 exit(0);
         }
-        i++;
     }
-}
-
-void vm_print_top(vm_t *vm, FILE *output)
-{
-    value_t *o = (value_t *)stack_top(vm->stack);
-    value_print(o, output);
-    fputc('\n', output);
-}
-
-void vm_print_all(vm_t *vm, FILE *output)
-{
-    int i = vm->stack->count - 1;
-    while (i >= 0) {
-        value_t *o = (value_t *)vector_ref(vm->stack, i);
-        fprintf(output, "%d\t", i);
-        value_print(o, output);
-        fputc('\n', output);
-        i--;
-    }
-    vector_setpos(vm->stack, 0);
 }
 
 void vm_inject_print(ins_t *ins)

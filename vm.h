@@ -21,6 +21,7 @@ extern "C" {
 typedef struct __vm_t vm_t;
 
 struct __vm_t {
+    int ip; // Instruction Pointer. Points to the next instruction to be executed
     env_t *denv;
     env_t *env;
     stack_t *stack;
@@ -31,8 +32,6 @@ extern vm_t *vm_new(void);
 extern void vm_free(vm_t *);
 extern void vm_execute(vm_t *, ins_t *);
 extern void vm_inject_print(ins_t *);
-extern void vm_print_all(vm_t *, FILE *);
-extern void vm_print_top(vm_t *, FILE *);
 
 #ifdef __cplusplus
 }
