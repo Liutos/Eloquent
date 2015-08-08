@@ -17,33 +17,13 @@
 
 /* PRIVATE */
 
-static value_t *vm_top(vm_t *vm)
-{
-    return (value_t *)vector_top(vm->stack);
-}
-
 static void vm_env_set(vm_t *vm, int i, int j, const char *name)
 {
-    value_t *val = vm_top(vm);
+    value_t *val = (value_t *)stack_top(vm->stack);
     if (i == -1 && j == -1)
         env_set(vm->env, name, val);
     else
         env_update(vm->env, i, j, val);
-}
-
-static value_t *vm_pop(vm_t *vm)
-{
-    return (value_t *)vector_pop(vm->stack);
-}
-
-static void vm_push(vm_t *vm, value_t *obj)
-{
-    vector_push(vm->stack, (intptr_t)obj);
-}
-
-static value_t *vm_iref(vm_t *vm, int i)
-{
-    return (value_t *)vector_iref(vm->stack, i);
 }
 
 static void vm_execute_bif(vm_t *vm, value_t *f)
@@ -51,20 +31,20 @@ static void vm_execute_bif(vm_t *vm, value_t *f)
     value_t *res = NULL;
     switch (VALUE_FUNC_ARITY(f)) {
         case 1: {
-            value_t *arg1 = vm_pop(vm);
+            value_t *arg1 = (value_t *)stack_pop(vm->stack);
             res = elo_apply1(f, vm->denv, arg1);
         }
         break;
         case 2: {
-            value_t *arg2 = vm_pop(vm);
-            value_t *arg1 = vm_pop(vm);
+            value_t *arg2 = (value_t *)stack_pop(vm->stack);
+            value_t *arg1 = (value_t *)stack_pop(vm->stack);
             res = elo_apply2(f, vm->denv, arg1, arg2);
         }
         break;
         default :
             fprintf(stderr, "Unsupported arity of bif: %d\n", VALUE_FUNC_ARITY(f));
     }
-    vm_push(vm, res);
+    stack_push(vm->stack, res);
 }
 
 /* PRINT BEGIN */
@@ -133,16 +113,16 @@ void vm_execute(vm_t *vm, ins_t *ins)
             case BC_ARGS: {
                 int i = BC_ARGS_ARITY(bc) - 1;
                 for (; i >= 0; i--) {
-                    value_t *obj = vm_iref(vm, i);
+                    value_t *obj = (value_t *)stack_nth(vm->stack, i);
                     env_set(vm->env, NULL, obj);
                 }
                 stack_shrink(vm->stack, BC_ARGS_ARITY(bc));
             }
             break;
             case BC_CALL: {
-                value_t *f = vm_pop(vm);
+                value_t *f = (value_t *)stack_pop(vm->stack);
                 if (BC_CALL_NARGS(bc) != VALUE_FUNC_ARITY(f)) {
-                    vm_push(vm, value_error_newf("Incorrect number of arguments. Expecting %d but get %d ones", VALUE_FUNC_ARITY(f), BC_CALL_NARGS(bc)));
+                    stack_push(vm->stack, value_error_newf("Incorrect number of arguments. Expecting %d but get %d ones", VALUE_FUNC_ARITY(f), BC_CALL_NARGS(bc)));
                     break;
                 }
 
@@ -156,7 +136,7 @@ void vm_execute(vm_t *vm, ins_t *ins)
                     /* 保存指令指针 */
                     stack_push(vm->sys_stack, i);
                     /* 初始化环境、字节码序列和指令指针 */
-                    vm->env = env_new(VALUE_UCF_ENV(f));
+                    vm->env = env_new(VALUE_FUNC_ENV(f));
                     vm->denv = env_new(vm->denv);
                     ins = VALUE_UCF_CODE(f);
                     i = -1;
@@ -166,12 +146,12 @@ void vm_execute(vm_t *vm, ins_t *ins)
             break;
 __check_exception:
             case BC_CHKEX: {
-                value_t *top = vm_top(vm);
+                value_t *top = (value_t *)stack_top(vm->stack);
                 if (elo_ERRORP(top)) {
                     if (!stack_isempty(vm->sys_stack)) {
                         RESTORE;
                         /* 将运行时错误压回参数栈 */
-                        vm_push(vm, top);
+                        stack_push(vm->stack, top);
                     } else
                         return;
                 }
@@ -180,25 +160,25 @@ __check_exception:
             case BC_DGET: {
                 value_t *object = env_get(vm->denv, BC_DGET_NAME(bc));
                 if (object == NULL) {
-                    vm_push(vm, value_error_newf("Undefined dynamic variable: %s", BC_DGET_NAME(bc)));
+                    stack_push(vm->stack, value_error_newf("Undefined dynamic variable: %s", BC_DGET_NAME(bc)));
                     goto __check_exception;
                 }
 
-                vm_push(vm, object);
+                stack_push(vm->stack, object);
             }
             break;
             case BC_DSET:
-                env_set(vm->denv, BC_DSET_NAME(bc), vm_top(vm));
+                env_set(vm->denv, BC_DSET_NAME(bc), (value_t *)stack_top(vm->stack));
                 break;
             case BC_FJUMP: {
-                value_t *o = vm_pop(vm);
+                value_t *o = (value_t *)stack_pop(vm->stack);
                 if (o->kind == VALUE_INT && VALUE_INT_VALUE(o) == 0)
                     i = BC_FJUMP_INDEX(bc) - 1;
             }
             break;
             case BC_FUNC: {
-                value_t *f = vm_top(vm);
-                VALUE_UCF_ENV(f) = vm->env;
+                value_t *f = (value_t *)stack_top(vm->stack);
+                VALUE_FUNC_ENV(f) = vm->env;
             }
             break;
             case BC_JUMP:
@@ -207,15 +187,15 @@ __check_exception:
             case BC_NOPE:
                 break;
             case BC_POP:
-                vm_pop(vm);
+                stack_pop(vm->stack);
                 break;
             case BC_PRINT: {
-                value_t *object = vm_top(vm);
+                value_t *object = (value_t *)stack_top(vm->stack);
                 vm_value_print(vm, object);
             }
             break;
             case BC_PUSH:
-                vm_push(vm, BC_PUSH_PTR(bc));
+                stack_push(vm->stack, BC_PUSH_PTR(bc));
                 break;
             case BC_RETURN:
                 RESTORE;
@@ -224,11 +204,11 @@ __check_exception:
             case BC_REF: {
                 value_t *object = env_ref(vm->env, BC_REF_I(bc), BC_REF_J(bc));
                 if (object == NULL) {
-                    vm_push(vm, value_error_newf("Undefined variable: %s", BC_REF_NAME(bc)));
+                    stack_push(vm->stack, value_error_newf("Undefined variable: %s", BC_REF_NAME(bc)));
                     goto __check_exception;
                 }
 
-                vm_push(vm, object);
+                stack_push(vm->stack, object);
             }
             break;
             case BC_SET:
@@ -244,7 +224,7 @@ __check_exception:
 
 void vm_print_top(vm_t *vm, FILE *output)
 {
-    value_t *o = vm_top(vm);
+    value_t *o = (value_t *)stack_top(vm->stack);
     value_print(o, output);
     fputc('\n', output);
 }

@@ -237,7 +237,7 @@ static int interp_bind_args(interp_t *interp, ast_t *pars, ast_t *exprs, env_t *
 
 static value_kind_t interp_execute_udf(interp_t *interp, value_t *f, ast_t *args, value_t **value)
 {
-    env_t *new_env = env_new(VALUE_UDF_ENV(f));
+    env_t *new_env = env_new(VALUE_FUNC_ENV(f));
     value_t *err = NULL;
     if (interp_bind_args(interp, VALUE_UDF_PARS(f), args, new_env, &err) == ERR) {
         if (value != NULL)
