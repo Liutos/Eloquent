@@ -20,6 +20,8 @@ typedef struct __value_error_t value_error_t;
 typedef struct __value_function_t value_function_t;
 
 typedef enum {
+    VALUE_CONS,
+    VALUE_END_OF_CONS,
     VALUE_ERROR,
     VALUE_FLOAT,
     VALUE_FUNCTION,
@@ -51,15 +53,21 @@ struct __value_t {
     value_kind_t kind;
     union {
         int int_val;
+        double float_val;
         value_error_t err_val;
         value_function_t func_val;
-        double float_val;
+        struct {
+            value_t *car;
+            value_t *cdr;
+        } cons_val;
     } u;
 };
 
 #define elo_type(x) ((x)->kind)
 
 extern value_t *value_bif_new(void *, unsigned int);
+extern value_t *value_cons_new(value_t *, value_t *);
+extern value_t *value_eoc_new(void);
 extern value_t *value_error_new(const char *);
 extern value_t *value_error_newf(const char *, ...);
 extern value_t *value_float_new(double);
@@ -78,6 +86,8 @@ extern int value_isequal(value_t *, value_t *);
 #define elo_NUMBERP(x) (elo_INTP(x) || elo_FLOATP(x))
 
 /* Accessors */
+#define VALUE_CONS_CAR(c) ((c)->u.cons_val.car)
+#define VALUE_CONS_CDR(c) ((c)->u.cons_val.cdr)
 #define VALUE_ERR_MSG(e) ((e)->u.err_val.msg->text)
 #define VALUE_FUNC_ARITY(f) ((f)->u.func_val.arity)
 #define VALUE_FUNC_ISBIF(f) ((f)->u.func_val.is_bif)

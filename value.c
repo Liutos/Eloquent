@@ -31,6 +31,19 @@ static void value_function_print(value_t *v, FILE *output)
     }
 }
 
+static void value_print_cons(value_t *cons, FILE *output)
+{
+    value_t *car = VALUE_CONS_CAR(cons);
+    value_t *cdr = VALUE_CONS_CDR(cons);
+    fputc('(', output);
+    value_print(car, output);
+    if (elo_type(cdr) != VALUE_END_OF_CONS) {
+        fprintf(output, " . ");
+        value_print(cdr, output);
+    }
+    fputc(')', output);
+}
+
 /* PUBLIC */
 
 value_t *value_bif_new(void *bif_ptr, unsigned int arity)
@@ -41,6 +54,19 @@ value_t *value_bif_new(void *bif_ptr, unsigned int arity)
     VALUE_FUNC_ISCMP(v) = 0;
     VALUE_BIF_PTR(v) = bif_ptr;
     return v;
+}
+
+value_t *value_cons_new(value_t *car, value_t *cdr)
+{
+    value_t *v = value_alloc(VALUE_CONS);
+    VALUE_CONS_CAR(v) = car;
+    VALUE_CONS_CDR(v) = cdr;
+    return v;
+}
+
+value_t *value_eoc_new(void)
+{
+    return value_alloc(VALUE_END_OF_CONS);
 }
 
 value_t *value_error_new(const char *msg)
@@ -98,6 +124,9 @@ value_t *value_udf_new(ast_t *pars, ast_t *body, env_t *env)
 void value_print(value_t *v, FILE *output)
 {
     switch (v->kind) {
+        case VALUE_CONS:
+            value_print_cons(v, output);
+            break;
         case VALUE_ERROR:
             fprintf(output, "ERROR: %s", VALUE_ERR_MSG(v));
             break;
