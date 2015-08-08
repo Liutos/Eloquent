@@ -137,76 +137,70 @@ void vm_free(vm_t *vm)
 
 void vm_execute(vm_t *vm, ins_t *ins)
 {
+    value_t *_fun_, *_val_;
     vm->ip = 0;
     while (vm_hasnext(vm, ins)) {
         bytecode_t *bc = vm_nextins(vm, ins);
         switch (BC_OPCODE(bc)) {
-            case BC_ARGS: {
-                int i = BC_ARGS_ARITY(bc) - 1;
-                for (; i >= 0; i--) {
+            case BC_ARGS:
+                for (int i = BC_ARGS_ARITY(bc) - 1; i >= 0; i--) {
                     value_t *obj = (value_t *)stack_nth(vm->stack, i);
                     env_set(vm->env, NULL, obj);
                 }
                 stack_shrink(vm->stack, BC_ARGS_ARITY(bc));
-            }
-            break;
-            case BC_CALL: {
-                value_t *f = (value_t *)stack_pop(vm->stack);
-                if (BC_CALL_NARGS(bc) != VALUE_FUNC_ARITY(f)) {
-                    stack_push(vm->stack, value_error_newf("Incorrect number of arguments. Expecting %d but get %d ones", VALUE_FUNC_ARITY(f), BC_CALL_NARGS(bc)));
+                break;
+            case BC_CALL:
+                _fun_ = (value_t *)stack_pop(vm->stack);
+                if (BC_CALL_NARGS(bc) != VALUE_FUNC_ARITY(_fun_)) {
+                    stack_push(vm->stack, value_error_newf("Incorrect number of arguments. Expecting %d but get %d ones", VALUE_FUNC_ARITY(_fun_), BC_CALL_NARGS(bc)));
                     break;
                 }
 
-                if (VALUE_FUNC_ISBIF(f))
-                    vm_execute_bif(vm, f);
+                if (VALUE_FUNC_ISBIF(_fun_))
+                    vm_execute_bif(vm, _fun_);
                 else {
                     vm_save(vm, ins);
                     /* 初始化环境、字节码序列和指令指针 */
-                    vm->env = env_new(VALUE_FUNC_ENV(f));
+                    vm->env = env_new(VALUE_FUNC_ENV(_fun_));
                     vm->denv = env_new(vm->denv);
-                    ins = VALUE_UCF_CODE(f);
+                    ins = VALUE_UCF_CODE(_fun_);
                     vm_goto(vm, 0);
                     /* 开始执行新的字节码指令 */
                 }
-            }
-            break;
+                break;
 __check_exception:
-            case BC_CHKEX: {
-                value_t *top = (value_t *)stack_top(vm->stack);
-                if (elo_ERRORP(top)) {
+            case BC_CHKEX:
+                _val_ = (value_t *)stack_top(vm->stack);
+                if (elo_ERRORP(_val_)) {
                     if (!stack_isempty(vm->sys_stack)) {
                         vm_restore(vm, &ins);
                         /* 将运行时错误压回参数栈 */
-                        stack_push(vm->stack, top);
+                        stack_push(vm->stack, _val_);
                     } else
                         return;
                 }
-            }
-            break;
-            case BC_DGET: {
-                value_t *object = env_get(vm->denv, BC_DGET_NAME(bc));
-                if (object == NULL) {
+                break;
+            case BC_DGET:
+                _val_ = env_get(vm->denv, BC_DGET_NAME(bc));
+                if (_val_ == NULL) {
                     stack_push(vm->stack, value_error_newf("Undefined dynamic variable: %s", BC_DGET_NAME(bc)));
                     goto __check_exception;
                 }
 
-                stack_push(vm->stack, object);
-            }
-            break;
+                stack_push(vm->stack, _val_);
+                break;
             case BC_DSET:
                 env_set(vm->denv, BC_DSET_NAME(bc), (value_t *)stack_top(vm->stack));
                 break;
-            case BC_FJUMP: {
-                value_t *o = (value_t *)stack_pop(vm->stack);
-                if (o->kind == VALUE_INT && VALUE_INT_VALUE(o) == 0)
+            case BC_FJUMP:
+                _val_ = (value_t *)stack_pop(vm->stack);
+                if (_val_->kind == VALUE_INT && VALUE_INT_VALUE(_val_) == 0)
                     vm_goto(vm, BC_FJUMP_INDEX(bc));
-            }
-            break;
-            case BC_FUNC: {
-                value_t *f = (value_t *)stack_top(vm->stack);
-                VALUE_FUNC_ENV(f) = vm->env;
-            }
-            break;
+                break;
+            case BC_FUNC:
+                _val_ = (value_t *)stack_top(vm->stack);
+                VALUE_FUNC_ENV(_val_) = vm->env;
+                break;
             case BC_JUMP:
                 vm_goto(vm, BC_JUMP_INDEX(bc));
                 break;
@@ -215,11 +209,10 @@ __check_exception:
             case BC_POP:
                 stack_pop(vm->stack);
                 break;
-            case BC_PRINT: {
-                value_t *object = (value_t *)stack_top(vm->stack);
-                vm_value_print(vm, object);
-            }
-            break;
+            case BC_PRINT:
+                _val_ = (value_t *)stack_top(vm->stack);
+                vm_value_print(vm, _val_);
+                break;
             case BC_PUSH:
                 stack_push(vm->stack, BC_PUSH_PTR(bc));
                 break;
@@ -227,16 +220,15 @@ __check_exception:
                 vm_restore(vm, &ins);
                 /* 开始执行旧的字节码指令 */
                 break;
-            case BC_REF: {
-                value_t *object = env_ref(vm->env, BC_REF_I(bc), BC_REF_J(bc));
-                if (object == NULL) {
+            case BC_REF:
+                _val_ = env_ref(vm->env, BC_REF_I(bc), BC_REF_J(bc));
+                if (_val_ == NULL) {
                     stack_push(vm->stack, value_error_newf("Undefined variable: %s", BC_REF_NAME(bc)));
                     goto __check_exception;
                 }
 
-                stack_push(vm->stack, object);
-            }
-            break;
+                stack_push(vm->stack, _val_);
+                break;
             case BC_SET:
                 vm_env_set(vm, BC_SET_I(bc), BC_SET_J(bc), BC_SET_NAME(bc));
                 break;
