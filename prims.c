@@ -15,6 +15,7 @@
 #define BIF_NAME(name) bif_##name
 #define DENV denv
 #define DEFINE_BIF(name, ...) value_t *BIF_NAME(name)(env_t *DENV, __VA_ARGS__)
+#define DEFINE_BIF0(name) value_t *BIF_NAME(name)(env_t *DENV)
 #define DEFINE_BIF1(name, arg1) DEFINE_BIF(name, value_t *arg1)
 #define DEFINE_BIF2(name, arg1, arg2) DEFINE_BIF(name, value_t *arg1, value_t *arg2)
 
@@ -125,6 +126,16 @@ DEFINE_BIF2(ge, n1, n2)
     return value_int_new(VALUE_FLOAT_VALUE(n1) >= VALUE_FLOAT_VALUE(n2));
 }
 
+static DEFINE_BIF2(cons, car, cdr)
+{
+    return value_cons_new(car, cdr);
+}
+
+static DEFINE_BIF0(nil)
+{
+    return value_eoc_new();
+}
+
 /* Built-in Compiled Functions */
 
 void bcf_print(ins_t *ins)
@@ -148,6 +159,8 @@ prim_t prims[] = {
         _BIF("i2d", i2d, 1),
         _BIF("=", equal, 2),
         _BIF(">=", ge, 2),
+        _BIF("cons", cons, 2),
+        _BIF("make-nil", nil, 0),
         _BCF("print", bcf_print, 1),
 };
 size_t prims_num = sizeof(prims) / sizeof(prim_t);

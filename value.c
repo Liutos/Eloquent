@@ -127,6 +127,9 @@ void value_print(value_t *v, FILE *output)
         case VALUE_CONS:
             value_print_cons(v, output);
             break;
+        case VALUE_END_OF_CONS:
+            fprintf(output, "()");
+            break;
         case VALUE_ERROR:
             fprintf(output, "ERROR: %s", VALUE_ERR_MSG(v));
             break;

@@ -19,10 +19,12 @@ extern "C" {
 typedef struct __prim_t prim_t;
 typedef void (*bcf_t)(ins_t *);
 
+typedef value_t *(*bif_0)(env_t *);
 typedef value_t *(*bif_1)(env_t *, value_t *);
 typedef value_t *(*bif_2)(env_t *, value_t *, value_t *);
 
 /* Primitives invocation */
+#define elo_apply0(f, denv) (((bif_0)VALUE_BIF_PTR(f))(denv))
 #define elo_apply1(f, denv, arg1) (((bif_1)VALUE_BIF_PTR(f))(denv, arg1))
 #define elo_apply2(f, denv, arg1, arg2) (((bif_2)VALUE_BIF_PTR(f))(denv, arg1, arg2))
 

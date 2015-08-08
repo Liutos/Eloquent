@@ -206,6 +206,9 @@ static value_kind_t interp_execute_bif(interp_t *interp, value_t *bif, ast_t *ar
 
     value_t *res = NULL;
     switch (VALUE_FUNC_ARITY(bif)) {
+        case 0:
+            res = elo_apply0(bif, interp->denv);
+            break;
         case 1: {
             value_t *arg1 = (value_t *)vector_ref(vals, 0);
             res = elo_apply1(bif, interp->denv, arg1);
