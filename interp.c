@@ -116,6 +116,16 @@ static value_kind_t bis_begin(interp_t *interp, ast_t *body, value_t **result)
     return interp_execute(interp, AST_CONS_CAR(body), result);
 }
 
+static value_kind_t bis_define(interp_t *interp, ast_t *body, value_t **result)
+{
+    /* 构造符合set语法的表达式并再次求值 */
+    ast_t *name = AST_CONS_CAR(body);
+    ast_t *lpart = AST_CONS_CDR(body);
+    ast_t *lexpr = ast_cons_new(ast_ident_new("lambda"), lpart);
+    ast_t *sexpr = ast_cons_new(name, ast_cons_new(lexpr, ast_eoc_new()));
+    return bis_set(interp, sexpr, result);
+}
+
 static value_kind_t bis_lambda(interp_t *interp, ast_t *body, value_t **result)
 {
     ast_t *pars = AST_CONS_CAR(body);
@@ -156,6 +166,7 @@ static void interp_initbif(interp_t *interp)
     interp_setbis(interp, "lambda", bis_lambda);
     interp_setbis(interp, "dset", bis_dset);
     interp_setbis(interp, "dget", bis_dget);
+    interp_setbis(interp, "define", bis_define);
 }
 
 static value_kind_t interp_execute_syntax(interp_t *interp, syntax_t *bis, ast_t *body, value_t **result)
