@@ -29,6 +29,9 @@ static void vm_execute_bif(vm_t *vm, value_t *f)
 {
     value_t *res = NULL;
     switch (VALUE_FUNC_ARITY(f)) {
+        case 0:
+            res = elo_apply0(f, vm->denv);
+            break;
         case 1: {
             value_t *arg1 = (value_t *)stack_pop(vm->stack);
             res = elo_apply1(f, vm->denv, arg1);
@@ -42,6 +45,7 @@ static void vm_execute_bif(vm_t *vm, value_t *f)
         break;
         default :
             fprintf(stderr, "Unsupported arity of bif: %d\n", VALUE_FUNC_ARITY(f));
+            exit(0);
     }
     stack_push(vm->stack, res);
 }
