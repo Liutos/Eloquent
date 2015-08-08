@@ -21,6 +21,7 @@ struct __string_t {
     size_t length;
 };
 
+extern string_t *string_init(string_t *);
 extern string_t *string_new(void);
 extern void string_free(string_t *);
 extern void string_addc(string_t *, char);

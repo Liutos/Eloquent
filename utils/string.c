@@ -27,13 +27,18 @@ static int string_isfull(string_t *s)
 
 /* PUBLIC */
 
-string_t *string_new(void)
+string_t *string_init(string_t *s)
 {
-    string_t *s = malloc(sizeof(string_t));
     s->capacity = DELTA;
     s->length = 0;
     s->text = calloc(s->capacity, sizeof(char));
     return s;
+}
+
+string_t *string_new(void)
+{
+    string_t *s = malloc(sizeof(string_t));
+    return string_init(s);
 }
 
 void string_free(string_t *s)
