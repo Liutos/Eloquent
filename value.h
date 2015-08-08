@@ -78,6 +78,7 @@ extern void value_print(value_t *, FILE *);
 extern int value_isequal(value_t *, value_t *);
 
 /* Type predicates */
+#define elo_CONSP(x) (elo_type(x) == VALUE_CONS)
 #define elo_ERRORP(x) (elo_type(x) == VALUE_ERROR)
 #define elo_FLOATP(x) (elo_type(x) == VALUE_FLOAT)
 #define elo_FUNCTIONP(x) (elo_type(x) == VALUE_FUNCTION)

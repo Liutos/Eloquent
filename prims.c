@@ -19,6 +19,12 @@
 #define DEFINE_BIF1(name, arg1) DEFINE_BIF(name, value_t *arg1)
 #define DEFINE_BIF2(name, arg1, arg2) DEFINE_BIF(name, value_t *arg1, value_t *arg2)
 
+#define elo_CONS_ASSERT(var) \
+    do { \
+        if (!elo_CONSP(var)) \
+            return value_error_newf("%s: Argument must be a cons", __func__); \
+    } while (0)
+
 #define elo_INT_ASSERT(var) \
     do { \
         if (!elo_INTP(var)) \
@@ -136,6 +142,23 @@ static DEFINE_BIF0(nil)
     return value_eoc_new();
 }
 
+static DEFINE_BIF1(car, l)
+{
+    elo_CONS_ASSERT(l);
+    return VALUE_CONS_CAR(l);
+}
+
+static DEFINE_BIF1(cdr, l)
+{
+    elo_CONS_ASSERT(l);
+    return VALUE_CONS_CDR(l);
+}
+
+static DEFINE_BIF1(nilp, x)
+{
+    return value_int_new(elo_type(x) == VALUE_END_OF_CONS);
+}
+
 /* Built-in Compiled Functions */
 
 void bcf_print(ins_t *ins)
@@ -161,6 +184,9 @@ prim_t prims[] = {
         _BIF(">=", ge, 2),
         _BIF("cons", cons, 2),
         _BIF("make-nil", nil, 0),
+        _BIF("nil?", nilp, 1),
+        _BIF("cdr", cdr, 1),
+        _BIF("car", car, 1),
         _BCF("print", bcf_print, 1),
 };
 size_t prims_num = sizeof(prims) / sizeof(prim_t);
