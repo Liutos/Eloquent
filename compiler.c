@@ -196,6 +196,16 @@ static int compiler_do_set(compiler_t *comp, ast_t *body, ins_t *ins)
     return OK;
 }
 
+static int compiler_do_define(compiler_t *comp, ast_t *body, ins_t *ins)
+{
+    /* 构造符合set语法的表达式并再次编译 */
+    ast_t *name = AST_CONS_CAR(body);
+    ast_t *lpart = AST_CONS_CDR(body);
+    ast_t *lexpr = ast_cons_new(ast_ident_new("lambda"), lpart);
+    ast_t *sexpr = ast_cons_new(name, ast_cons_new(lexpr, ast_eoc_new()));
+    return compiler_do_set(comp, sexpr, ins);
+}
+
 static int compiler_do_if(compiler_t *comp, ast_t *body, ins_t *ins)
 {
     ast_t *pred = AST_CONS_CAR(body);
@@ -273,6 +283,7 @@ compiler_t *compiler_new(void)
     compiler_setrt(c, "lambda", compiler_do_lambda);
     compiler_setrt(c, "dget", compiler_do_dget);
     compiler_setrt(c, "dset", compiler_do_dset);
+    compiler_setrt(c, "define", compiler_do_define);
     c->counter = 0;
     return c;
 }
