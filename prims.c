@@ -159,6 +159,11 @@ static DEFINE_BIF1(nilp, x)
     return value_int_new(elo_type(x) == VALUE_END_OF_CONS);
 }
 
+static DEFINE_BIF1(typeof, x)
+{
+    return value_type_new( value_names[elo_type(x)] );
+}
+
 /* Built-in Compiled Functions */
 
 void bcf_print(ins_t *ins)
@@ -187,6 +192,7 @@ prim_t prims[] = {
         _BIF("nil?", nilp, 1),
         _BIF("cdr", cdr, 1),
         _BIF("car", car, 1),
+        _BIF("typeof", typeof, 1),
         _BCF("print", bcf_print, 1),
 };
 size_t prims_num = sizeof(prims) / sizeof(prim_t);

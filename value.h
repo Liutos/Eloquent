@@ -18,14 +18,22 @@ typedef seg_vector_t value_env_t;
 typedef struct __value_t value_t;
 typedef struct __value_error_t value_error_t;
 typedef struct __value_function_t value_function_t;
+typedef struct __value_type_t value_type_t;
+
+#define VALUE_KIND(op) \
+    op(VALUE_CONS), \
+    op(VALUE_END_OF_CONS), \
+    op(VALUE_ERROR), \
+    op(VALUE_FLOAT), \
+    op(VALUE_FUNCTION), \
+    op(VALUE_INT), \
+    op(VALUE_TYPE),
+
+#define IDENTIFY(x) x
+#define STRINGIFY(x) #x
 
 typedef enum {
-    VALUE_CONS,
-    VALUE_END_OF_CONS,
-    VALUE_ERROR,
-    VALUE_FLOAT,
-    VALUE_FUNCTION,
-    VALUE_INT,
+    VALUE_KIND(IDENTIFY)
 } value_kind_t;
 
 struct __value_error_t {
@@ -49,6 +57,10 @@ struct __value_function_t {
     } u;
 };
 
+struct __value_type_t {
+    ident_t *name;
+};
+
 struct __value_t {
     value_kind_t kind;
     union {
@@ -60,8 +72,11 @@ struct __value_t {
             value_t *car;
             value_t *cdr;
         } cons_val;
+        value_type_t type_val;
     } u;
 };
+
+extern const char *value_names[];
 
 #define elo_type(x) ((x)->kind)
 
@@ -72,6 +87,7 @@ extern value_t *value_error_new(const char *);
 extern value_t *value_error_newf(const char *, ...);
 extern value_t *value_float_new(double);
 extern value_t *value_int_new(int);
+extern value_t *value_type_new(const char *);
 extern value_t *value_ucf_new(int, ins_t *);
 extern value_t *value_udf_new(ast_t *, ast_t *, struct __env_t *);
 extern void value_print(value_t *, FILE *);
@@ -100,6 +116,7 @@ extern int value_isequal(value_t *, value_t *);
 #define VALUE_UCF_CODE(f) ((f)->u.func_val.u.ucf.code)
 #define VALUE_FLOAT_VALUE(f) ((f)->u.float_val)
 #define VALUE_INT_VALUE(i) ((i)->u.int_val)
+#define VALUE_TYPE_NAME(t) ((t)->u.type_val.name)
 
 #ifdef __cplusplus
 }

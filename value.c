@@ -46,6 +46,10 @@ static void value_print_cons(value_t *cons, FILE *output)
 
 /* PUBLIC */
 
+const char *value_names[] = {
+        VALUE_KIND(STRINGIFY)
+};
+
 value_t *value_bif_new(void *bif_ptr, unsigned int arity)
 {
     value_t *v = value_alloc(VALUE_FUNCTION);
@@ -100,6 +104,13 @@ value_t *value_int_new(int num)
     return v;
 }
 
+value_t *value_type_new(const char *name)
+{
+    value_t *v = value_alloc(VALUE_TYPE);
+    VALUE_TYPE_NAME(v) = ident_intern(name);
+    return v;
+}
+
 value_t *value_ucf_new(int arity, ins_t *code)
 {
     value_t *v = value_alloc(VALUE_FUNCTION);
@@ -141,6 +152,9 @@ void value_print(value_t *v, FILE *output)
             break;
         case VALUE_INT:
             fprintf(output, "%d", v->u.int_val);
+            break;
+        case VALUE_TYPE:
+            fprintf(output, "#<TYPE %s>", IDENT_NAME( VALUE_TYPE_NAME(v) ));
             break;
         default :
             fprintf(stderr, "Don't know how to print value: %d", v->kind);
