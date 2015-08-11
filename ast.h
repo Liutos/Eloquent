@@ -48,6 +48,7 @@ extern ast_t *ast_ident_new(const char *);
 extern ast_t *ast_int_new(int);
 extern void ast_free(ast_t *);
 extern void ast_print(ast_t *, FILE *);
+extern int ast_cons_length(ast_t *);
 
 #define AST_CONS_CAR(c) ((c)->u.cons_val.car)
 #define AST_CONS_CADR(c) AST_CONS_CAR( AST_CONS_CDR(c) )

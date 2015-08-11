@@ -4,6 +4,7 @@
  *  Created on: 2015年7月16日
  *      Author: liutos
  */
+#include <assert.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include "ast.h"
@@ -105,4 +106,15 @@ void ast_print(ast_t *a, FILE *output)
             fprintf(stderr, "Don't know how to print: %d", a->kind);
             exit(1);
     }
+}
+
+int ast_cons_length(ast_t *cons)
+{
+    assert(cons->kind == AST_CONS || cons->kind == AST_END_OF_CONS);
+    int i = 0;
+    while (cons->kind != AST_END_OF_CONS) {
+        i++;
+        cons = AST_CONS_CDR(cons);
+    }
+    return i;
 }

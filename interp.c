@@ -130,7 +130,7 @@ static value_kind_t bis_lambda(interp_t *interp, ast_t *body, value_t **result)
 {
     ast_t *pars = AST_CONS_CAR(body);
     body = AST_CONS_CDR(body);
-    value_t *val = value_udf_new(pars, body, interp->env);
+    value_t *val = value_udf_new(ast_cons_length(pars), pars, body, interp->env);
     if (result != NULL)
         *result = val;
     return val->kind;
@@ -270,6 +270,13 @@ static value_kind_t interp_execute_udf(interp_t *interp, value_t *f, ast_t *args
 
 static value_kind_t interp_execute_function(interp_t *interp, value_t *f, ast_t *args, value_t **value)
 {
+    int arity = VALUE_FUNC_ARITY(f);
+    int nargs = ast_cons_length(args);
+    if (nargs != arity) {
+        if (value != NULL)
+            *value = value_error_newf("Line %d, column %d: Incorrect number of arguments. Expecting %d but get %d", args->line, args->column, arity, nargs);
+        return VALUE_ERROR;
+    }
     if (VALUE_FUNC_ISBIF(f))
         return interp_execute_bif(interp, f, args, value);
     else

@@ -89,7 +89,7 @@ extern value_t *value_float_new(double);
 extern value_t *value_int_new(int);
 extern value_t *value_type_new(const char *);
 extern value_t *value_ucf_new(int, ins_t *);
-extern value_t *value_udf_new(ast_t *, ast_t *, struct __env_t *);
+extern value_t *value_udf_new(int, ast_t *, ast_t *, struct __env_t *);
 extern void value_print(value_t *, FILE *);
 extern int value_isequal(value_t *, value_t *);
 

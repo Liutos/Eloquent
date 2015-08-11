@@ -121,9 +121,10 @@ value_t *value_ucf_new(int arity, ins_t *code)
     return v;
 }
 
-value_t *value_udf_new(ast_t *pars, ast_t *body, env_t *env)
+value_t *value_udf_new(int arity, ast_t *pars, ast_t *body, env_t *env)
 {
     value_t *v = value_alloc(VALUE_FUNCTION);
+    VALUE_FUNC_ARITY(v) = arity;
     VALUE_FUNC_ISBIF(v) = 0;
     VALUE_FUNC_ISCMP(v) = 0;
     VALUE_FUNC_ENV(v) = env;
