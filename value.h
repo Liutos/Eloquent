@@ -27,6 +27,7 @@ typedef struct __value_type_t value_type_t;
     op(VALUE_FLOAT), \
     op(VALUE_FUNCTION), \
     op(VALUE_INT), \
+    op(VALUE_REF), \
     op(VALUE_TYPE),
 
 #define IDENTIFY(x) x
@@ -72,6 +73,9 @@ struct __value_t {
             value_t *car;
             value_t *cdr;
         } cons_val;
+        struct {
+            value_t **addr;
+        } ref_val;
         value_type_t type_val;
     } u;
 };
@@ -87,6 +91,7 @@ extern value_t *value_error_new(const char *);
 extern value_t *value_error_newf(const char *, ...);
 extern value_t *value_float_new(double);
 extern value_t *value_int_new(int);
+extern value_t *value_ref_new(value_t **);
 extern value_t *value_type_new(const char *);
 extern value_t *value_ucf_new(int, ins_t *);
 extern value_t *value_udf_new(int, ast_t *, ast_t *, struct __env_t *);
@@ -99,6 +104,7 @@ extern int value_isequal(value_t *, value_t *);
 #define elo_FLOATP(x) (elo_type(x) == VALUE_FLOAT)
 #define elo_FUNCTIONP(x) (elo_type(x) == VALUE_FUNCTION)
 #define elo_INTP(x) (elo_type(x) == VALUE_INT)
+#define elo_REFP(x) (elo_type(x) == VALUE_REF)
 
 #define elo_NUMBERP(x) (elo_INTP(x) || elo_FLOATP(x))
 
@@ -116,6 +122,7 @@ extern int value_isequal(value_t *, value_t *);
 #define VALUE_UCF_CODE(f) ((f)->u.func_val.u.ucf.code)
 #define VALUE_FLOAT_VALUE(f) ((f)->u.float_val)
 #define VALUE_INT_VALUE(i) ((i)->u.int_val)
+#define VALUE_REF_ADDR(r) ((r)->u.ref_val.addr)
 #define VALUE_TYPE_NAME(t) ((t)->u.type_val.name)
 
 #ifdef __cplusplus

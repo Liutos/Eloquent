@@ -26,6 +26,7 @@ extern int env_locate(env_t *, const char *, int *, int *);
 extern int env_update(env_t *, int, int, value_t *);
 extern value_t *env_get(env_t *, const char *);
 extern value_t *env_ref(env_t *, int, int);
+extern value_t **env_getaddr(env_t *, const char *);
 
 #ifdef __cplusplus
 }

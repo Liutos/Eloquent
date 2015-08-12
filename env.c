@@ -125,3 +125,16 @@ value_t *env_ref(env_t *env, int index, int offset)
     binding_t *b = (binding_t *)vector_ref(&env->data, offset);
     return (value_t *)b->value;
 }
+
+value_t **env_getaddr(env_t *env, const char *name)
+{
+    while (!env_isempty(env)) {
+        for (int i = 0; i < env->data.count; i++) {
+            binding_t *b = (binding_t *)vector_ref(&env->data, i);
+            if (b->name != NULL && strcmp(b->name, name) == 0)
+                return (value_t **)&b->value;
+        }
+        env = env->outer;
+    }
+    return NULL;
+}

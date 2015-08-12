@@ -136,6 +136,40 @@ static value_kind_t bis_lambda(interp_t *interp, ast_t *body, value_t **result)
     return val->kind;
 }
 
+static value_kind_t bis_refof(interp_t *interp, ast_t *body, value_t **result)
+{
+    ast_t *var = AST_CONS_CAR(body);
+    if (var->kind != AST_IDENTIFIER) {
+        if (result != NULL)
+            *result = value_error_newf("Line %d, column %d: Operand of & must be an identifier", var->line, var->column);
+        return VALUE_ERROR;
+    }
+
+    value_t **addr = env_getaddr(interp->env, AST_IDENT_NAME(var));
+    if (result != NULL)
+        *result = value_ref_new(addr);
+    return VALUE_REF;
+}
+
+static value_kind_t bis_valof(interp_t *interp, ast_t *body, value_t **result)
+{
+    ast_t *expr = AST_CONS_CAR(body);
+    value_t *val = NULL;
+    if (interp_execute(interp, expr, &val) == VALUE_ERROR) {
+        if (result != NULL)
+            *result = val;
+        return elo_type(val);
+    }
+    if (elo_type(val) != VALUE_REF) {
+        if (result != NULL)
+            *result = value_error_newf("Line %d, column %d: Value must be a reference", expr->line, expr->column);
+        return VALUE_ERROR;
+    }
+    if (result != NULL)
+        *result = *VALUE_REF_ADDR(val);
+    return (*VALUE_REF_ADDR(val))->kind;
+}
+
 /* SYNTAX END */
 
 static void interp_setbif(interp_t *interp, const char *name, void *bif_ptr, unsigned int arity)
@@ -167,6 +201,8 @@ static void interp_initbif(interp_t *interp)
     interp_setbis(interp, "dset", bis_dset);
     interp_setbis(interp, "dget", bis_dget);
     interp_setbis(interp, "define", bis_define);
+    interp_setbis(interp, "&", bis_refof);
+    interp_setbis(interp, "valof", bis_valof);
 }
 
 static value_kind_t interp_execute_syntax(interp_t *interp, syntax_t *bis, ast_t *body, value_t **result)

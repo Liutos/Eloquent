@@ -104,6 +104,13 @@ value_t *value_int_new(int num)
     return v;
 }
 
+value_t *value_ref_new(value_t **addr)
+{
+    value_t *v = value_alloc(VALUE_REF);
+    VALUE_REF_ADDR(v) = addr;
+    return v;
+}
+
 value_t *value_type_new(const char *name)
 {
     value_t *v = value_alloc(VALUE_TYPE);
@@ -153,6 +160,9 @@ void value_print(value_t *v, FILE *output)
             break;
         case VALUE_INT:
             fprintf(output, "%d", v->u.int_val);
+            break;
+        case VALUE_REF:
+            fprintf(output, "#<REF %p>", VALUE_REF_ADDR(v));
             break;
         case VALUE_TYPE:
             fprintf(output, "#<TYPE %s>", IDENT_NAME( VALUE_TYPE_NAME(v) ));
