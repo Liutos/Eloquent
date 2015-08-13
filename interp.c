@@ -1,6 +1,7 @@
 #include <assert.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 #include "ast.h"
 #include "env.h"
 #include "interp.h"
@@ -28,7 +29,37 @@ static void interp_set(interp_t *interp, const char *name, value_t *value)
     env_set(interp->env, name, value);
 }
 
+static int is_valof_form(ast_t *expr)
+{
+    if (expr->kind == AST_CONS
+            && AST_CONS_CAR(expr)->kind == AST_IDENTIFIER
+            && strcmp(AST_IDENT_NAME( AST_CONS_CAR(expr) ), "valof") == 0
+            && AST_CONS_CADR(expr)->kind == AST_IDENTIFIER)
+        return 1;
+    else
+        return 0;
+}
+
 /* SYNTAX BEGIN */
+
+static value_kind_t bis_valof(interp_t *interp, ast_t *body, value_t **result)
+{
+    ast_t *expr = AST_CONS_CAR(body);
+    value_t *val = NULL;
+    if (interp_execute(interp, expr, &val) == VALUE_ERROR) {
+        if (result != NULL)
+            *result = val;
+        return elo_type(val);
+    }
+    if (elo_type(val) != VALUE_REF) {
+        if (result != NULL)
+            *result = value_error_newf("Line %d, column %d: Value must be a reference", expr->line, expr->column);
+        return VALUE_ERROR;
+    }
+    if (result != NULL)
+        *result = *VALUE_REF_ADDR(val);
+    return (*VALUE_REF_ADDR(val))->kind;
+}
 
 static value_kind_t bis_set(interp_t *interp, ast_t *body, value_t **result)
 {
@@ -41,7 +72,16 @@ static value_kind_t bis_set(interp_t *interp, ast_t *body, value_t **result)
         return val->kind;
     }
 
-    interp_set(interp, AST_IDENT_NAME(var), val);
+    if (is_valof_form(var)) {
+        value_t *ref = NULL;
+        if (interp_execute(interp, AST_CONS_CADR(var), &ref) == VALUE_ERROR) {
+            if (result != NULL)
+                *result = ref;
+            return elo_type(ref);
+        }
+        *VALUE_REF_ADDR(ref) = val;
+    } else
+        interp_set(interp, AST_IDENT_NAME(var), val);
     if (result != NULL)
         *result = val;
     return val->kind;
@@ -149,25 +189,6 @@ static value_kind_t bis_refof(interp_t *interp, ast_t *body, value_t **result)
     if (result != NULL)
         *result = value_ref_new(addr);
     return VALUE_REF;
-}
-
-static value_kind_t bis_valof(interp_t *interp, ast_t *body, value_t **result)
-{
-    ast_t *expr = AST_CONS_CAR(body);
-    value_t *val = NULL;
-    if (interp_execute(interp, expr, &val) == VALUE_ERROR) {
-        if (result != NULL)
-            *result = val;
-        return elo_type(val);
-    }
-    if (elo_type(val) != VALUE_REF) {
-        if (result != NULL)
-            *result = value_error_newf("Line %d, column %d: Value must be a reference", expr->line, expr->column);
-        return VALUE_ERROR;
-    }
-    if (result != NULL)
-        *result = *VALUE_REF_ADDR(val);
-    return (*VALUE_REF_ADDR(val))->kind;
 }
 
 /* SYNTAX END */
