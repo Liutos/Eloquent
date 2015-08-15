@@ -176,6 +176,15 @@ static int compiler_do_set(compiler_t *comp, ast_t *body, ins_t *ins)
 {
     ast_t *var = AST_CONS_CAR(body);
     ast_t *expr = AST_CONS_CAR( AST_CONS_CDR(body) );
+    if (is_valof_form(var)) {
+        if (compiler_do(comp, expr, ins) == ERR)
+            return ERR;
+        if (compiler_do(comp, AST_CONS_CADR(var), ins) == ERR)
+            return ERR;
+        ins_push(ins, bc_aset_new());
+        return OK;
+    }
+
     bytecode_t *bc = NULL;
     int i = 0, j = 0;
     char *name = AST_IDENT_NAME(var);

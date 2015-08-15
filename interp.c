@@ -29,17 +29,6 @@ static void interp_set(interp_t *interp, const char *name, value_t *value)
     env_set(interp->env, name, value);
 }
 
-static int is_valof_form(ast_t *expr)
-{
-    if (expr->kind == AST_CONS
-            && AST_CONS_CAR(expr)->kind == AST_IDENTIFIER
-            && strcmp(AST_IDENT_NAME( AST_CONS_CAR(expr) ), "valof") == 0
-            && AST_CONS_CADR(expr)->kind == AST_IDENTIFIER)
-        return 1;
-    else
-        return 0;
-}
-
 /* SYNTAX BEGIN */
 
 static value_kind_t bis_valof(interp_t *interp, ast_t *body, value_t **result)

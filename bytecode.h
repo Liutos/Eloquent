@@ -26,6 +26,7 @@ typedef vector_t ins_t;
 #define BC_KIND(op) \
     op(BC_ADDR), \
     op(BC_ARGS), \
+    op(BC_ASET), \
     op(BC_CALL), \
     op(BC_CHKEX), \
     op(BC_DGET), \
@@ -83,6 +84,7 @@ struct __bytecode_t {
 
 extern bytecode_t *bc_addr_new(const char *);
 extern bytecode_t *bc_args_new(int);
+extern bytecode_t *bc_aset_new(void);
 extern bytecode_t *bc_call_new(int);
 extern bytecode_t *bc_chkex_new(void);
 extern bytecode_t *bc_dget_new(char *);

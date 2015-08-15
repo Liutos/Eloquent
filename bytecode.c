@@ -72,6 +72,11 @@ bytecode_t *bc_args_new(int arity)
     return bc;
 }
 
+bytecode_t *bc_aset_new(void)
+{
+    return bc_new(BC_ASET);
+}
+
 bytecode_t *bc_call_new(int nargs)
 {
     bytecode_t *bc = bc_new(BC_CALL);

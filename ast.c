@@ -7,6 +7,7 @@
 #include <assert.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 #include "ast.h"
 #include "utils/string.h"
 
@@ -117,4 +118,15 @@ int ast_cons_length(ast_t *cons)
         cons = AST_CONS_CDR(cons);
     }
     return i;
+}
+
+int is_valof_form(ast_t *expr)
+{
+    if (expr->kind == AST_CONS
+            && AST_CONS_CAR(expr)->kind == AST_IDENTIFIER
+            && strcmp(AST_IDENT_NAME( AST_CONS_CAR(expr) ), "valof") == 0
+            && AST_CONS_CADR(expr)->kind == AST_IDENTIFIER)
+        return 1;
+    else
+        return 0;
 }

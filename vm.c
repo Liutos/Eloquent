@@ -144,7 +144,7 @@ void vm_free(vm_t *vm)
 
 void vm_execute(vm_t *vm, ins_t *ins)
 {
-    value_t *_fun_, *_val_;
+    value_t *_fun_, *_val_, *_val2_;
     value_t **_addr_; // Used only by BC_ADDR
     vm->ip = 0;
     while (vm_hasnext(vm, ins)) {
@@ -166,6 +166,15 @@ void vm_execute(vm_t *vm, ins_t *ins)
                     env_set(vm->env, NULL, obj);
                 }
                 stack_shrink(vm->stack, BC_ARGS_ARITY(bc));
+                break;
+            case BC_ASET:
+                _val_ = (value_t *)stack_pop(vm->stack);
+                _val2_ = (value_t *)stack_top(vm->stack);
+                if (elo_type(_val_) != VALUE_REF) {
+                    stack_push(vm->stack, value_error_new("Operand of `valof' must be a reference"));
+                    goto __check_exception;
+                }
+                *VALUE_REF_ADDR(_val_) = _val2_;
                 break;
             case BC_CALL:
                 _fun_ = (value_t *)stack_pop(vm->stack);
