@@ -58,6 +58,13 @@ static void ins_push_print(bytecode_t *bc, FILE *output, int indent, int index)
 
 /* PUBLIC */
 
+bytecode_t *bc_addr_new(const char *name)
+{
+    bytecode_t *bc = bc_new(BC_ADDR);
+    BC_ADDR_VAR(bc) = ident_intern(name);
+    return bc;
+}
+
 bytecode_t *bc_args_new(int arity)
 {
     bytecode_t *bc = bc_new(BC_ARGS);
@@ -186,6 +193,9 @@ void bc_print(bytecode_t *bc, FILE *output)
 {
     fprintf(output, "%s", bc_name(bc));
     switch (BC_OPCODE(bc)) {
+        case BC_ADDR:
+            fprintf(output, " %s", BC_ADDR_NAME(bc));
+            break;
         case BC_ARGS:
             fprintf(output, " %d", BC_ARGS_ARITY(bc));
             break;

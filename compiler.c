@@ -264,6 +264,17 @@ static int compiler_do_dset(compiler_t *comp, ast_t *body, ins_t *ins)
     return OK;
 }
 
+static int compiler_do_refof(compiler_t *comp, ast_t *body, ins_t *ins)
+{
+    ast_t *var = AST_CONS_CAR(body);
+    if (var->kind != AST_IDENTIFIER) {
+        string_printf(comp->error, "Line %d, column %d: Operand of & must be an identifier", var->line, var->column);
+        return ERR;
+    }
+    ins_push(ins, bc_addr_new(AST_IDENT_NAME(var)));
+    return OK;
+}
+
 /* PUBLIC */
 
 compiler_t *compiler_new(void)
@@ -284,6 +295,7 @@ compiler_t *compiler_new(void)
     compiler_setrt(c, "dget", compiler_do_dget);
     compiler_setrt(c, "dset", compiler_do_dset);
     compiler_setrt(c, "define", compiler_do_define);
+    compiler_setrt(c, "&", compiler_do_refof);
     c->counter = 0;
     return c;
 }

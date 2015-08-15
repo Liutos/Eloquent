@@ -24,6 +24,7 @@ typedef struct __bytecode_t bytecode_t;
 typedef vector_t ins_t;
 
 #define BC_KIND(op) \
+    op(BC_ADDR), \
     op(BC_ARGS), \
     op(BC_CALL), \
     op(BC_CHKEX), \
@@ -54,6 +55,7 @@ struct __bytecode_t {
     opcode_t opcode;
     union {
         struct { struct __value_t *ptr; } bc_push;
+        struct { ident_t *var; } bc_addr;
         struct { int arity; } bc_args;
         struct { int nargs; } bc_call;
         struct { char *name; } bc_dget;
@@ -78,6 +80,7 @@ struct __bytecode_t {
     } u;
 };
 
+extern bytecode_t *bc_addr_new(const char *);
 extern bytecode_t *bc_args_new(int);
 extern bytecode_t *bc_call_new(int);
 extern bytecode_t *bc_chkex_new(void);
@@ -107,6 +110,8 @@ extern void ins_pretty_print(ins_t *, FILE *, int);
 #define ins_ref(ins, i) (bytecode_t *)vector_ref(ins, i);
 
 #define BC_OPCODE(b) ((b)->opcode)
+#define BC_ADDR_VAR(a) ((a)->u.bc_addr.var)
+#define BC_ADDR_NAME(a) IDENT_NAME( BC_ADDR_VAR(a) )
 #define BC_ARGS_ARITY(a) ((a)->u.bc_args.arity)
 #define BC_CALL_NARGS(b) ((b)->u.bc_call.nargs)
 #define BC_DGET_NAME(b) ((b)->u.bc_dget.name)

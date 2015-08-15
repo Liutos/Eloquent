@@ -145,10 +145,21 @@ void vm_free(vm_t *vm)
 void vm_execute(vm_t *vm, ins_t *ins)
 {
     value_t *_fun_, *_val_;
+    value_t **_addr_; // Used only by BC_ADDR
     vm->ip = 0;
     while (vm_hasnext(vm, ins)) {
         bytecode_t *bc = vm_nextins(vm, ins);
         switch (BC_OPCODE(bc)) {
+            case BC_ADDR:
+                _addr_ = env_getaddr(vm->env, BC_ADDR_NAME(bc));
+                if (_addr_ == NULL)
+                    _addr_ = env_getaddr(vm->global_env, BC_ADDR_NAME(bc));
+                if (_addr_ == NULL) {
+                    stack_push(vm->stack, value_error_newf("Undefined variable: %s", BC_ADDR_NAME(bc)));
+                    goto __check_exception;
+                }
+                stack_push(vm->stack, value_ref_new(_addr_));
+                break;
             case BC_ARGS:
                 for (int i = BC_ARGS_ARITY(bc) - 1; i >= 0; i--) {
                     value_t *obj = (value_t *)stack_nth(vm->stack, i);
