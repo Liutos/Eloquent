@@ -264,6 +264,14 @@ __check_exception:
                 _val_ = (value_t *)stack_top(vm->stack);
                 vm_env_set(vm->env, BC_SET_I(bc), BC_SET_J(bc), BC_SET_NAME(bc), _val_);
                 break;
+            case BC_VALOF:
+                _val_ = (value_t *)stack_pop(vm->stack);
+                if (elo_type(_val_) != VALUE_REF) {
+                    stack_push(vm->stack, value_error_new("Argument of `valof' must be a reference"));
+                    goto __check_exception;
+                }
+                stack_push(vm->stack, *VALUE_REF_ADDR(_val_));
+                break;
             default :
                 fprintf(stderr, "Not support: %s\n", bc_name(bc));
                 exit(0);

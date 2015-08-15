@@ -42,7 +42,8 @@ typedef vector_t ins_t;
     op(BC_PUSH), \
     op(BC_REF), \
     op(BC_RETURN), \
-    op(BC_SET),
+    op(BC_SET), \
+    op(BC_VALOF),
 
 #define BC_IDENTIFY(bc) bc
 #define BC_STRINGIFY(bc) #bc
@@ -99,6 +100,7 @@ extern bytecode_t *bc_push_new(void *);
 extern bytecode_t *bc_ref_new(int, int, char *);
 extern bytecode_t *bc_set_new(int, int, char *);
 extern bytecode_t *bc_return_new(void);
+extern bytecode_t *bc_valof_new(void);
 extern void bc_print(bytecode_t *, FILE *);
 extern const char *bc_name(bytecode_t *);
 

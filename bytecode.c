@@ -189,6 +189,11 @@ bytecode_t *bc_set_new(int i, int j, char *name)
     return bc;
 }
 
+bytecode_t *bc_valof_new(void)
+{
+    return bc_new(BC_VALOF);
+}
+
 void bc_print(bytecode_t *bc, FILE *output)
 {
     fprintf(output, "%s", bc_name(bc));
