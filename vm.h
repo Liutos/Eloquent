@@ -31,6 +31,7 @@ struct __vm_t {
     hash_table_t *traced_objs;
     stack_t *stack;
     stack_t *sys_stack;
+    value_t *fun; // The function executed currently
 };
 
 extern vm_t *vm_new(void);

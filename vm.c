@@ -57,6 +57,22 @@ static void vm_trace_callbif(vm_t *vm, value_t *f, ...)
     fprintf(TRACE_OUTPUT, ")\n");
 }
 
+static void vm_trace_callucf(vm_t *vm, value_t *f)
+{
+    ident_t *id = NULL;
+    if (!is_traced(vm, f, &id))
+        return;
+    vm_trace_space(vm);
+    fprintf(TRACE_OUTPUT, "[%d] %s(", vm->depth, IDENT_NAME(id));
+    for (int i = VALUE_FUNC_ARITY(f) - 1; i >= 0; i--) {
+        value_t *arg = (value_t *)stack_nth(vm->stack, i);
+        value_print(arg, TRACE_OUTPUT);
+        if (i > 0)
+            fprintf(TRACE_OUTPUT, ", ");
+    }
+    fprintf(TRACE_OUTPUT, ")\n");
+}
+
 static void vm_trace_retbif(vm_t *vm, value_t *f, value_t *res)
 {
     ident_t *id = NULL;
@@ -66,6 +82,11 @@ static void vm_trace_retbif(vm_t *vm, value_t *f, value_t *res)
     fprintf(TRACE_OUTPUT, "[%d] %s returned ", vm->depth, IDENT_NAME(id));
     value_print(res, TRACE_OUTPUT);
     fputc('\n', TRACE_OUTPUT);
+}
+
+static void vm_trace_retucf(vm_t *vm, value_t *f, value_t *res)
+{
+    vm_trace_retbif(vm, f, res);
 }
 
 static void vm_execute_bif(vm_t *vm, value_t *f)
@@ -129,8 +150,9 @@ static void vm_goto(vm_t *vm, int index)
     vm->ip = index;
 }
 
-static void vm_restore(vm_t *vm, ins_t **ins)
+static void vm_restore(vm_t *vm, ins_t **ins, value_t **_fun_)
 {
+    *_fun_ = (value_t *)stack_pop(vm->sys_stack);
     /* 恢复指令指针 */
     vm->ip = (int)stack_pop(vm->sys_stack);
     /* 恢复指令信息 */
@@ -140,7 +162,7 @@ static void vm_restore(vm_t *vm, ins_t **ins)
     vm->denv = (env_t *)stack_pop(vm->sys_stack);
 }
 
-static void vm_save(vm_t *vm, ins_t *ins)
+static void vm_save(vm_t *vm, ins_t *ins, value_t *_func_)
 {
     /* 保存环境信息 */
     stack_push(vm->sys_stack, vm->denv);
@@ -149,6 +171,8 @@ static void vm_save(vm_t *vm, ins_t *ins)
     stack_push(vm->sys_stack, ins);
     /* 保存指令指针 */
     stack_push(vm->sys_stack, vm->ip);
+    /* 保存上一个被调用的函数对象 */
+    stack_push(vm->sys_stack, _func_);
 }
 
 static int vm_hasnext(vm_t *vm, ins_t *ins)
@@ -235,10 +259,13 @@ void vm_execute(vm_t *vm, ins_t *ins)
                 if (VALUE_FUNC_ISBIF(_fun_))
                     vm_execute_bif(vm, _fun_);
                 else {
-                    vm_save(vm, ins);
+                    vm_trace_callucf(vm, _fun_);
+                    vm_save(vm, ins, _fun_);
+                    vm->depth++;
                     /* 初始化环境、字节码序列和指令指针 */
                     vm->env = env_new(VALUE_FUNC_ENV(_fun_));
                     vm->denv = env_new(vm->denv);
+                    vm->fun = _fun_;
                     ins = VALUE_UCF_CODE(_fun_);
                     vm_goto(vm, 0);
                     /* 开始执行新的字节码指令 */
@@ -249,7 +276,7 @@ __check_exception:
                 _val_ = (value_t *)stack_top(vm->stack);
                 if (elo_ERRORP(_val_)) {
                     if (!stack_isempty(vm->sys_stack)) {
-                        vm_restore(vm, &ins);
+                        vm_restore(vm, &ins, &_fun_);
                         /* 将运行时错误压回参数栈 */
                         stack_push(vm->stack, _val_);
                     } else
@@ -306,7 +333,9 @@ __check_exception:
                 stack_push(vm->stack, BC_PUSH_PTR(bc));
                 break;
             case BC_RETURN:
-                vm_restore(vm, &ins);
+                vm->depth--;
+                vm_restore(vm, &ins, &_fun_);
+                vm_trace_retucf(vm, _fun_, (value_t *)stack_top(vm->stack));
                 /* 开始执行旧的字节码指令 */
                 break;
             case BC_REF:

@@ -4,5 +4,6 @@
     1))
 
 (trace fact)
+(trace *)
 
 (fact 5)
