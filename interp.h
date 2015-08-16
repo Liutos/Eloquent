@@ -20,7 +20,9 @@ struct __syntax_t {
 };
 
 struct __interp_t {
+    int depth;
     hash_table_t *syntax_env;
+    hash_table_t *traced_objs;
     env_t *env;
     env_t *denv;
 };

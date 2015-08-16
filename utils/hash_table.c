@@ -78,6 +78,11 @@ void *hash_table_get(hash_table_t *tbl, void *key, int *is_found)
     return NULL;
 }
 
+size_t hash_ptr(void *ptr)
+{
+    return (size_t)ptr;
+}
+
 size_t hash_str(void *str)
 {
     const char *_str = str;
@@ -88,6 +93,11 @@ size_t hash_str(void *str)
         _str++;
     }
     return hash & 0x7FFFFFFF;
+}
+
+int comp_ptr(void *_p1, void *_p2)
+{
+    return _p1 == _p2;
 }
 
 int comp_str(void *_s1, void *_s2)

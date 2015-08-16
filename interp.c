@@ -1,4 +1,5 @@
 #include <assert.h>
+#include <stdarg.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -10,6 +11,8 @@
 #include "utils/vector.h"
 #include "value.h"
 
+#define TRACE_OUTPUT stdout
+
 /* PRIVATE */
 
 static syntax_t *syntax_new(void *ptr)
@@ -17,6 +20,11 @@ static syntax_t *syntax_new(void *ptr)
     syntax_t *s = malloc(sizeof(syntax_t));
     s->ptr = ptr;
     return s;
+}
+
+static int is_traced(interp_t *interp, value_t *obj)
+{
+    return hash_table_get(interp->traced_objs, obj, NULL) != NULL;
 }
 
 static syntax_t *interp_getbis(interp_t *interp, const char *name)
@@ -180,6 +188,22 @@ static value_kind_t bis_refof(interp_t *interp, ast_t *body, value_t **result)
     return VALUE_REF;
 }
 
+static value_kind_t bis_trace(interp_t *interp, ast_t *body, value_t **result)
+{
+    ast_t *expr = AST_CONS_CAR(body);
+    value_t *obj = NULL;
+    if (interp_execute(interp, expr, &obj) == VALUE_ERROR) {
+        if (result != NULL)
+            *result = obj;
+        return obj->kind;
+    }
+    if (elo_type(obj) == VALUE_FUNCTION)
+        hash_table_set(interp->traced_objs, obj, obj);
+    if (result != NULL)
+        *result = obj;
+    return obj->kind;
+}
+
 /* SYNTAX END */
 
 static void interp_setbif(interp_t *interp, const char *name, void *bif_ptr, unsigned int arity)
@@ -213,6 +237,37 @@ static void interp_initbif(interp_t *interp)
     interp_setbis(interp, "define", bis_define);
     interp_setbis(interp, "&", bis_refof);
     interp_setbis(interp, "valof", bis_valof);
+    interp_setbis(interp, "trace", bis_trace);
+}
+
+static void interp_trace_callbif(interp_t *interp, value_t *f, ...)
+{
+    if (!is_traced(interp, f))
+        return;
+    fprintf(TRACE_OUTPUT, "[%d] ", interp->depth);
+    value_print(f, TRACE_OUTPUT);
+    fputc('(', TRACE_OUTPUT);
+    va_list ap;
+    va_start(ap, f);
+    value_t *arg = va_arg(ap, value_t *);
+    while (arg != NULL) {
+        value_print(arg, TRACE_OUTPUT);
+        arg = va_arg(ap, value_t *);
+        if (arg != NULL)
+            fprintf(TRACE_OUTPUT, ", ");
+    }
+    fprintf(TRACE_OUTPUT, ")\n");
+}
+
+static void interp_trace_retbif(interp_t *interp, value_t *f, value_t *res)
+{
+    if (!is_traced(interp, f))
+        return;
+    fprintf(TRACE_OUTPUT, "[%d] ", interp->depth);
+    value_print(f, TRACE_OUTPUT);
+    fprintf(TRACE_OUTPUT, " returned ");
+    value_print(res, TRACE_OUTPUT);
+    fputc('\n', TRACE_OUTPUT);
 }
 
 static value_kind_t interp_execute_syntax(interp_t *interp, syntax_t *bis, ast_t *body, value_t **result)
@@ -253,16 +308,19 @@ static value_kind_t interp_execute_bif(interp_t *interp, value_t *bif, ast_t *ar
     value_t *res = NULL;
     switch (VALUE_FUNC_ARITY(bif)) {
         case 0:
+            interp_trace_callbif(interp, bif, NULL);
             res = elo_apply0(bif, interp->denv);
             break;
         case 1: {
             value_t *arg1 = (value_t *)vector_ref(vals, 0);
+            interp_trace_callbif(interp, bif, arg1, NULL);
             res = elo_apply1(bif, interp->denv, arg1);
             break;
         }
         case 2: {
             value_t *arg1 = (value_t *)vector_ref(vals, 0);
             value_t *arg2 = (value_t *)vector_ref(vals, 1);
+            interp_trace_callbif(interp, bif, arg1, arg2, NULL);
             res = elo_apply2(bif, interp->denv, arg1, arg2);
             break;
         }
@@ -271,6 +329,7 @@ static value_kind_t interp_execute_bif(interp_t *interp, value_t *bif, ast_t *ar
                 *value = value_error_newf("Don't support build in function of arity %d", VALUE_FUNC_ARITY(bif));
             return VALUE_ERROR;
     }
+    interp_trace_retbif(interp, bif, res);
 
     if (value != NULL)
         *value = res;
@@ -306,9 +365,11 @@ static value_kind_t interp_execute_udf(interp_t *interp, value_t *f, ast_t *args
     }
 
     env_t *old_env = interp->env;
+    interp->depth++;
     interp->env = new_env;
     interp->denv = env_new(interp->denv);
     value_kind_t kind = bis_begin(interp, VALUE_UDF_BODY(f), value);
+    interp->depth--;
     interp->env = old_env;
     interp->denv = interp->denv->outer;
     return kind;
@@ -380,8 +441,10 @@ static value_kind_t interp_execute_ident(interp_t *interp, ast_t *ast, value_t *
 interp_t *interp_new(void)
 {
     interp_t *i = malloc(sizeof(interp_t));
+    i->depth = 0;
     i->env = env_new(env_empty_new());
     i->syntax_env = hash_table_new(hash_str, comp_str);
+    i->traced_objs = hash_table_new(hash_ptr, comp_ptr);
     i->denv = env_new(env_empty_new());
     interp_initbif(i);
     return i;

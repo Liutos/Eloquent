@@ -39,7 +39,9 @@ extern void hash_table_free(hash_table_t *);
 extern void hash_table_set(hash_table_t *, void *, void *);
 extern void *hash_table_get(hash_table_t *, void *, int *);
 
+extern size_t hash_ptr(void *);
 extern size_t hash_str(void *);
+extern int comp_ptr(void *, void *);
 extern int comp_str(void *, void *);
 
 #ifdef __cplusplus
