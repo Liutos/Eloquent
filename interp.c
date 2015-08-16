@@ -22,9 +22,11 @@ static syntax_t *syntax_new(void *ptr)
     return s;
 }
 
-static int is_traced(interp_t *interp, value_t *obj)
+static int is_traced(interp_t *interp, value_t *obj, ident_t **id)
 {
-    return hash_table_get(interp->traced_objs, obj, NULL) != NULL;
+    assert(id != NULL);
+    *id = (ident_t *)hash_table_get(interp->traced_objs, obj, NULL);
+    return *id != NULL;
 }
 
 static syntax_t *interp_getbis(interp_t *interp, const char *name)
@@ -197,8 +199,17 @@ static value_kind_t bis_trace(interp_t *interp, ast_t *body, value_t **result)
             *result = obj;
         return obj->kind;
     }
-    if (elo_type(obj) == VALUE_FUNCTION)
-        hash_table_set(interp->traced_objs, obj, obj);
+    if (elo_type(obj) == VALUE_FUNCTION) {
+        ident_t *id = NULL;
+        if (expr->kind == AST_IDENTIFIER)
+            id = ident_intern(AST_IDENT_NAME(expr));
+        else {
+            char name[32] = {0};
+            snprintf(name, sizeof(name), "#<%p>", obj);
+            id = ident_intern(name);
+        }
+        hash_table_set(interp->traced_objs, obj, id);
+    }
     if (result != NULL)
         *result = obj;
     return obj->kind;
@@ -240,12 +251,20 @@ static void interp_initbif(interp_t *interp)
     interp_setbis(interp, "trace", bis_trace);
 }
 
+static void interp_trace_space(interp_t *interp)
+{
+    for (int i = 0; i < interp->depth; i++)
+        fprintf(TRACE_OUTPUT, "  ");
+}
+
 static void interp_trace_callbif(interp_t *interp, value_t *f, ...)
 {
-    if (!is_traced(interp, f))
+    ident_t *id = NULL;
+    if (!is_traced(interp, f, &id))
         return;
+    interp_trace_space(interp);
     fprintf(TRACE_OUTPUT, "[%d] ", interp->depth);
-    value_print(f, TRACE_OUTPUT);
+    fprintf(TRACE_OUTPUT, "%s", IDENT_NAME(id));
     fputc('(', TRACE_OUTPUT);
     va_list ap;
     va_start(ap, f);
@@ -259,15 +278,43 @@ static void interp_trace_callbif(interp_t *interp, value_t *f, ...)
     fprintf(TRACE_OUTPUT, ")\n");
 }
 
+static void interp_trace_calludf(interp_t *interp, value_t *f, env_t *env)
+{
+    ident_t *id = NULL;
+    if (!is_traced(interp, f, &id))
+        return;
+    interp_trace_space(interp);
+    fprintf(TRACE_OUTPUT, "[%d] ", interp->depth);
+    fprintf(TRACE_OUTPUT, "%s", IDENT_NAME(id));
+    fputc('(', TRACE_OUTPUT);
+    ast_t *pars = VALUE_UDF_PARS(f);
+    while (pars->kind != AST_END_OF_CONS) {
+        ast_t *par = AST_CONS_CAR(pars);
+        value_t *arg = env_get(env, AST_IDENT_NAME(par));
+        value_print(arg, TRACE_OUTPUT);
+        pars = AST_CONS_CDR(pars);
+        if (pars->kind != AST_END_OF_CONS)
+            fprintf(TRACE_OUTPUT, ", ");
+    }
+    fprintf(TRACE_OUTPUT, ")\n");
+}
+
 static void interp_trace_retbif(interp_t *interp, value_t *f, value_t *res)
 {
-    if (!is_traced(interp, f))
+    ident_t *id = NULL;
+    if (!is_traced(interp, f, &id))
         return;
+    interp_trace_space(interp);
     fprintf(TRACE_OUTPUT, "[%d] ", interp->depth);
-    value_print(f, TRACE_OUTPUT);
+    fprintf(TRACE_OUTPUT, "%s", IDENT_NAME(id));
     fprintf(TRACE_OUTPUT, " returned ");
     value_print(res, TRACE_OUTPUT);
     fputc('\n', TRACE_OUTPUT);
+}
+
+static void interp_trace_retudf(interp_t *interp, value_t *f, value_t *res)
+{
+    interp_trace_retbif(interp, f, res);
 }
 
 static value_kind_t interp_execute_syntax(interp_t *interp, syntax_t *bis, ast_t *body, value_t **result)
@@ -363,6 +410,7 @@ static value_kind_t interp_execute_udf(interp_t *interp, value_t *f, ast_t *args
             *value = err;
         return err->kind;
     }
+    interp_trace_calludf(interp, f, new_env);
 
     env_t *old_env = interp->env;
     interp->depth++;
@@ -372,6 +420,7 @@ static value_kind_t interp_execute_udf(interp_t *interp, value_t *f, ast_t *args
     interp->depth--;
     interp->env = old_env;
     interp->denv = interp->denv->outer;
+    interp_trace_retudf(interp, f, *value);
     return kind;
 }
 
