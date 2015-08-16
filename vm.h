@@ -12,6 +12,7 @@
 
 #include "bytecode.h"
 #include "env.h"
+#include "utils/hash_table.h"
 #include "utils/stack.h"
 
 #ifdef __cplusplus
@@ -21,11 +22,13 @@ extern "C" {
 typedef struct __vm_t vm_t;
 
 struct __vm_t {
+    int depth;
     int ip; // Instruction Pointer. Points to the next instruction to be executed
     env_t *denv; // Current dynamic environment
     env_t *env; // Current lexical environment
     env_t *global_env; // The unique global environment
     env_t *init_env; // The environment with primitives
+    hash_table_t *traced_objs;
     stack_t *stack;
     stack_t *sys_stack;
 };

@@ -284,6 +284,18 @@ static int compiler_do_refof(compiler_t *comp, ast_t *body, ins_t *ins)
     return OK;
 }
 
+static int compiler_do_trace(compiler_t *comp, ast_t *body, ins_t *ins)
+{
+    ast_t *expr = AST_CONS_CAR(body);
+    if (compiler_do(comp, expr, ins) == ERR)
+        return ERR;
+    ident_t *id = NULL;
+    if (expr->kind == AST_IDENTIFIER)
+        id = ident_intern(AST_IDENT_NAME(expr));
+    ins_push(ins, bc_trace_new(id));
+    return OK;
+}
+
 static int compiler_do_valof(compiler_t *comp, ast_t *body, ins_t *ins)
 {
     ast_t *expr = AST_CONS_CAR(body);
@@ -315,6 +327,7 @@ compiler_t *compiler_new(void)
     compiler_setrt(c, "define", compiler_do_define);
     compiler_setrt(c, "&", compiler_do_refof);
     compiler_setrt(c, "valof", compiler_do_valof);
+    compiler_setrt(c, "trace", compiler_do_trace);
     c->counter = 0;
     return c;
 }

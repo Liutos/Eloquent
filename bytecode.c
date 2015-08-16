@@ -194,6 +194,13 @@ bytecode_t *bc_set_new(int i, int j, char *name)
     return bc;
 }
 
+bytecode_t *bc_trace_new(ident_t *id)
+{
+    bytecode_t *bc = bc_new(BC_TRACE);
+    BC_TRACE_VAR(bc) = id;
+    return bc;
+}
+
 bytecode_t *bc_valof_new(void)
 {
     return bc_new(BC_VALOF);
@@ -238,6 +245,9 @@ void bc_print(bytecode_t *bc, FILE *output)
         case BC_GSET:
         case BC_SET:
             fprintf(output, " %d %d ; %s", BC_SET_I(bc), BC_SET_J(bc), BC_SET_NAME(bc));
+            break;
+        case BC_TRACE:
+            fprintf(output, " %s", BC_TRACE_NAME(bc));
             break;
         default :
             break;

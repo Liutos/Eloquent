@@ -11,8 +11,6 @@
 #include "utils/vector.h"
 #include "value.h"
 
-#define TRACE_OUTPUT stdout
-
 /* PRIVATE */
 
 static syntax_t *syntax_new(void *ptr)

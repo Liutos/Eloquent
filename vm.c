@@ -25,21 +25,67 @@ static void vm_env_set(env_t *env, int i, int j, const char *name, value_t *val)
         env_update(env, i, j, val);
 }
 
+static int is_traced(vm_t *vm, value_t *obj, ident_t **id)
+{
+    assert(id != NULL);
+    *id = (ident_t *)hash_table_get(vm->traced_objs, obj, NULL);
+    return *id != NULL;
+}
+
+static void vm_trace_space(vm_t *vm)
+{
+    for (int i = 0; i < vm->depth; i++)
+        fprintf(TRACE_OUTPUT, "  ");
+}
+
+static void vm_trace_callbif(vm_t *vm, value_t *f, ...)
+{
+    ident_t *id = NULL;
+    if (!is_traced(vm, f, &id))
+        return;
+    vm_trace_space(vm);
+    fprintf(TRACE_OUTPUT, "[%d] %s(", vm->depth, IDENT_NAME(id));
+    va_list ap;
+    va_start(ap, f);
+    value_t *arg = va_arg(ap, value_t *);
+    while (arg != NULL) {
+        value_print(arg, TRACE_OUTPUT);
+        arg = va_arg(ap, value_t *);
+        if (arg != NULL)
+            fprintf(TRACE_OUTPUT, ", ");
+    }
+    fprintf(TRACE_OUTPUT, ")\n");
+}
+
+static void vm_trace_retbif(vm_t *vm, value_t *f, value_t *res)
+{
+    ident_t *id = NULL;
+    if (!is_traced(vm, f, &id))
+        return;
+    vm_trace_space(vm);
+    fprintf(TRACE_OUTPUT, "[%d] %s returned ", vm->depth, IDENT_NAME(id));
+    value_print(res, TRACE_OUTPUT);
+    fputc('\n', TRACE_OUTPUT);
+}
+
 static void vm_execute_bif(vm_t *vm, value_t *f)
 {
     value_t *res = NULL;
     switch (VALUE_FUNC_ARITY(f)) {
         case 0:
+            vm_trace_callbif(vm, f, NULL);
             res = elo_apply0(f, vm->denv);
             break;
         case 1: {
             value_t *arg1 = (value_t *)stack_pop(vm->stack);
+            vm_trace_callbif(vm, f, arg1, NULL);
             res = elo_apply1(f, vm->denv, arg1);
         }
         break;
         case 2: {
             value_t *arg2 = (value_t *)stack_pop(vm->stack);
             value_t *arg1 = (value_t *)stack_pop(vm->stack);
+            vm_trace_callbif(vm, f, arg1, arg2, NULL);
             res = elo_apply2(f, vm->denv, arg1, arg2);
         }
         break;
@@ -47,6 +93,7 @@ static void vm_execute_bif(vm_t *vm, value_t *f)
             fprintf(stderr, "Unsupported arity of bif: %d\n", VALUE_FUNC_ARITY(f));
             exit(0);
     }
+    vm_trace_retbif(vm, f, res);
     stack_push(vm->stack, res);
 }
 
@@ -121,6 +168,7 @@ static bytecode_t *vm_nextins(vm_t *vm, ins_t *ins)
 vm_t *vm_new(void)
 {
     vm_t *vm = malloc(sizeof(*vm));
+    vm->depth = 0;
     vm->ip = 0;
     /* Environments */
     vm->denv = env_new(env_empty_new());
@@ -128,6 +176,7 @@ vm_t *vm_new(void)
     vm->init_env = elo_extend_env(env_new(env_empty_new()));
     vm->global_env = vm->init_env;
 
+    vm->traced_objs = hash_table_new(hash_ptr, comp_ptr);
     vm->stack = stack_new();
     vm->sys_stack = stack_new();
     return vm;
@@ -272,6 +321,17 @@ __check_exception:
             case BC_SET:
                 _val_ = (value_t *)stack_top(vm->stack);
                 vm_env_set(vm->env, BC_SET_I(bc), BC_SET_J(bc), BC_SET_NAME(bc), _val_);
+                break;
+            case BC_TRACE: {
+                _val_ = (value_t *)stack_top(vm->stack);
+                ident_t *id = BC_TRACE_VAR(bc);
+                if (id == NULL) {
+                    char name[32] = {0};
+                    snprintf(name, sizeof(name), "#<%p>", _val_);
+                    id = ident_intern(name);
+                }
+                hash_table_set(vm->traced_objs, _val_, id);
+            }
                 break;
             case BC_VALOF:
                 _val_ = (value_t *)stack_pop(vm->stack);

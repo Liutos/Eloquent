@@ -44,6 +44,7 @@ typedef vector_t ins_t;
     op(BC_REF), \
     op(BC_RETURN), \
     op(BC_SET), \
+    op(BC_TRACE), \
     op(BC_VALOF),
 
 #define BC_IDENTIFY(bc) bc
@@ -79,6 +80,7 @@ struct __bytecode_t {
             int i, j;
             char *name;
         } bc_gset, bc_set;
+        struct { ident_t *var; } bc_trace;
     } u;
 };
 
@@ -102,6 +104,7 @@ extern bytecode_t *bc_push_new(void *);
 extern bytecode_t *bc_ref_new(int, int, char *);
 extern bytecode_t *bc_set_new(int, int, char *);
 extern bytecode_t *bc_return_new(void);
+extern bytecode_t *bc_trace_new(ident_t *);
 extern bytecode_t *bc_valof_new(void);
 extern void bc_print(bytecode_t *, FILE *);
 extern const char *bc_name(bytecode_t *);
@@ -135,6 +138,8 @@ extern void ins_pretty_print(ins_t *, FILE *, int);
 #define BC_REF_I(g) ((g)->u.bc_ref.i)
 #define BC_REF_J(g) ((g)->u.bc_ref.j)
 #define BC_REF_NAME(b) ((b)->u.bc_ref.name)
+#define BC_TRACE_NAME(t) IDENT_NAME( BC_TRACE_VAR(t) )
+#define BC_TRACE_VAR(t) ((t)->u.bc_trace.var)
 
 #ifdef __cplusplus
 }

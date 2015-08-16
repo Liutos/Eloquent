@@ -82,6 +82,8 @@ struct __value_t {
 
 extern const char *value_names[];
 
+#define TRACE_OUTPUT stdout
+
 #define elo_type(x) ((x)->kind)
 
 extern value_t *value_bif_new(void *, unsigned int);
